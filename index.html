@@ -353,6 +353,7 @@ body.touch #chat::after{content:'แตะเพื่อขยาย/ย่อ'
 .expl .gauge{flex:1}
 /* inventory */
 #invWin{top:calc(10px + env(safe-area-inset-top,0px));right:390px;width:min(330px,calc(100vw - 20px))}
+#invGrid{max-height:min(52vh,330px);overflow-y:auto;overscroll-behavior:contain;align-content:start}
 .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:10px}
 .grid .slot{width:auto;aspect-ratio:1;height:auto}
 .invft{display:flex;justify-content:space-between;padding:0 12px 10px;font-size:12px;font-variant-numeric:tabular-nums}
@@ -682,7 +683,7 @@ button{transition:filter .15s,box-shadow .15s}button:hover{filter:brightness(1.0
   <section id="invWin" class="pw drag" hidden aria-label="กระเป๋า">
     <div class="hd"><span>กระเป๋า</span><button class="x" data-close="invWin" aria-label="ปิด">✕</button></div>
     <div class="grid" id="invGrid"></div>
-    <div class="invft"><span>เหรียญ <b id="goldTxt">500</b> G</span><span>น้ำหนัก <b id="wtTxt">0 / 2000</b></span></div>
+    <div class="invft"><span>เหรียญ <b id="goldTxt">500</b> G</span><span>กระเป๋า <b id="wtTxt">ไม่จำกัด</b></span></div>
     <div class="costh">ชุดเซ็ตหมาป่า (คลิกเพื่อสวมใส่)</div>
     <div class="cosrow" id="cosRow"></div>
   </section>
@@ -4399,12 +4400,14 @@ function fillSlot(b,name,count){const img=b.querySelector('img');if(name){img.sr
   else{b.classList.add('empty');b.title='';b.querySelector('.n').textContent='';}}
 function updateInv(){
   [...hotSlots.children].forEach((b,i)=>{const n=HOT[i];b.classList.add('hot');b.classList.toggle('skill',!!(n&&n.sk));if(n&&n.sk){const s=SKB[n.sk];b.classList.remove('empty');b.style.opacity=1;const si=b.querySelector('.si');si.innerHTML=skSvg(s.ic);si.style.background=skColor(s);b.title=`${s.n} Lv ${skLv[s.id]} · SP ${s.sp(skLv[s.id]||1)}`;b.querySelector('.n').textContent='';return;}if(n){fillSlot(b,n,inv[n]||0);b.classList.remove('empty');b.style.opacity=inv[n]?1:0.55;}else{b.classList.add('empty');}});
-  const names=Object.keys(inv),eqs=typeof equipBag!=='undefined'?equipBag:[];[...invGrid.children].forEach((b,i)=>{const n=names[i];
+  const names=Object.keys(inv),eqs=typeof equipBag!=='undefined'?equipBag:[];
+  {const need=Math.max(35,Math.ceil((names.length+eqs.length+1)/7)*7);while(invGrid.children.length<need){const b=document.createElement('button');b.className='slot empty';b.innerHTML='<img alt=""><span class="n"></span>';invGrid.appendChild(b);}while(invGrid.children.length>need)invGrid.lastChild.remove();}
+  [...invGrid.children].forEach((b,i)=>{const n=names[i];
     delete b.dataset.eqc;b.classList.remove('craft');if(n){fillSlot(b,n,inv[n]);b.onclick=()=>invClick(n);b.querySelector('img').style.display='';return;}
     const I=eqs[i-names.length];if(I){const D=EQ_DB[I.id];b.classList.remove('empty');const img=b.querySelector('img');img.src=D.icon;img.style.display='';b.querySelector('.n').textContent=I.ref?'+'+I.ref:'';b.title='';b.dataset.eqc='uid:'+I.uid;b.classList.toggle('craft',!!D.craft);b.onclick=()=>invClick(null,I);return;}
     fillSlot(b,null,0);b.onclick=null;});
   document.getElementById('goldTxt').textContent=gold.toLocaleString();if(typeof renderTracker==='function')renderTracker();
-  const wt=weightNow(),mx=derived().wtMax;document.getElementById('wtTxt').textContent=`${wt} / ${mx}`;document.getElementById('dvWt').textContent=`${wt} / ${mx}`;
+  const wt=weightNow(),mx=derived().wtMax;document.getElementById('wtTxt').textContent=`${(names.length+eqs.length).toLocaleString()} ช่อง · ไม่จำกัด`;document.getElementById('dvWt').textContent=`${wt} · ไม่จำกัด`;
 }
 /* ---- windows: toggle + drag ---- */
 function toggleWin(id,show){const w=document.getElementById(id);w.hidden=show===undefined?!w.hidden:!show;if(!w.hidden&&innerWidth<700)['statWin','invWin','worldWin','skillWin','eqWin','shopWin','refWin','warpWin','autoWin','petWin','questWin','sysWin','craftWin','partyWin','jtWin','huntWin','advWin'].forEach(o=>{const e=document.getElementById(o);if(o!==id&&e)e.hidden=true;});if(!w.hidden){w.style.zIndex=++zTop;if(id==='statWin')drawRadar();if(id==='invWin')updateInv();if(id==='worldWin')updateWorld();if(id==='skillWin')renderSkills();}}
@@ -18508,8 +18511,8 @@ function updateAuto(dt){
   /* buffs / pets while idle */
   if(autoSkills(null))return;
   /* loot (only when nothing is attacking us) */
-  if(C.loot){const wt=weightNow(),mx=derived().wtMax;
-    if(wt<mx*0.9){if(!pendingPick){const near=items.filter(it=>it.sc===curMap.scene&&autoLootOK(it.kind)&&!((AUTO.black.get(it)||0)>time)&&Math.hypot(it.x-P.x,it.z-P.z)<16).sort((a,b)=>Math.hypot(a.x-P.x,a.z-P.z)-Math.hypot(b.x-P.x,b.z-P.z))[0];
+  if(C.loot){
+    if(true){if(!pendingPick){const near=items.filter(it=>it.sc===curMap.scene&&autoLootOK(it.kind)&&!((AUTO.black.get(it)||0)>time)&&Math.hypot(it.x-P.x,it.z-P.z)<16).sort((a,b)=>Math.hypot(a.x-P.x,a.z-P.z)-Math.hypot(b.x-P.x,b.z-P.z))[0];
         if(near){pendingPick=near;if(!P.goTo(near.x,near.z)){pendingPick=null;AUTO.black.set(near,time+30);}else return;}}
       else return;}
     else if(time>AUTO.warnW){AUTO.warnW=time+60;say('กระเป๋าใกล้เต็ม ออโต้จะไม่เก็บของจนกว่าจะขายของ','sys');}}
