@@ -526,6 +526,7 @@ body.touch #chat::after{content:'แตะเพื่อขยาย/ย่อ'
 .bsi img{width:78%;height:78%;image-rendering:pixelated}.bsi u{position:absolute;right:1px;bottom:0;text-decoration:none;font:800 12px var(--body);color:#fff;background:#2a1e14;border-radius:8px;padding:0 4px}.bsi.need{outline:2px solid #ffe060;box-shadow:0 0 8px #ffd24a}.bsi.craft::after{content:'★';position:absolute;right:1px;top:-3px;color:#e0281e;font-size:12px;text-shadow:0 0 2px #fff}
 .splist{padding:0;overflow:hidden;background:linear-gradient(180deg,#d8c3a0,#ccb48e)}.sphd,.spr{display:grid;grid-template-columns:1fr 54px 90px;align-items:center}.sphd{background:#cdb896;border-bottom:2px solid #8a7050;font:700 14px Georgia,serif;color:#3a2a18;padding:6px 10px}.sphd span:nth-child(n+2){text-align:center}
 #spList{display:flex;flex-direction:column}.spr{grid-template-columns:40px 1fr 54px 90px;gap:8px;padding:3px 10px;min-height:0;border:0;border-bottom:1px solid #b89e7a;border-radius:0;background:transparent;text-align:left;color:#2a1e12}.spr:nth-child(odd){background:#e2d0ae}.spr.sel{background:#a8d0c0}
+.label.merc .altlv{font-size:10px;color:#ffe08a;margin-left:2px}
 #advWin{top:calc(60px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);width:min(560px,calc(100vw - 20px));max-height:calc(100% - 140px);display:flex;flex-direction:column}
 .advb{overflow:auto;padding:10px 12px 12px}.advtabs{display:flex;gap:4px;margin-bottom:10px}.advtabs button{flex:1;padding:6px;border:1px solid #8a6a40;border-radius:4px;background:#d8c3a0;color:#3a2a18;font:700 13px var(--body)}.advtabs button[aria-selected=true]{background:#f3e6c4;box-shadow:inset 0 -3px 0 #c87a3a}
 .rpbal{display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 10px;background:#00000010;border-radius:8px;padding:8px 10px;color:#3a2a18}.rpbal b{font:700 20px Georgia,serif;color:#a8601a}.rpbal small{grid-column:1/3;color:#7a6a50;font-size:10.5px}
@@ -18542,7 +18543,7 @@ function killMon(m){if(AUTO.on)AUTO.kills++;if(typeof advKill==='function')advKi
   const be=Math.max(1,Math.round(m.T.exp*expMod(m.T.lv||1)*(1+CX('expP')/100))),ge=Math.round(be*1.15),gj=Math.round(be*0.8*1.15),mx=m.x,mz=m.z,top=Math.max(2.6,m.T.size*0.95);
   setTimeout(()=>{popText(mx,mz,`<i>+${ge.toLocaleString('en-US')} EXP</i><em>+${gj.toLocaleString('en-US')} JOB</em>`,'gain',top,{html:true,life:1.8,rise:1.3});},140);
   if(effLv('b_bloodlust')){php=Math.min(maxHp,php+maxHp*effLv('b_bloodlust')/100);updateHP();}
-  gainExp(be);gainJob(gj);fsKill(m,ge,gj);dqKill(m);say(`ปราบ ${m.T.name} ได้ +${ge} EXP · +${gj} Job EXP`,'sys');
+  gainExp(be);gainJob(gj);if(typeof altExp==='function')altExp(be);fsKill(m,ge,gj);dqKill(m);say(`ปราบ ${m.T.name} ได้ +${ge} EXP · +${gj} Job EXP`,'sys');
   {const pl=pas().leader;if(pl){const n=Math.min(((buffs.leader&&buffs.leader.end>time)?buffs.leader.n:0)+1,pl);buffs.leader={n,atkP:2*n,end:time+30};}}
   if(Math.random()<Math.min(0.95,(0.55+S('LCK')*0.01)*gDropMul())){const name=m.T.drops[Math.floor(Math.random()*m.T.drops.length)],ik=ITEM_KINDS.find(k=>k.name===name);const skipD=isCraftMat(name)&&!qActive.hasOwnProperty('c_'+m.type)&&Math.random()>CRAFT_SUB_RATE;if(!skipD)createItem(m.x+0.4,m.z+0.3,ik,true,m.map.scene);
     if(ik&&!skipD){if(!ik.icon)ik.icon=ik.tex.image.toDataURL();const ic=ik.icon,mx2=m.x,mz2=m.z;setTimeout(()=>popText(mx2,mz2,`<img alt="" src="${ic}">ดรอป ${name}`,'drop',1.6,{html:true,life:2.2,rise:0.9}),420);say(`${m.T.name} ดรอป ${name}`,'sys');}}
@@ -18863,23 +18864,23 @@ const MERC_DEF={
  lizard:{n:'นักธนูกิ้งก่า',role:'ยิงไกล',ic:'➶',d:'ยิงธนูจากระยะไกล คริติคอลสูง ทุก 6 วินาทียิงทะลุเป็นแนว',line:'lizard',range:7,every:1.15,pct:55,col:'#b0ff8a',cost:1},
  penguin:{n:'จอมเวทเพนกวิน',role:'เวทวงกว้าง',ic:'❄',d:'ลูกน้ำแข็งทำให้มอนช้าลง ทุก 7 วินาทีร่ายพายุหิมะใส่กลุ่มมอน',line:'penguin',range:6.5,every:1.8,pct:80,col:'#8ad8ff',cost:1.1}};
 const MERC_DUR=1800,MERCS=[];
-function mercSlots(){return 1+((lvl>=40||classIdx>=2)?1:0)+((JUTTI||0)>0?1:0);}
+const PARTY_MAX=4;function mercSlots(){return PARTY_MAX;}
 function mercCost(type){return Math.round((150+Math.min(lvl,175)*30)*MERC_DEF[type].cost);}
 function mercAtNpc(){return!!(talkNpc&&talkNpc.name.indexOf('ทหารรับจ้าง')>=0);}
-function mercMake(type,left){const D=MERC_DEF[type],S=LINE_SPR[D.line],A=S?S.anims:HERO,R=RACES.find(r=>r[0]===D.line);
+function mercMake(type,left,DX){const D=DX||MERC_DEF[type],S=LINE_SPR[D.line],A=S?S.anims:HERO,R=RACES.find(r=>r[0]===D.line);
   const tex=new THREE.TextureLoader().load(S?S.f:R[3]);tex.minFilter=THREE.LinearFilter;tex.generateMipmaps=false;tex.repeat.set(1/A.cols,1/A.rows);
   const mesh=new THREE.Mesh((S&&S.geo)||heroGeo,new THREE.MeshBasicMaterial({map:tex,alphaTest:0.5,side:THREE.DoubleSide}));mesh.rotation.order='YXZ';
   const shadow=new THREE.Mesh(shadowGeo,shadowMat);shadow.renderOrder=1;
-  const el=document.createElement('div');el.className='label merc';el.innerHTML=`<span>${D.ic} ${D.n}</span>${type==='bison'?'<i class="mhp"><b></b></i>':''}`;labelLayer.appendChild(el);
+  const el=document.createElement('div');el.className='label merc';el.innerHTML=`<span>${D.ic} ${D.n}${D.alt?` <small class="altlv">Lv ${D.alt.d.lvl}</small>`:''}</span>${type==='bison'||D.alt?'<i class="mhp"><b></b></i>':''}`;labelLayer.appendChild(el);
   const i=MERCS.length,M={type,D,A,tex,mesh,shadow,el,left:left||MERC_DUR,x:player.x+Math.cos(i*2.4+1)*1.6,z:player.z+Math.sin(i*2.4+1)*1.6,facing:0,t:0,cd:0.5,atkT:0,moving:false,sp1:4,sp2:0,down:0,
     hpMax:1,hp:1};
-  mercHpCalc(M);M.hp=M.hpMax;MERCS.push(M);return M;}
-function mercHpCalc(M){const r=M.hpMax?M.hp/M.hpMax:1;M.hpMax=Math.round(maxHp*1.4+lvl*20);M.hp=Math.max(1,M.hpMax*r);}
-function mercRemove(M){const i=MERCS.indexOf(M);if(i<0)return;MERCS.splice(i,1);if(M.mesh.parent)M.mesh.parent.remove(M.mesh);if(M.shadow.parent)M.shadow.parent.remove(M.shadow);M.el.remove();M.tex.dispose();
+  if(D.alt)M.alt=D.alt;mercHpCalc(M);M.hp=M.hpMax;MERCS.push(M);return M;}
+function mercHpCalc(M){const r=M.hpMax?M.hp/M.hpMax:1;if(M.alt){const d=M.alt.d;M.hpMax=Math.round((70+((d.base&&d.base.VIT)||1)*10+d.lvl*12)*1.4+d.lvl*20);M.hp=Math.max(1,M.hpMax*r);return;}M.hpMax=Math.round(maxHp*1.4+lvl*20);M.hp=Math.max(1,M.hpMax*r);}
+function mercRemove(M){const i=MERCS.indexOf(M);if(i<0)return;if(M.alt)altFlush(M);MERCS.splice(i,1);if(M.mesh.parent)M.mesh.parent.remove(M.mesh);if(M.shadow.parent)M.shadow.parent.remove(M.shadow);M.el.remove();M.tex.dispose();
   mons.forEach(m=>{if(m.tauntM===M){m.tauntM=null;m.tauntEnd=0;}});renderPartyHud();}
 function mercClear(){while(MERCS.length)mercRemove(MERCS[0]);}
 function mercHire(type){if(!mercAtNpc()){say('ต้องจ้างที่หัวหน้ากิลด์ทหารรับจ้าง ดาเรน ในอัลเดรีย','sys');return;}
-  const ex=MERCS.find(M=>M.type===type),c=mercCost(type);
+  const ex=MERCS.find(M=>M.type===type&&!M.alt),c=mercCost(type);
   if(!ex&&MERCS.length>=mercSlots()){say(`ปาร์ตี้เต็มแล้ว (${mercSlots()} ช่อง) ปลดใครออกก่อน`,'sys');return;}
   if(gold<c){say(`เงินไม่พอ ต้องใช้ ${c.toLocaleString()} z`,'sys');return;}gold-=c;
   if(ex){ex.left=Math.min(ex.left+MERC_DUR,MERC_DUR*3);say(`ต่อสัญญา ${ex.D.n} +30 นาที`,'sys');}
@@ -18888,7 +18889,7 @@ function mercHire(type){if(!mercAtNpc()){say('ต้องจ้างที่�
 function mercTarget(){const P=player;let t=(P.attackTarget&&!P.attackTarget.dead&&P.attackTarget)||(pendingAttack&&!pendingAttack.dead&&pendingAttack)||(TGT&&TGT.mon&&!TGT.dead&&TGT)||null;
   if(t&&t.map===curMap&&Math.hypot(t.x-P.x,t.z-P.z)<14)return t;let best=null,bd=10;
   for(const m of mons){if(m.map!==curMap||m.dead||!(m.aggro||m.tauntEnd>time))continue;const d=Math.hypot(m.x-P.x,m.z-P.z);if(d<bd){bd=d;best=m;}}return best;}
-function mercHit(m,pct,o){if(!m||m.dead)return;o=o||{};const D=derived(),A=Math.max(D.atk,D.matk);let v=(A*1.7+lvl*2+Math.random()*A*0.8)*pct/100;
+let mercCur=null;function mercHit(m,pct,o){if(!m||m.dead)return;o=o||{};const D=derived(),al=mercCur&&mercCur.alt,A=al?altPower(al.d):Math.max(D.atk,D.matk),LV=al?al.d.lvl:lvl;let v=(A*1.7+LV*2+Math.random()*A*0.8)*pct/100*(al?1.6:1);
   const crit=Math.random()<Math.min(0.9,D.crit+(o.crit||0));if(crit)v*=1.5;if(m.vulnEnd>time)v*=1+m.vuln/100;
   if(o.slow){m.slow=Math.max(m.slow||0,o.slow);m.slowEnd=time+3;}if(!m.T.boss||m.aggro)m.aggro=true;applyHit(m,Math.max(1,Math.round(v)),crit,'pack');}
 function mercAlive(M){return!!M&&MERCS.includes(M)&&!M.down&&M.mesh.parent===curMap.scene;}
@@ -18910,15 +18911,16 @@ function mercAct(M,tg){const D=M.D,ty=M.type;
   if(ty==='penguin'){arrowFx(M.x,M.z,tg.x,tg.z,D.col);if(time>M.sp1){M.sp1=time+7;monsNear(tg.x,tg.z,2.8).forEach(m=>mercHit(m,D.pct*1.1,{slow:40}));popText(tg.x,tg.z,'พายุหิมะ!','skill',3.6);}else mercHit(tg,D.pct,{slow:25});return true;}
   return false;}
 function updateMercs(dt){if(!MERCS.length)return;const town=isTownMap(),tg=town?null:mercTarget();
-  for(let i=MERCS.length-1;i>=0;i--){const M=MERCS[i];M.left-=dt;
+  for(let i=MERCS.length-1;i>=0;i--){const M=MERCS[i];if(!M.alt)M.left-=dt;
     if(M.left<=0){say(`สัญญาจ้าง ${M.D.n} หมดแล้ว กลับไปจ้างใหม่ได้ที่ดาเรน`,'sys');mercRemove(M);continue;}
     if(M.mesh.parent!==curMap.scene){curMap.scene.add(M.mesh);curMap.scene.add(M.shadow);M.x=player.x+Math.cos(i*2.4+1)*1.6;M.z=player.z+Math.sin(i*2.4+1)*1.6;}
+    if(M.alt&&M.hurtT&&time-M.hurtT>5&&M.hp<M.hpMax&&!M.down)M.hp=Math.min(M.hpMax,M.hp+M.hpMax*0.02*dt);
     if(M.down){M.down=Math.max(0,M.down-dt);M.mesh.visible=M.shadow.visible=false;M.el.style.visibility='hidden';if(!M.down){M.hp=M.hpMax*0.5;M.x=player.x+1;M.z=player.z;say(`${M.D.n} กลับมาสู้ต่อ!`,'sys');}continue;}
     M.mesh.visible=M.shadow.visible=true;M.t+=dt;M.cd-=dt;M.atkT=Math.max(0,M.atkT-dt);
     if(M.type==='bison'&&time-(M.hurtT||-99)>5&&M.hp<M.hpMax)M.hp=Math.min(M.hpMax,M.hp+M.hpMax*0.03*dt);
     const dp=Math.hypot(player.x-M.x,player.z-M.z);if(dp>18){M.x=player.x+Math.cos(i*2.4+1)*1.5;M.z=player.z+Math.sin(i*2.4+1)*1.5;}
     let gx,gz,stop=0.35;const fight=tg&&M.type!=='sheep'&&!playerDown;
-    if(fight){const d=Math.hypot(tg.x-M.x,tg.z-M.z);gx=tg.x;gz=tg.z;stop=M.D.range*0.9;if(d<=M.D.range+0.2){M.facing=Math.atan2(tg.x-M.x,tg.z-M.z);if(M.cd<=0&&mercAct(M,tg)){M.cd=M.D.every;M.atkT=0.45;}}}
+    if(fight){const d=Math.hypot(tg.x-M.x,tg.z-M.z);gx=tg.x;gz=tg.z;stop=M.D.range*0.9;if(d<=M.D.range+0.2){M.facing=Math.atan2(tg.x-M.x,tg.z-M.z);mercCur=M;if(M.cd<=0&&mercAct(M,tg)){M.cd=M.D.every;M.atkT=0.45;}mercCur=null;}}
     else{const a=camYaw+[1.95,-1.95,Math.PI][i%3],r=M.type==='sheep'&&tg?3:2.3;gx=player.x+Math.sin(a)*r;gz=player.z+Math.cos(a)*r;
       if(M.type==='sheep'&&M.cd<=0&&!town&&mercAct(M,tg)){M.cd=M.D.every;M.atkT=0.45;}}
     const dx=gx-M.x,dz=gz-M.z,d=Math.hypot(dx,dz);M.moving=d>stop+0.05&&M.atkT<=0;
@@ -18931,23 +18933,52 @@ function updateMercs(dt){if(!MERCS.length)return;const town=isTownMap(),tg=town?
 function placeMercLabels(){qgUpdate();MERCS.forEach(M=>{if(M.down||M.mesh.parent!==curMap.scene){M.el.style.visibility='hidden';return;}place(M.el,M.x,3.6,M.z);
   const b=M.el.querySelector('.mhp b');if(b)b.style.width=Math.max(0,M.hp/M.hpMax*100)+'%';});}
 function mercHpRefresh(){MERCS.forEach(mercHpCalc);}
+
+/* ---------- party: other heroes from the same account ---------- */
+const ALT_ROLE={sheep:'sheep',bison:'bison',lizard:'lizard',rabbit:'lizard',penguin:'penguin',monkey:'penguin',bat:'penguin',wolf:'wolf',cat:'wolf',panda:'wolf',mole:'wolf'};
+const ALT_RN={sheep:'ฮีลเลอร์',bison:'แทงก์',lizard:'ยิงไกล',penguin:'เวทวงกว้าง',wolf:'โจมตีประชิด'};
+let ALT_LIST=null,altLoading=false;
+function altPower(d){const W=d.equipped&&d.equipped.weapon&&EQ_DB[d.equipped.weapon.id];const b=d.base||{};const mag=['monkey','penguin','bat','sheep'].includes(d.line);
+  return (mag?Math.max(b.INT||1,b.ATK||1):(b.ATK||1))+d.lvl+(W?Math.max(W.atk||0,W.matk||0)*(1+0.08*((d.equipped.weapon.ref)||0)):0);}
+function altCap(d){return (d.classIdx||0)>=3?175:99;}
+function altPct(d){const n=expNeed(d.lvl);return d.lvl>=altCap(d)?100:Math.min(99,Math.floor((d.exp||0)/n*100));}
+function altExp(v){if(!MERCS.some(M=>M.alt))return;MERCS.forEach(M=>{if(!M.alt||M.down)return;const d=M.alt.d;if(d.lvl>=altCap(d))return;d.exp=(d.exp||0)+Math.round(v*1.15);let up=0;
+  while(d.lvl<altCap(d)&&d.exp>=expNeed(d.lvl)){d.exp-=expNeed(d.lvl);d.lvl++;d.statPts=(d.statPts||0)+Math.floor(d.lvl/5)+3;up++;}
+  if(up){M.alt.dirty=true;mercHpCalc(M);M.hp=M.hpMax;popText(M.x,M.z,`LEVEL UP Lv ${d.lvl}`,'lvl',3.8);say(`🎉 ${d.name} เลเวลอัปเป็น Lv ${d.lvl}! (แต้มสเตตัสเก็บไว้ในตัวละครนั้น)`,'sys');const sm=M.el.querySelector('.altlv');if(sm)sm.textContent='Lv '+d.lvl;}
+  M.alt.dirty=true;});}
+function altFlush(only){MERCS.filter(M=>M.alt&&M.alt.dirty&&(!only||M===only)).forEach(M=>{M.alt.dirty=false;const d=M.alt.d,sl=M.alt.slot;if(sl===SAVE.slot)return;
+  try{store().put(sl,d).catch(()=>{});}catch(e){}try{const bk=`aldria.bak.${SAVE.uid}.${sl}`;const b=JSON.parse(localStorage.getItem(bk)||'null');if(b){localStorage.setItem(bk,JSON.stringify(d));}}catch(e){}});}
+setInterval(()=>{try{altFlush();}catch(e){}},20000);
+async function altFetch(){if(altLoading)return;altLoading=true;try{const L=await store().list();ALT_LIST=L.map((d,i)=>d?{slot:i,d}:null).filter(x=>x&&x.slot!==SAVE.slot);}catch(e){ALT_LIST=[];}altLoading=false;renderParty();}
+function altDef(a){const d=a.d,role=ALT_ROLE[d.line]||'wolf',B=MERC_DEF[role],R=RACES.find(r=>r[0]===d.line);
+  return Object.assign({},B,{n:d.name,role:`${R?R[1].replace('เผ่า',''):''} · ${ALT_RN[role]}`,line:d.line,alt:{slot:a.slot,d,dirty:false}});}
+function altJoin(slot){const a=(ALT_LIST||[]).find(x=>x.slot===slot);if(!a)return;if(MERCS.some(M=>M.alt&&M.alt.slot===slot))return;
+  if(MERCS.length>=PARTY_MAX){say(`ปาร์ตี้เต็มแล้ว (${PARTY_MAX} ตัว) ปลดใครออกก่อน`,'sys');return;}
+  const D=altDef(a);mercMake(ALT_ROLE[a.d.line]||'wolf',1e9,D);say(`${a.d.name} (Lv ${a.d.lvl}) เข้าร่วมปาร์ตี้! ได้ EXP ไปพร้อมกับคุณ`,'sys');sfx('job');renderParty();renderPartyHud();}
+async function altRestore(slots){try{const L=await store().list();slots.forEach(sl=>{const d=L[sl];if(d&&sl!==SAVE.slot&&MERCS.length<PARTY_MAX&&!MERCS.some(M=>M.alt&&M.alt.slot===sl))mercMake(ALT_ROLE[d.line]||'wolf',1e9,altDef({slot:sl,d}));});renderPartyHud();}catch(e){}}
+function altListHtml(){if(!ALT_LIST){altFetch();return '<h5 class="dqh">ตัวละครในไอดีเดียวกัน</h5><p class="auhint">กำลังโหลด...</p>';}
+  const rows=ALT_LIST.map(a=>{const d=a.d,R=RACES.find(r=>r[0]===d.line),inP=MERCS.some(M=>M.alt&&M.alt.slot===a.slot),role=ALT_RN[ALT_ROLE[d.line]||'wolf'];
+    return `<div class="qr ${inP?'ok':''}"><div><b>${d.name} <em class="mrole">${R?R[1]:''} · Lv ${d.lvl}</em></b><small>บทบาท: ${role} · พลังโจมตีจากค่าสถานะและอาวุธของตัวละครนั้น</small></div><button data-ajoin="${a.slot}" ${inP||MERCS.length>=PARTY_MAX?'disabled':''}>${inP?'อยู่ในปาร์ตี้':'ชวนเข้าปาร์ตี้'}</button></div>`;}).join('');
+  return `<h5 class="dqh">ตัวละครในไอดีเดียวกัน <small>ชวนมาช่วยสู้ ได้ EXP และเลเวลไปด้วย</small></h5>${rows||'<p class="auhint">ยังไม่มีตัวละครอื่นในไอดีนี้ สร้างฮีโร่เพิ่มได้ที่หน้าเลือกตัวละคร</p>'}`;}
 /* party HUD + window */
 const partyHud=document.createElement('div');partyHud.id='partyHud';partyHud.hidden=true;document.getElementById('game').appendChild(partyHud);
 partyHud.addEventListener('click',()=>openParty(false));
 function mmss(s){s=Math.max(0,Math.floor(s));return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;}
 function renderPartyHud(){partyHud.hidden=!MERCS.length;if(partyHud.hidden)return;const me=document.getElementById('me').getBoundingClientRect();partyHud.style.top=Math.round(me.bottom+6)+'px';
-  partyHud.innerHTML=MERCS.map(M=>`<div class="phm ${M.down?'dn':''}"><i style="background:${M.D.col}">${M.D.ic}</i><span><b>${M.D.n}</b><small>${M.down?`ล้ม · ลุกใน ${Math.ceil(M.down)} วิ`:M.D.role}</small>${M.type==='bison'?`<em class="phb"><u style="width:${M.hp/M.hpMax*100}%"></u></em>`:''}</span><time>${mmss(M.left)}</time></div>`).join('');}
+  partyHud.innerHTML=MERCS.map(M=>`<div class="phm ${M.down?'dn':''}"><i style="background:${M.D.col}">${M.D.ic}</i><span><b>${M.D.n}</b><small>${M.down?`ล้ม · ลุกใน ${Math.ceil(M.down)} วิ`:M.D.role}</small>${M.type==='bison'||M.alt?`<em class="phb"><u style="width:${M.hp/M.hpMax*100}%"></u></em>`:''}</span><time>${M.alt?'Lv '+M.alt.d.lvl:mmss(M.left)}</time></div>`).join('');}
 function openParty(atNpc){toggleWin('partyWin',true);renderParty();}
 function renderParty(){const w=document.getElementById('partyWin');if(!w||w.hidden)return;const at=mercAtNpc(),sl=mercSlots();
   document.getElementById('ptGold').textContent=gold.toLocaleString();
-  document.getElementById('ptBody').innerHTML=`<div class="ptslot">สมาชิก ${MERCS.length}/${sl} ช่อง <small>(+1 ช่องเมื่อ Lv 40 หรือคลาส High · +1 ช่องเมื่อจุติ)</small></div>
-   ${MERCS.map(M=>`<div class="qr ok"><div><b>${M.D.ic} ${M.D.n}</b><small>${M.D.role} · เหลือเวลา ${mmss(M.left)}${M.type==='bison'?` · HP ${Math.round(M.hp).toLocaleString()}/${M.hpMax.toLocaleString()}`:''}</small></div><div class="qbtns"><button data-mfire="${M.type}" class="qab">ปลดออก</button></div></div>`).join('')}
+  document.getElementById('ptBody').innerHTML=`<div class="ptslot">สมาชิก ${MERCS.length}/${sl} ช่อง <small>(ตัวละครในไอดีเดียวกัน + ทหารรับจ้าง รวมได้ ${PARTY_MAX} ตัว)</small></div>
+   ${MERCS.map(M=>`<div class="qr ok"><div><b>${M.D.ic} ${M.D.n}${M.alt?` <em class="mrole">Lv ${M.alt.d.lvl}</em>`:''}</b><small>${M.D.role}${M.alt?` · EXP ${altPct(M.alt.d)}% · ได้ EXP ไปด้วยทุกตัวที่ล่า`:` · เหลือเวลา ${mmss(M.left)}`}${M.type==='bison'||M.alt?` · HP ${Math.round(M.hp).toLocaleString()}/${M.hpMax.toLocaleString()}`:''}</small></div><div class="qbtns"><button ${M.alt?`data-afire="${M.alt.slot}"`:`data-mfire="${M.type}"`} class="qab">ปลดออก</button></div></div>`).join('')}
+   ${altListHtml()}
    <h5 class="dqh">จ้างทหาร ${at?'':'<small>ต้องคุยกับดาเรนที่กิลด์ทหารรับจ้างในอัลเดรีย</small>'}</h5>
-   ${Object.entries(MERC_DEF).map(([k,D])=>{const has=MERCS.some(M=>M.type===k),c=mercCost(k),full=!has&&MERCS.length>=sl;
+   ${Object.entries(MERC_DEF).map(([k,D])=>{const has=MERCS.some(M=>M.type===k&&!M.alt),c=mercCost(k),full=!has&&MERCS.length>=sl;
      return `<div class="qr"><div><b><i class="mic" style="background:${D.col}">${D.ic}</i> ${D.n} <em class="mrole">${D.role}</em></b><small>${D.d}</small><span class="qrw">${c.toLocaleString()} z / 30 นาที</span></div><button data-mhire="${k}" ${at&&gold>=c&&!full?'':'disabled'}>${has?'ต่อสัญญา':'จ้าง'}</button></div>`;}).join('')}
    <p class="auhint">ทหารรับจ้างใช้พลังโจมตีตามค่าสถานะของคุณ (ATK หรือ MATK ที่สูงกว่า) ตามคุณข้ามแผนที่ได้ และเวลาสัญญาจะเดินเฉพาะตอนเล่น</p>`;}
-document.addEventListener('click',e=>{const t=e.target.closest('[data-mhire],[data-mfire]');if(!t)return;
-  if(t.dataset.mhire){mercHire(t.dataset.mhire);return;}const M=MERCS.find(q=>q.type===t.dataset.mfire);if(!M)return;
+document.addEventListener('click',e=>{const t=e.target.closest('[data-mhire],[data-mfire],[data-ajoin],[data-afire]');if(!t)return;
+  if(t.dataset.ajoin){altJoin(+t.dataset.ajoin);return;}if(t.dataset.afire){const M=MERCS.find(q=>q.alt&&q.alt.slot===+t.dataset.afire);if(M){say(`${M.D.n} ออกจากปาร์ตี้แล้ว (บันทึกเลเวลไว้ในตัวละครนั้น)`,'sys');mercRemove(M);renderParty();}return;}
+  if(t.dataset.mhire){mercHire(t.dataset.mhire);return;}const M=MERCS.find(q=>q.type===t.dataset.mfire&&!q.alt);if(!M)return;
   if(t.dataset.sure!=='1'){t.dataset.sure='1';t.textContent='ยืนยัน?';return;}say(`ปลด ${M.D.n} ออกจากปาร์ตี้แล้ว`,'sys');mercRemove(M);renderParty();});
 
 /* ---------- glue: tick, save, reset ---------- */
@@ -19127,12 +19158,12 @@ setInterval(()=>{try{advTick();}catch(e){}},1000);
 function partyTick(dt){fsTick(dt);if(typeof iceShieldFx==='function')iceShieldFx();if(window.sqOn)sqTick(dt);if(typeof updateNav==='function')updateNav(dt);if((partyTick.s=(partyTick.s||0)+dt)>0.5){partyTick.s=0;skStatTick();}updateMercs(dt);updateJtAura();
   if((partyTick.h=(partyTick.h||0)+dt)>1){partyTick.h=0;if(autoTab==='stat'&&!document.getElementById('autoWin').hidden)renderAutoWin();if(!document.getElementById('partyWin').hidden)renderParty();
     if(dqGen()&&qTab==='daily'&&!document.getElementById('questWin').hidden)renderQuest();}}
-function partySave(){return{jt:JUTTI||0,mc:MERCS.map(M=>({t:M.type,l:Math.round(M.left)})),dq:JSON.parse(JSON.stringify(DQ)),fs:JSON.parse(JSON.stringify(FST))};}
+function partySave(){altFlush();return{jt:JUTTI||0,al:MERCS.filter(M=>M.alt).map(M=>M.alt.slot),mc:MERCS.filter(M=>!M.alt).map(M=>({t:M.type,l:Math.round(M.left)})),dq:JSON.parse(JSON.stringify(DQ)),fs:JSON.parse(JSON.stringify(FST))};}
 function partyLoad(d){d=d||{};JUTTI=d.jt||0;mercClear();if(d.dq)Object.assign(DQ,d.dq);else Object.assign(DQ,{d:'',w:'',dl:[],wl:[],dn:0,bonus:false});
-  fsReset();if(d.fs)Object.assign(FST,d.fs);(d.mc||[]).forEach(o=>{if(MERC_DEF[o.t]&&o.l>0)mercMake(o.t,o.l);});renderPartyHud();}
+  fsReset();if(d.fs)Object.assign(FST,d.fs);(d.mc||[]).forEach(o=>{if(MERC_DEF[o.t]&&o.l>0)mercMake(o.t,o.l);});if(d.al&&d.al.length)setTimeout(()=>altRestore(d.al),800);renderPartyHud();}
 function partyNew(){JUTTI=0;mercClear();Object.assign(DQ,{d:'',w:'',dl:[],wl:[],dn:0,bonus:false});fsReset();renderPartyHud();}
 document.getElementById('btnQuest').onclick=()=>{toggleWin('questWin');renderQuest();};
-document.getElementById('btnParty').onclick=()=>{toggleWin('partyWin');renderParty();};
+document.getElementById('btnParty').onclick=()=>{ALT_LIST=null;toggleWin('partyWin');renderParty();};
 
 /* ===================== SAVE / LOAD + GOOGLE LOGIN (Firebase) ===================== */
 /* ▼▼ วาง config จาก Firebase Console ตรงนี้ (Project settings → Your apps → Web app → SDK setup and configuration → Config)
