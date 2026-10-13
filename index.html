@@ -4379,7 +4379,7 @@ function popText(x,z,txt,cls,y=4.2,o={}){const el=document.createElement('div');
   const dx=num?(Math.random()-0.5)*44:0;b.style.setProperty('--dx',dx.toFixed(0)+'px');labelLayer.appendChild(el);
   const life=o.life||(cls==='lvl'?2.4:cls==='job'?1.8:num?1.05:1.1),rise=o.rise!=null?o.rise:(num?1.8:cls==='lvl'||cls==='job'?0.6:1.6);
   dmgs.push({el,x,z,t:0,y,life,rise});if(dmgs.length>60){const d=dmgs.shift();d.el.remove();}}
-const baseCap=()=>(typeof classIdx==='number'&&classIdx>=3)?175:99;
+const baseCap=()=>(typeof JUTTI!=='undefined'&&JUTTI>=1)?175:99;/* จุติ once to unlock Base Lv past 99 */
 function gainExp(v){v=Math.round(v*1.15);if(lvl>=baseCap()){exp=0;updateExp();return;}exp+=v;let up=false,gp=0;while(lvl<baseCap()&&exp>=expNeed(lvl)){exp-=expNeed(lvl);lvl++;saveSoon();const g=Math.floor(lvl/5)+3;statPts+=g;gp+=g;up=true;}if(lvl>=baseCap())exp=0;
   if(up){recalc(false);php=maxHp;psp=maxSp;popText(player.x,player.z,`LEVEL UP<small>Base Lv ${lvl}</small>`,'lvl',4.6,{html:true});levelFx();sfx('levelup');say(`เลเวลอัป! Base Lv ${lvl} · สเตตัสทุกตัว +${up} · ได้แต้มสเตตัส +${gp} (กด C เพื่อเพิ่ม)`,'sys');if(typeof updateJobUI==='function')updateJobUI();}
   updateExp();updateHP();}
@@ -4843,7 +4843,7 @@ const buffs={},skCD={};let lastSkillAt=-9,lastAtkSkillAt=-9,lastBlinkAt=-9,nextC
 /* class plan: C1 Base 1-40 · C2 Base 41-80 · High class (after rebirth) Base 1-85 · C3 Base 99-160 */
 const JOB_R=[[1,40,40,4,0.9],[41,80,50,6,0.9],[1,85,50,6,1],[99,160,70,8,0.9]];
 const JOB_B=JOB_R.map(([lo,hi,J,A])=>{let K=0;for(let l=lo;l<=hi;l++)K+=killsAt(l);let su=0;for(let j=1;j<J;j++){const u=(j-1)/(J-1);su+=u*u;}return(K-A*(J-1))/su;});
-const jobNeed=j=>{const [lo,hi,J,A,m]=JOB_R[classIdx],u=(j-1)/(J-1),L=Math.min(100,lo+(hi-lo)*u);return Math.round(JOB_SLOW*(A+JOB_B[classIdx]*u*u)*(5+1.2*Math.pow(L,1.75))*0.8*1.15*m*((typeof JUTTI!=='undefined'&&JUTTI)?1:0.6));};
+const jobNeed=j=>{const [lo,hi,J,A,m]=JOB_R[classIdx],u=(j-1)/(J-1),L=Math.min(100,lo+(hi-lo)*u);return Math.round(JOB_SLOW*(A+JOB_B[classIdx]*u*u)*(5+1.2*Math.pow(L,1.75))*0.8*1.15*m*((typeof JUTTI!=='undefined'&&JUTTI)?0.2:0.12));};
 function expMod(mlv){const d=mlv-Math.min(lvl,100);return d>=0?1+Math.min(d,10)*0.02:d>=-5?1:Math.max(0.15,1+(d+5)*0.06);}
 const classPts=c=>c<classIdx?SK_CLASSES[c].pts:c===classIdx?Math.min(jobLv-1,SK_CLASSES[c].pts):0;
 const skSpent=c=>SKILLS.filter(s=>s.c===c&&!s.free).reduce((a,s)=>a+skLv[s.id],0)-(c===0&&SKB[FREE0]&&!SKB[FREE0].free&&skLv[FREE0]>0?1:0);
@@ -20380,18 +20380,18 @@ function frame(now){
 }
 /* ===================== PARTY · REBIRTH · FARM STATS · DAILY QUESTS ===================== */
 /* ---------- rebirth / จุติ ---------- */
-var JUTTI=0;const JT_MAX=10;
+var JUTTI=0;const JT_MAX=1;
 const JT_COL=['#ffffff','#fff2b0','#8affa0','#7ad0ff','#c08aff','#ff7a7a','#ffb84a','#7affe8','#ff8ae0','#e8f0ff','#ffd84a'];
 function jtHp(){return 1+0.04*(JUTTI||0);}
 function jtAtk(){return 1+0.03*(JUTTI||0);}
-function jtExp(){return JUTTI?1.2+0.2*JUTTI:0.5;}/* first life (before จุติ) levels twice as fast; each จุติ makes it harder */
+function jtExp(){return JUTTI?0.3:0.1;}/* first life (before จุติ) levels twice as fast; each จุติ makes it harder */
 function jtReqs(){return[[`Base Lv 99 ขึ้นไป (ตอนนี้ ${lvl})`,lvl>=99],[`เป็นคลาส High ขึ้นไป (รีเบิร์ทคลาสแล้ว)`,classIdx>=2],[`จุติไม่เกิน ${JT_MAX} ครั้ง`,(JUTTI||0)<JT_MAX]];}
 function jtCan(){return jtReqs().every(r=>r[1]);}
 function jtLabel(){const t=(JUTTI?`☯${JUTTI} `:'')+player.name;meLabel.textContent=t;meLabel.style.color=JUTTI?JT_COL[Math.min(JUTTI,JT_COL.length-1)]:'';}
 function doJutti(){if(!jtCan())return;JUTTI++;lvl=1;exp=0;STAT_KEYS.forEach(k=>base[k]=1);statPts=100+20*JUTTI;
   recalc(false);php=maxHp;psp=maxSp;updateHP();updateExp();updateJobUI();jtLabel();
   popText(player.x,player.z,'จุติ ☯'+JUTTI,'lvl',4.6);levelFx(JT_COL[JUTTI],'#ffffff',true);sfx('levelup');
-  say(`☯ จุติครั้งที่ ${JUTTI}! Base Lv กลับเป็น 1 · ได้แต้มสเตตัส ${statPts} · HP/SP +${4*JUTTI}% · ATK/MATK +${3*JUTTI}% ถาวร · ออร่าใหม่ · EXP ที่ต้องใช้ต่อเลเวล ×${jtExp().toFixed(2)}`,'sys');
+  say(`☯ จุติครั้งที่ ${JUTTI}! Base Lv กลับเป็น 1 · ได้แต้มสเตตัส ${statPts} · HP/SP +${4*JUTTI}% · ATK/MATK +${3*JUTTI}% ถาวร · ออร่าใหม่ · 🔓 อัพ Base Lv ได้ถึง 175`,'sys');
   say('คลาส สกิล อุปกรณ์ และของในกระเป๋ายังอยู่ครบ จัดแต้มสเตตัสใหม่ได้ที่หน้าสถานะ (C)','sys');
   renderJt();if(typeof saveNow==='function')saveNow(false);}
 const JT_AURA=(()=>{const g=new THREE.Group();g.renderOrder=2;
@@ -20416,7 +20416,7 @@ function renderJt(){const w=document.getElementById('jtWin');if(!w||w.hidden)ret
   const tiers=[...Array(JT_MAX)].map((_,i)=>{const t=i+1;return `<span class="jtt ${t<=J?'got':''} ${t===J+1?'nx':''}" style="--c:${JT_COL[t]}">☯${t}</span>`;}).join('');
   document.getElementById('jtBody').innerHTML=`<div class="jtnow">จุติแล้ว <b>${J}</b> / ${JT_MAX} ครั้ง</div><div class="jtrow">${tiers}</div>
    <div class="jtbox"><b>โบนัสถาวรตอนนี้</b><span>HP/SP สูงสุด +${4*J}% · ATK/MATK +${3*J}% · ช่องปาร์ตี้ ${J?'+1':'—'}</span></div>
-   ${J<JT_MAX?`<div class="jtbox nx"><b>จุติครั้งที่ ${J+1} จะได้</b><span>Base Lv กลับเป็น 1 · แต้มสเตตัส ${100+20*(J+1)} · HP/SP +${4*(J+1)}% · ATK/MATK +${3*(J+1)}% · ออร่าสี<i style="background:${JT_COL[J+1]}"></i></span><small>แลกกับ: EXP ที่ต้องใช้ต่อเลเวล ×${(1+0.15*(J+1)).toFixed(2)} (ฟาร์มนานขึ้น) · สเตตัสที่อัพไว้ถูกรีเซ็ต</small></div>`:'<div class="jtbox nx"><b>จุติครบ 10 ครั้งแล้ว</b><span>ออร่าสีรุ้งเป็นของคุณ</span></div>'}
+   ${J<JT_MAX?`<div class="jtbox nx"><b>จุติครั้งที่ ${J+1} จะได้</b><span>Base Lv กลับเป็น 1 · แต้มสเตตัส ${100+20*(J+1)} · HP/SP +${4*(J+1)}% · ATK/MATK +${3*(J+1)}% · ออร่าสี<i style="background:${JT_COL[J+1]}"></i></span><span>🔓 ปลดล็อก Base Lv เกิน 99 (สูงสุด 175)</span><small>แลกกับ: EXP ที่ต้องใช้ต่อเลเวล ×3 ของตอนก่อนจุติ (ฟาร์มนานขึ้น) · สเตตัสที่อัพไว้ถูกรีเซ็ต</small></div>`:'<div class="jtbox nx"><b>จุติแล้ว</b><span>Base Lv อัพได้ถึง 175</span></div>'}
    <div class="jtreq">${R.map(([t,o])=>`<span class="${o?'ok':'no'}">${o?'✓':'✕'} ${t}</span>`).join('')}</div>
    <p class="auhint">เก็บไว้ครบ: คลาส · Job · สกิล · อุปกรณ์ · กระเป๋า · การ์ด · สัตว์เลี้ยง</p>
    <button class="aubig" data-jtgo ${ok?'':'disabled'}>${ok?'☯ จุติเดี๋ยวนี้':'ยังจุติไม่ได้'}</button>`;}
@@ -20616,7 +20616,7 @@ function altPower(d){const W=d.equipped&&d.equipped.weapon&&EQ_DB[d.equipped.wea
   return (mag?Math.max(b.INT||1,b.ATK||1):(b.ATK||1))+d.lvl+(W?Math.max(W.atk||0,W.matk||0)*(1+0.08*((d.equipped.weapon.ref)||0)):0);}
 function altCap(d){return (d.classIdx||0)>=3?175:99;}
 function altPct(d){const n=expNeed(d.lvl);return d.lvl>=altCap(d)?100:Math.min(99,Math.floor((d.exp||0)/n*100));}
-function jobNeedAt(j,ci){const [lo,hi,J,A,m]=JOB_R[ci],u=(j-1)/(J-1),L=Math.min(100,lo+(hi-lo)*u);return Math.round(JOB_SLOW*(A+JOB_B[ci]*u*u)*(5+1.2*Math.pow(L,1.75))*0.8*1.15*m*((typeof JUTTI!=='undefined'&&JUTTI)?1:0.6));}
+function jobNeedAt(j,ci){const [lo,hi,J,A,m]=JOB_R[ci],u=(j-1)/(J-1),L=Math.min(100,lo+(hi-lo)*u);return Math.round(JOB_SLOW*(A+JOB_B[ci]*u*u)*(5+1.2*Math.pow(L,1.75))*0.8*1.15*m*((typeof JUTTI!=='undefined'&&JUTTI)?0.2:0.12));}
 function altJobCap(d){const Ln=LINES[d.line],C=Ln&&Ln.classes&&Ln.classes[d.classIdx||0];return C?C.job:50;}
 function altExp(v,gj){if(!MERCS.some(M=>M.alt))return;MERCS.forEach(M=>{if(!M.alt||M.down)return;const d=M.alt.d,sl=M.alt.slot;let up=0,jup=0;
   if(gj&&(d.jobLv||1)<altJobCap(d)){d.jobLv=d.jobLv||1;d.jobExp=(d.jobExp||0)+Math.round(gj*1.15);const ci=Math.min(d.classIdx||0,JOB_R.length-1);
