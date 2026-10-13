@@ -1636,6 +1636,9 @@ const hitMat=new THREE.MeshBasicMaterial({visible:false});
 /* ---------- items on the ground (clickable) ---------- */
 /* ===================== CRAFTING: material sets (12-Tails style set gear) ===================== */
 const MATS={/* name: [colour, shape, price, monsters…] */
+ 'ขนนกเพนกวินหิมะ':['#e8f4ff','feather',80,'di_peng di_mage di_papa di_golem'],
+ 'เขาผลึกน้ำแข็ง':['#7ad8ff','shard',120,'di_golem di_papa di_stag'],
+ 'แก่นน้ำแข็งนิรันดร์':['#b88aff','core',320,'di_venero di_stag'],
  'ผ้าพันมัมมี่':['#e8dcc0','cloth',60,'dg_dog dg_pup dg_bull dg_anubis'],
  'เขี้ยวอนูบิส':['#3a3430','shard',90,'dg_anubis dg_bull dg_camel'],
  'อัญมณีตาแมว':['#4affd0','gem',250,'dg_maoh dg_camel'],
@@ -3597,7 +3600,7 @@ function buildGeneric(key){
   const gm=new THREE.Mesh(new THREE.PlaneGeometry(FW,FW),new THREE.MeshLambertMaterial({map:tex}));gm.rotation.x=-Math.PI/2;gm.receiveShadow=true;sc.add(gm);
   const oc={void:'#0a0614',darkstone:'#0e0a14',mystic:'#2a4a4a',frost:'#d8e2ec',shadow:'#241c2e',scrapdirt:'#6a5a48',stumpdirt:'#5a7a3e',sand:'#d8bc86',snow:'#d8e2ec',forest:'#5a8a3e',seabed:'#1e4a5a',cave:'#1a1210',metal:'#1a1e28',stone:'#14100c',waste:'#c8a07a',beachsand:'#4a9ad0',swampgrass:'#4a5a3a',burnt:'#3a3028',tomb:'#120c06'}[def.base]||'#6f9f48';
   const om=new THREE.Mesh(new THREE.PlaneGeometry(700,700),M(oc));om.rotation.x=-Math.PI/2;om.position.y=-0.03;sc.add(om);
-  const BLK=['water','chasm','chasmriver','lava','cliff','wall','sea','swamp','honey','void'];
+  const BLK=['water','chasm','chasmriver','lava','cliff','wall','sea','swamp','honey','void','skyfall','snowwall'];
   for(let j=0;j<GN;j++)for(let i=0;i<GN;i++){const x=i-HALF+0.5,z=j-HALF+0.5;if(Math.abs(x)<74&&Math.abs(z)<74&&BLK.includes(T(x,z)))bl[j*GN+i]=1;}
   const exits=Object.keys(pd).map(d=>edgeOf(key,d).p);
   const SOFT=['forest','deepgrass','scrapdirt','stumpdirt','tribal','voidrock','mystic','shadow','frost'],clear=(x,z,m=2.6)=>{const t=T(x,z);return(!t||SOFT.includes(t))&&!P(x+m,z)&&!P(x-m,z)&&!P(x,z+m)&&!P(x,z-m)&&Math.hypot(x,z)>8&&exits.every(p=>Math.hypot(p[0]-x,p[1]-z)>9);};
@@ -4194,7 +4197,7 @@ let bubble=null,bubbleT=0;
 $('#chatForm').addEventListener('submit',e=>{e.preventDefault();const v=$('#chatIn').value.trim();if(!v)return;$('#chatIn').value='';say(player.name+' : '+v);
   if(!bubble){bubble=document.createElement('div');bubble.className='bubble';labelLayer.appendChild(bubble);}bubble.textContent=v;bubble.hidden=false;bubbleT=5;view.focus();});
 let talkNpc=null,talkIdx=0,pendingTalk=null,pendingAttack=null,pendingPick=null;
-function openTalk(n){if(n.heal){sfx('heal');php=maxHp;psp=maxSp;updateHP();popText(player.x,player.z,'HP/SP FULL','heal',4.2);levelFx('#7dff8a','#e8ffe8',false);}talkNpc=n;talkIdx=0;n.talking=true;n.path=[];n.facing=Math.atan2(player.x-n.x,player.z-n.z);player.facing=Math.atan2(n.x-player.x,n.z-player.z);showLine();$('#talk').hidden=false;{const sv=document.getElementById('talkSvc');sv.innerHTML=n.smith?'<button data-svc="craft">⚒ คราฟชุดเซต</button><button data-svc="refine">🔨 ตีบวกอุปกรณ์</button>':'';}if(n.name==='นักสำรวจ ลิซ่า'&&typeof dgTalk==='function')dgTalk(n);if(n.shop)openShop();if(n.refine)openRefine();if(n.warp)openWarp();if(n.petup)openPetUp();if(n.quest)openQuest();if(n.craft)openCraft();if(n.name.indexOf('ทหารรับจ้าง')>=0)openParty(true);if(n.name.indexOf('วัฏจักร')>=0)openJt();storyTalk(n.name);if(n.sqZone&&window.sqOn)sqTalk(n);}
+function openTalk(n){if(n.heal){sfx('heal');php=maxHp;psp=maxSp;updateHP();popText(player.x,player.z,'HP/SP FULL','heal',4.2);levelFx('#7dff8a','#e8ffe8',false);}talkNpc=n;talkIdx=0;n.talking=true;n.path=[];n.facing=Math.atan2(player.x-n.x,player.z-n.z);player.facing=Math.atan2(n.x-player.x,n.z-player.z);showLine();$('#talk').hidden=false;{const sv=document.getElementById('talkSvc');sv.innerHTML=n.smith?'<button data-svc="craft">⚒ คราฟชุดเซต</button><button data-svc="refine">🔨 ตีบวกอุปกรณ์</button>':'';}if(n.name==='นักสำรวจ ลิซ่า'&&typeof dgTalk==='function')dgTalk(n);if(n.name==='เพนกวินผู้หลบหนี เพนเน่'&&typeof diTalk==='function')diTalk(n);if(n.shop)openShop();if(n.refine)openRefine();if(n.warp)openWarp();if(n.petup)openPetUp();if(n.quest)openQuest();if(n.craft)openCraft();if(n.name.indexOf('ทหารรับจ้าง')>=0)openParty(true);if(n.name.indexOf('วัฏจักร')>=0)openJt();storyTalk(n.name);if(n.sqZone&&window.sqOn)sqTalk(n);}
 function showLine(){$('#talkName').textContent=talkNpc.name;const l=talkNpc.lines[talkIdx];$('#talkText').textContent=l;say(talkNpc.name+' : '+l,'npc');$('#talkNext').hidden=talkIdx>=talkNpc.lines.length-1;}
 function closeTalk(){if(talkNpc){talkNpc.talking=false;talkNpc.wait=2;}talkNpc=null;$('#talk').hidden=true;}
 $('#talkNext').onclick=()=>{talkIdx++;showLine();};
@@ -4860,7 +4863,7 @@ function rollDmg(mult,t,mag){const D=derived();let crit=Math.random()<D.crit;if(
   if(t&&t.mon){if(t.vulnEnd>time)v*=1+t.vuln/100;if(t.shredEnd>time)v*=1+t.shred/100;}
   if(LINE==='penguin'&&mag)v*=pgMul(t);if(LINE==='mole')v*=mlMul(t);if(LINE==='bat')v*=btMul(t,mag);if(LINE==='panda')v*=pdMul(t,mag);if(LINE==='cat')v*=ctMul(t,mag);if(LINE==='sheep')v*=shMul(t,mag);if(LINE==='rabbit')v*=rbMul(t,mag);v*=cardDmgMul(t,mag);v=elemDmg(v,t,mag);return{v:Math.max(t&&t.mon&&elemMul(playerElem(),t.elem||'neutral')===0?0:1,Math.round(v)),crit};}
 function applyHit(d,v,crit,cls){if(!d||d.dead)return;if(d.mon&&cls!=='pack'&&(!TGT||TGT.dead))setTarget(d);if(cls!=='pack')sfx(crit?'crit':'hit');popDamage(d.x,d.z,v,crit,cls);
-  if(d.mon){if(d.sleepEnd>time&&!btNoWake())v=gWake(d,v);d.hp-=v;if(typeof shOnHit==='function')shOnHit(d,v,cls);if(cls!=='pack'){const dr=bsum().drain;if(dr){php=Math.min(maxHp,php+v*dr/100);updateHP();}}d.el.classList.add('hurt');d.bar.style.width=Math.max(0,d.hp/d.T.hp*100)+'%';if(d.T.retaliate)d.aggro=true;else d.wait=0;
+  if(d.mon){if(d.sleepEnd>time&&!btNoWake())v=gWake(d,v);if(d.diBoss&&typeof diDmgMul==='function')v=Math.max(1,Math.round(v*diDmgMul(d)));d.hp-=v;if(typeof shOnHit==='function')shOnHit(d,v,cls);if(cls!=='pack'){const dr=bsum().drain;if(dr){php=Math.min(maxHp,php+v*dr/100);updateHP();}}d.el.classList.add('hurt');d.bar.style.width=Math.max(0,d.hp/d.T.hp*100)+'%';if(d.T.retaliate)d.aggro=true;else d.wait=0;
     const ls=pas().ls;if(ls){php=Math.min(maxHp,php+v*ls/100);updateHP();}
     if(d.hp<=0)killMon(d);return;}
   d.shake=1;}
@@ -17719,6 +17722,7 @@ const CRAFT_SETS=[
  ['sand','ชุดพายุทราย',36,'#e8c878',['เกล็ดทราย','หนามแมงป่อง','ผ้าโจร'],{AGI:2,TAL:1},{stats:{AGI:4}},{aspdP:10,stats:{TAL:5}},'พายุทราย'],
  ['tomb','ชุดสุสานฟาโรห์',42,'#e0a830',['ผ้าพันมัมมี่','เขี้ยวอนูบิส','อัญมณีตาแมว'],{ATK:1,INT:1,AGI:1},{stats:{ATK:4,INT:4}},{crit:4,atk:15,matk:15,stats:{AGI:4}},'ฟาโรห์'],
  ['sea','ชุดวังใต้น้ำ',45,'#3ab8d8',['เกล็ดปลา','ไข่มุก','เปลือกปู'],{INT:2,VIT:1},{stats:{INT:5}},{hpP:12,matk:30,stats:{INT:5}},'วังน้ำ'],
+ ['frost','ชุดหอคอยน้ำแข็ง',52,'#7ad8ff',['ขนนกเพนกวินหิมะ','เขาผลึกน้ำแข็ง','แก่นน้ำแข็งนิรันดร์'],{INT:1,VIT:1,DEF:1},{stats:{VIT:5,INT:5}},{hpP:10,def:15,matk:25,atk:20,stats:{DEF:5}},'หิมะนิรันดร์'],
  ['mech','ชุดจักรกลแซปป้า',62,'#5ad8a0',['ชิปกลไก','กระดูกโบราณ','เศษดาบ'],{ATK:1,DEF:2},{stats:{ATK:4,DEF:5}},{atk:20,crit:5},'จักรกล'],
  ['sage','ชุดปราชญ์เอนลาเจีย',72,'#8ab0ff',['แกนพลังโบราณ','หน้ากระดาษต้องสาป','ผลึกน้ำแข็ง'],{INT:2,CHA:1},{stats:{INT:6}},{matk:40,stats:{INT:6,CHA:6}},'เอนลาเจีย'],
  ['shadow','ชุดเงาราตรี',82,'#8a5ad0',['ผลึกเงา','ขนนกเพลิง','กระดูกโบราณ'],{ATK:1,TAL:1,LCK:1},{stats:{TAL:6}},{crit:6,atk:25},'เงาราตรี'],
@@ -17748,7 +17752,7 @@ function rollMatDrop(m){const L=MAT_SRC[m.type];if(!L)return;const n=m.T.boss?2:
   const name=L[Math.floor(Math.random()*L.length)],ik=ITEM_KINDS.find(k=>k.name===name);if(!ik)continue;createItem(m.x-0.3+i*0.5,m.z-0.5,ik,true,m.map.scene);}}
 function matWhere(n){const M=MATS[n];if(M)return M[3].split(' ').map(t=>MON_TYPES[t]&&MON_TYPES[t].name.replace('★ ','')).filter(Boolean).slice(0,3).join(', ');
   const src=Object.keys(MON_TYPES).filter(t=>(MON_TYPES[t].drops||[]).includes(n)).map(t=>MON_TYPES[t].name).slice(0,3);return src.join(', ')||'ร้านค้า';}
-function craftCost(D){let ix=CRAFT_SETS.findIndex(s=>s[0]===D.set);if(ix>5)ix--;const [m1,m2,m3]=CRAFT_SET[D.set].mats,w=D.slot==='weapon'?2:D.slot==='armor'?1.5:1;
+function craftCost(D){const ix=CRAFT_SETS.filter(s=>!['tomb','frost'].includes(s[0])||s[0]===D.set).findIndex(s=>s[0]===D.set);const [m1,m2,m3]=CRAFT_SET[D.set].mats,w=D.slot==='weapon'?2:D.slot==='armor'?1.5:1;
   return {mats:[[m1,Math.round((6+ix*2)*w)],[m2,Math.round((4+ix)*w)],[m3,Math.round(3*w)]],z:Math.round(D.lv*D.lv*4+300)};}
 const QUAL=[['',0],['ดี',1],['ยอดเยี่ยม',2],['ตำนาน',4]];
 function rollQuality(){const r=Math.random(),l=S('LCK')*0.002;return r<0.03+l?3:r<0.12+l*2?2:r<0.35+l*3?1:0;}
@@ -17881,7 +17885,7 @@ function buildCardEff(type,T){const D=CARD_DEF[type];if(!D||!D[1])return null;co
   return{eff,label:parts.join(' · ')};}
 function cardSlotOK(C,slot){const s=C.slot;if(!s)return true;return s===slot||(s==='acc'&&(slot==='acc1'||slot==='acc2'||slot==='acc'));}
 /* runtime helpers used by combat hooks */
-const CX=k=>((typeof EQX!=='undefined'&&EQX[k])||0)+(k==='expP'&&typeof buffs!=='undefined'&&buffs.rp_exp&&buffs.rp_exp.end>time?50:0);
+const CX=k=>((typeof EQX!=='undefined'&&EQX[k])||0)+(k==='spd'&&typeof DI!=='undefined'&&DI.on&&DI.sledEnd>time?60:0)+(k==='expP'&&typeof buffs!=='undefined'&&buffs.rp_exp&&buffs.rp_exp.end>time?50:0);
 function cardDmgMul(t,mag){if(!t||!t.mon)return 1;let k=(1+CX('vsE_'+(t.elem||'neutral'))/100)*(1+CX('vsS_'+t.sz)/100)*(1+CX(mag?'matkP':'atkP')/100);if(t.T.boss)k*=1+CX('vsBoss')/100;return k;}
 function cardResMul(src){if(!src||!src.mon)return 1;const r=CX('resE_'+(src.elem||'neutral'))+CX('resS_'+src.sz)+(src.T.boss?CX('resBoss'):0);return 1-Math.min(60,r)/100;}
 function cardOnHit(d,D){if(!d||!d.mon||d.dead)return;const boss=d.T.boss;
@@ -18101,7 +18105,7 @@ const BS_TABS=[['weapon','Weapon','อาวุธ','#f0b8a8'],['armor','Armor',
 let bsTab='mat',bsSel=null,bsPage=0,bsCare=0,bsResult=null,bsArch=null;
 function bsRecipes(){if(bsTab==='mat'){const R=[];[1,2].forEach(g=>STONE_STATS.forEach(s=>R.push({kind:'stone',id:`stone:${s}:${g}`,s,g,n:stoneName(s,g),lv:g===1?20:50,
     mats:[[stoneName(s,g-1),3]],z:g===1?500:2000,icon:ICON_URL[stoneName(s,g)]})));return R;}
-  const L=[];CRAFT_SETS.filter(s=>['tomb'].includes(s[0])).forEach(([sid])=>{if(bsTab==='weapon')L.push(EQ_DB[`cw_${sid}_${LINE}`]);if(bsTab==='armor')['ch','ca','cs'].forEach(p=>L.push(EQ_DB[`${p}_${sid}`]));if(bsTab==='acc')L.push(EQ_DB[`cr_${sid}`]);});
+  const L=[];CRAFT_SETS.filter(s=>['tomb','frost'].includes(s[0])).forEach(([sid])=>{if(bsTab==='weapon')L.push(EQ_DB[`cw_${sid}_${LINE}`]);if(bsTab==='armor')['ch','ca','cs'].forEach(p=>L.push(EQ_DB[`${p}_${sid}`]));if(bsTab==='acc')L.push(EQ_DB[`cr_${sid}`]);});
   return L.filter(Boolean).map(D=>{const c=craftCost(D);return{kind:'eq',id:D.id,D,n:D.n,lv:D.lv,mats:c.mats,z:c.z,icon:D.icon};});}
 function bsRate(R){if(R.kind==='stone')return R.g===1?80:60;return R.lv<=20?100:Math.max(45,100-Math.floor((R.lv-20)*0.7));}
 function bsCareStep(R){return Math.max(50,Math.round(R.lv*15));}
@@ -18568,7 +18572,7 @@ function killMon(m){if(AUTO.on)AUTO.kills++;if(typeof advKill==='function')advKi
   {const D=rollEqDrop(m);if(D){createItem(m.x-0.5,m.z+0.4,D.kind,true,m.map.scene);setTimeout(()=>popText(m.x,m.z,`<img alt="" src="${D.icon}">ดรอป ${D.n}!`,'drop',1.3,{html:true,life:2.6,rise:1}),650);say(`★ ${m.T.name} ดรอปอุปกรณ์ ${D.n}!`,'sys');}
    const C=rollCardDrop(m);if(C){ITEM_KINDS.includes(C.kind)||ITEM_KINDS.push(C.kind);createItem(m.x+0.6,m.z-0.4,C.kind,true,m.map.scene);setTimeout(()=>popText(m.x,m.z,`<img alt="" src="${C.icon}">${C.name}!!`,'drop',1.0,{html:true,life:3,rise:1.2}),900);say(`★★ ${m.T.name} ดรอป ${C.name}! (${C.label})`,'sys');sfx('levelup');}}
   rollMatDrop(m);rollOreDrop(m);rollStoneDrop(m);eliteLoot(m);sfx('kill');
-  if(m.dg&&typeof dgKill==='function')dgKill(m);if(m.hunt){huntLoot(m);}else{if(!m.sq&&!m.summ&&!m.dg)setTimeout(()=>spawnMon(m.type,m.map,m.reg),m.T.boss?60000:6000);if(m.T.boss)say(`ปราบบอส ${m.T.name} สำเร็จ!`,'sys');}
+  if(m.dg&&typeof dgKill==='function')dgKill(m);if(m.di&&typeof diKill==='function')diKill(m);if(m.hunt){huntLoot(m);}else{if(!m.sq&&!m.summ&&!m.dg&&!m.di)setTimeout(()=>spawnMon(m.type,m.map,m.reg),m.T.boss?60000:6000);if(m.T.boss)say(`ปราบบอส ${m.T.name} สำเร็จ!`,'sys');}
 }
 function monStep(m,tx,tz,spd,dt){const dx=tx-m.x,dz=tz-m.z,d=Math.hypot(dx,dz);if(d<0.05)return false;const st=Math.min(d,spd*dt),nx=m.x+dx/d*st,nz=m.z+dz/d*st;
   m.face=(dx*Math.cos(camYaw)-dz*Math.sin(camYaw))>0?-1:1;
@@ -18596,7 +18600,7 @@ function updateMons(dt){if(HUNT.fx.length)huntFx(dt);
       if(m.wait<=0){m.wait=2+Math.random()*4;const a=Math.random()*Math.PI*2,r=2+Math.random()*6;m.tx=m.x+Math.cos(a)*r;m.tz=m.z+Math.sin(a)*r;}
       moving=monStep(m,m.tx,m.tz,m.T.speed*spm,dt);
     }
-    if(m.hunt)huntAI(m,dt,dp);else if(m.dgBoss)dgBossAI(m,dt,dp);
+    if(m.hunt)huntAI(m,dt,dp);else if(m.dgBoss)dgBossAI(m,dt,dp);else if(m.diBoss)diBossAI(m,dt,dp);
     if(m.lunge>0)m.lunge-=dt;
     const b=moving?Math.abs(Math.sin(m.t*7)):Math.abs(Math.sin(m.t*2.4))*0.3;
     const sq=m.lunge>0?1.18:1;
@@ -18612,7 +18616,7 @@ function updatePlayerState(dt){
   else{let ch=false;if(time-lastHurt>4&&php<maxHp){php=Math.min(maxHp,php+dt*(2+S('VIT')*0.1)*(1+(derived().p.regen+CX('regenP'))/100));ch=true;}if(psp<maxSp){psp=Math.min(maxSp,psp+dt*(1+S('INT')*0.08+maxSp*0.004)*(1+CX('spRegenP')/100));ch=true;}if(ch&&Math.random()<0.2)updateHP();}
 }
 let warping=false;
-function warpTo(map,x,z,msg){if(typeof dgOnWarp==='function')dgOnWarp(map);if(typeof cancelCast==='function')cancelCast();sfx('warp');
+function warpTo(map,x,z,msg){if(typeof dgOnWarp==='function')dgOnWarp(map);if(typeof diOnWarp==='function')diOnWarp(map);if(typeof cancelCast==='function')cancelCast();sfx('warp');
   if(warping)return;warping=true;const f=document.getElementById('fade');f.classList.add('on');
   player.path=[];player.action=null;player.attackTarget=null;pendingAttack=null;pendingPick=null;pendingTalk=null;if(talkNpc)closeTalk();marker.visible=false;
   setTimeout(()=>{
@@ -19457,7 +19461,7 @@ function egShaft(x,z,r=2.4,col='#ffe0a0'){const m=new THREE.Mesh(new THREE.Cylin
   m.position.set(x,8,z);m.userData.noTint=true;m.userData.shaft=true;scene.add(m);const d=new THREE.Mesh(new THREE.CircleGeometry(r*1.3,24),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.07,blending:THREE.AdditiveBlending,depthWrite:false}));
   d.rotation.x=-Math.PI/2;d.position.set(x,0.06,z);scene.add(d);}
 function egGlowFinish(key,lights){const L=DG.pendingGlow.splice(0),objs=DG.objs[key]=DG.objs[key]||{};objs.glow=[];objs.lights=[];
-  if(GEN[key].base==='tomb'){scene.children.forEach(o=>{if(o.isHemisphereLight)o.intensity*=0.55;});if(scene.userData.sun)scene.userData.sun.intensity*=0.45;}
+  if(GEN[key].base==='tomb'||GEN[key].base==='icefloor'){scene.children.forEach(o=>{if(o.isHemisphereLight)o.intensity*=0.55;});if(scene.userData.sun)scene.userData.sun.intensity*=0.45;}
   L.forEach(([x,y,z,col,s],i)=>{const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:dgGlowTex(),color:col,transparent:true,opacity:0.55,blending:THREE.AdditiveBlending,depthWrite:false}));sp.position.set(x,y,z);sp.scale.set(s,s,1);sp.userData.base=s;sp.userData.ph=Math.random()*9;scene.add(sp);objs.glow.push(sp);});
   (lights||[]).forEach(([x,z,col,i,d])=>{const l=new THREE.PointLight(col,i||1,d||26,1.6);l.position.set(x,4.5,z);l.userData.base=i||1;l.userData.ph=Math.random()*9;scene.add(l);objs.lights.push(l);});}
 function egLabel(key,x,z,text,y=6.5){const el=document.createElement('div');el.className='label portal dglb';el.textContent=text;el.style.visibility='hidden';document.getElementById('labels').appendChild(el);
@@ -19669,6 +19673,311 @@ ITEM_KINDS.push({name:DG_ITEM,w:1,draw(g){g.fillStyle='#2b1f1a';g.beginPath();g.
   g.strokeStyle='#2a5a5a';g.lineWidth=2;g.beginPath();g.arc(15,15,4,0.5,5.5);g.stroke();g.beginPath();g.moveTo(19,18);g.quadraticCurveTo(22,24,17,24);g.stroke();}});
 {const ik=ITEM_KINDS[ITEM_KINDS.length-1],c=document.createElement('canvas');c.width=c.height=32;ik.draw(c.getContext('2d'));ik.tex=new THREE.CanvasTexture(c);ik.tex.magFilter=THREE.NearestFilter;ik.tex.minFilter=THREE.NearestFilter;ik.tex.generateMipmaps=false;ICON_URL[ik.name]=c.toDataURL();}
 const dgCss=document.createElement('style');dgCss.textContent=`#dgHud{position:absolute;top:calc(48px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);padding:5px 14px;border-radius:18px;background:rgba(40,24,10,.82);border:1px solid #e8b830;color:#ffe9b8;font:600 12.5px var(--display);z-index:5;pointer-events:none;white-space:nowrap}#dgHud b{color:#ffd84a}`;document.head.appendChild(dgCss);
+/* ===================== DUNGEON 2: หอคอยเยือกแข็ง (Frozen spire, Lv 50+) ===================== */
+var DI={on:false,stage:'',kills:0,need:0,runes:[0,0,0,0],runeT:[0,0,0,0],lift:0,liftOn:false,boss:null,timer:0,sledEnd:0,t0:0,stagDead:false,venDead:false,trapT:0};
+const DI_KEYS=['diA','diB','diC','diD','diE','diF','diG','diH'],DI_LV=50,DI_ITEM='หม้อชาบูน้ำแข็ง',DI_ITEM_Z=4000,DI_NAME='หอคอยเยือกแข็ง';
+const IC={ice:'#a6dbf7',ice2:'#8ccbf0',deep:'#3a5a8a',navy:'#22365a',stone:'#4a6a98',stone2:'#3e5c8a',frost:'#e8f6ff',gold:'#e8c050',violet:'#8a6ad8'};
+/* ---------- monster art (original) ---------- */
+function diPeng(kind){return g=>{const o='#141c2a';g.lineWidth=3;g.strokeStyle=o;const big=kind==='papa';g.save();if(big){g.translate(48,94);g.scale(1.12,1.12);g.translate(-48,-94);}
+  g.fillStyle=kind==='mage'?'#3a4a8a':kind==='papa'?'#2a5a9a':'#2a6aa8';g.beginPath();g.moveTo(26,40);g.lineTo(70,40);g.lineTo(76,88);g.lineTo(20,88);g.closePath();g.fill();g.stroke();
+  g.fillStyle='#1e2430';g.beginPath();g.ellipse(48,58,20,30,0,0,7);g.fill();g.stroke();g.fillStyle='#f4f8ff';g.beginPath();g.ellipse(48,64,13,22,0,0,7);g.fill();
+  g.fillStyle='#ffb030';g.beginPath();g.ellipse(40,90,8,4,0,0,7);g.fill();g.stroke();g.beginPath();g.ellipse(56,90,8,4,0,0,7);g.fill();g.stroke();
+  g.fillStyle='#1e2430';g.beginPath();g.arc(48,28,15,0,7);g.fill();g.stroke();g.fillStyle='#f4f8ff';g.beginPath();g.ellipse(42,28,5,6,0,0,7);g.fill();g.beginPath();g.ellipse(54,28,5,6,0,0,7);g.fill();
+  g.fillStyle='#0a0e18';g.beginPath();g.arc(43,29,2.4,0,7);g.fill();g.beginPath();g.arc(53,29,2.4,0,7);g.fill();g.fillStyle='#ff9a20';g.beginPath();g.moveTo(44,34);g.lineTo(52,34);g.lineTo(48,40);g.closePath();g.fill();g.stroke();
+  if(kind==='soldier'){g.fillStyle='#bfe6ff';g.beginPath();g.moveTo(32,16);g.lineTo(38,4);g.lineTo(44,14);g.lineTo(50,2);g.lineTo(56,14);g.lineTo(62,4);g.lineTo(64,18);g.closePath();g.fill();g.stroke();
+    g.strokeStyle='#8a6a45';g.lineWidth=3;g.beginPath();g.moveTo(80,10);g.lineTo(72,86);g.stroke();g.fillStyle='#bfefff';g.beginPath();g.moveTo(80,2);g.lineTo(86,14);g.lineTo(78,16);g.closePath();g.fill();g.strokeStyle=o;g.stroke();}
+  if(kind==='mage'){g.fillStyle='#4a3a8a';g.beginPath();g.moveTo(30,22);g.lineTo(48,-2);g.lineTo(66,22);g.closePath();g.fill();g.stroke();g.fillStyle=IC.gold;g.fillRect(32,18,32,5);
+    g.strokeStyle='#c8d8f0';g.lineWidth=3;g.beginPath();g.moveTo(14,16);g.lineTo(20,88);g.stroke();g.fillStyle='#7af0ff';g.shadowColor='#7af0ff';g.shadowBlur=12;g.beginPath();g.moveTo(14,2);g.lineTo(20,12);g.lineTo(14,22);g.lineTo(8,12);g.closePath();g.fill();g.shadowBlur=0;}
+  if(big){g.fillStyle=IC.gold;g.beginPath();g.ellipse(48,10,18,5,0,0,7);g.lineWidth=3;g.strokeStyle=IC.gold;g.stroke();g.fillStyle='#f4e0a0';g.fillRect(28,42,40,6);g.strokeStyle=o;g.strokeRect(28,42,40,6);
+    g.fillStyle=IC.gold;[[24,44],[72,44]].forEach(([x,y])=>{g.beginPath();g.arc(x,y,8,0,7);g.fill();g.stroke();});}
+  g.restore();};}
+function diCannon(g){const o='#141c2a';g.lineWidth=3;g.strokeStyle=o;g.fillStyle='#5a7aa8';g.beginPath();g.moveTo(18,90);g.lineTo(78,90);g.lineTo(70,62);g.lineTo(26,62);g.closePath();g.fill();g.stroke();
+  g.fillStyle='#a6dbf7';g.beginPath();g.ellipse(48,54,24,16,0,0,7);g.fill();g.stroke();g.fillStyle='#8ccbf0';g.save();g.translate(48,48);g.rotate(-0.5);g.fillRect(-8,-34,16,36);g.strokeRect(-8,-34,16,36);
+  g.fillStyle='#1a2a44';g.beginPath();g.ellipse(0,-34,8,4,0,0,7);g.fill();g.restore();g.fillStyle='#e8f6ff';[[30,56],[62,52],[40,64]].forEach(([x,y])=>{g.beginPath();g.moveTo(x,y-8);g.lineTo(x+4,y);g.lineTo(x-4,y);g.closePath();g.fill();});
+  g.fillStyle='#7af0ff';g.shadowColor='#7af0ff';g.shadowBlur=10;g.beginPath();g.arc(48,56,5,0,7);g.fill();g.shadowBlur=0;}
+function diGolem(g){const o='#1a2844';g.lineWidth=3;g.strokeStyle=o;const C='#8ab8e8',D='#6a90c8';
+  g.fillStyle=D;g.fillRect(28,70,14,22);g.strokeRect(28,70,14,22);g.fillRect(54,70,14,22);g.strokeRect(54,70,14,22);
+  g.fillStyle=C;g.beginPath();g.moveTo(22,34);g.lineTo(74,34);g.lineTo(80,74);g.lineTo(16,74);g.closePath();g.fill();g.stroke();
+  [[10,40],[86,40]].forEach(([x,y])=>{g.fillStyle=D;g.beginPath();g.moveTo(x-8,y);g.lineTo(x+8,y);g.lineTo(x+6,y+38);g.lineTo(x-6,y+38);g.closePath();g.fill();g.stroke();});
+  g.fillStyle=C;g.beginPath();g.moveTo(34,14);g.lineTo(62,14);g.lineTo(66,36);g.lineTo(30,36);g.closePath();g.fill();g.stroke();
+  g.fillStyle='#d8f0ff';[[22,34,14],[40,30,18],[58,32,16],[74,34,12],[12,40,12],[84,40,12]].forEach(([x,y,h])=>{g.beginPath();g.moveTo(x-4,y);g.lineTo(x,y-h);g.lineTo(x+4,y);g.closePath();g.fill();g.stroke();});
+  g.fillStyle='#ff6a3a';g.shadowColor='#ff6a3a';g.shadowBlur=10;[[40,24],[56,24]].forEach(([x,y])=>{g.beginPath();g.moveTo(x-4,y);g.lineTo(x,y-3);g.lineTo(x+4,y);g.lineTo(x,y+3);g.closePath();g.fill();});g.shadowBlur=0;
+  g.strokeStyle='#bfe6ff';g.lineWidth=1.5;g.beginPath();g.moveTo(30,50);g.lineTo(44,60);g.lineTo(40,72);g.moveTo(64,46);g.lineTo(54,58);g.stroke();}
+function diStag(g){const o='#1a2844';g.lineWidth=3;g.strokeStyle=o;const C='#d8eaf8',D='#9ab8d8';
+  g.fillStyle=D;[[30,64],[40,66],[62,66],[72,64]].forEach(([x,y])=>{g.fillRect(x-3,y,6,26);g.strokeRect(x-3,y,6,26);});
+  g.fillStyle=C;g.beginPath();g.ellipse(52,56,26,13,0,0,7);g.fill();g.stroke();g.beginPath();g.moveTo(32,52);g.quadraticCurveTo(22,40,26,28);g.lineTo(34,30);g.quadraticCurveTo(34,42,40,48);g.closePath();g.fill();g.stroke();
+  g.beginPath();g.ellipse(26,26,10,8,-0.3,0,7);g.fill();g.stroke();g.beginPath();g.ellipse(16,30,6,4,-0.3,0,7);g.fill();g.stroke();
+  g.strokeStyle='#7af0ff';g.lineWidth=4;g.shadowColor='#7af0ff';g.shadowBlur=10;[[24,20,10,4],[24,20,6,8],[30,18,44,2],[30,18,48,12],[30,18,38,0]].forEach(([a,b,c,d])=>{g.beginPath();g.moveTo(a,b);g.lineTo(c,d);g.stroke();});
+  g.beginPath();g.moveTo(14,8);g.lineTo(8,0);g.moveTo(42,6);g.lineTo(52,0);g.stroke();g.shadowBlur=0;g.fillStyle='#0a1830';g.beginPath();g.arc(24,25,2.4,0,7);g.fill();
+  g.fillStyle='#bfefff';[[44,46],[56,44],[66,48]].forEach(([x,y])=>{g.beginPath();g.moveTo(x-3,y);g.lineTo(x,y-9);g.lineTo(x+3,y);g.closePath();g.fill();});
+  g.fillStyle='rgba(122,240,255,.18)';g.beginPath();g.ellipse(48,56,40,30,0,0,7);g.fill();}
+function diCrystal(g){g.lineWidth=3;g.strokeStyle='#1a2030';g.fillStyle='#8a92a8';g.beginPath();g.moveTo(28,92);g.lineTo(68,92);g.lineTo(62,80);g.lineTo(34,80);g.closePath();g.fill();g.stroke();
+  g.fillStyle='#c8d0e0';g.fillRect(36,74,24,6);g.strokeRect(36,74,24,6);g.fillStyle='#b88aff';g.shadowColor='#c8a0ff';g.shadowBlur=14;
+  g.beginPath();g.moveTo(48,6);g.lineTo(62,40);g.lineTo(48,74);g.lineTo(34,40);g.closePath();g.fill();g.shadowBlur=0;g.stroke();g.fillStyle='#e8d8ff';g.beginPath();g.moveTo(48,10);g.lineTo(54,40);g.lineTo(48,68);g.closePath();g.fill();}
+function diVenero(g){const o='#10142a';g.lineWidth=3;g.strokeStyle=o;
+  g.strokeStyle='#bfefff';g.lineWidth=3;g.shadowColor='#9ad8ff';g.shadowBlur=12;for(let k=0;k<12;k++){const a=k/12*6.28;g.beginPath();g.moveTo(48+Math.cos(a)*16,24+Math.sin(a)*16);g.lineTo(48+Math.cos(a)*(k%2?24:30),24+Math.sin(a)*(k%2?24:30));g.stroke();}g.shadowBlur=0;
+  g.lineWidth=3;g.strokeStyle=o;g.fillStyle='#2a3a6a';g.beginPath();g.moveTo(30,36);g.lineTo(66,36);g.lineTo(84,94);g.lineTo(12,94);g.closePath();g.fill();g.stroke();
+  g.fillStyle='#4a6ab8';g.beginPath();g.moveTo(38,40);g.lineTo(58,40);g.lineTo(66,92);g.lineTo(30,92);g.closePath();g.fill();g.fillStyle=IC.gold;g.fillRect(36,58,24,4);
+  g.strokeStyle='#bfe6ff';g.lineWidth=1.5;for(let k=0;k<5;k++){g.beginPath();g.moveTo(48,64+k*6);g.lineTo(40-k*2,70+k*6);g.moveTo(48,64+k*6);g.lineTo(56+k*2,70+k*6);g.stroke();}
+  g.lineWidth=3;g.strokeStyle=o;g.fillStyle='#1e2a4a';g.beginPath();g.moveTo(32,16);g.quadraticCurveTo(48,4,64,16);g.lineTo(66,42);g.lineTo(30,42);g.closePath();g.fill();g.stroke();
+  g.fillStyle='#9ac8f0';g.beginPath();g.ellipse(48,28,10,12,0,0,7);g.fill();g.stroke();g.fillStyle='#e8f8ff';g.shadowColor='#7af0ff';g.shadowBlur=10;g.beginPath();g.arc(44,27,2.2,0,7);g.fill();g.beginPath();g.arc(52,27,2.2,0,7);g.fill();g.shadowBlur=0;
+  g.strokeStyle='#2a3a6a';g.lineWidth=2;g.beginPath();g.moveTo(43,34);g.quadraticCurveTo(48,37,53,34);g.stroke();
+  g.fillStyle='#bfefff';[[12,50],[84,50],[8,30],[88,30]].forEach(([x,y])=>{g.beginPath();g.moveTo(x,y-14);g.lineTo(x+4,y);g.lineTo(x,y+6);g.lineTo(x-4,y);g.closePath();g.fill();g.strokeStyle='#4a6ab8';g.lineWidth=1.5;g.stroke();});}
+Object.assign(MON_TYPES,{
+  di_peng:MT('เพนกวินทหารน้ำแข็ง',52,{aggro:8,retaliate:true,size:2.6,speed:2.6,drops:['เหรียญทอง','ยาขาว'],draw:diPeng('soldier'),sq:true}),
+  di_mage:MT('เพนกวินเวทหิมะ',55,{aggro:9,retaliate:true,size:2.7,speed:2.3,drops:['เหรียญทอง','ยาสารพัด'],draw:diPeng('mage'),sq:true}),
+  di_papa:MT('พ่อเพนกวินผู้ยิ่งใหญ่',60,{aggro:8,retaliate:true,size:3.8,speed:2.0,drops:['เหรียญทอง','ยาขาว'],draw:diPeng('papa'),sq:true}),
+  di_cannon:MT('ปืนใหญ่น้ำแข็ง',54,{aggro:0,retaliate:false,size:3,speed:0,drops:['เหรียญทอง'],draw:diCannon,sq:true}),
+  di_golem:MT('ผู้พิทักษ์ผลึก',58,{aggro:8,retaliate:true,size:4.6,speed:1.8,drops:['เหรียญทอง','ยาขาว'],draw:diGolem,sq:true}),
+  di_crystal:MT('ผลึกเยือกแข็ง',58,{aggro:0,retaliate:false,size:2.8,speed:0,drops:['เหรียญทอง'],draw:diCrystal,sq:true}),
+  di_stag:MT('★ ราชากวางเขาผลึก',58,{aggro:14,retaliate:true,size:5.6,speed:2.8,boss:true,drops:['เหรียญทอง','ยาขาว'],draw:diStag,sq:true}),
+  di_venero:MT('★ เวเนรอส เทพน้ำแข็งจอมปลอม',64,{aggro:30,retaliate:true,size:6,speed:2.2,boss:true,drops:['เหรียญทอง','ยาขาว','ยาสารพัด'],draw:diVenero,sq:true})});
+[['di_peng',1.6,1.5],['di_mage',1.4,1.6],['di_papa',3.2,2.6],['di_cannon',2.2,1.6],['di_golem',4.2,3],['di_crystal',2.4,1],['di_stag',38,30],['di_venero',110,85]].forEach(([k,h,e])=>{const T=MON_TYPES[k];T.hp=Math.round(T.hp*h);T.exp=Math.round(T.exp*e);
+  T.atk=T.atk.map(v=>Math.round(v*(k==='di_venero'?2.8:k==='di_stag'?2.2:k==='di_crystal'||k==='di_cannon'?0:k==='di_golem'||k==='di_papa'?1.6:1.3)));MON_ELEM[k]=k==='di_golem'||k==='di_cannon'?'earth':'water';});
+Object.assign(PAL,{snowwall:[236,242,248,8],icefloor:[88,120,170,10],icetile:[150,190,226,10],icerune:[120,170,220,8],skyfall:[160,200,236,14],icewalk:[196,224,244,10]});
+INDOOR_BASE.push('icefloor');
+/* ---------- textures ---------- */
+function diFriezeTex(){if(dgTexC.di)return dgTexC.di;const c=document.createElement('canvas');c.width=1024;c.height=128;const g=c.getContext('2d');
+  const gr=g.createLinearGradient(0,0,0,128);gr.addColorStop(0,'#3a5a8a');gr.addColorStop(1,'#2a426a');g.fillStyle=gr;g.fillRect(0,0,1024,128);
+  g.strokeStyle='#9ad8ff';g.lineWidth=3;for(let k=0;k<2;k++){g.beginPath();for(let x=0;x<=1024;x+=16)g.lineTo(x,40+k*48+((x/16)%2?8:-8));g.stroke();}
+  g.fillStyle='#bfefff';for(let x=24;x<1024;x+=64){g.save();g.translate(x,64);for(let a=0;a<6;a++){g.rotate(Math.PI/3);g.fillRect(-1.5,0,3,16);g.fillRect(-5,9,10,2);}g.restore();}
+  g.fillStyle=IC.gold;g.fillRect(0,0,1024,5);g.fillRect(0,123,1024,5);const t=new THREE.CanvasTexture(c);t.wrapS=THREE.RepeatWrapping;return dgTexC.di=t;}
+function diRuneTex(){if(dgTexC.rune)return dgTexC.rune;const c=document.createElement('canvas');c.width=c.height=512;const g=c.getContext('2d');const r=g.createRadialGradient(256,256,20,256,256,256);
+  r.addColorStop(0,'#bfefff');r.addColorStop(0.6,'#4a8ad0');r.addColorStop(1,'#1e3a6a');g.fillStyle=r;g.beginPath();g.arc(256,256,252,0,7);g.fill();
+  g.strokeStyle='#e8fbff';g.lineWidth=5;g.shadowColor='#bff4ff';g.shadowBlur=10;[236,200,120].forEach(R=>{g.beginPath();g.arc(256,256,R,0,7);g.stroke();});
+  for(let k=0;k<12;k++){const a=k/12*6.28,b=(k+5)/12*6.28;g.beginPath();g.moveTo(256+Math.cos(a)*200,256+Math.sin(a)*200);g.lineTo(256+Math.cos(b)*200,256+Math.sin(b)*200);g.stroke();}
+  for(let k=0;k<8;k++){const a=k/8*6.28;g.save();g.translate(256+Math.cos(a)*160,256+Math.sin(a)*160);g.rotate(a);g.beginPath();g.moveTo(0,-18);g.lineTo(12,0);g.lineTo(0,18);g.lineTo(-12,0);g.closePath();g.stroke();g.restore();}
+  g.strokeStyle='rgba(255,255,255,.35)';g.lineWidth=2;for(let k=0;k<40;k++){g.beginPath();let x=256+(Math.random()-0.5)*480,y=256+(Math.random()-0.5)*480;g.moveTo(x,y);for(let s=0;s<4;s++){x+=(Math.random()-0.5)*60;y+=(Math.random()-0.5)*60;g.lineTo(x,y);}g.stroke();}
+  return dgTexC.rune=new THREE.CanvasTexture(c);}
+function diPlatTex(){if(dgTexC.plat)return dgTexC.plat;const c=document.createElement('canvas');c.width=c.height=256;const g=c.getContext('2d');g.fillStyle='#c8e4f6';g.fillRect(0,0,256,256);
+  for(let k=0;k<900;k++){g.fillStyle=`rgba(${Math.random()<0.5?'255,255,255':'120,170,220'},${Math.random()*0.18})`;g.fillRect(Math.random()*256,Math.random()*256,3,3);}
+  g.strokeStyle='rgba(90,140,200,.45)';g.lineWidth=2;for(let i=0;i<=256;i+=64){g.beginPath();g.moveTo(i,0);g.lineTo(i,256);g.stroke();g.beginPath();g.moveTo(0,i);g.lineTo(256,i);g.stroke();}
+  g.strokeStyle='rgba(255,255,255,.6)';g.lineWidth=1.5;for(let k=0;k<14;k++){g.beginPath();let x=Math.random()*256,y=Math.random()*256;g.moveTo(x,y);for(let s=0;s<3;s++){x+=(Math.random()-0.5)*40;y+=(Math.random()-0.5)*40;g.lineTo(x,y);}g.stroke();}
+  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;return dgTexC.plat=t;}
+/* ---------- props ---------- */
+function icCol(x,z,h=8,s=1){cy(1*s,1.15*s,0.6,IC.navy,x,0.3,z,10);cy(0.7*s,0.8*s,h,IC.ice2,x,h/2+0.6,z,10);cy(0.75*s,0.75*s,0.3,IC.gold,x,1.5,z,10);cy(0.75*s,0.75*s,0.3,IC.gold,x,h*0.7,z,10);
+  cy(1.1*s,0.7*s,1,IC.stone,x,h+1.1,z,10);for(let k=0;k<6;k++){const a=k/6*6.28;bx(0.16,1.2*s,0.16,IC.gold,x+Math.cos(a)*0.5*s,h+2.2,z+Math.sin(a)*0.5*s,{rx:Math.sin(a)*0.5,rz:-Math.cos(a)*0.5});}
+  put(leafGeo,'b:#bff4ff',x,h+2.4,z,{s:0.35*s});blockCircle(x,z,1*s);footprints.push({c:true,x,z,r:1.1*s,color:IC.ice2});}
+function icShards(x,z,n=5,s=1){for(let k=0;k<n;k++){const h=(1+rnd()*2.2)*s;co((0.3+rnd()*0.3)*s,h,pick([IC.ice,IC.frost,'#bfe4f5']),x+(rnd()-0.5)*1.6*s,h/2,z+(rnd()-0.5)*1.6*s,5,rnd()*3);}blockCircle(x,z,0.9*s);}
+function icWallShards(x0,x1,z0,z1){for(let x=x0;x<=x1;x+=1.7){icShards(x,z0+0.6,2,0.8);icShards(x,z1-0.6,2,0.8);}for(let z=z0;z<=z1;z+=1.7){icShards(x0+0.6,z,2,0.8);icShards(x1-0.6,z,2,0.8);}}
+function icFrieze(x0,x1,z0,z1,y=4,h=1.6,skip){const T0=dgTexC.gl;dgTexC.gl=diFriezeTex();egFrieze(x0,x1,z0,z1,y,h,skip);dgTexC.gl=T0;}
+function icRune(x,z,r){const m=new THREE.Mesh(new THREE.CircleGeometry(r,48),new THREE.MeshLambertMaterial({map:diRuneTex(),emissive:'#1a3a6a',emissiveIntensity:0.6}));m.rotation.x=-Math.PI/2;m.position.set(x,0.05,z);m.receiveShadow=true;scene.add(m);return m;}
+function icBrazier(x,z){brazier(x,z,'#7ad8ff',false);DG.pendingGlow.push([x,2.6,z,'#7ad8ff',3.2]);}
+function icSnowman(x,z){snowmanDeco(x,z);blockCircle(x,z,0.9);}
+function icLampPost(x,z){cy(0.12,0.16,4.2,'#2a3a5a',x,2.1,z,6);bx(0.7,0.12,0.7,IC.gold,x,4.2,z);put(leafGeo,'b:#bff4ff',x,4.7,z,{s:0.4});bx(0.08,1,0.08,IC.gold,x,5.2,z);DG.pendingGlow.push([x,4.7,z,'#9ae8ff',2.2]);blockCircle(x,z,0.3);}
+/* sky platforms: tops at y=0, bodies hanging below */
+function icSkyify(cloudCol='#e4f2fc'){scene.children.forEach(o=>{if(o.isMesh&&o.geometry&&o.geometry.type==='PlaneGeometry'&&Math.abs(o.rotation.x+Math.PI/2)<0.01){o.position.y=o.geometry.parameters.width>300?-14:-12;o.receiveShadow=false;if(o.material&&o.material.color&&o.geometry.parameters.width>300)o.material.color.set('#9ac8ec');}});
+  scene.children.forEach(o=>{if(o.isHemisphereLight)o.intensity*=0.8;});if(scene.userData.sun)scene.userData.sun.intensity*=0.85;
+  for(let k=0;k<40;k++){const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:dgGlowTex(),color:cloudCol,transparent:true,opacity:0.55,depthWrite:false}));const s=14+Math.random()*22;sp.scale.set(s,s*0.45,1);sp.position.set((Math.random()-0.5)*190,-5-Math.random()*6,(Math.random()-0.5)*190);scene.add(sp);}}
+function icPlat(shape){const top=diPlatTex().clone();top.needsUpdate=true;const side=new THREE.MeshLambertMaterial({color:'#7aa8d8'});let m;
+  if(shape.r){top.repeat.set(shape.r/4,shape.r/4);m=new THREE.Mesh(new THREE.CylinderGeometry(shape.r,shape.r*0.55,6,40),[side,new THREE.MeshLambertMaterial({map:top}),side]);m.position.set(shape.x,-3,shape.z);
+    for(let k=0;k<Math.round(shape.r*1.4);k++){const a=k/(shape.r*1.4)*6.28,rr=shape.r*(0.55+Math.random()*0.35),h=2+Math.random()*4;put(new THREE.ConeGeometry(0.5+Math.random()*0.5,h,5),pick([IC.ice,IC.frost,'#9ac8f0']),shape.x+Math.cos(a)*rr,-6-h/2,shape.z+Math.sin(a)*rr,{rx:Math.PI});}}
+  else{const L=Math.hypot(shape.x1-shape.x0,shape.z1-shape.z0),a=Math.atan2(shape.x1-shape.x0,shape.z1-shape.z0);top.repeat.set(shape.w/4,L/4);
+    m=new THREE.Mesh(new THREE.BoxGeometry(shape.w,1.6,L),[side,side,new THREE.MeshLambertMaterial({map:top}),side,side,side]);m.position.set((shape.x0+shape.x1)/2,-0.8,(shape.z0+shape.z1)/2);m.rotation.y=a;
+    for(let t=0.1;t<1;t+=0.12){const px=shape.x0+(shape.x1-shape.x0)*t,pz=shape.z0+(shape.z1-shape.z0)*t;put(new THREE.ConeGeometry(0.25,1.4+Math.random()*2,5),IC.ice,px+(Math.random()-0.5)*shape.w*0.6,-2.4,pz,{rx:Math.PI});}
+    if(shape.rail)for(const s of[-1,1]){const ox=Math.cos(a)*s*(shape.w/2-0.2),oz=-Math.sin(a)*s*(shape.w/2-0.2);for(let t=0;t<=1.001;t+=Math.max(0.08,2.4/L))cy(0.12,0.14,1.1,IC.frost,shape.x0+(shape.x1-shape.x0)*t+ox,0.55,shape.z0+(shape.z1-shape.z0)*t+oz,6);}}
+  m.castShadow=false;m.receiveShadow=true;scene.add(m);}
+function inPlat(P,x,z){return P.some(s=>s.r?Math.hypot(x-s.x,z-s.z)<s.r-0.4:(()=>{const dx=s.x1-s.x0,dz=s.z1-s.z0,L2=dx*dx+dz*dz,t=Math.max(0,Math.min(1,((x-s.x0)*dx+(z-s.z0)*dz)/L2)),px=s.x0+dx*t,pz=s.z0+dz*t;return Math.hypot(x-px,z-pz)<s.w/2-0.3;})());}
+function icColRing(cx,cz,r,n,h=9,skip=[]){for(let k=0;k<n;k++){const a=k/n*6.28;if(skip.some(s=>Math.abs(((a-s+9.42)%6.28)-3.14)<0.25))continue;icCol(cx+Math.cos(a)*r,cz+Math.sin(a)*r,h,0.9);}
+  for(let k=0;k<n;k++){const a=(k+0.5)/n*6.28;if(skip.some(s=>Math.abs(((a-s+9.42)%6.28)-3.14)<0.3))continue;bx(2*Math.PI*r/n+0.4,0.9,1.2,IC.stone,cx+Math.cos(a)*r,h+2.2,cz+Math.sin(a)*r,{ry:-a+Math.PI/2});}}
+/* ---------- maps ---------- */
+const DI_SKY={sky:'#0e1626',hs:'#bfe4ff',hg:'#1a2a44'},DI_OPEN={sky:'#a8d8f4',hs:'#f4fbff',hg:'#8aa8c8'};
+const diPathX=z=>Math.sin(z*0.055)*24;
+GEN.diA={name:`${DI_NAME} · ทางขึ้นทุ่งน้ำแข็ง`,base:'snow',border:'none',dress:'frost',fx:'snow',fog:[100,280],...snowSky,
+  type(x,z){const d=Math.abs(x-diPathX(z));if(z>66||z<-68)return'snowwall';if(d<4)return'ice';if(d<7.5)return'snowpath';return'snowwall';},
+  build(c){DG.pendingGlow=[];frozenTower(0,-120);for(let z=-66;z<=66;z+=2.2){const px=diPathX(z);for(const s of[-1,1]){if(rnd()<0.5)icShards(px+s*(8.6+rnd()*1.5),z,2,1+rnd()*0.6);else put(leafGeo,'#f2f6fa',px+s*(9.5+rnd()*2),0.5,z,{s:[2+rnd()*2,1+rnd()*1.4,2+rnd()],ry:rnd()*3});}}
+   for(let k=0;k<70;k++){const z=(rnd()-0.5)*140,px=diPathX(z),s=rnd()<0.5?-1:1,x=px+s*(14+rnd()*40);if(Math.abs(x)>76)continue;if(rnd()<0.4)pine(x,z,1+rnd()*0.6,true);else put(leafGeo,'#eef4fa',x,0.8,z,{s:[4+rnd()*5,1.5+rnd()*2.5,3+rnd()*4],ry:rnd()*3});}
+   for(let z=-56;z<=56;z+=16){const px=diPathX(z);icLampPost(px+6.4,z);icLampPost(px-6.4,z+8);}
+   egGlowFinish('diA');},mons:[]};
+GEN.diB={name:`${DI_NAME} · ป้อมน้ำแข็งเชิงหอคอย`,base:'snow',border:'none',dress:'frost',fx:'snow',fog:[100,280],...snowSky,
+  type(x,z){if(!inR(x,z,-40,40,-50,46))return'snowwall';if(z<-44)return Math.abs(x)<3?'icetile':'snowwall';if(Math.hypot(x,z+8)<14)return'icetile';if(Math.abs(x)<3.4)return'icetile';return'ice';},
+  build(c){DG.pendingGlow=[];frozenTower(0,-82);
+   for(let x=-40;x<=40;x+=3.2){if(Math.abs(x)<4)continue;bx(3.2,4+((x*7)%3),2.4,pick([IC.ice2,IC.ice,'#9ac8f0']),x,2,-46.4);co(0.9,2,IC.frost,x,6.4,-46.4,4,0.78);}
+   for(let z=-46;z<=46;z+=3.2)for(const s of[-1,1]){bx(2.4,3+((z*5)%2),3.2,pick([IC.ice2,IC.ice]),s*41.4,1.6,z);}for(let x=-40;x<=40;x+=3.2)bx(3.2,2.4,2.4,IC.ice2,x,1.2,47.2);
+   egDoorFrame(0,-47.2,0);egSlab('diB','n',0,-46.6,0);(DG.objs.diB.slabs.n.m.material.color).set('#9ac8f0');egLabel('diB',0,-46,'ประตูหอคอย',7.4);
+   [[-24,30],[24,30],[-30,4],[30,4],[-12,40],[12,40]].forEach(([x,z])=>icSnowman(x,z));[[-6,24],[6,24],[-6,0],[6,0],[-6,-24],[6,-24]].forEach(([x,z])=>icLampPost(x,z));
+   [[-34,-30],[34,-30],[-34,36],[34,36]].forEach(([x,z])=>icShards(x,z,7,1.6));icRune(0,-8,9);
+   egGlowFinish('diB',[[0,-8,'#9ae8ff',0.8,30]]);},mons:[]};
+GEN.diC={name:`${DI_NAME} · โถงชั้นแรก`,base:'icefloor',border:'none',dress:'frost',fx:'snow',fog:[50,150],...DI_SKY,
+  type(x,z){const d=Math.hypot(x,z);if(d<27)return d<9?'icerune':'icetile';if(Math.abs(x)<2.6&&z<-25&&z>-31)return'icetile';if(Math.abs(x)<3&&z>25&&z<31)return'icetile';return'wall';},
+  build(c){DG.pendingGlow=[];buildWalls(c.T,[IC.stone,IC.stone2,'#3a5888'],8);for(let k=0;k<40;k++){const a=k/40*6.28;if(Math.abs(Math.sin(a))>0.97)continue;icShards(Math.cos(a)*25.4,Math.sin(a)*25.4,2,1);}
+   egDoorFrame(0,-27.6,0);egSlab('diC','n',0,-27.3,0);egLabel('diC',0,-27,'ทางขึ้นชั้นถัดไป',7.4);icRune(0,0,8.6);
+   [[-12,-12],[12,-12],[-12,12],[12,12]].forEach(([x,z])=>icCol(x,z,9,1.1));
+   const O=DG.objs.diC=DG.objs.diC||{};O.runes=[];[[-19,-6],[19,-6],[-15,15],[15,15]].forEach(([x,z],i)=>{const m=new THREE.Mesh(new THREE.CylinderGeometry(1.6,1.8,0.4,24),new THREE.MeshLambertMaterial({color:'#4a6aa8',emissive:'#1a3a8a',emissiveIntensity:0.5}));m.position.set(x,0.2,z);scene.add(m);
+     const cr=new THREE.Mesh(new THREE.OctahedronGeometry(0.7),new THREE.MeshBasicMaterial({color:'#5a8ad8'}));cr.position.set(x,2.2,z);scene.add(cr);O.runes.push({x,z,m,cr});egLabel('diC',x,z,`ผนึก ${i+1}`,3.6);});
+   [[-24,-8],[24,-8],[-8,24],[8,24]].forEach(([x,z])=>icBrazier(x,z));
+   egGlowFinish('diC',[[0,0,'#7ad8ff',1.2,34],[-14,14,'#9ae8ff',0.8,24],[14,14,'#9ae8ff',0.8,24],[0,-20,'#9ae8ff',0.8,24]]);},mons:[]};
+const DI_ROWS=[50,26,2,-22,-46];
+GEN.diD={name:`${DI_NAME} · ทางวนชั้นล่าง`,base:'icefloor',border:'none',dress:'frost',fx:'snow',fog:[50,150],...DI_SKY,
+  type(x,z){for(const r of DI_ROWS)if(Math.abs(z-r)<4&&Math.abs(x)<30)return Math.abs(z-r)<1.4?'icerune':'icetile';
+   for(let i=0;i<4;i++){const side=i%2?-1:1;if(z<DI_ROWS[i]+1&&z>DI_ROWS[i+1]-1&&Math.abs(x-side*25)<5)return'icetile';}if(Math.abs(x-26)<2.4&&z<-49&&z>-54)return'icetile';return'wall';},
+  build(c){DG.pendingGlow=[];buildWalls(c.T,[IC.stone,IC.stone2,'#3a5888'],7);
+   DI_ROWS.forEach((r,i)=>{for(let x=-24;x<=24;x+=8){icBrazier(x,r-3.4+((x/8)%2?6.8:0)*0);}icFrieze(-30,30,r-4,r+4,3.6,1.4,[]);});
+   for(let i=0;i<4;i++){const side=i%2?-1:1;icShards(side*28.6,(DI_ROWS[i]+DI_ROWS[i+1])/2,4,1.2);}
+   egDoorFrame(26,-50.6,0);egSlab('diD','n',26,-50.3,0);egLabel('diD',26,-50,'บันไดสู่โถงกวาง',7.2);
+   egGlowFinish('diD',[[0,50,'#7ad8ff',0.9,30],[0,2,'#7ad8ff',0.9,30],[0,-46,'#7ad8ff',0.9,30]]);},mons:[]};
+GEN.diE={name:`${DI_NAME} · โถงราชากวาง`,base:'icefloor',border:'none',dress:'frost',fx:'snow',fog:[55,160],...DI_SKY,
+  type(x,z){const d=Math.hypot(x,z);if(d<28)return d<12?'icerune':'icetile';if(Math.abs(x)<2.6&&z<-26&&z>-32)return'icetile';if(Math.abs(x)<3&&z>26&&z<32)return'icetile';return'wall';},
+  build(c){DG.pendingGlow=[];buildWalls(c.T,[IC.stone,IC.stone2,'#3a5888'],9);for(let k=0;k<44;k++){const a=k/44*6.28;if(Math.abs(Math.sin(a))>0.97)continue;icShards(Math.cos(a)*26.4,Math.sin(a)*26.4,3,1.3);}
+   icRune(0,0,11.6);egDoorFrame(0,-28.6,0);egSlab('diE','n',0,-28.3,0);egLabel('diE',0,-28,'ทางขึ้นหอคอยชั้นบน',7.4);
+   for(let k=0;k<6;k++){const a=k/6*6.28+0.52;icCol(Math.cos(a)*19,Math.sin(a)*19,10,1.15);}
+   egGlowFinish('diE',[[0,0,'#7ad8ff',1.3,40],[-16,-14,'#9ae8ff',0.8,26],[16,-14,'#9ae8ff',0.8,26]]);},mons:[]};
+const DI_F=[{x:0,z:0,r:26},{x:0,z:30,w:8,x0:0,z0:24,x1:0,z1:44},{x:0,z:46,r:6}];
+GEN.diF={name:`${DI_NAME} · ลานลอยฟ้าชั้นบน`,base:'snow',border:'none',dress:'none',fx:'snow',fog:[80,260],...DI_OPEN,
+  type(x,z){return inPlat(DI_F,x,z)?(Math.hypot(x,z)<5?'icerune':'icewalk'):'skyfall';},
+  build(c){DG.pendingGlow=[];icSkyify();DI_F.forEach(icPlat);icColRing(0,0,24,16,9,[Math.PI/2]);
+   const lift=icRune(0,0,4.6);lift.position.y=0.06;(DG.objs.diF=DG.objs.diF||{}).lift=lift;egLabel('diF',0,0,'ลิฟต์ผลึก',3);
+   [[-14,-14],[14,-14],[-16,10],[16,10]].forEach(([x,z])=>icShards(x,z,4,1.1));
+   egGlowFinish('diF',[[0,0,'#9ae8ff',0.9,30]]);},mons:[]};
+const DI_G=[{x:0,z:58,r:9},{w:4.4,x0:0,z0:50,x1:-24,z1:30,rail:true},{x:-24,z:26,r:8},{w:4,x0:-22,z0:19,x1:-2,z1:-2,rail:true},{x:0,z:-6,r:9},{w:4,x0:6,z0:-12,x1:24,z1:-26,rail:true},{x:26,z:-30,r:8},{w:4.4,x0:22,z0:-37,x1:4,z1:-52,rail:true},{x:0,z:-58,r:9}];
+GEN.diG={name:`${DI_NAME} · สะพานฟ้าหมุนวน`,base:'snow',border:'none',dress:'none',fx:'snow',fog:[80,260],...DI_OPEN,
+  type(x,z){return inPlat(DI_G,x,z)?'icewalk':'skyfall';},
+  build(c){DG.pendingGlow=[];icSkyify();DI_G.forEach(icPlat);[[0,58],[-24,26],[0,-6],[26,-30],[0,-58]].forEach(([x,z],i)=>{for(let k=0;k<6;k++){const a=k/6*6.28;icCol(x+Math.cos(a)*(i===4||i===0?7.6:6.6),z+Math.sin(a)*(i===4||i===0?7.6:6.6),6,0.6);}});
+   frozenTower(70,-10);const pg=new THREE.Mesh(new THREE.TorusGeometry(2,0.14,8,40),new THREE.MeshBasicMaterial({color:'#c8a0ff'}));pg.rotation.x=Math.PI/2;pg.position.set(0,0.1,-60);scene.add(pg);
+   DG.pendingGlow.push([0,1.4,-60,'#c8a0ff',4]);egLabel('diG',0,-60,'ประตูสู่บัลลังก์น้ำแข็ง',4);egGlowFinish('diG');},mons:[]};
+GEN.diH={name:`${DI_NAME} · บัลลังก์เทพจอมปลอม`,base:'icefloor',border:'none',dress:'frost',fx:'snow',fog:[70,200],sky:'#1a0e2a',hs:'#d8c8ff',hg:'#1a2244',
+  type(x,z){const d=Math.hypot(x,z*1.1);if(d<30)return d<10?'icerune':'icewalk';if(Math.abs(x)<3.4&&z>26&&z<44)return'icewalk';return'cliff';},
+  build(c){DG.pendingGlow=[];for(let k=0;k<46;k++){const a=k/46*6.28,r=32+rnd()*10,h=6+rnd()*16;if(a>1.25&&a<1.9)continue;co(2.4+rnd()*3,h,pick([IC.ice,'#9ac8f0',IC.frost,'#7aa8d8']),Math.cos(a)*r,h/2,Math.sin(a)*r/1.1,5,rnd()*3);}
+   icRune(0,-4,9.6);bx(10,1.2,6,IC.stone,0,0.6,-24);bx(4,6,1,'#c8e4f6',0,4,-26.6);for(let k=0;k<9;k++){const a=-Math.PI/2+(k-4)*0.22;bx(0.4,4+Math.abs(4-k)*-0.4+4,0.4,'#bfefff',Math.cos(a)*5.5,6+Math.sin(a)*-3,-26.4,{rz:(k-4)*0.2});}
+   [[-20,-10],[20,-10],[-22,10],[22,10]].forEach(([x,z])=>icBrazier(x,z));
+   egGlowFinish('diH',[[0,-4,'#b89aff',1.2,40],[0,-24,'#9ae8ff',1,26],[-20,10,'#9ae8ff',0.7,26],[20,10,'#9ae8ff',0.7,26]]);},mons:[]};
+DI_KEYS.forEach(k=>{MAPS[k]={key:k,name:GEN[k].name,built:false};});
+/* ---------- run state ---------- */
+function diClearMons(){for(let i=mons.length-1;i>=0;i--){const m=mons[i];if(!m.di)continue;if(m.mesh.parent)m.mesh.parent.remove(m.mesh);if(m.shadow.parent)m.shadow.parent.remove(m.shadow);m.el.remove();if(m.ering&&m.ering.parent)m.ering.parent.remove(m.ering);
+  const h=hitMeshes.indexOf(m.mesh);if(h>=0)hitMeshes.splice(h,1);if(TGT===m)clearTarget();mons.splice(i,1);}}
+function diSpawn(type,key,reg,n=1,o={}){const mp=MAPS[key],out=[];for(let i=0;i<n;i++){spawnMon(type,mp,reg);const m=mons[mons.length-1];m.di=true;m.reg=null;if(o.x!=null){m.x=o.x+(i?(Math.random()-0.5)*3:0);m.z=o.z+(i?(Math.random()-0.5)*3:0);}if(o.aggro)m.aggro=true;
+  if(type==='di_cannon'||type==='di_crystal'){m.elite=null;if(m.ering&&m.ering.parent){m.ering.parent.remove(m.ering);m.ering=null;}m.T=MON_TYPES[type];m.hp=m.T.hp;m.sc=1;m.mesh.material.color.setRGB(1,1,1);m.mesh.userData.tint=null;}out.push(m);}return out;}
+function diHud(){let e=document.getElementById('diHud');if(!e){e=document.createElement('div');e.id='diHud';e.className='dihud';document.getElementById('game').appendChild(e);}
+  if(!DI.on){e.hidden=true;return;}e.hidden=false;const R={A:'ทางขึ้นทุ่งน้ำแข็ง',B:'ป้อมน้ำแข็ง',C:'โถงชั้นแรก',D:'ทางวนชั้นล่าง',E:'ราชากวาง',F:'ลานลอยฟ้า',G:'สะพานฟ้า',H:'บัลลังก์เทพจอมปลอม'}[DI.stage]||'';
+  let k='';if(DI.stage==='B')k=` · ทำลายปืนใหญ่ <b>${DI.cannonDown||0}/3</b>`;else if(DI.stage==='C')k=` · ผนึก <b>${DI.runes.filter(Boolean).length}/4</b>`;else if(DI.need)k=` · กำจัด <b>${Math.min(DI.kills,DI.need)}/${DI.need}</b>`;
+  if(DI.stage==='F')k=DI.liftOn?` · ยืนบนลิฟต์ <b>${Math.floor(DI.lift/6*100)}%</b>`:` · กำจัดผู้พิทักษ์ <b>${DI.kills}/${DI.need}</b>`;
+  if(DI.stage==='G'){const t=Math.max(0,Math.ceil(DI.timer));k=` · พายุหิมะมาใน <b>${Math.floor(t/60)}:${String(t%60).padStart(2,'0')}</b>${t<=0?' ❄ หนาวจัด!':''}`;}
+  if(DI.stage==='A'&&DI.sledEnd>time)k=` · 🛷 เลื่อนหิมะ ${Math.ceil(DI.sledEnd-time)} วิ`;e.innerHTML=`❄ ${DI_NAME} · ${R}${k}`;}
+function diEnter(){if(lvl<DI_LV){say(`ต้องเลเวล ${DI_LV} ขึ้นไปถึงจะเข้าหอคอยได้`,'sys');return;}if(!inv[DI_ITEM]){say(`ต้องใช้ ${DI_ITEM} 1 ชิ้นเป็นของฝากเพื่อหลอกยามเพนกวิน (ซื้อจากเพนเน่)`,'sys');return;}
+  inv[DI_ITEM]--;if(!inv[DI_ITEM])delete inv[DI_ITEM];updateInv();closeTalk();diClearMons();
+  Object.assign(DI,{on:true,stage:'A',kills:0,need:0,runes:[0,0,0,0],runeT:[0,0,0,0],lift:0,liftOn:false,boss:null,timer:0,t0:Date.now(),stagDead:false,venDead:false,cannonDown:0});
+  warpTo(MAPS.diA,diPathX(62),62,`❄ เข้าสู่ ${DI_NAME} — เพนเน่ให้เลื่อนหิมะมา รีบพุ่งขึ้นไปตามทางน้ำแข็ง!`);setTimeout(diStageA,700);saveSoon();}
+function diSled(sec){DI.sledEnd=time+sec;recalc();setTimeout(()=>recalc(),sec*1000+200);popText(player.x,player.z,'🛷 SPEED UP!','gain',3.6);}
+function diStageA(){DI.stage='A';DI.need=0;[[40,20],[10,-10],[-20,-40],[-46,-62]].forEach(([z1,z0])=>{const zc=(z0+z1)/2,px=diPathX(zc);diSpawn('di_peng','diA',{x0:px-5,x1:px+5,z0,z1},3);});diSled(70);diHud();}
+function diStageB(){DI.stage='B';DI.need=0;DI.cannonDown=0;setTimeout(()=>{diClearMons();dgSlabSet('diB','n',false);[[-20,-30],[20,-30],[0,-38]].forEach(([x,z])=>{const[m]=diSpawn('di_cannon','diB',null,1,{x,z});m.cannon=true;m.fire=2+Math.random()*2;});
+  diSpawn('di_peng','diB',{x0:-30,x1:30,z0:-30,z1:30},7);diSpawn('di_mage','diB',{x0:-24,x1:24,z0:-26,z1:10},3);diHud();},750);}
+function diStageC(){DI.stage='C';DI.need=0;DI.runes=[0,0,0,0];DI.runeT=[0,0,0,0];setTimeout(()=>{diClearMons();dgSlabSet('diC','n',false);const O=DG.objs.diC;if(O)O.runes.forEach(r=>{r.cr.material.color.set('#5a8ad8');});
+  diSpawn('di_peng','diC',{x0:-20,x1:20,z0:-18,z1:18},9);diSpawn('di_mage','diC',{x0:-18,x1:18,z0:-18,z1:12},4);diHud();},750);}
+function diStageD(){DI.stage='D';DI.kills=0;DI.need=22;setTimeout(()=>{diClearMons();dgSlabSet('diD','n',false);DI_ROWS.forEach((r,i)=>{const R={x0:-24,x1:24,z0:r-3,z1:r+3};diSpawn('di_peng','diD',R,i===0?2:3);diSpawn('di_mage','diD',R,i<2?1:2);if(i>=2)diSpawn('di_golem','diD',R,1);});diHud();},750);}
+function diStageE(){DI.stage='E';DI.need=0;setTimeout(()=>{diClearMons();dgSlabSet('diE','n',false);const[m]=diSpawn('di_stag','diE',null,1,{x:0,z:-8});m.diBoss='stag';m.sk={a:4,b:7,c:10};m.phase=0;diHud();},750);}
+function diStageF(){DI.stage='F';DI.kills=0;DI.need=2;DI.lift=0;DI.liftOn=false;setTimeout(()=>{diClearMons();diSpawn('di_golem','diF',null,1,{x:-10,z:-10});diSpawn('di_golem','diF',null,1,{x:10,z:-10});diSpawn('di_peng','diF',{x0:-16,x1:16,z0:-16,z1:16},5);diSpawn('di_mage','diF',{x0:-16,x1:16,z0:-16,z1:16},2);diHud();},750);}
+function diStageG(){DI.stage='G';DI.need=0;DI.timer=240;setTimeout(()=>{diClearMons();[[-24,26],[0,-6],[26,-30]].forEach(([x,z])=>{diSpawn('di_papa','diG',null,1,{x,z});diSpawn('di_peng','diG',{x0:x-5,x1:x+5,z0:z-5,z1:z+5},2);diSpawn('di_mage','diG',null,1,{x:x+3,z:z+2});});diSpawn('di_papa','diG',null,1,{x:2,z:-54});diHud();},750);}
+function diStageH(){DI.stage='H';DI.need=0;DI.boss=null;setTimeout(()=>{diClearMons();diCrystals();diHud();},750);}
+function diCrystals(){for(let k=0;k<6;k++){const a=k/6*6.28+0.26,x=Math.cos(a)*19,z=Math.sin(a)*17-2;if(mons.some(m=>m.di&&!m.dead&&m.type==='di_crystal'&&Math.hypot(m.x-x,m.z-z)<2))continue;const[m]=diSpawn('di_crystal','diH',null,1,{x,z});m.crys=true;}}
+function diWake(){if(DI.boss||DI.venDead)return;const[m]=diSpawn('di_venero','diH',null,1,{x:0,z:-16,aggro:true});m.diBoss='venero';m.sk={a:4,b:6,c:9,d:14,e:22};m.phase=0;DI.boss=m;
+  levelFx('#b89aff','#e8e0ff',false);try{sfx('thunder');}catch(e){}say('❄ "ผู้บุกรุกตัวจ้อย... ข้าคือเทพองค์ที่เจ็ด! โลกนี้จะกลายเป็นน้ำแข็งชั่วนิรันดร์!" — เวเนรอส','sys');
+  say('💎 ผลึกเยือกแข็งรอบห้องคอยรักษาและป้องกันเวเนรอส — ทำลายผลึกก่อน!','sys');popText(0,-16,'เวเนรอส!','lvl',7);diHud();}
+/* ---------- traps ---------- */
+const DI_SRC={map:null,dead:false,mon:false,x:0,z:0,T:{boss:false}};
+function diTrap(x,z,r,delay,v,col='#7ad8ff',freeze=0){DI_SRC.map=curMap;DI_SRC.dead=false;huntWarn(DI_SRC,x,z,r,delay,v,col);if(freeze){const F=HUNT.fx[HUNT.fx.length-1];F.freeze=freeze;}}
+/* freeze on hit: wrap huntFx once */
+{const of=huntFx;huntFx=function(dt){HUNT.fx.forEach(F=>{if(F.freeze&&F.t+dt>=F.delay&&F.map===curMap&&Math.hypot(player.x-F.x,player.z-F.z)<=F.r)giveStatus('freeze',F.freeze);});of(dt);};}
+function diTrig(){const k=curMap.key,px=player.x,pz=player.z,near=(x,z,r)=>Math.hypot(px-x,pz-z)<r;
+  if(k==='diA'&&pz<-62){diStageB();warpTo(MAPS.diB,0,40,'🏰 ป้อมน้ำแข็งเชิงหอคอย — ทำลายปืนใหญ่น้ำแข็งทั้ง 3 กระบอกเพื่อเปิดประตู');return;}
+  if(k==='diB'&&near(0,-45.5,2.6)){if((DI.cannonDown||0)<3){dgPush(0,-40,`ประตูถูกผนึกด้วยพลังปืนใหญ่ (${DI.cannonDown||0}/3)`);return;}diStageC();warpTo(MAPS.diC,0,22,'🌀 โถงชั้นแรก — ยืนบนผนึกทั้ง 4 จุดเพื่อเปิดทางขึ้น');return;}
+  if(k==='diC'){const O=DG.objs.diC;if(O)O.runes.forEach((r,i)=>{if(DI.runes[i])return;if(near(r.x,r.z,1.9)){DI.runeT[i]+=0.25;if(DI.runeT[i]>=1.5){DI.runes[i]=1;r.cr.material.color.set('#ffd84a');fxRing(r.x,r.z,2.2,'#ffd84a');try{sfx('job');}catch(e){}say(`💠 เปิดผนึกที่ ${i+1} แล้ว (${DI.runes.filter(Boolean).length}/4)`,'sys');
+        diTrap(r.x+3,r.z+3,2.6,1.2,60+lvl*6,'#7ad8ff',1);}}else DI.runeT[i]=Math.max(0,DI.runeT[i]-0.1);});
+    if(near(0,-26,2.4)){if(DI.runes.filter(Boolean).length<4){dgPush(0,-21,'ทางขึ้นยังปิด — เปิดผนึกให้ครบ 4 จุด');return;}diStageD();warpTo(MAPS.diD,-24,50,'🧊 ทางวนชั้นล่าง — กำจัดศัตรู 22 ตัวเพื่อเปิดบันได');return;}}
+  if(k==='diD'&&near(26,-49.5,2.4)){if(DI.kills<DI.need){dgPush(24,-44,`บันไดยังถูกผนึก (กำจัด ${DI.kills}/${DI.need})`);return;}diStageE();warpTo(MAPS.diE,0,22,'🦌 โถงราชากวาง — ราชากวางเขาผลึกตื่นขึ้นแล้ว!');return;}
+  if(k==='diE'&&near(0,-27,2.4)){if(!DI.stagDead){dgPush(0,-22,'ประตูถูกผนึก จนกว่าราชากวางจะล้ม');return;}diStageF();warpTo(MAPS.diF,0,44,'☁ ลานลอยฟ้าชั้นบน — กำจัดผู้พิทักษ์ผลึก แล้วยืนรอบนลิฟต์');return;}
+  if(k==='diF'&&DI.kills>=DI.need){if(!DI.liftOn){DI.liftOn=true;say('✨ ลิฟต์ผลึกทำงานแล้ว! ยืนบนวงกลางให้ครบเวลา (ศัตรูจะบุกขึ้นมา)','sys');}
+    if(near(0,0,4.4)){DI.lift+=0.25;if(Math.round(DI.lift*4)%6===0)diSpawn('di_peng','diF',null,2,{x:(Math.random()-0.5)*30,z:(Math.random()-0.5)*30,aggro:true});
+      if(DI.lift>=6){diStageG();warpTo(MAPS.diG,0,60,'🌀 สะพานฟ้าหมุนวน — รีบข้ามให้ถึงประตูก่อนพายุหิมะมา!');return;}}else DI.lift=Math.max(0,DI.lift-0.25);}
+  if(k==='diG'&&near(0,-60,2.4)){diStageH();warpTo(MAPS.diH,0,36,'👑 บัลลังก์เทพจอมปลอม — เดินเข้าไปกลางห้องเพื่อเผชิญหน้าเวเนรอส');return;}
+  if(k==='diH'){if(!DI.boss&&!DI.venDead&&pz<14)diWake();if(DI.venDead&&near(0,-8,3)){diExit(true);return;}}}
+function diExit(done){if(DI.exitRing){DI.exitRing.parent&&DI.exitRing.parent.remove(DI.exitRing);DI.exitRing=null;}DI.on=false;diClearMons();diHud();warpTo(MAPS.twsnow,DI_CAMP[0],DI_CAMP[1]+4,done?'❄ เพนเน่พาคุณกลับสู่เมืองหิมะ':'❄ ออกจากหอคอยกลับสู่เมืองหิมะ');}
+function diOnWarp(map){if(DI.on&&!DI_KEYS.includes(map.key)){DI.on=false;diClearMons();setTimeout(diHud,10);}}
+/* ---------- per-frame ---------- */
+function diTick(dt){const k=curMap.key;if(!DI_KEYS.includes(k)||!DI.on){if(document.getElementById('diHud')&&!DI.on)diHud();return;}if(playerDown)return;
+  if(DI.stage==='D'&&DI.kills>=DI.need)dgSlabSet('diD','n',true);if(DI.stage==='C'&&DI.runes.every(Boolean))dgSlabSet('diC','n',true);if(DI.stage==='B'&&DI.cannonDown>=3)dgSlabSet('diB','n',true);if(DI.stagDead)dgSlabSet('diE','n',true);
+  /* environment traps */
+  DI.trapT-=dt;const lvT=60+lvl*7;if(DI.trapT<=0){
+    if(k==='diA'){DI.trapT=2.2;for(let i=0;i<2;i++){const z=player.z-4-Math.random()*10,x=diPathX(z)+(Math.random()-0.5)*6;diTrap(x,z,2.2,1.3,lvT,'#bfefff');}}
+    else if(k==='diC'||k==='diD'){DI.trapT=k==='diC'?4.5:3.5;for(let i=0;i<2;i++){const a=Math.random()*6.28,r=2+Math.random()*5;diTrap(player.x+Math.cos(a)*r,player.z+Math.sin(a)*r,2.4,1.4,lvT,'#7ad8ff',1);}}
+    else if(k==='diF'){DI.trapT=3.4;diTrap(player.x+(Math.random()-0.5)*6,player.z+(Math.random()-0.5)*6,2.6,1.3,lvT*1.2,'#bfefff',1);}
+    else if(k==='diG'){DI.trapT=2.4;for(let i=0;i<2;i++){const a=Math.random()*6.28,r=1+Math.random()*5;diTrap(player.x+Math.cos(a)*r,player.z+Math.sin(a)*r,2.2,1.2,lvT*1.3,'#bfefff',i?1:0);}}
+    else DI.trapT=1;}
+  /* cannons */
+  mons.forEach(m=>{if(!m.cannon||m.dead||m.map!==curMap)return;const d=Math.hypot(player.x-m.x,player.z-m.z);if(d>26)return;m.fire-=dt;if(m.fire>0)return;m.fire=3.6+Math.random();
+    const a=Math.atan2(player.z-m.z,player.x-m.x);for(let s=1;s<=6;s++)huntWarn(m,m.x+Math.cos(a)*s*3.2,m.z+Math.sin(a)*s*3.2,1.8,0.9+s*0.12,Math.round(lvT*1.3),'#9ad8ff');const F=HUNT.fx;for(let i=F.length-6;i<F.length;i++)if(F[i])F[i].freeze=1.2;});
+  /* blizzard timer */
+  if(k==='diG'){DI.timer-=dt;if(DI.timer<=0){php=Math.max(1,php-maxHp*0.025*dt);updateHP();if((diTick.b=(diTick.b||0)+dt)>1.5){diTick.b=0;popText(player.x,player.z,'❄ หนาวจัด','hurt',3.6);}}}
+  /* crystals heal Venero */
+  if(k==='diH'&&DI.boss&&!DI.boss.dead){const n=mons.filter(m=>m.crys&&!m.dead&&m.map===curMap).length;if(n){DI.boss.hp=Math.min(DI.boss.T.hp,DI.boss.hp+DI.boss.T.hp*0.0035*n*dt);DI.boss.bar.style.width=DI.boss.hp/DI.boss.T.hp*100+'%';}
+    if((diTick.c=(diTick.c||0)+dt)>40){diTick.c=0;diCrystals();say('💎 ผลึกเยือกแข็งงอกขึ้นใหม่!','sys');}}
+  if((diTick.t=(diTick.t||0)+dt)>0.25){diTick.t=0;diTrig();diHud();}}
+/* damage reduction while crystals live */
+function diDmgMul(m){if(m.diBoss!=='venero')return 1;const n=mons.filter(q=>q.crys&&!q.dead&&q.map===m.map).length;return Math.max(0.25,1-0.12*n);}
+/* bosses */
+function diBossAI(m,dt,dp){if(m.stunEnd>time+1)m.stunEnd=time+1;if(m.fearEnd>time+0.5)m.fearEnd=time+0.5;if(m.sleepEnd>time+1)m.sleepEnd=time+1;if(m.slowEnd>time&&m.slow>40)m.slow=40;
+  if(!m.aggro){if(dp<22&&!playerDown)m.aggro=true;return;}if(playerDown)return;const big=m.T.atk[1],pct=m.hp/m.T.hp;for(const s in m.sk)m.sk[s]-=dt;
+  if(m.diBoss==='stag'){
+    if(m.sk.a<=0&&dp<9){m.sk.a=6;for(let i=0;i<3;i++)huntWarn(m,m.x,m.z,3+i*2.5,1+i*0.35,Math.round(big*1.4),'#7af0ff');popText(m.x,m.z,'คลื่นเขาผลึก!','skill',m.T.size*0.9+0.6);}
+    if(m.sk.b<=0&&dp<22){m.sk.b=8;const a=Math.atan2(player.z-m.z,player.x-m.x);for(let s=1;s<=7;s++)huntWarn(m,m.x+Math.cos(a)*s*2.6,m.z+Math.sin(a)*s*2.6,2,1.2,Math.round(big*1.8),'#bfefff');
+      setTimeout(()=>{if(m.dead)return;m.x=Math.max(-24,Math.min(24,m.x+Math.cos(a)*16));m.z=Math.max(-24,Math.min(24,m.z+Math.sin(a)*16));fxRing(m.x,m.z,3,'#bfefff');},1300);popText(m.x,m.z,'พุ่งชน!','skill',m.T.size*0.9+0.6);}
+    if(m.sk.c<=0){m.sk.c=11;for(let i=0;i<5;i++){const a=Math.random()*6.28,r=Math.random()*7;huntWarn(m,player.x+Math.cos(a)*r,player.z+Math.sin(a)*r,2.4,1.5,Math.round(big*1.5),'#9ad8ff');}popText(m.x,m.z,'ฝนน้ำแข็ง!','skill',m.T.size*0.9+0.6);}
+    const ph=pct<0.5?1:0;if(ph>m.phase){m.phase=ph;diSpawn('di_golem','diE',null,2,{x:m.x+4,z:m.z,aggro:true});say('🦌 ราชากวางเรียกผู้พิทักษ์ผลึกมาช่วย!','sys');}
+    if(pct<0.25&&!m.rage){m.rage=1;m.T=Object.assign(Object.create(m.T),{atk:m.T.atk.map(v=>Math.round(v*1.4)),speed:m.T.speed*1.3});m.mesh.material.color.setRGB(0.7,0.9,1.4);say('🔥 ราชากวางคลั่ง!','sys');}return;}
+  /* Venero */
+  const ph=pct<0.25?3:pct<0.5?2:pct<0.75?1:0;
+  if(ph>m.phase){m.phase=ph;if(ph===1){say('❄ "สาวกของข้า ออกมา!" — เวเนรอสเรียกพ่อเพนกวิน','sys');diSpawn('di_papa','diH',null,2,{x:m.x,z:m.z+5,aggro:true});}
+    if(ph===2){say('❄ "จงแข็งตายเป็นรูปปั้น!" — เวเนรอสร่ายนิรันดร์เยือกแข็ง: วิ่งออกนอกวง!','sys');huntWarn(m,m.x,m.z,13,2.6,Math.round(big*3),'#b89aff');HUNT.fx[HUNT.fx.length-1].freeze=3;diCrystals();}
+    if(ph===3){m.T=Object.assign(Object.create(m.T),{atk:m.T.atk.map(v=>Math.round(v*1.5)),speed:m.T.speed*1.3});m.mesh.material.color.setRGB(0.8,0.7,1.5);say('🔥 "ข้าคือเทพ! ข้าไม่มีวันพ่ายแพ้!" — เวเนรอสคลั่ง!','sys');diSpawn('di_golem','diH',null,1,{x:m.x,z:m.z+5,aggro:true});}}
+  if(m.sk.a<=0&&dp<10){m.sk.a=m.phase>=3?4.5:6;huntWarn(m,m.x,m.z,6,1.2,Math.round(big*2),'#9ad8ff');HUNT.fx[HUNT.fx.length-1].freeze=1.2;popText(m.x,m.z,'โนวาเยือกแข็ง!','skill',m.T.size*0.9+0.6);}
+  if(m.sk.b<=0&&dp<26){m.sk.b=m.phase>=2?6:8;const base=Math.atan2(player.z-m.z,player.x-m.x);[-0.35,0,0.35].forEach(o=>{const a=base+o;for(let s=1;s<=7;s++)huntWarn(m,m.x+Math.cos(a)*s*2.6,m.z+Math.sin(a)*s*2.6,1.6,1+s*0.08,Math.round(big*1.4),'#bfefff');});popText(m.x,m.z,'หอกน้ำแข็ง!','skill',m.T.size*0.9+0.6);}
+  if(m.sk.c<=0&&dp<26){m.sk.c=10;for(let i=0;i<3+m.phase;i++){const a=Math.random()*6.28,r=Math.random()*6;huntWarn(m,player.x+Math.cos(a)*r,player.z+Math.sin(a)*r,2.8,1.5+i*0.1,Math.round(big*1.6),'#b89aff');}popText(m.x,m.z,'พายุหิมะ!','skill',m.T.size*0.9+0.6);}
+  if(m.sk.d<=0){m.sk.d=16;diSpawn('di_peng','diH',null,2,{x:m.x-4,z:m.z+4,aggro:true});}}
+/* ---------- kills & loot ---------- */
+const DI_MAT={feather:'ขนนกเพนกวินหิมะ',horn:'เขาผลึกน้ำแข็ง',core:'แก่นน้ำแข็งนิรันดร์'};
+function diKill(m){if(!DI.on)return;const L=gDropMul();
+  if(['di_peng','di_mage','di_papa','di_golem'].includes(m.type)){DI.kills++;if(Math.random()<0.28*L)dgDrop(m,DI_MAT.feather);if((m.type==='di_golem'||m.type==='di_papa')&&Math.random()<0.4*L)dgDrop(m,DI_MAT.horn);if(m.type==='di_mage'&&Math.random()<0.12*L)dgDrop(m,DI_MAT.horn);
+    if(DI.need&&DI.kills===DI.need&&DI.stage!=='F'){say('🔓 ได้ยินเสียงน้ำแข็งแตก ประตูเปิดออกแล้ว!','sys');try{sfx('job');}catch(e){}}}
+  if(m.cannon){DI.cannonDown=(DI.cannonDown||0)+1;say(`💥 ทำลายปืนใหญ่น้ำแข็ง ${DI.cannonDown}/3`,'sys');if(DI.cannonDown>=3)say('🔓 ประตูหอคอยเปิดออกแล้ว!','sys');}
+  if(m.diBoss==='stag'){DI.stagDead=true;dgDrop(m,DI_MAT.horn,3);dgDrop(m,DI_MAT.feather,3);if(Math.random()<0.5)dgDrop(m,DI_MAT.core,1);mons.forEach(q=>{if(q.di&&q!==m&&q.map===curMap&&!q.dead)q.hp=Math.min(q.hp,1);});say('🦌 ราชากวางเขาผลึกล้มลงแล้ว! ประตูทางเหนือเปิดออก','sys');if(typeof advAdd==='function')advAdd(12,'ปราบราชากวางเขาผลึก');}
+  if(m.diBoss==='venero'){DI.venDead=true;DI.boss=null;const g=Math.round(55000*(1+S('CHA')*0.01));gold+=g;dgDrop(m,DI_MAT.core,3+(Math.random()<0.5?1:0));dgDrop(m,DI_MAT.horn,3);dgDrop(m,DI_MAT.feather,4);inv['ยาสารพัด']=(inv['ยาสารพัด']||0)+3;updateInv();
+    mons.forEach(q=>{if(q.di&&q!==m&&!q.dead)q.hp=Math.min(q.hp,1);});ADV.hunt=ADV.hunt||{};const first=!ADV.hunt.di1;ADV.hunt.di1=(ADV.hunt.di1||0)+1;if(typeof advAdd==='function')advAdd(first?140:40,first?`พิชิต ${DI_NAME} ครั้งแรก!`:`พิชิต ${DI_NAME}`);
+    const g2=new THREE.Group();const t1=new THREE.Mesh(new THREE.TorusGeometry(2,0.12,8,48),new THREE.MeshBasicMaterial({color:'#bfefff'}));t1.rotation.x=Math.PI/2;t1.position.y=0.12;g2.add(t1);
+    const c1=new THREE.Mesh(new THREE.CylinderGeometry(1.9,1.9,5,32,1,true),new THREE.MeshBasicMaterial({color:'#bfefff',transparent:true,opacity:0.22,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));c1.position.y=2.5;g2.add(c1);g2.position.set(0,0,-8);m.map.scene.add(g2);DI.exitRing=g2;
+    const mins=Math.round((Date.now()-DI.t0)/60000);levelFx('#bfefff','#ffffff',false);try{sfx('levelup');}catch(e){}popText(m.x,m.z,'CLEAR!','lvl',6);
+    say(`👑 พิชิต ${DI_NAME} สำเร็จ! (${mins} นาที) +${g.toLocaleString()} z · เดินเข้าวงแสงกลางห้องเพื่อกลับเมือง`,'sys');saveSoon();}}
+/* ---------- Penne at the snow town ---------- */
+const DI_CAMP=[-6,-48];
+function diPenneOpts(){const c=document.createElement('canvas');c.width=384;c.height=192;const g=c.getContext('2d');
+  for(let f=0;f<2;f++){g.save();g.translate(f*192,0);g.scale(2,2);const o='#141c2a',bob=f?2:0;g.lineWidth=3;g.strokeStyle=o;
+    g.fillStyle='#1e2430';g.beginPath();g.ellipse(48,62+bob*0.5,22,28,0,0,7);g.fill();g.stroke();g.fillStyle='#f4f8ff';g.beginPath();g.ellipse(48,68,14,20,0,0,7);g.fill();
+    g.fillStyle='#ffb030';g.beginPath();g.ellipse(40,91,8,4,0,0,7);g.fill();g.stroke();g.beginPath();g.ellipse(56,91,8,4,0,0,7);g.fill();g.stroke();
+    g.fillStyle='#1e2430';g.beginPath();g.ellipse(26,60,6,14,f?0.6:0.3,0,7);g.fill();g.stroke();g.beginPath();g.ellipse(70,60,6,14,-0.3,0,7);g.fill();g.stroke();
+    g.fillStyle='#1e2430';g.beginPath();g.arc(48,30+bob,16,0,7);g.fill();g.stroke();g.fillStyle='#f4f8ff';g.beginPath();g.ellipse(42,30+bob,5,6,0,0,7);g.fill();g.beginPath();g.ellipse(54,30+bob,5,6,0,0,7);g.fill();
+    g.fillStyle='#0a0e18';g.beginPath();g.arc(43,31+bob,2.6,0,7);g.fill();g.beginPath();g.arc(53,31+bob,2.6,0,7);g.fill();g.fillStyle='#fff';g.fillRect(42,29+bob,1.5,1.5);g.fillRect(52,29+bob,1.5,1.5);
+    g.fillStyle='#ff9a20';g.beginPath();g.moveTo(44,36+bob);g.lineTo(52,36+bob);g.lineTo(48,42+bob);g.closePath();g.fill();g.stroke();
+    g.fillStyle='#d84a3a';g.fillRect(32,44+bob,32,7);g.strokeRect(32,44+bob,32,7);g.fillRect(56,48+bob,8,16);g.strokeRect(56,48+bob,8,16);
+    g.fillStyle='#8a6a45';g.beginPath();g.ellipse(30,74,9,8,0,0,7);g.fill();g.stroke();g.strokeStyle='#5a3a26';g.beginPath();g.moveTo(34,50);g.lineTo(28,68);g.stroke();
+    g.fillStyle='#7ad8ff';g.beginPath();g.moveTo(48,10+bob);g.lineTo(52,16+bob);g.lineTo(48,22+bob);g.lineTo(44,16+bob);g.closePath();g.fill();g.restore();}
+  const t=new THREE.CanvasTexture(c);t.repeat.set(0.5,1);t.magFilter=THREE.LinearFilter;const geo=new THREE.PlaneGeometry(2.6,2.6);geo.translate(0,1.25,0);return{tex:t,geo,front:{cols:2,fps:2,seq:[0,0,1,0,0,1,1]}};}
+{const ob=GEN.twsnow.build;GEN.twsnow.build=function(c){ob.call(this,c);const[x,z]=DI_CAMP;
+  icSnowman(x-4,z-2);bx(1.6,0.8,1.2,'#8a6a45',x-3,0.4,z+1);cy(0.7,0.6,0.7,'#5a6a7a',x-3,1.15,z+1,12);cy(0.75,0.75,0.12,'#2a3a4a',x-3,1.55,z+1,12);put(leafGeo,'b:#bfefff',x-3,1.7,z+1,{s:0.3});
+  townNPC('เพนกวินผู้หลบหนี เพนเน่',null,x,z,
+   {...diPenneOpts(),facing:0,lines:['ชู่ว... ข้าชื่อเพนเน่ เพนกวินที่หนีออกมาจากหอคอยนั่นแหละ','เวเนรอส จอมเวทน้ำแข็งที่อ้างตัวเป็นเทพองค์ที่เจ็ด รวบรวมพวกเพนกวินไว้เป็นกองทัพ เขากำลังจะทำพิธีให้ทั้งโลกกลายเป็นน้ำแข็ง!',
+     'ข้าไม่เห็นด้วยกับแผนนี้... ช่วยไปถึงยอดหอคอยแล้วหยุดพิธีของเวเนรอสทีเถอะ','ยามเพนกวินชอบหม้อชาบูน้ำแข็งมาก เอาไปฝากเป็นสินบนแล้วข้าจะพาเจ้าเข้าทางลับเอง']});};}
+function diTalk(n){const sv=document.getElementById('talkSvc');sv.innerHTML=`<button data-di="enter">❄ เข้าหอคอย (Lv ${DI_LV}+)</button><button data-di="buy">🛒 ${DI_ITEM} ${DI_ITEM_Z.toLocaleString()} z</button><button data-di="info">📜 รายละเอียด</button>`;}
+document.getElementById('talkSvc').addEventListener('click',e=>{const b=e.target.closest('[data-di]');if(!b)return;const a=b.dataset.di;
+  if(a==='enter')diEnter();else if(a==='buy'){if(gold<DI_ITEM_Z){say('เงินไม่พอ','sys');return;}gold-=DI_ITEM_Z;inv[DI_ITEM]=(inv[DI_ITEM]||0)+1;updateInv();sfx('coin');say(`ซื้อ ${DI_ITEM} แล้ว (มี ${inv[DI_ITEM]} ชิ้น)`,'sys');}
+  else['❄ หอคอยเยือกแข็ง · เลเวล 50 ขึ้นไป · ปาร์ตี้สูงสุด 4 ตัว','1) ทางขึ้นทุ่งน้ำแข็ง — ได้เลื่อนหิมะเร่งความเร็ว รีบพุ่งผ่าน ระวังน้ำแข็งย้อยตกลงมา',
+    '2) ป้อมน้ำแข็ง — ปืนใหญ่ยิงแนวน้ำแข็ง (โดนแล้วแช่แข็ง) ทำลายปืนใหญ่ 3 กระบอกเพื่อเปิดประตู · 3) โถงชั้นแรก — ยืนบนผนึก 4 จุดให้ครบ ระวังกับดักระเบิดน้ำแข็ง',
+    '4) ทางวนชั้นล่าง — มอนแรงขึ้น กำจัด 22 ตัว · 5) ราชากวางเขาผลึก — คลื่นเขา พุ่งชน ฝนน้ำแข็ง อย่ายืนรวมกัน',
+    '6) ลานลอยฟ้า — กำจัดผู้พิทักษ์ผลึก แล้วยืนบนลิฟต์รอจนครบเวลา · 7) สะพานฟ้า — มีเวลา 4 นาทีก่อนพายุหิมะ',
+    '8) เวเนรอส — ผลึกเยือกแข็ง 6 ก้อนรักษาและลดดาเมจที่บอสได้รับ ทำลายผลึกก่อน! ครึ่งเลือดจะร่ายวงยักษ์ ต้องวิ่งออกให้ทัน',
+    'วัตถุดิบ: ขนนกเพนกวินหิมะ · เขาผลึกน้ำแข็ง · แก่นน้ำแข็งนิรันดร์ (บอส) → คราฟ "ชุดหอคอยน้ำแข็ง" ที่ช่างคราฟ'].forEach(l=>say(l,'npc'));});
+ITEM_KINDS.push({name:DI_ITEM,w:2,draw(g){g.fillStyle='#2b1f1a';g.beginPath();g.ellipse(16,20,12,8,0,0,7);g.fill();g.fillStyle='#3a4a6a';g.beginPath();g.ellipse(16,20,11,7,0,0,7);g.fill();
+  g.fillStyle='#7ad8ff';g.beginPath();g.ellipse(16,16,10,4,0,0,7);g.fill();g.fillStyle='#e8f8ff';[[11,13],[19,12],[15,10]].forEach(([x,y])=>{g.beginPath();g.moveTo(x,y+3);g.lineTo(x+2,y-4);g.lineTo(x+4,y+3);g.closePath();g.fill();});
+  g.fillStyle='#b88aff';g.beginPath();g.arc(16,15,2.5,0,7);g.fill();g.fillStyle='#2b1f1a';g.fillRect(3,18,3,3);g.fillRect(26,18,3,3);}});
+{const ik=ITEM_KINDS[ITEM_KINDS.length-1],c=document.createElement('canvas');c.width=c.height=32;ik.draw(c.getContext('2d'));ik.tex=new THREE.CanvasTexture(c);ik.tex.magFilter=THREE.NearestFilter;ik.tex.minFilter=THREE.NearestFilter;ik.tex.generateMipmaps=false;ICON_URL[ik.name]=c.toDataURL();}
+const diCss=document.createElement('style');diCss.textContent=`#diHud{position:absolute;top:calc(48px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);padding:5px 14px;border-radius:18px;background:rgba(14,30,54,.85);border:1px solid #9ad8ff;color:#e8f6ff;font:600 12.5px var(--display);z-index:5;pointer-events:none;white-space:nowrap}#diHud b{color:#bfefff}`;document.head.appendChild(diCss);
 
 const RPS=[
  {id:'atk',perm:'atk',n:'ตราแห่งพลัง: ATK +2 ถาวร',ic:'หินพลัง ATK Ⅲ',base:20,step:5,cap:t=>5*(t+1),t:0},
@@ -19719,7 +20028,7 @@ function renderAdv(){const B=document.getElementById('advBody');if(!B)return;con
 function advHud(){const nm=document.getElementById('face');if(!nm)return;let e=document.getElementById('advMini');if(!e){e=document.createElement('img');e.id='advMini';e.alt='';e.title='ยศนักผจญภัย';e.onclick=()=>{toggleWin('advWin',true);renderAdv();};nm.appendChild(e);e.addEventListener('pointerdown',ev=>ev.stopPropagation());}
   const ti=ADV_TIERS.indexOf(advTier());if(e.dataset.t!=String(ti)){e.dataset.t=ti;e.src=advBadge(ti,48);e.title=`ยศ ${ADV_TIERS[ti][1]} · Adventure Lv ${advLevel()}`;}}
 setInterval(()=>{try{advTick();}catch(e){}},1000);
-function partyTick(dt){if(typeof dgTick==='function')dgTick(dt);fsTick(dt);if(typeof iceShieldFx==='function')iceShieldFx();if(window.sqOn)sqTick(dt);if(typeof updateNav==='function')updateNav(dt);if((partyTick.s=(partyTick.s||0)+dt)>0.5){partyTick.s=0;skStatTick();}updateMercs(dt);updateJtAura();
+function partyTick(dt){if(typeof dgTick==='function')dgTick(dt);if(typeof diTick==='function')diTick(dt);fsTick(dt);if(typeof iceShieldFx==='function')iceShieldFx();if(window.sqOn)sqTick(dt);if(typeof updateNav==='function')updateNav(dt);if((partyTick.s=(partyTick.s||0)+dt)>0.5){partyTick.s=0;skStatTick();}updateMercs(dt);updateJtAura();
   if((partyTick.h=(partyTick.h||0)+dt)>1){partyTick.h=0;if(autoTab==='stat'&&!document.getElementById('autoWin').hidden)renderAutoWin();if(!document.getElementById('partyWin').hidden)renderParty();
     if(dqGen()&&qTab==='daily'&&!document.getElementById('questWin').hidden)renderQuest();}}
 function partySave(){altFlush();return{jt:JUTTI||0,al:MERCS.filter(M=>M.alt).map(M=>M.alt.slot),mc:MERCS.filter(M=>!M.alt).map(M=>({t:M.type,l:Math.round(M.left)})),dq:JSON.parse(JSON.stringify(DQ)),fs:JSON.parse(JSON.stringify(FST))};}
@@ -19775,6 +20084,7 @@ function applySave(d){if(typeof obLoad==='function')setTimeout(()=>obLoad(d.ob),
   updateHP();updateExp();updateInv();updateJobUI();renderSkills();renderTracker();jtLabel();
   if(typeof advLoad==='function'){advLoad(d.adv);recalc();}
   if(typeof DG_KEYS!=='undefined'&&DG_KEYS.includes(d.map)){d.map='twdesert';d.x=DG_CAMP[0]+2;d.z=DG_CAMP[1]+3;}
+  if(typeof DI_KEYS!=='undefined'&&DI_KEYS.includes(d.map)){d.map='twsnow';d.x=DI_CAMP[0];d.z=DI_CAMP[1]+4;}
   const M=MAPS[d.map];if(M&&M!==curMap)warpTo(M,d.x,d.z);else{player.x=d.x;player.z=d.z;camT.x=d.x;camT.z=d.z;}}
 /* --- storage back-ends --- */
 function slotIdx(pre){const o=[];try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith(pre)){const n=+k.slice(pre.length);if(Number.isInteger(n)&&n>=0&&n<500)o.push(n);}}}catch(e){}return o;}
