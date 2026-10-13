@@ -4843,7 +4843,7 @@ const buffs={},skCD={};let lastSkillAt=-9,lastAtkSkillAt=-9,lastBlinkAt=-9,nextC
 /* class plan: C1 Base 1-40 · C2 Base 41-80 · High class (after rebirth) Base 1-85 · C3 Base 99-160 */
 const JOB_R=[[1,40,40,4,0.9],[41,80,50,6,0.9],[1,85,50,6,1],[99,160,70,8,0.9]];
 const JOB_B=JOB_R.map(([lo,hi,J,A])=>{let K=0;for(let l=lo;l<=hi;l++)K+=killsAt(l);let su=0;for(let j=1;j<J;j++){const u=(j-1)/(J-1);su+=u*u;}return(K-A*(J-1))/su;});
-const jobNeed=j=>{const [lo,hi,J,A,m]=JOB_R[classIdx],u=(j-1)/(J-1),L=Math.min(100,lo+(hi-lo)*u);return Math.round(JOB_SLOW*(A+JOB_B[classIdx]*u*u)*(5+1.2*Math.pow(L,1.75))*0.8*1.15*m);};
+const jobNeed=j=>{const [lo,hi,J,A,m]=JOB_R[classIdx],u=(j-1)/(J-1),L=Math.min(100,lo+(hi-lo)*u);return Math.round(JOB_SLOW*(A+JOB_B[classIdx]*u*u)*(5+1.2*Math.pow(L,1.75))*0.8*1.15*m*((typeof JUTTI!=='undefined'&&JUTTI)?1:0.6));};
 function expMod(mlv){const d=mlv-Math.min(lvl,100);return d>=0?1+Math.min(d,10)*0.02:d>=-5?1:Math.max(0.15,1+(d+5)*0.06);}
 const classPts=c=>c<classIdx?SK_CLASSES[c].pts:c===classIdx?Math.min(jobLv-1,SK_CLASSES[c].pts):0;
 const skSpent=c=>SKILLS.filter(s=>s.c===c&&!s.free).reduce((a,s)=>a+skLv[s.id],0)-(c===0&&SKB[FREE0]&&!SKB[FREE0].free&&skLv[FREE0]>0?1:0);
@@ -20384,7 +20384,7 @@ var JUTTI=0;const JT_MAX=10;
 const JT_COL=['#ffffff','#fff2b0','#8affa0','#7ad0ff','#c08aff','#ff7a7a','#ffb84a','#7affe8','#ff8ae0','#e8f0ff','#ffd84a'];
 function jtHp(){return 1+0.04*(JUTTI||0);}
 function jtAtk(){return 1+0.03*(JUTTI||0);}
-function jtExp(){return 1+0.15*(JUTTI||0);}
+function jtExp(){return JUTTI?1.2+0.2*JUTTI:0.5;}/* first life (before จุติ) levels twice as fast; each จุติ makes it harder */
 function jtReqs(){return[[`Base Lv 99 ขึ้นไป (ตอนนี้ ${lvl})`,lvl>=99],[`เป็นคลาส High ขึ้นไป (รีเบิร์ทคลาสแล้ว)`,classIdx>=2],[`จุติไม่เกิน ${JT_MAX} ครั้ง`,(JUTTI||0)<JT_MAX]];}
 function jtCan(){return jtReqs().every(r=>r[1]);}
 function jtLabel(){const t=(JUTTI?`☯${JUTTI} `:'')+player.name;meLabel.textContent=t;meLabel.style.color=JUTTI?JT_COL[Math.min(JUTTI,JT_COL.length-1)]:'';}
@@ -20616,7 +20616,7 @@ function altPower(d){const W=d.equipped&&d.equipped.weapon&&EQ_DB[d.equipped.wea
   return (mag?Math.max(b.INT||1,b.ATK||1):(b.ATK||1))+d.lvl+(W?Math.max(W.atk||0,W.matk||0)*(1+0.08*((d.equipped.weapon.ref)||0)):0);}
 function altCap(d){return (d.classIdx||0)>=3?175:99;}
 function altPct(d){const n=expNeed(d.lvl);return d.lvl>=altCap(d)?100:Math.min(99,Math.floor((d.exp||0)/n*100));}
-function jobNeedAt(j,ci){const [lo,hi,J,A,m]=JOB_R[ci],u=(j-1)/(J-1),L=Math.min(100,lo+(hi-lo)*u);return Math.round(JOB_SLOW*(A+JOB_B[ci]*u*u)*(5+1.2*Math.pow(L,1.75))*0.8*1.15*m);}
+function jobNeedAt(j,ci){const [lo,hi,J,A,m]=JOB_R[ci],u=(j-1)/(J-1),L=Math.min(100,lo+(hi-lo)*u);return Math.round(JOB_SLOW*(A+JOB_B[ci]*u*u)*(5+1.2*Math.pow(L,1.75))*0.8*1.15*m*((typeof JUTTI!=='undefined'&&JUTTI)?1:0.6));}
 function altJobCap(d){const Ln=LINES[d.line],C=Ln&&Ln.classes&&Ln.classes[d.classIdx||0];return C?C.job:50;}
 function altExp(v,gj){if(!MERCS.some(M=>M.alt))return;MERCS.forEach(M=>{if(!M.alt||M.down)return;const d=M.alt.d,sl=M.alt.slot;let up=0,jup=0;
   if(gj&&(d.jobLv||1)<altJobCap(d)){d.jobLv=d.jobLv||1;d.jobExp=(d.jobExp||0)+Math.round(gj*1.15);const ci=Math.min(d.classIdx||0,JOB_R.length-1);
