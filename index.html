@@ -4410,7 +4410,7 @@ function updateInv(){
   const wt=weightNow(),mx=derived().wtMax;document.getElementById('wtTxt').textContent=`${(names.length+eqs.length).toLocaleString()} ช่อง · ไม่จำกัด`;document.getElementById('dvWt').textContent=`${wt} · ไม่จำกัด`;
 }
 /* ---- windows: toggle + drag ---- */
-function toggleWin(id,show){const w=document.getElementById(id);w.hidden=show===undefined?!w.hidden:!show;if(!w.hidden&&innerWidth<700)['statWin','invWin','worldWin','skillWin','eqWin','shopWin','refWin','warpWin','autoWin','petWin','questWin','sysWin','craftWin','partyWin','jtWin','huntWin','advWin'].forEach(o=>{const e=document.getElementById(o);if(o!==id&&e)e.hidden=true;});if(!w.hidden){w.style.zIndex=++zTop;if(id==='statWin')drawRadar();if(id==='invWin')updateInv();if(id==='worldWin')updateWorld();if(id==='skillWin')renderSkills();}}
+function toggleWin(id,show){const w=document.getElementById(id);w.hidden=show===undefined?!w.hidden:!show;if(!w.hidden&&innerWidth<700)['statWin','invWin','worldWin','skillWin','eqWin','shopWin','refWin','warpWin','autoWin','petWin','questWin','sysWin','craftWin','partyWin','jtWin','huntWin','advWin','cardWin'].forEach(o=>{const e=document.getElementById(o);if(o!==id&&e)e.hidden=true;});if(!w.hidden){w.style.zIndex=++zTop;if(id==='statWin')drawRadar();if(id==='invWin')updateInv();if(id==='worldWin')updateWorld();if(id==='skillWin')renderSkills();}}
 let zTop=10;
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-close]');if(b){e.preventDefault();toggleWin(b.dataset.close,false);}});
 document.getElementById('btnStat').onclick=()=>toggleWin('statWin');document.getElementById('btnEq').onclick=()=>{toggleWin('eqWin');renderEq();};document.getElementById('btnSound').onclick=()=>{audioInit();setSound(!soundOn);};document.getElementById('btnSkill').onclick=()=>toggleWin('skillWin');document.getElementById('btnWorld').onclick=()=>toggleWin('worldWin');
@@ -17974,13 +17974,52 @@ document.addEventListener('click',e=>{const u=e.target.closest('[data-unq]');if(
 let cardPick=null;
 function invClick(n,I){if(I){if(stonePick){socketStone(I);return;}if(cardPick){insertCard(I);return;}equipItem(I);return;}
   if(STN[n]){stonePickStart(n);return;}
-  const C=CARD_BY_NAME(n);if(C){cardPick=C;say(`เลือก ${C.name} (${C.label}) แล้ว — คลิกอุปกรณ์ที่มีช่องการ์ดในกระเป๋าหรือในหน้าอุปกรณ์เพื่อเสียบ`,'sys');document.body.classList.add('picking');return;}
+  const C=CARD_BY_NAME(n);if(C){if(typeof openCardWin==='function'){openCardWin(n);return;}cardPick=C;say(`เลือก ${C.name} (${C.label}) แล้ว — คลิกอุปกรณ์ที่มีช่องการ์ดในกระเป๋าหรือในหน้าอุปกรณ์เพื่อเสียบ`,'sys');document.body.classList.add('picking');return;}
   useItem(n);}
 function insertCard(I){const C=cardPick;cardPick=null;document.body.classList.remove('picking');const D=EQ_DB[I.id];
   if(!D.slots||I.cards.length>=D.slots){say(`${eqName(I)} ไม่มีช่องการ์ดว่าง`,'sys');return;}if(!inv[C.name]){return;}
   if(!cardSlotOK(C,D.slot)){say(`${C.name} ใส่ได้เฉพาะ${CSLOT_N[C.slot]}เท่านั้น`,'sys');return;}
   inv[C.name]--;if(!inv[C.name])delete inv[C.name];I.cards.push(C.type);say(`เสียบ ${C.name} ลงใน ${EQ_DB[I.id].n} สำเร็จ (${C.label})`,'sys');sfx('refineOk');afterEq();}
 document.addEventListener('click',e=>{const u0=e.target.closest('[data-unq]');if(u0&&stonePick){const I=equipped[u0.dataset.unq];if(I){e.stopImmediatePropagation();socketStone(I);return;}}const u=e.target.closest('[data-unq]');if(u&&cardPick){const I=equipped[u.dataset.unq];if(I){e.stopImmediatePropagation();insertCard(I);}}},true);
+/* ===================== CARD WINDOW: pick a card → tap a free slot ===================== */
+let cwSel=null,cwFilter='fit';
+function cwCards(){return Object.keys(inv).map(n=>CARD_BY_NAME(n)).filter(Boolean).sort((a,b)=>(b.boss?1:0)-(a.boss?1:0)||a.name.localeCompare(b.name,'th'));}
+function cwGear(){const L=[];Object.entries(equipped).forEach(([s,I])=>{if(I)L.push({I,on:s});});equipBag.forEach(I=>{if(!Object.values(equipped).includes(I))L.push({I,on:null});});return L.filter(x=>EQ_DB[x.I.id].slots);}
+function cwFits(C,I){const D=EQ_DB[I.id];return!!C&&I.cards.length<D.slots&&cardSlotOK(C,D.slot);}
+function renderCardWin(){const B=document.getElementById('cwBody');if(!B||document.getElementById('cardWin').hidden)return;const cards=cwCards();if(cwSel&&!inv[cwSel])cwSel=null;if(!cwSel&&cards[0])cwSel=cards[0].name;const C=cwSel?CARD_BY_NAME(cwSel):null;
+  let G=cwGear();if(C&&cwFilter==='fit')G=G.filter(x=>cwFits(C,x.I)||x.I.cards.length);
+  B.innerHTML=`<div class="cwl"><h4>1. เลือกการ์ด <small>(${cards.reduce((a,c)=>a+inv[c.name],0)} ใบ)</small></h4><div class="cwcards">${cards.map(c=>`<button class="cwc ${c.name===cwSel?'sel':''} ${c.boss?'boss':''}" data-cwc="${c.name}"><img alt="" src="${c.icon}"><span><b>${c.name.replace('การ์ด','')}</b><small>${c.label}</small></span>${inv[c.name]>1?`<u>×${inv[c.name]}</u>`:''}</button>`).join('')||'<p class="cwempty">ยังไม่มีการ์ด — การ์ดดรอปจากมอนสเตอร์ (บอสและอีลิทดรอปง่ายกว่า)</p>'}</div></div>
+  <div class="cwr"><h4>2. แตะช่องว่าง ◇ ของอุปกรณ์ <label><input type="checkbox" id="cwFit" ${cwFilter==='fit'?'checked':''}> แสดงเฉพาะที่ใส่ได้</label></h4>
+   ${C?`<p class="cwsel"><img alt="" src="${C.icon}"> <b>${C.name}</b> · ${C.label}${C.slot?` · <em>ใส่ได้เฉพาะ${CSLOT_N[C.slot]}</em>`:' · ใส่ได้ทุกช่อง'}</p>`:''}
+   <div class="cwgear">${G.map(({I,on})=>{const D=EQ_DB[I.id],fit=cwFits(C,I);return `<div class="cwg ${fit?'fit':''}" data-eqc="uid:${I.uid}"><img alt="" src="${D.icon}"><span class="cwgn"><b>${eqName(I)}</b><small>${CSLOT_N[D.slot==='acc1'||D.slot==='acc2'?'acc':D.slot]||D.slot}${on?' · <em>สวมอยู่</em>':''}</small></span>
+     <span class="cwsl">${Array.from({length:D.slots},(_,k)=>{const t=I.cards[k];if(t){const cc=cardOf(t);return `<button class="cws on" data-cwrm="${I.uid}:${k}" title="${cc.name} · ${cc.label} (แตะเพื่อถอด)"><img alt="" src="${cc.icon}"></button>`;}
+       return `<button class="cws ${fit?'go':''}" data-cwput="${I.uid}" ${fit?'':'disabled'} title="${fit?'เสียบการ์ดที่เลือก':'ช่องว่าง'}">◇</button>`;}).join('')}</span></div>`;}).join('')||'<p class="cwempty">ไม่มีอุปกรณ์ที่มีช่องการ์ด'+(C&&cwFilter==='fit'?'ที่ใส่การ์ดนี้ได้':'')+' — อุปกรณ์ระดับสูงและของคราฟจะมีช่องการ์ด</p>'}</div>
+   <p class="cwhint">แตะการ์ดที่เสียบอยู่เพื่อถอดคืนเข้ากระเป๋า (ค่าถอด ${CW_FEE.toLocaleString()} z)</p></div>`;}
+const CW_FEE=500;
+function cwFind(uid){uid=+uid;return Object.values(equipped).find(I=>I&&I.uid===uid)||equipBag.find(I=>I.uid===uid);}
+function openCardWin(sel){if(sel)cwSel=sel;toggleWin('cardWin',true);renderCardWin();}
+(function(){const w=document.createElement('section');w.id='cardWin';w.className='pw drag';w.hidden=true;w.setAttribute('aria-label','การ์ด');
+  w.innerHTML=`<div class="hd"><span>🃏 เสียบการ์ด</span><button class="x" data-close="cardWin" aria-label="ปิด">✕</button></div><div class="cwb" id="cwBody"></div>`;document.getElementById('game').appendChild(w);
+  w.addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;
+    if(t.dataset.cwc){cwSel=t.dataset.cwc;renderCardWin();return;}
+    if(t.dataset.cwput){const I=cwFind(t.dataset.cwput),C=CARD_BY_NAME(cwSel);if(!I||!C||!inv[C.name])return;cardPick=C;insertCard(I);popText(player.x,player.z,'CARD!','gain',3.8);levelFx('#ffd24a','#fff6c8',false);renderCardWin();return;}
+    if(t.dataset.cwrm){const[u,k]=t.dataset.cwrm.split(':'),I=cwFind(u);if(!I)return;if(t.dataset.ask!=='1'){w.querySelectorAll('[data-ask]').forEach(b=>{b.dataset.ask='';b.classList.remove('ask');});t.dataset.ask='1';t.classList.add('ask');say(`แตะอีกครั้งเพื่อถอดการ์ด (ค่าถอด ${CW_FEE} z)`,'sys');return;}
+      if(gold<CW_FEE){say('เงินไม่พอสำหรับค่าถอดการ์ด','sys');return;}gold-=CW_FEE;const tp=I.cards.splice(+k,1)[0],cc=cardOf(tp);inv[cc.name]=(inv[cc.name]||0)+1;cwSel=cc.name;say(`ถอด ${cc.name} ออกจาก ${EQ_DB[I.id].n} แล้ว`,'sys');sfx('coin');afterEq();renderCardWin();}});
+  w.addEventListener('change',e=>{if(e.target.id==='cwFit'){cwFilter=e.target.checked?'fit':'all';renderCardWin();}});
+  const bq=document.getElementById('btnEq');if(bq){const b=document.createElement('button');b.id='btnCard';b.innerHTML='การ์ด<small>เสียบ</small>';bq.after(b);b.onclick=()=>{toggleWin('cardWin');renderCardWin();};}
+  const st=document.createElement('style');st.textContent=`#cardWin{top:calc(50px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);width:min(760px,calc(100vw - 16px));max-height:calc(100% - 120px);display:flex;flex-direction:column}
+  .cwb{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:10px;padding:10px;min-height:0;overflow:hidden;flex:1}.cwb h4{margin:0 0 6px;font:600 14px var(--display);display:flex;gap:8px;align-items:center;flex-wrap:wrap}.cwb h4 small{color:var(--muted);font-weight:400}.cwb h4 label{margin-left:auto;font:400 12px var(--body);display:flex;gap:4px;align-items:center}
+  .cwl,.cwr{display:flex;flex-direction:column;min-height:0}.cwcards,.cwgear{overflow-y:auto;display:flex;flex-direction:column;gap:4px;padding-right:2px;overscroll-behavior:contain}
+  .cwc{all:unset;cursor:pointer;display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:8px;align-items:center;padding:5px 8px;border-radius:8px;background:rgba(255,255,255,.5);border:1px solid rgba(110,75,44,.25)}.cwc img{width:30px;height:30px;image-rendering:pixelated}
+  .cwc span{display:flex;flex-direction:column;min-width:0}.cwc b{font:600 13px var(--display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cwc small{font-size:11px;color:#2a6a3a}.cwc u{text-decoration:none;font:700 12px var(--body);color:#7a3ab0}
+  .cwc.sel{background:#fff1c0;border-color:#c9a24a;box-shadow:0 0 0 2px #e8c050}.cwc.boss b{color:#a0600a}
+  .cwsel{margin:0 0 6px;padding:6px 8px;border-radius:7px;background:#fff6d8;border:1px dashed #c9a24a;font-size:12.5px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}.cwsel img{width:22px;height:22px;image-rendering:pixelated}.cwsel em{color:#b03a2a;font-style:normal}
+  .cwg{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:8px;align-items:center;padding:5px 8px;border-radius:8px;background:rgba(255,255,255,.4);border:1px solid rgba(110,75,44,.2);opacity:.75}.cwg.fit{opacity:1;background:#eaf8e4;border-color:#7ac08a}.cwg img{width:30px;height:30px;image-rendering:pixelated}
+  .cwgn{display:flex;flex-direction:column;min-width:0}.cwgn b{font:600 12.5px var(--display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cwgn small{font-size:11px;color:var(--muted)}.cwgn em{color:#2a7a3a;font-style:normal}
+  .cwsl{display:flex;gap:4px}.cws{width:38px;height:38px;min-height:0;padding:0;border-radius:8px;font-size:18px;color:#a08a6a;background:#efe4cc;border:2px dashed #b8a07a}.cws:disabled{opacity:.5;cursor:default}
+  .cws.go{border:2px solid #4a9a5a;color:#2a7a3a;background:#d8f4d8;animation:cwpulse 1.2s infinite}.cws.on{border:2px solid #c9a24a;background:#fff6d8}.cws.on img{width:28px;height:28px;image-rendering:pixelated}.cws.ask{background:#ffc8b8;border-color:#e0603a}
+  @keyframes cwpulse{50%{box-shadow:0 0 0 4px rgba(74,154,90,.3)}}.cwempty,.cwhint{font-size:12px;color:var(--muted);margin:6px 2px}
+  @media (max-width:700px){#cardWin{top:calc(8px + env(safe-area-inset-top,0px));max-height:calc(100% - 90px)}.cwb{grid-template-columns:1fr;grid-template-rows:minmax(0,0.8fr) minmax(0,1.2fr)}}`;document.head.appendChild(st);})();
 /* ===================== BUILD ARCHETYPES : crafted gear stats follow the player's build ===================== */
 const ARCH={
  guard:{n:'ผู้พิทักษ์',st:['VIT','DEF','ATK'],col:'#7a9ab8',b5:lv=>({hpP:Math.round(4+lv/12)}),b5t:lv=>`MaxHP +${Math.round(4+lv/12)}%`},
