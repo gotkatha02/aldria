@@ -4305,6 +4305,10 @@ const dmgs=[];let gold=500;
 let lvl=1,exp=0,maxHp=120,php=120,maxSp=40,psp=40,lastHurt=-99,playerDown=0,statPts=48,reborn=false;
 const killsAt=l=>l<=99?4+0.06*l*l:592+(l-99)*8;
 const LEVEL_SLOW=3.5,JOB_SLOW=2.8;/* leveling pace: long grind (auto-farm friendly) */
+const DUN_EXP=4,DUN_EXP_BOSS=2;/* dungeon monsters give far more EXP than field ones */
+/* finishing a dungeon: a big chunk of the current level bar (base + job) */
+function dunClearExp(name,frac){const ex=Math.round(expNeed(lvl)*frac),jx=Math.round(jobNeed(jobLv)*frac);gainExp(ex);gainJob(jx);if(typeof altExp==='function')altExp(ex,jx);
+  setTimeout(()=>popText(player.x,player.z,`<i>+${ex.toLocaleString('en-US')} EXP</i><em>+${jx.toLocaleString('en-US')} JOB</em>`,'gain',3.4,{html:true,life:3,rise:1.6}),600);say(`🎁 โบนัสพิชิต ${name}: +${ex.toLocaleString()} EXP · +${jx.toLocaleString()} Job EXP`,'sys');}
 const expNeed=l=>Math.round(LEVEL_SLOW*(l>40?1+(l-40)*0.012:1)*killsAt(l)*(5+1.2*Math.pow(Math.min(l,100),1.75))*1.15*(reborn&&classIdx===2?1.2:1)*jtExp());
 /* ---- stats (RO-like): base can be raised with points, bonus comes from equipment ---- */
 const STAT_KEYS=['ATK','DEF','AGI','VIT','INT','CHA','TAL','LCK'];
@@ -18570,7 +18574,7 @@ function hurtPlayer(v,src){if(playerDown)return;if(buffs.p_block&&buffs.p_block.
 function killMon(m){if(AUTO.on)AUTO.kills++;if(typeof advKill==='function')advKill(m);if(typeof apOnKill==='function')apOnKill(m);mlOnKill(m);btOnKill(m);ctOnKill(m);rbOnKill(m);cardOnKill(m);questKill(m.type);storyKill(m.type);if(window.sqOn)sqKill(m);
   m.dead=0.001;m.el.remove();hitMeshes.splice(hitMeshes.indexOf(m.mesh),1);
   if(player.attackTarget===m)player.attackTarget=null;if(pendingAttack===m)pendingAttack=null;
-  const be=Math.max(1,Math.round(m.T.exp*expMod(m.T.lv||1)*(1+CX('expP')/100))),ge=Math.round(be*1.15),gj=Math.round(be*0.8*1.15),mx=m.x,mz=m.z,top=Math.max(2.6,m.T.size*0.95);
+  const be=Math.max(1,Math.round(m.T.exp*expMod(m.T.lv||1)*(1+CX('expP')/100)*((m.dg||m.di||m.dp)?(m.T.boss?DUN_EXP_BOSS:DUN_EXP):1))),ge=Math.round(be*1.15),gj=Math.round(be*0.8*1.15),mx=m.x,mz=m.z,top=Math.max(2.6,m.T.size*0.95);
   setTimeout(()=>{popText(mx,mz,`<i>+${ge.toLocaleString('en-US')} EXP</i><em>+${gj.toLocaleString('en-US')} JOB</em>`,'gain',top,{html:true,life:1.8,rise:1.3});},140);
   if(effLv('b_bloodlust')){php=Math.min(maxHp,php+maxHp*effLv('b_bloodlust')/100);updateHP();}
   gainExp(be);gainJob(gj);if(typeof altExp==='function')altExp(be,gj);fsKill(m,ge,gj);dqKill(m);say(`ปราบ ${m.T.name} ได้ +${ge} EXP · +${gj} Job EXP`,'sys');
@@ -19655,7 +19659,7 @@ function dgKill(m){if(!DG.on)return;const L=gDropMul();
     say('🐪 ผู้เฝ้าสุสานล้มลงแล้ว! ประตูทางเหนือเปิดออก','sys');advAdd&&advAdd(10,'ปราบอูฐมัมมี่ผู้เฝ้าสุสาน');}
   if(m.dgBoss==='maoh'){DG.maohDead=true;DG.boss=null;const g=Math.round(30000*(1+S('CHA')*0.01));gold+=g;dgDrop(m,DG_MAT.gem,3+(Math.random()<0.5?1:0));dgDrop(m,DG_MAT.fang,3);dgDrop(m,DG_MAT.cloth,4);inv['ยาสารพัด']=(inv['ยาสารพัด']||0)+3;updateInv();
     ADV.hunt=ADV.hunt||{};const first=!ADV.hunt.dg1;ADV.hunt.dg1=(ADV.hunt.dg1||0)+1;if(typeof advAdd==='function')advAdd(first?100:30,first?`พิชิต ${DG_NAME} ครั้งแรก!`:`พิชิต ${DG_NAME}`);
-    const mins=Math.round((Date.now()-DG.t0)/60000);levelFx('#ffd84a','#fff6c8',false);try{sfx('levelup');}catch(e){}popText(m.x,m.z,'CLEAR!','lvl',6);
+    dunClearExp(DG_NAME,0.6);const mins=Math.round((Date.now()-DG.t0)/60000);levelFx('#ffd84a','#fff6c8',false);try{sfx('levelup');}catch(e){}popText(m.x,m.z,'CLEAR!','lvl',6);
     {const g=new THREE.Group();const t1=new THREE.Mesh(new THREE.TorusGeometry(2,0.12,8,48),new THREE.MeshBasicMaterial({color:'#ffd84a'}));t1.rotation.x=Math.PI/2;t1.position.y=0.12;g.add(t1);
      const c1=new THREE.Mesh(new THREE.CylinderGeometry(1.9,1.9,5,32,1,true),new THREE.MeshBasicMaterial({color:'#ffe08a',transparent:true,opacity:0.22,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));c1.position.y=2.5;g.add(c1);g.position.set(0,0,-38);m.map.scene.add(g);DG.exitRing=g;
      if(!DG.exitLb)DG.exitLb=egLabel('dgG',0,-38,'✦ ออกจากสุสาน',5.4);DG.exitLb.textContent='✦ ออกจากสุสาน';}
@@ -19951,7 +19955,7 @@ function diKill(m){if(!DI.on)return;const L=gDropMul();
     mons.forEach(q=>{if(q.di&&q!==m&&!q.dead)q.hp=Math.min(q.hp,1);});ADV.hunt=ADV.hunt||{};const first=!ADV.hunt.di1;ADV.hunt.di1=(ADV.hunt.di1||0)+1;if(typeof advAdd==='function')advAdd(first?140:40,first?`พิชิต ${DI_NAME} ครั้งแรก!`:`พิชิต ${DI_NAME}`);
     const g2=new THREE.Group();const t1=new THREE.Mesh(new THREE.TorusGeometry(2,0.12,8,48),new THREE.MeshBasicMaterial({color:'#bfefff'}));t1.rotation.x=Math.PI/2;t1.position.y=0.12;g2.add(t1);
     const c1=new THREE.Mesh(new THREE.CylinderGeometry(1.9,1.9,5,32,1,true),new THREE.MeshBasicMaterial({color:'#bfefff',transparent:true,opacity:0.22,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));c1.position.y=2.5;g2.add(c1);g2.position.set(0,0,-8);m.map.scene.add(g2);DI.exitRing=g2;
-    const mins=Math.round((Date.now()-DI.t0)/60000);levelFx('#bfefff','#ffffff',false);try{sfx('levelup');}catch(e){}popText(m.x,m.z,'CLEAR!','lvl',6);
+    dunClearExp(DI_NAME,0.7);const mins=Math.round((Date.now()-DI.t0)/60000);levelFx('#bfefff','#ffffff',false);try{sfx('levelup');}catch(e){}popText(m.x,m.z,'CLEAR!','lvl',6);
     say(`👑 พิชิต ${DI_NAME} สำเร็จ! (${mins} นาที) +${g.toLocaleString()} z · เดินเข้าวงแสงกลางห้องเพื่อกลับเมือง`,'sys');saveSoon();}}
 /* ---------- Penne at the snow town ---------- */
 const DI_CAMP=[-6,-48];
@@ -20243,7 +20247,7 @@ function dpKill(m){if(!DP.on)return;const L=gDropMul();
     mons.forEach(q=>{if(q.dp&&q!==m&&!q.dead)q.hp=Math.min(q.hp,1);});ADV.hunt=ADV.hunt||{};const first=!ADV.hunt.pc1;ADV.hunt.pc1=(ADV.hunt.pc1||0)+1;if(typeof advAdd==='function')advAdd(first?180:50,first?`พิชิต ${DP_NAME} ครั้งแรก!`:`พิชิต ${DP_NAME}`);
     const g2=new THREE.Group();const t1=new THREE.Mesh(new THREE.TorusGeometry(2,0.12,8,48),new THREE.MeshBasicMaterial({color:'#ffd84a'}));t1.rotation.x=Math.PI/2;t1.position.y=0.12;g2.add(t1);
     const c1=new THREE.Mesh(new THREE.CylinderGeometry(1.9,1.9,5,32,1,true),new THREE.MeshBasicMaterial({color:'#ffe08a',transparent:true,opacity:0.22,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));c1.position.y=2.5;g2.add(c1);m.map.scene.add(g2);DP.exitRing=g2;
-    const mins=Math.round((Date.now()-DP.t0)/60000);levelFx('#ffd84a','#fff6c8',false);try{sfx('levelup');}catch(e){}popText(0,0,'CLEAR!','lvl',6);
+    dunClearExp(DP_NAME,0.8);const mins=Math.round((Date.now()-DP.t0)/60000);levelFx('#ffd84a','#fff6c8',false);try{sfx('levelup');}catch(e){}popText(0,0,'CLEAR!','lvl',6);
     say(`👑 พิชิต ${DP_NAME} สำเร็จ! (${mins} นาที) +${g.toLocaleString()} z · เกล็ดปิศาจทะเล ${inv[DP_MAT.scale]} ชิ้นเข้ากระเป๋า · เดินเข้าวงแสงกลางเรือเพื่อกลับแคมป์`,'sys');saveSoon();}}
 /* ---------- Uncle Guibo at the beach camp pier ---------- */
 const DP_CAMP=[6,40];
@@ -20272,6 +20276,10 @@ ITEM_KINDS.push({name:DP_ITEM,w:2,draw(g){g.fillStyle='#2b1f1a';g.fillRect(4,12,
   g.fillStyle='#ff9a6a';g.beginPath();g.ellipse(21,19,5,3,0.3,0,7);g.fill();g.fillStyle='#5ab87a';g.fillRect(9,23,14,3);g.fillStyle='#c8963a';g.fillRect(3,8,26,5);g.fillStyle='#2b1f1a';g.fillRect(14,4,4,5);}});
 {const ik=ITEM_KINDS[ITEM_KINDS.length-1],c=document.createElement('canvas');c.width=c.height=32;ik.draw(c.getContext('2d'));ik.tex=new THREE.CanvasTexture(c);ik.tex.magFilter=THREE.NearestFilter;ik.tex.minFilter=THREE.NearestFilter;ik.tex.generateMipmaps=false;ICON_URL[ik.name]=c.toDataURL();}
 const dpCss=document.createElement('style');dpCss.textContent=`#dpHud{position:absolute;top:calc(48px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);padding:5px 14px;border-radius:18px;background:rgba(40,16,10,.86);border:1px solid #e8b830;color:#ffe9c8;font:600 12.5px var(--display);z-index:5;pointer-events:none;white-space:nowrap}#dpHud b{color:#ffd84a}`;document.head.appendChild(dpCss);
+/* dungeon monsters were built on the plain mkS curve, which is far below the tuned field monsters: rebase them on the field monster of the same level */
+{const F=Object.values(MON_TYPES).filter(T=>!T.boss&&!T.sq&&T.lv&&T.hp&&T.exp&&T.atk);const near=lv=>F.reduce((b,T)=>Math.abs(T.lv-lv)<Math.abs(b.lv-lv)?T:b,F[0]);
+ Object.entries(MON_TYPES).forEach(([k,T])=>{if(!/^(dg|di|pc)_/.test(k))return;const B=mkS(T.lv),N=near(T.lv),rh=T.hp/B.hp,re=T.exp/B.exp;T.hp=Math.round(N.hp*rh);T.exp=Math.round(N.exp*re);
+   T.atk=T.atk.map((v,i)=>Math.round(Math.max(v,N.atk[i]*(v/(B.atk[i]||1)))));});}
 
 const RPS=[
  {id:'atk',perm:'atk',n:'ตราแห่งพลัง: ATK +2 ถาวร',ic:'หินพลัง ATK Ⅲ',base:20,step:5,cap:t=>5*(t+1),t:0},
