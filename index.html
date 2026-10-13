@@ -18174,52 +18174,83 @@ function bsCompound(){const R=bsRecipes().find(r=>r.id===bsSel);if(!R)return;con
     else if(t.dataset.bspg){bsPage=Math.max(0,bsPage+Number(t.dataset.bspg));renderCraft();}
     else if(t.dataset.bscare){const R=bsRecipes().find(r=>r.id===bsSel);bsCare=Math.max(0,Math.min(100-bsRate(R),bsCare+Number(t.dataset.bscare)*5));renderCraft();}
     else if(t.id==='bsGo')bsCompound();});})();
-/* ===================== ITEM SHOP (list + detail + total price) ===================== */
-let spMode='buy',spSel=null,spQty=1,spPage=0,spUse=false,spArch=null,spCat='eq';
+/* ===================== ITEM SHOP v2: scroll list, inline buy/sell, sell-all ===================== */
+let spMode='buy',spSel=null,spQty=1,spUse=false,spArch=null,spCat='eq',spSellCat='all',spConfirm=null,spMats=false;
 const SP_CATS=[['eq','อุปกรณ์'],['use','ของใช้'],['stone','หินพลัง']];
-function spRows(){if(spMode==='buy'){const st=shopStock();if(spCat==='eq')return st.eq.filter(D=>!spUse||!canWear(D)).map(D=>({k:'eq:'+D.id,n:D.n,icon:D.icon,lv:D.lv,price:D.price,D}));return st.items.filter(n=>!!STN[n]===(spCat==='stone')).map(n=>({k:'it:'+n,n,icon:ICON_URL[n],lv:'--',price:PRICE[n]}));}
-  const R=Object.keys(inv).map(n=>({k:'it:'+n,n,icon:ICON_URL[n],lv:'--',price:sellPrice(n),cnt:inv[n]}));
-  equipBag.forEach(I=>{const D=EQ_DB[I.id];if(Object.values(equipped).includes(I))return;R.push({k:'iq:'+I.uid,n:eqName(I),icon:D.icon,lv:D.lv,price:Math.round(D.price/2*(1+I.ref*0.3)),D,I,cnt:1});});return R;}
+const SP_SELLCATS=[['all','ทั้งหมด'],['loot','ของดรอป'],['mat','วัตถุดิบคราฟ'],['use','ของใช้'],['eq','อุปกรณ์']];
+const SP_KEEP=n=>(typeof CARD_BY_NAME==='function'&&CARD_BY_NAME(n))||STN[n]||n==='แร่เพิ่มพลัง'||/^หินพลัง|เศษคำสาป|หม้อชาบู|ชุดอาหารทะเล/.test(n);
+function spKind(n){if(USE[n])return'use';if(isCraftMat(n))return'mat';if(SP_KEEP(n))return'keep';return'loot';}
+function spRows(){if(spMode==='buy'){const st=shopStock();if(spCat==='eq')return st.eq.filter(D=>!spUse||!canWear(D)).map(D=>({k:'eq:'+D.id,n:D.n,icon:D.icon,lv:D.lv,price:D.price,D}));return st.items.filter(n=>!!STN[n]===(spCat==='stone')).map(n=>({k:'it:'+n,n,icon:ICON_URL[n],lv:'',price:PRICE[n]}));}
+  const R=[];if(spSellCat!=='eq')Object.keys(inv).forEach(n=>{const kd=spKind(n);if(spSellCat!=='all'&&kd!==spSellCat)return;R.push({k:'it:'+n,n,icon:ICON_URL[n],lv:'',price:sellPrice(n),cnt:inv[n],kd});});
+  if(spSellCat==='all'||spSellCat==='eq')equipBag.forEach(I=>{const D=EQ_DB[I.id];if(Object.values(equipped).includes(I))return;R.push({k:'iq:'+I.uid,n:eqName(I),icon:D.icon,lv:D.lv,price:Math.round(D.price/2*(1+I.ref*0.3)),D,I,cnt:1,kd:'eq'});});return R;}
 function spDesc(r){if(r.D)return eqcDesc(r.D);const d=itemDesc(r.n);if(d)return d;if(STN[r.n]){const S_=STN[r.n];return `ยัดลงรูของคราฟ ⭐ เพื่อเพิ่ม ${S_.s} แบบสุ่ม +${STONE_G[S_.g][1]}~${STONE_G[S_.g][2]}`;}
-  if(typeof CARD_BY_NAME==='function'&&CARD_BY_NAME(r.n))return CARD_BY_NAME(r.n).label;if(typeof isCraftMat==='function'&&isCraftMat(r.n))return 'วัตถุดิบสำหรับคราฟชุดเซตที่ช่างตีเหล็ก ดรอปจาก '+matWhere(r.n);return 'ไอเทมทั่วไป';}
-function spStat(r){const D=r.D,st=Object.assign({},(D&&D.stats)||{}),rb=r.I?refBonus(r.I):{};if(D&&(D.archable||D.craft)){const a=r.I?archOf(r.I):spArch;const as=archStats(a,D.lv);for(const k in as)st[k]=(st[k]||0)+as[k];}const v=k=>{if(!D)return'<i>-</i>';let n=k==='ATK'?(D.atk||0)+(rb.atk||0)+(st.ATK||0):k==='DEF'?(D.def||0)+(rb.def||0)+(st.DEF||0):(st[k]||0);return n?`<b>${n}</b>`:'<i>-</i>';};
-  return ['ATK','INT','DEF','CHA','AGI','TAL','VIT','LCK'].map(k=>`<span>${k}</span>${v(k)}`).join('');}
-function spInvHtml(hl){const names=Object.keys(inv),cells=names.map(n=>`<span class="bsi ${hl===n?'need':''}" title="${n}"><img alt="" src="${ICON_URL[n]||''}">${inv[n]>1?`<u>${inv[n]}</u>`:''}</span>`);
-  equipBag.forEach(I=>{const D=EQ_DB[I.id];cells.push(`<span class="bsi ${D.craft?'craft':''}" data-eqc="uid:${I.uid}"><img alt="" src="${D.icon}">${I.ref?`<u>+${I.ref}</u>`:''}</span>`);});
-  while(cells.length<30||cells.length%6)cells.push('<i class="bsi empty"></i>');return cells.join('');}
+  if(typeof CARD_BY_NAME==='function'&&CARD_BY_NAME(r.n))return CARD_BY_NAME(r.n).label;if(isCraftMat(r.n))return 'วัตถุดิบสำหรับคราฟชุดเซตที่ช่างตีเหล็ก ดรอปจาก '+matWhere(r.n);return 'ของดรอปทั่วไป ขายเป็นเงินได้';}
+function spStat(r){const D=r.D;if(!D)return'';const st=Object.assign({},D.stats||{}),rb=r.I?refBonus(r.I):{};if(D.archable||D.craft){const a=r.I?archOf(r.I):spArch;const as=archStats(a,D.lv);for(const k in as)st[k]=(st[k]||0)+as[k];}
+  const v=k=>{let n=k==='ATK'?(D.atk||0)+(rb.atk||0)+(st.ATK||0):k==='DEF'?(D.def||0)+(rb.def||0)+(st.DEF||0):(st[k]||0);return n?`<b>${n}</b>`:'<i>-</i>';};
+  return `<div class="spst">${['ATK','INT','DEF','CHA','AGI','TAL','VIT','LCK'].map(k=>`<span>${k}</span>${v(k)}`).join('')}${D.matk?`<span>MATK</span><b>${D.matk}</b>`:''}</div>`;}
+/* bulk sell: loot (+ craft materials when ticked), or every unequipped, un-refined, non-craft piece of gear */
+function spBulk(kind){if(kind==='eq'){const L=equipBag.filter(I=>{const D=EQ_DB[I.id];return!Object.values(equipped).includes(I)&&!I.ref&&!I.q&&!D.craft&&!(I.cards&&I.cards.length)&&!(I.stones&&Object.keys(I.stones).length);});
+    return{n:L.length,z:L.reduce((a,I)=>a+Math.round(EQ_DB[I.id].price/2),0),go(){L.forEach(I=>equipBag.splice(equipBag.indexOf(I),1));}};}
+  const L=Object.keys(inv).filter(n=>{const k=spKind(n);return k==='loot'||(spMats&&k==='mat');});return{n:L.reduce((a,n)=>a+inv[n],0),z:L.reduce((a,n)=>a+sellPrice(n)*inv[n],0),go(){L.forEach(n=>delete inv[n]);}};}
 function renderShop(){const w=document.getElementById('shopWin');if(w.hidden)return;if(!spArch)spArch=archDefault();eqcPrevArch=spArch;
-  document.getElementById('spGold').textContent=gold.toLocaleString();
-  document.querySelectorAll('[data-spmode]').forEach(b=>b.setAttribute('aria-selected',b.dataset.spmode===spMode));document.getElementById('spUse').checked=spUse;
-  document.getElementById('spCats').hidden=spMode!=='buy';document.querySelectorAll('[data-spcat]').forEach(b=>b.setAttribute('aria-selected',b.dataset.spcat===spCat));
-  const L=spRows(),per=8,pages=Math.max(1,Math.ceil(L.length/per));spPage=Math.min(spPage,pages-1);
-  if(!L.some(r=>r.k===spSel)){spSel=L[0]?L[0].k:null;spQty=1;}
-  document.getElementById('spList').innerHTML=L.slice(spPage*per,spPage*per+per).map(r=>`<button class="spr ${r.k===spSel?'sel':''}" data-spk="${r.k}" ${r.D?`data-eqc="${r.I?'uid:'+r.I.uid:'id:'+r.D.id}"`:''}><img alt="" src="${r.icon}"><b>${r.n}${r.cnt>1?` <small>×${r.cnt}</small>`:''}</b><span class="lv ${r.D&&canWear(r.D)?'no':''}">${r.lv}</span><em>${r.price.toLocaleString()}z</em></button>`).join('')||'<p class="shempty">ไม่มีของ</p>';
-  document.getElementById('spPage').textContent=`${spPage+1}/${pages}`;
+  document.getElementById('spGold').textContent=gold.toLocaleString();const buy=spMode==='buy';
+  document.querySelectorAll('[data-spmode]').forEach(b=>b.setAttribute('aria-selected',b.dataset.spmode===spMode));document.getElementById('spUseW').hidden=!buy||spCat!=='eq';document.getElementById('spUse').checked=spUse;
+  document.getElementById('spCats').innerHTML=(buy?SP_CATS:SP_SELLCATS).map(([k,t])=>`<button data-spcat="${k}" aria-selected="${k===(buy?spCat:spSellCat)}">${t}</button>`).join('');
+  const L=spRows();if(!L.some(r=>r.k===spSel)){spSel=L[0]?L[0].k:null;spQty=1;}
+  document.getElementById('spList').innerHTML=L.map(r=>`<div class="spr2 ${r.k===spSel?'sel':''}" data-spk="${r.k}" ${r.D?`data-eqc="${r.I?'uid:'+r.I.uid:'id:'+r.D.id}"`:''}>
+     <img alt="" src="${r.icon}"><span class="spn"><b>${r.n}</b><small>${r.D?`Lv ${r.D.lv}${canWear(r.D)?' · <em>'+canWear(r.D)+'</em>':''}`:buy?'':`มี ${r.cnt} ชิ้น`}</small></span><span class="spp">${r.price.toLocaleString()} z</span>
+     ${buy?`<button class="spb" data-spqk="${r.k}" data-n="1" ${r.price>gold?'disabled':''}>ซื้อ</button>`:`${r.cnt>1?`<button class="spb s1" data-spqk="${r.k}" data-n="1">ขาย 1</button>`:''}<button class="spb sa" data-spqk="${r.k}" data-n="all">${r.cnt>1?'ขายหมด':'ขาย'}</button>`}</div>`).join('')||'<p class="shempty">ไม่มีของในหมวดนี้</p>';
   const r=L.find(x=>x.k===spSel),P=document.getElementById('spInfo');
-  if(!r){P.innerHTML='<p class="shempty">—</p>';}else{const max=r.D?1:spMode==='buy'?99:r.cnt;spQty=Math.max(1,Math.min(spQty,max));const tot=r.price*spQty;
-    P.innerHTML=`<h3>${r.n}</h3><p class="bsd">${spDesc(r)}</p>${r.D?`<small class="bslv">Lv ${r.D.lv}${canWear(r.D)?` · <em>${canWear(r.D)}</em>`:''}</small>`:''}${spMode==='buy'&&r.D&&r.D.archable?`<div class="bsarch"><span>สายสเตตัส</span>${Object.entries(ARCH).map(([k,A])=>`<button data-sparch="${k}" style="--ac:${A.col}" aria-selected="${k===spArch}" title="${A.st.join(' / ')}">${(BUILDS[LINE]||[]).includes(k)?'★':''}${A.n}</button>`).join('')}<small>${ARCH[spArch].st.join(' / ')} · แนะนำ: ${(BUILDS[LINE]||[]).map(k=>ARCH[k].n).join(', ')}</small></div>`:''}<div class="spst">${spStat(r)}</div>
-    <div class="sptot"><span class="spttl">Total-Price</span><img alt="" src="${r.icon}"><span>×</span><div class="spq"><button data-spq="-1">−</button><input id="spQty" value="${spQty}" inputmode="numeric"><button data-spq="1">+</button></div><b class="${spMode==='buy'&&tot>gold?'no':''}">${tot.toLocaleString()} z</b>
-    <button class="spgo" id="spGo" ${spMode==='buy'&&tot>gold?'disabled':''}>${spMode==='buy'?'Buy':'Sell'}</button></div>`;}
-  document.getElementById('spInv').innerHTML=spInvHtml(r&&!r.D?r.n:null);}
-function spDo(){const L=spRows(),r=L.find(x=>x.k===spSel);if(!r)return;const q=spQty,tot=r.price*q;
-  if(spMode==='buy'){if(gold<tot){say('เงินไม่พอ','sys');return;}gold-=tot;if(r.D){const NI=newEq(r.D.id);if(r.D.archable)NI.arch=spArch;equipBag.push(NI);say(`ซื้อ ${r.n} (-${tot.toLocaleString()} z) กด I แล้วคลิกเพื่อสวมใส่`,'sys');}else{inv[r.n]=(inv[r.n]||0)+q;say(`ซื้อ ${r.n} ×${q} (-${tot.toLocaleString()} z)`,'sys');}}
-  else{if(r.I){gold+=r.price;equipBag.splice(equipBag.indexOf(r.I),1);say(`ขาย ${r.n} ได้ ${r.price.toLocaleString()} z`,'sys');}else{const c=Math.min(q,inv[r.n]||0);if(!c)return;gold+=r.price*c;inv[r.n]-=c;if(!inv[r.n])delete inv[r.n];say(`ขาย ${r.n} ×${c} ได้ ${(r.price*c).toLocaleString()} z`,'sys');}spQty=1;}
-  sfx('coin');updateInv();renderShop();}
-(function(){const w=document.getElementById('shopWin');w.classList.add('spw');
-  w.innerHTML=`<div class="hd bshd"><span>🛒 Item Shop</span><label class="spuse"><input type="checkbox" id="spUse"> ใส่ได้เท่านั้น</label><span class="bsgold"><b id="spGold">0</b> z</span><button class="x" data-close="shopWin" aria-label="ปิด">✕</button></div>
-  <div class="bsbody"><div class="bsL"><div class="bstabs"><button data-spmode="buy" style="--c:#f0b8a8">ซื้อ</button><button data-spmode="sell" style="--c:#88d0a8">ขาย</button></div><div class="spcats" id="spCats">${SP_CATS.map(([k,t])=>`<button data-spcat="${k}">${t}</button>`).join('')}</div>
-    <div class="splist"><div class="sphd"><span>Item List</span><span>Lv.</span><span>Price</span></div><div id="spList"></div></div>
-    <div class="bspg"><button data-sppg="-1">◀</button><span>Page <b id="spPage">1</b></span><button data-sppg="1">▶</button></div></div>
-  <div class="bsR"><div class="bsinfo" id="spInfo"></div><div class="bsinv" id="spInv"></div></div></div>`;
-  w.addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;
-    if(t.dataset.spmode){spMode=t.dataset.spmode;spSel=null;spPage=0;}
-    else if(t.dataset.spcat){spCat=t.dataset.spcat;spSel=null;spPage=0;}
-    else if(t.dataset.spk){if(spSel!==t.dataset.spk)spQty=1;spSel=t.dataset.spk;}
-    else if(t.dataset.sppg){spPage=Math.max(0,spPage+Number(t.dataset.sppg));}
-    else if(t.dataset.spq){spQty+=Number(t.dataset.spq);}
+  if(!r)P.innerHTML='<p class="shempty">เลือกของจากรายการ</p>';else{const max=r.D?1:buy?Math.max(1,Math.min(999,Math.floor(gold/Math.max(1,r.price)))):r.cnt;spQty=Math.max(1,Math.min(spQty,max));const tot=r.price*spQty;
+    P.innerHTML=`<div class="sph"><img alt="" src="${r.icon}"><div><h3>${r.n}</h3><small>${r.D?`Lv ${r.D.lv}`:''} ${r.cnt?`· มีอยู่ ${r.cnt} ชิ้น`:inv[r.n]?`· มีอยู่ ${inv[r.n]} ชิ้น`:''}</small></div></div><p class="bsd">${spDesc(r)}</p>
+    ${buy&&r.D&&r.D.archable?`<div class="bsarch"><span>สายสเตตัส</span>${Object.entries(ARCH).map(([k,A])=>`<button data-sparch="${k}" style="--ac:${A.col}" aria-selected="${k===spArch}" title="${A.st.join(' / ')}">${(BUILDS[LINE]||[]).includes(k)?'★':''}${A.n}</button>`).join('')}</div>`:''}${spStat(r)}
+    <div class="sptot2">${r.D?'':`<div class="spq"><button data-spq="-10">−10</button><button data-spq="-1">−</button><input id="spQty" value="${spQty}" inputmode="numeric"><button data-spq="1">+</button><button data-spq="10">+10</button><button data-spq="max">${buy?'สูงสุด':'ทั้งหมด'}</button></div>`}
+      <button class="spgo ${buy?'':'sell'}" id="spGo" ${buy&&tot>gold?'disabled':''}>${buy?'ซื้อ':'ขาย'}${r.D?'':` ×${spQty}`} · ${tot.toLocaleString()} z</button></div>`;}
+  const bk=document.getElementById('spBulk');if(buy){bk.hidden=true;}else{bk.hidden=false;const A=spBulk('loot'),E=spBulk('eq');
+    bk.innerHTML=`<label class="spmat"><input type="checkbox" id="spMats" ${spMats?'checked':''}> รวมวัตถุดิบคราฟ</label>
+      <button class="spbulk ${spConfirm==='loot'?'ask':''}" data-spbulk="loot" ${A.n?'':'disabled'}>${spConfirm==='loot'?'กดอีกครั้งเพื่อยืนยัน':'💰 ขายของดรอปทั้งหมด'}<small>${A.n} ชิ้น · ${A.z.toLocaleString()} z</small></button>
+      <button class="spbulk ${spConfirm==='eq'?'ask':''}" data-spbulk="eq" ${E.n?'':'disabled'}>${spConfirm==='eq'?'กดอีกครั้งเพื่อยืนยัน':'🛡 ขายอุปกรณ์ที่ไม่ใช้'}<small>${E.n} ชิ้น · ${E.z.toLocaleString()} z</small></button>`;}}
+function spSell(r,q){if(r.I){gold+=r.price;equipBag.splice(equipBag.indexOf(r.I),1);say(`ขาย ${r.n} ได้ ${r.price.toLocaleString()} z`,'sys');return;}const c=Math.min(q,inv[r.n]||0);if(!c)return;gold+=r.price*c;inv[r.n]-=c;if(!inv[r.n])delete inv[r.n];say(`ขาย ${r.n} ×${c} ได้ ${(r.price*c).toLocaleString()} z`,'sys');}
+function spBuy(r,q){const tot=r.price*q;if(gold<tot){say('เงินไม่พอ','sys');return false;}gold-=tot;if(r.D){const NI=newEq(r.D.id);if(r.D.archable)NI.arch=spArch;equipBag.push(NI);say(`ซื้อ ${r.n} (-${tot.toLocaleString()} z) กด I แล้วคลิกเพื่อสวมใส่`,'sys');}else{inv[r.n]=(inv[r.n]||0)+q;say(`ซื้อ ${r.n} ×${q} (-${tot.toLocaleString()} z)`,'sys');}return true;}
+function spDo(){const r=spRows().find(x=>x.k===spSel);if(!r)return;if(spMode==='buy'){if(!spBuy(r,spQty))return;}else{spSell(r,spQty);spQty=1;}sfx('coin');updateInv();renderShop();}
+(function(){const w=document.getElementById('shopWin');w.classList.add('spw','sp2');
+  w.innerHTML=`<div class="hd bshd"><span>🛒 ร้านค้า</span><span class="bsgold">💰 <b id="spGold">0</b> z</span><button class="x" data-close="shopWin" aria-label="ปิด">✕</button></div>
+  <div class="sp2b"><div class="sp2l"><div class="bstabs"><button data-spmode="buy" style="--c:#f0b8a8">🛍 ซื้อ</button><button data-spmode="sell" style="--c:#88d0a8">💰 ขาย</button></div>
+    <div class="spcats" id="spCats"></div><label class="spuse" id="spUseW"><input type="checkbox" id="spUse"> แสดงเฉพาะที่ใส่ได้</label>
+    <div class="splist2" id="spList"></div><div class="spbulkw" id="spBulk" hidden></div></div>
+  <div class="sp2r" id="spInfo"></div></div>`;
+  w.addEventListener('click',e=>{const t=e.target.closest('button');const row=e.target.closest('[data-spk]');
+    if(t&&t.dataset.spqk){const r=spRows().find(x=>x.k===t.dataset.spqk);if(!r)return;spConfirm=null;if(spMode==='buy'){if(!spBuy(r,1))return;}else spSell(r,t.dataset.n==='all'?r.cnt:1);sfx('coin');updateInv();renderShop();return;}
+    if(!t&&row){if(spSel!==row.dataset.spk)spQty=1;spSel=row.dataset.spk;spConfirm=null;renderShop();return;}if(!t)return;
+    if(t.dataset.spmode){spMode=t.dataset.spmode;spSel=null;spConfirm=null;}
+    else if(t.dataset.spcat){if(spMode==='buy')spCat=t.dataset.spcat;else spSellCat=t.dataset.spcat;spSel=null;spConfirm=null;}
+    else if(t.dataset.spq){const r=spRows().find(x=>x.k===spSel);if(t.dataset.spq==='max')spQty=r?(spMode==='buy'?Math.max(1,Math.floor(gold/Math.max(1,r.price))):r.cnt||1):1;else spQty+=Number(t.dataset.spq);}
     else if(t.dataset.sparch){spArch=t.dataset.sparch;}
+    else if(t.dataset.spbulk){const k=t.dataset.spbulk;if(spConfirm!==k){spConfirm=k;renderShop();return;}const B=spBulk(k);if(B.n){B.go();gold+=B.z;sfx('coin');say(`💰 ขาย${k==='eq'?'อุปกรณ์':'ของดรอป'} ${B.n} ชิ้น ได้ ${B.z.toLocaleString()} z`,'sys');popText(player.x,player.z,`+${B.z.toLocaleString()} z`,'gain',3);}spConfirm=null;updateInv();}
     else if(t.id==='spGo'){spDo();return;}else return;renderShop();});
-  w.addEventListener('change',e=>{if(e.target.id==='spUse'){spUse=e.target.checked;spPage=0;renderShop();}else if(e.target.id==='spQty'){spQty=parseInt(e.target.value)||1;renderShop();}});})();
+  w.addEventListener('change',e=>{if(e.target.id==='spUse'){spUse=e.target.checked;renderShop();}else if(e.target.id==='spMats'){spMats=e.target.checked;spConfirm=null;renderShop();}else if(e.target.id==='spQty'){spQty=parseInt(e.target.value)||1;renderShop();}});
+  const st=document.createElement('style');st.textContent=`
+  .sp2 .sp2b{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:8px;padding:8px;min-height:0;flex:1;overflow:hidden}
+  .sp2 .sp2l{display:flex;flex-direction:column;min-height:0;gap:6px}
+  .sp2 .spcats{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;flex:none}.sp2 .spcats button{flex:none;height:28px;padding:0 10px;font-size:12.5px;border-radius:14px;white-space:nowrap}.sp2 .spcats button[aria-selected=true]{background:#6e4a2c;color:#fbecc8}
+  .sp2 .spuse{font-size:12px;color:#f3e6c4;display:flex;gap:6px;align-items:center}
+  .sp2 .splist2{flex:1;min-height:120px;overflow-y:auto;background:#efe0bf;border:1px solid #3a2a18;border-radius:6px;padding:4px;display:flex;flex-direction:column;gap:3px;overscroll-behavior:contain}
+  .sp2 .spr2{display:grid;grid-template-columns:34px minmax(0,1fr) auto auto auto;gap:6px;align-items:center;padding:4px 6px;border-radius:6px;background:#f8efd8;border:1px solid rgba(110,75,44,.25);cursor:pointer}
+  .sp2 .spr2.sel{background:#cfeedd;border-color:#4a9a6a;box-shadow:inset 0 0 0 1px #4a9a6a}.sp2 .spr2 img{width:32px;height:32px;image-rendering:pixelated}
+  .sp2 .spn{display:flex;flex-direction:column;min-width:0}.sp2 .spn b{font:600 13.5px var(--display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sp2 .spn small{font-size:11px;color:var(--muted)}.sp2 .spn em{color:#b03a2a;font-style:normal}
+  .sp2 .spp{font:700 13px var(--body);color:#7a3ab0;white-space:nowrap}
+  .sp2 .spb{height:30px;padding:0 10px;font-size:12.5px;white-space:nowrap}.sp2 .spb.sa{background:linear-gradient(#bfe8c8,#7ac08a);border-color:#3a7a4a}.sp2 .spb:disabled{opacity:.4}
+  .sp2 .spbulkw{display:flex;flex-direction:column;gap:5px;background:rgba(0,0,0,.18);border-radius:6px;padding:6px}.sp2 .spmat{font-size:12px;color:#f3e6c4;display:flex;gap:6px;align-items:center}
+  .sp2 .spbulk{height:auto;min-height:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font:600 14px var(--display);background:linear-gradient(#ffe39a,#e0a840);border-color:#8a5a1a}
+  .sp2 .spbulk small{font:500 11.5px var(--body);color:#5a3a10}.sp2 .spbulk.ask{background:linear-gradient(#ffb09a,#e0603a);color:#fff}.sp2 .spbulk.ask small{color:#fff}.sp2 .spbulk:disabled{opacity:.45}
+  .sp2 .sp2r{background:#f3e6c8;border:1px solid #3a2a18;border-radius:6px;padding:10px;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+  .sp2 .sph{display:flex;gap:10px;align-items:center}.sp2 .sph img{width:44px;height:44px;image-rendering:pixelated;background:#e8d6ae;border-radius:8px;padding:4px}.sp2 .sph h3{margin:0;font:600 17px var(--display)}.sp2 .sph small{color:var(--muted)}
+  .sp2 .bsd{margin:0;font-size:13px;line-height:1.5}
+  .sp2 .spst{display:grid;grid-template-columns:repeat(4,auto 1fr);gap:2px 8px;font-size:12px}.sp2 .spst i{color:#aaa;font-style:normal}
+  .sp2 .sptot2{margin-top:auto;display:flex;flex-direction:column;gap:6px}.sp2 .spq{display:flex;gap:4px;align-items:center;flex-wrap:wrap}.sp2 .spq button{height:30px;min-width:34px;padding:0 6px}.sp2 .spq input{width:56px;height:30px;text-align:center;font:600 15px var(--body);border:1px solid #8a6a45;border-radius:5px}
+  .sp2 .spgo{height:44px;font:700 16px var(--display);background:linear-gradient(#8a5a32,#5a3a1e);color:#fff3d0;border-color:#2a1a0a}.sp2 .spgo.sell{background:linear-gradient(#5ab87a,#2a7a4a)}.sp2 .spgo:disabled{opacity:.45}
+  @media (max-width:700px){#shopWin.sp2{max-height:calc(100% - 20px);top:calc(8px + env(safe-area-inset-top,0px))}.sp2 .sp2b{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) auto;overflow:hidden}
+    .sp2 .sp2r{max-height:34vh}.sp2 .sp2r .bsd{font-size:12px}.sp2 .sp2r .spst{display:none}.sp2 .sph img{width:34px;height:34px}.sp2 .sph h3{font-size:15px}.sp2 .spr2{grid-template-columns:30px minmax(0,1fr) auto auto auto}.sp2 .spb{padding:0 7px}}`;document.head.appendChild(st);})();
 
 function openRefine(){toggleWin('refWin',true);renderRefine();}
 function starterGear(){for(const s in equipped)equipped[s]=null;equipBag.length=0;
