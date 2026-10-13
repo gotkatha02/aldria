@@ -18657,7 +18657,7 @@ function killMon(m){if(AUTO.on)AUTO.kills++;if(typeof advKill==='function')advKi
   {const D=rollEqDrop(m);if(D){createItem(m.x-0.5,m.z+0.4,D.kind,true,m.map.scene);setTimeout(()=>popText(m.x,m.z,`<img alt="" src="${D.icon}">ดรอป ${D.n}!`,'drop',1.3,{html:true,life:2.6,rise:1}),650);say(`★ ${m.T.name} ดรอปอุปกรณ์ ${D.n}!`,'sys');}
    const C=rollCardDrop(m);if(C){ITEM_KINDS.includes(C.kind)||ITEM_KINDS.push(C.kind);createItem(m.x+0.6,m.z-0.4,C.kind,true,m.map.scene);setTimeout(()=>popText(m.x,m.z,`<img alt="" src="${C.icon}">${C.name}!!`,'drop',1.0,{html:true,life:3,rise:1.2}),900);say(`★★ ${m.T.name} ดรอป ${C.name}! (${C.label})`,'sys');sfx('levelup');}}
   rollMatDrop(m);rollOreDrop(m);rollStoneDrop(m);eliteLoot(m);sfx('kill');
-  if(m.dg&&typeof dgKill==='function')dgKill(m);if(m.di&&typeof diKill==='function')diKill(m);if(m.dp&&typeof dpKill==='function')dpKill(m);if(m.gb&&typeof gbKill==='function')gbKill(m);if(m.hunt){huntLoot(m);}else{if(!m.sq&&!m.summ&&!m.dg&&!m.di&&!m.dp&&!m.gb)setTimeout(()=>spawnMon(m.type,m.map,m.reg),m.T.boss?60000:6000);if(m.T.boss)say(`ปราบบอส ${m.T.name} สำเร็จ!`,'sys');}
+  if((m.dg||m.di||m.dp)&&!m.T.boss&&!m.box&&!m.cannon&&!m.crys)rpTick(m.dg?2:m.di?2.5:3);if(m.dg&&typeof dgKill==='function')dgKill(m);if(m.di&&typeof diKill==='function')diKill(m);if(m.dp&&typeof dpKill==='function')dpKill(m);if(m.gb&&typeof gbKill==='function')gbKill(m);if(m.hunt){huntLoot(m);}else{if(!m.sq&&!m.summ&&!m.dg&&!m.di&&!m.dp&&!m.gb)setTimeout(()=>spawnMon(m.type,m.map,m.reg),m.T.boss?60000:6000);if(m.T.boss)say(`ปราบบอส ${m.T.name} สำเร็จ!`,'sys');}
 }
 function monStep(m,tx,tz,spd,dt){const dx=tx-m.x,dz=tz-m.z,d=Math.hypot(dx,dz);if(d<0.05)return false;const st=Math.min(d,spd*dt),nx=m.x+dx/d*st,nz=m.z+dz/d*st;
   m.face=(dx*Math.cos(camYaw)-dz*Math.sin(camYaw))>0?-1:1;
@@ -19231,6 +19231,9 @@ function advAdd(n,why){if(!n||!ADV.ready)return;const l0=advLevel();ADV.rev++;AD
     else{popText(player.x,player.z,`ADVENTURE Lv ${l1}`,'gain',4.6);say(`🎖 ระดับนักผจญภัย Lv ${l1} · ATK +1`,'sys');}
     advHud();}
   if(!document.getElementById('advWin').hidden)renderAdv();}
+/* bonus RP (shop currency only, does not raise rank) for dungeons and bosses */
+function rpAdd(n,why){if(!n||!ADV.ready)return;ADV.rp+=n;ADV.rev++;popText(player.x,player.z,`+${n.toLocaleString()} RP`,'gain',4.6);say(`🎖 ${why}: +${n.toLocaleString()} RP`,'sys');advSave&&advSave();if(!document.getElementById('advWin').hidden)renderAdv();}
+let rpAcc=0,rpAccT=0;function rpTick(n){rpAcc+=n;if(time-rpAccT>4&&rpAcc>=1){const v=Math.floor(rpAcc);rpAcc-=v;rpAccT=time;ADV.rp+=v;ADV.rev++;popText(player.x,player.z,`+${v} RP`,'gain',4.2);}}
 function advKill(m){if(!m||!m.T)return;const k=m.type,c=(ADV.kills[k]||0)+1;ADV.kills[k]=c;ADV.rev++;
   if(c===1)advAdd(m.T.boss?25:3,`พบมอนใหม่: ${m.T.name.replace('★ ','')}`);
   else if(c===50||c===200)advAdd(c===50?3:6,`ล่า ${m.T.name.replace('★ ','')} ครบ ${c}`);
@@ -19366,7 +19369,7 @@ function huntLoot(m){const C=HUNT_CFG[m.hunt],lv=m.T.lv||1,id=m.huntId;HUNT.next
   const n=kind==='mvp'?5:2;for(let i=0;i<n;i++){rollMatDrop(m);const it=m.T.drops[Math.floor(Math.random()*m.T.drops.length)];if(it)inv[it]=(inv[it]||0)+1;}
   if(kind==='mvp'){rollStoneDrop(m);rollOreDrop(m);inv['ยาขาว']=(inv['ยาขาว']||0)+3;}
   updateInv();
-  if(typeof advAdd==='function'){ADV.hunt=ADV.hunt||{};const first=!ADV.hunt[id];ADV.hunt[id]=1;advAdd(kind==='mvp'?(first?60:20):(first?15:5),`${first?'ล่าครั้งแรก: ':'ล่าบอส '}${m.T.name.replace(/^\S+ /,'')}`);}
+  if(typeof advAdd==='function'){ADV.hunt=ADV.hunt||{};const first=!ADV.hunt[id];ADV.hunt[id]=1;advAdd(kind==='mvp'?(first?60:20):(first?15:5),`${first?'ล่าครั้งแรก: ':'ล่าบอส '}${m.T.name.replace(/^\S+ /,'')}`);rpAdd(kind==='mvp'?250:60,kind==='mvp'?'ล่าบอส MVP':'ล่ามินิบอส');}
   say(`${C.ic} ล่า ${m.T.name} สำเร็จ! +${g.toLocaleString()} z · เกิดใหม่ใน ${Math.round(C.respawn/60)} นาที`,'sys');
   if(kind==='mvp'){levelFx('#ffcf3a','#fff6c8',false);try{sfx('levelup');}catch(e){}}saveSoon();
   if(!document.getElementById('huntWin').hidden)renderHunt();}
@@ -19729,9 +19732,9 @@ function dgKill(m){if(!DG.on)return;const L=gDropMul();
     if(m.type!=='dg_bug'&&Math.random()<0.28*L)dgDrop(m,DG_MAT.cloth);if(m.type==='dg_anubis'&&Math.random()<0.35*L)dgDrop(m,DG_MAT.fang);if(m.type==='dg_bull'&&Math.random()<0.15*L)dgDrop(m,DG_MAT.fang);
     if(DG.need&&DG.kills===DG.need){say('🔓 ได้ยินเสียงประตูหินเลื่อนเปิด!','sys');try{sfx('job');}catch(e){}}}
   if(m.dgBoss==='camel'){DG.camelDead=true;dgDrop(m,DG_MAT.cloth,3);dgDrop(m,DG_MAT.fang,2);if(Math.random()<0.5)dgDrop(m,DG_MAT.gem,1);mons.forEach(q=>{if(q.dg&&q!==m&&q.map===curMap&&!q.dead)q.hp=Math.min(q.hp,1);});
-    say('🐪 ผู้เฝ้าสุสานล้มลงแล้ว! ประตูทางเหนือเปิดออก','sys');advAdd&&advAdd(10,'ปราบอูฐมัมมี่ผู้เฝ้าสุสาน');}
+    say('🐪 ผู้เฝ้าสุสานล้มลงแล้ว! ประตูทางเหนือเปิดออก','sys');rpAdd(200,'ปราบอูฐมัมมี่');advAdd&&advAdd(10,'ปราบอูฐมัมมี่ผู้เฝ้าสุสาน');}
   if(m.dgBoss==='maoh'){DG.maohDead=true;DG.boss=null;const g=Math.round(30000*(1+S('CHA')*0.01));gold+=g;dgDrop(m,DG_MAT.gem,3+(Math.random()<0.5?1:0));dgDrop(m,DG_MAT.fang,3);dgDrop(m,DG_MAT.cloth,4);inv['ยาสารพัด']=(inv['ยาสารพัด']||0)+3;updateInv();
-    ADV.hunt=ADV.hunt||{};const first=!ADV.hunt.dg1;ADV.hunt.dg1=(ADV.hunt.dg1||0)+1;if(typeof advAdd==='function')advAdd(first?100:30,first?`พิชิต ${DG_NAME} ครั้งแรก!`:`พิชิต ${DG_NAME}`);
+    ADV.hunt=ADV.hunt||{};const first=!ADV.hunt.dg1;ADV.hunt.dg1=(ADV.hunt.dg1||0)+1;if(typeof advAdd==='function')advAdd(first?100:30,first?`พิชิต ${DG_NAME} ครั้งแรก!`:`พิชิต ${DG_NAME}`);rpAdd(first?1500:800,`พิชิต ${DG_NAME}`);
     dunClearExp(DG_NAME,0.6);const mins=Math.round((Date.now()-DG.t0)/60000);levelFx('#ffd84a','#fff6c8',false);try{sfx('levelup');}catch(e){}popText(m.x,m.z,'CLEAR!','lvl',6);
     {const g=new THREE.Group();const t1=new THREE.Mesh(new THREE.TorusGeometry(2,0.12,8,48),new THREE.MeshBasicMaterial({color:'#ffd84a'}));t1.rotation.x=Math.PI/2;t1.position.y=0.12;g.add(t1);
      const c1=new THREE.Mesh(new THREE.CylinderGeometry(1.9,1.9,5,32,1,true),new THREE.MeshBasicMaterial({color:'#ffe08a',transparent:true,opacity:0.22,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));c1.position.y=2.5;g.add(c1);g.position.set(0,0,-38);m.map.scene.add(g);DG.exitRing=g;
@@ -20023,9 +20026,9 @@ function diKill(m){if(!DI.on)return;const L=gDropMul();
   if(['di_peng','di_mage','di_papa','di_golem'].includes(m.type)){DI.kills++;if(Math.random()<0.28*L)dgDrop(m,DI_MAT.feather);if((m.type==='di_golem'||m.type==='di_papa')&&Math.random()<0.4*L)dgDrop(m,DI_MAT.horn);if(m.type==='di_mage'&&Math.random()<0.12*L)dgDrop(m,DI_MAT.horn);
     if(DI.need&&DI.kills===DI.need&&DI.stage!=='F'){say('🔓 ได้ยินเสียงน้ำแข็งแตก ประตูเปิดออกแล้ว!','sys');try{sfx('job');}catch(e){}}}
   if(m.cannon){DI.cannonDown=(DI.cannonDown||0)+1;say(`💥 ทำลายปืนใหญ่น้ำแข็ง ${DI.cannonDown}/3`,'sys');if(DI.cannonDown>=3)say('🔓 ประตูหอคอยเปิดออกแล้ว!','sys');}
-  if(m.diBoss==='stag'){DI.stagDead=true;dgDrop(m,DI_MAT.horn,3);dgDrop(m,DI_MAT.feather,3);if(Math.random()<0.5)dgDrop(m,DI_MAT.core,1);mons.forEach(q=>{if(q.di&&q!==m&&q.map===curMap&&!q.dead)q.hp=Math.min(q.hp,1);});say('🦌 ราชากวางเขาผลึกล้มลงแล้ว! ประตูทางเหนือเปิดออก','sys');if(typeof advAdd==='function')advAdd(12,'ปราบราชากวางเขาผลึก');}
+  if(m.diBoss==='stag'){DI.stagDead=true;dgDrop(m,DI_MAT.horn,3);dgDrop(m,DI_MAT.feather,3);if(Math.random()<0.5)dgDrop(m,DI_MAT.core,1);mons.forEach(q=>{if(q.di&&q!==m&&q.map===curMap&&!q.dead)q.hp=Math.min(q.hp,1);});say('🦌 ราชากวางเขาผลึกล้มลงแล้ว! ประตูทางเหนือเปิดออก','sys');rpAdd(260,'ปราบราชากวาง');if(typeof advAdd==='function')advAdd(12,'ปราบราชากวางเขาผลึก');}
   if(m.diBoss==='venero'){DI.venDead=true;DI.boss=null;const g=Math.round(55000*(1+S('CHA')*0.01));gold+=g;dgDrop(m,DI_MAT.core,3+(Math.random()<0.5?1:0));dgDrop(m,DI_MAT.horn,3);dgDrop(m,DI_MAT.feather,4);inv['ยาสารพัด']=(inv['ยาสารพัด']||0)+3;updateInv();
-    mons.forEach(q=>{if(q.di&&q!==m&&!q.dead)q.hp=Math.min(q.hp,1);});ADV.hunt=ADV.hunt||{};const first=!ADV.hunt.di1;ADV.hunt.di1=(ADV.hunt.di1||0)+1;if(typeof advAdd==='function')advAdd(first?140:40,first?`พิชิต ${DI_NAME} ครั้งแรก!`:`พิชิต ${DI_NAME}`);
+    mons.forEach(q=>{if(q.di&&q!==m&&!q.dead)q.hp=Math.min(q.hp,1);});ADV.hunt=ADV.hunt||{};const first=!ADV.hunt.di1;ADV.hunt.di1=(ADV.hunt.di1||0)+1;if(typeof advAdd==='function')advAdd(first?140:40,first?`พิชิต ${DI_NAME} ครั้งแรก!`:`พิชิต ${DI_NAME}`);rpAdd(first?2000:1100,`พิชิต ${DI_NAME}`);
     const g2=new THREE.Group();const t1=new THREE.Mesh(new THREE.TorusGeometry(2,0.12,8,48),new THREE.MeshBasicMaterial({color:'#bfefff'}));t1.rotation.x=Math.PI/2;t1.position.y=0.12;g2.add(t1);
     const c1=new THREE.Mesh(new THREE.CylinderGeometry(1.9,1.9,5,32,1,true),new THREE.MeshBasicMaterial({color:'#bfefff',transparent:true,opacity:0.22,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));c1.position.y=2.5;g2.add(c1);g2.position.set(0,0,-8);m.map.scene.add(g2);DI.exitRing=g2;
     dunClearExp(DI_NAME,0.7);const mins=Math.round((Date.now()-DI.t0)/60000);levelFx('#bfefff','#ffffff',false);try{sfx('levelup');}catch(e){}popText(m.x,m.z,'CLEAR!','lvl',6);
@@ -20314,10 +20317,10 @@ function dpKill(m){if(!DP.on)return;const L=gDropMul();
   if(m.box){DP.boxes--;DP.boxN++;const r=Math.random();if(!DP.key&&(DP.boxN>=DP.boxKey||DP.boxes<=0)){DP.key=true;popText(m.x,m.z,'🗝 เจอกุญแจ!','lvl',3);say('🗝 เจอกุญแจห้องครัวในกล่องปริศนา!','sys');try{sfx('levelup');}catch(e){}}
     else if(r<0.3){dpSpawn(Math.random()<0.5?'pc_fish':'pc_craw','pcD',null,1,{x:m.x,z:m.z,aggro:true});popText(m.x,m.z,'โจรสลัดซุ่มอยู่!','hurt',2.6);}
     else if(r<0.5){diTrap(m.x,m.z,3,1,80+lvl*7,'#ff6a2a');popText(m.x,m.z,'💣 ระเบิด!','hurt',2.6);}else if(r<0.75)dgDrop(m,DP_MAT.cloth);else popText(m.x,m.z,'ว่างเปล่า...','miss',2.4);}
-  if(m.dpBoss==='chef'){DP.chefDead=true;dgDrop(m,DP_MAT.claw,3);dgDrop(m,DP_MAT.cloth,2);if(Math.random()<0.5)dgDrop(m,DP_MAT.scale,1);mons.forEach(q=>{if(q.dp&&q!==m&&q.map===curMap&&!q.dead)q.hp=Math.min(q.hp,1);});say('🦀 "ไม่จริ้ง... สูตรลับของข้า..." เชฟปูก้ามเพลิงล้มลง! ประตูเปิดออก','sys');if(typeof advAdd==='function')advAdd(14,'ปราบเชฟปูก้ามเพลิง');}
-  if(m.dpBoss==='shark'){DP.sharkDead=true;dgDrop(m,DP_MAT.cloth,3);dgDrop(m,DP_MAT.claw,2);say('🦈 กัปตันฉลามล้มลง! ยึดเรือได้แล้ว — เดินไปที่หัวเรือเพื่อออกเรือ','sys');egLabel('pcG',0,-50,'⛵ ออกเรือ!',4.2);if(typeof advAdd==='function')advAdd(10,'ยึดเรือโจรสลัด');}
+  if(m.dpBoss==='chef'){DP.chefDead=true;dgDrop(m,DP_MAT.claw,3);dgDrop(m,DP_MAT.cloth,2);if(Math.random()<0.5)dgDrop(m,DP_MAT.scale,1);mons.forEach(q=>{if(q.dp&&q!==m&&q.map===curMap&&!q.dead)q.hp=Math.min(q.hp,1);});say('🦀 "ไม่จริ้ง... สูตรลับของข้า..." เชฟปูก้ามเพลิงล้มลง! ประตูเปิดออก','sys');rpAdd(300,'ปราบเชฟปูก้ามเพลิง');if(typeof advAdd==='function')advAdd(14,'ปราบเชฟปูก้ามเพลิง');}
+  if(m.dpBoss==='shark'){DP.sharkDead=true;dgDrop(m,DP_MAT.cloth,3);dgDrop(m,DP_MAT.claw,2);say('🦈 กัปตันฉลามล้มลง! ยึดเรือได้แล้ว — เดินไปที่หัวเรือเพื่อออกเรือ','sys');rpAdd(300,'ปราบกัปตันฉลาม');egLabel('pcG',0,-50,'⛵ ออกเรือ!',4.2);if(typeof advAdd==='function')advAdd(10,'ยึดเรือโจรสลัด');}
   if(m.dpBoss==='serpent'){DP.serpDead=true;DP.boss=null;weather.rain=false;const g=Math.round(80000*(1+S('CHA')*0.01));gold+=g;inv[DP_MAT.scale]=(inv[DP_MAT.scale]||0)+3+(Math.random()<0.5?1:0);inv[DP_MAT.claw]=(inv[DP_MAT.claw]||0)+3;inv[DP_MAT.cloth]=(inv[DP_MAT.cloth]||0)+4;inv['ยาสารพัด']=(inv['ยาสารพัด']||0)+3;updateInv();
-    mons.forEach(q=>{if(q.dp&&q!==m&&!q.dead)q.hp=Math.min(q.hp,1);});ADV.hunt=ADV.hunt||{};const first=!ADV.hunt.pc1;ADV.hunt.pc1=(ADV.hunt.pc1||0)+1;if(typeof advAdd==='function')advAdd(first?180:50,first?`พิชิต ${DP_NAME} ครั้งแรก!`:`พิชิต ${DP_NAME}`);
+    mons.forEach(q=>{if(q.dp&&q!==m&&!q.dead)q.hp=Math.min(q.hp,1);});ADV.hunt=ADV.hunt||{};const first=!ADV.hunt.pc1;ADV.hunt.pc1=(ADV.hunt.pc1||0)+1;if(typeof advAdd==='function')advAdd(first?180:50,first?`พิชิต ${DP_NAME} ครั้งแรก!`:`พิชิต ${DP_NAME}`);rpAdd(first?2600:1400,`พิชิต ${DP_NAME}`);
     const g2=new THREE.Group();const t1=new THREE.Mesh(new THREE.TorusGeometry(2,0.12,8,48),new THREE.MeshBasicMaterial({color:'#ffd84a'}));t1.rotation.x=Math.PI/2;t1.position.y=0.12;g2.add(t1);
     const c1=new THREE.Mesh(new THREE.CylinderGeometry(1.9,1.9,5,32,1,true),new THREE.MeshBasicMaterial({color:'#ffe08a',transparent:true,opacity:0.22,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));c1.position.y=2.5;g2.add(c1);m.map.scene.add(g2);DP.exitRing=g2;
     dunClearExp(DP_NAME,0.8);const mins=Math.round((Date.now()-DP.t0)/60000);levelFx('#ffd84a','#fff6c8',false);try{sfx('levelup');}catch(e){}popText(0,0,'CLEAR!','lvl',6);
@@ -20498,7 +20501,7 @@ function gbOnWarp(map){if(GB.on&&!GB_KEYS.includes(map.key)){GB.on=false;gbClear
 function gbWin(){const B=GB_BOSS[GB.day];GB.done[GB.key]=1;const g=Math.round(B.lv*2500*(1+S('CHA')*0.01));gold+=g;const ex=Math.round(expNeed(lvl)*0.5),jx=Math.round(jobNeed(jobLv)*0.5);gainExp(ex);gainJob(jx);if(typeof altExp==='function')altExp(ex,jx);
   ['แร่เพิ่มพลัง','ยาสารพัด','ยาขาว'].forEach((n,i)=>{inv[n]=(inv[n]||0)+[2,3,5][i];});{const st=STONE_STATS[Math.floor(Math.random()*STONE_STATS.length)];const sn=stoneName(st,1);inv[sn]=(inv[sn]||0)+1;}
   const ct=B.parts[0][0],C=cardOf(ct);if(C&&Math.random()<0.35){ITEM_KINDS.includes(C.kind)||ITEM_KINDS.push(C.kind);inv[C.name]=(inv[C.name]||0)+1;say(`★★ ได้รับ ${C.name}!`,'sys');}
-  updateInv();ADV.hunt=ADV.hunt||{};const first=!ADV.hunt['gb'+GB.day];ADV.hunt['gb'+GB.day]=(ADV.hunt['gb'+GB.day]||0)+1;if(typeof advAdd==='function')advAdd(first?120:40,`${first?'ปราบกิลด์บอสครั้งแรก: ':'กิลด์บอส: '}${B.n}`);
+  updateInv();ADV.hunt=ADV.hunt||{};const first=!ADV.hunt['gb'+GB.day];ADV.hunt['gb'+GB.day]=(ADV.hunt['gb'+GB.day]||0)+1;if(typeof advAdd==='function')advAdd(first?120:40,`${first?'ปราบกิลด์บอสครั้งแรก: ':'กิลด์บอส: '}${B.n}`);rpAdd((first?2000:1000)+B.lv*10,`กิลด์บอส ${B.n}`);
   levelFx('#ffd84a','#fff6c8',true);try{sfx('levelup');}catch(e){}popText(player.x,player.z,'GUILD BOSS CLEAR!','lvl',6);
   say(`🏆 ปราบกิลด์บอส ${B.n} สำเร็จ! +${g.toLocaleString()} z · +${ex.toLocaleString()} EXP · แร่เพิ่มพลัง ×2 · หินพลัง · ยา — จะกลับเมืองใน 8 วินาที`,'sys');saveSoon();setTimeout(()=>{if(GB.on)gbExit(true);},8000);GB.cleared=true;}
 function gbKill(m){if(!GB.on||!m.gbPart)return;const B=GB_BOSS[GB.day];
