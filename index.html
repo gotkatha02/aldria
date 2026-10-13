@@ -615,6 +615,18 @@ button{transition:filter .15s,box-shadow .15s}button:hover{filter:brightness(1.0
 #sceneVignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 48%,transparent 40%,#13283b22 100%)}
 @media(max-width:900px){#artEdition{top:auto;bottom:calc(var(--hb,62px) + 8px);font-size:9px;padding:4px 9px}.csin{padding:16px;border-radius:16px}}
 @media(prefers-reduced-motion:reduce){button{transition:none}}
+</style><style>
+/* hotbar: 3 rows of skill slots */
+.slots{display:grid!important;grid-template-columns:repeat(10,42px);grid-auto-rows:42px;gap:4px!important}
+.menu{display:grid!important;grid-template-columns:repeat(5,auto);gap:4px!important;align-content:center}
+.menu button{height:40px}
+@media (max-width:1100px){.slots{grid-template-columns:repeat(10,38px);grid-auto-rows:38px}.slot{width:38px;height:38px}}
+@media (max-width:700px){#hotbar{flex-wrap:wrap}.slots{width:100%;grid-template-columns:repeat(10,minmax(0,1fr));grid-auto-rows:auto;gap:4px!important}
+  .slots .slot{width:auto!important;height:auto!important;aspect-ratio:1;max-height:44px}.slots .slot img{width:70%!important;height:70%!important}
+  .menu{width:100%;grid-template-columns:repeat(5,1fr)}}
+@media (max-height:520px){.slots{grid-template-columns:repeat(10,30px);grid-auto-rows:30px;gap:3px!important}.slots .slot{width:30px!important;height:30px!important;aspect-ratio:auto}.slots .slot img{width:22px!important;height:22px!important}
+  .slot .si{inset:3px}.slot .si svg{width:17px;height:17px}.menu button{height:30px!important}}
+.slot .k{font-size:8.5px}
 </style></head><body>
 
 <div id="game">
@@ -1427,7 +1439,7 @@ document.getElementById('questWin').addEventListener('click',e=>{const t=e.targe
 const qTrack=document.createElement('div');qTrack.id='qTrack';qTrack.hidden=true;document.getElementById('game').appendChild(qTrack);
 qTrack.addEventListener('click',e=>{const sn=e.target.closest('[data-sqnav]');if(sn){sqGo(sn.dataset.sqnav);return;}if(e.target.closest('.qti.qsq')){toggleWin('questWin',true);qTab='side';renderQuest();return;}const qn=e.target.closest('[data-qnav],[data-qnavmap]');if(qn){if(qn.dataset.qnavmap){if(AUTO.on)setAuto(false);navStart(qn.dataset.qnavmap);}else qgGo();return;}if(e.target.closest('.qth'))qTrack.classList.toggle('mini');else if(e.target.closest('.qti.qst')){toggleWin('questWin',true);qTab='story';renderQuest();}else if(e.target.closest('.qti')){toggleWin('questWin',true);qTab='mine';renderQuest();}});
 function renderTracker(){const D=buildQDB(),act=D.filter(q=>qActive.hasOwnProperty(q.id));const stOn=typeof ST!=='undefined'&&ST.started;const sqL=window.sqOn?sqLines():'';qTrack.hidden=!act.length&&!stOn&&!sqL;if(qTrack.hidden)return;
-  const mini=document.getElementById('mini').getBoundingClientRect();qTrack.style.top=Math.round(mini.bottom+8)+'px';
+  const mini=document.getElementById('mini').getBoundingClientRect();qTrack.style.top=Math.round(mini.bottom+8)+'px';{const hb=document.getElementById('hotbar');const lim=(hb?hb.getBoundingClientRect().top:innerHeight)-mini.bottom-16;qTrack.style.maxHeight=Math.max(40,lim)+'px';qTrack.style.overflowY='auto';}
   qTrack.innerHTML=`<div class="qth">📜 เควสต์ (${act.length})<span>▾</span></div>`+(stOn?storyLine():'')+sqL+act.map(q=>{const p=qProg(q),ok=p>=q.n;return `<div class="qti ${ok?'ok':''}"><b>${ok?'✔ ':''}${q.title}</b><small>${p}/${q.n}${ok?' · กลับไปส่ง':''}</small>${!ok&&q.maps&&q.maps[0]&&MAPS[q.maps[0]]?`<button class="qnav" data-qnavmap="${q.maps[0]}">🧭 ไป ${(MAPS[q.maps[0]].name.split(' · ')[0])}</button>`:''}</div>`;}).join('');}
 window.addEventListener('resize',()=>renderTracker());
 /* ===================== MAIN STORY (chapters 1–11, structure after the 12-Tails mission map) ===================== */
@@ -4234,7 +4246,7 @@ $('#camReset').onclick=()=>{targetYaw=Math.round(camYaw/(Math.PI*2))*Math.PI*2+M
 window.addEventListener('keydown',e=>{
   if(e.target.id==='chatIn'){if(e.key==='Escape')view.focus();return;}
   const k=e.key.toLowerCase();
-  const fm=/^F([1-8])$/.exec(e.key)||/^([1-8])$/.exec(e.key);if(fm){e.preventDefault();useHot(fm[1]-1);return;}
+  {const dm=/^Digit(\d)$/.exec(e.code||''),fm=/^F(\d{1,2})$/.exec(e.key);let hi=-1;if(dm&&!e.ctrlKey&&!e.metaKey){const c=(+dm[1]+9)%10;hi=c+(e.altKey?2:e.shiftKey?1:0)*HOT_COLS;}else if(fm&&+fm[1]>=1&&+fm[1]<=10&&!e.ctrlKey)hi=+fm[1]-1+(e.altKey?2:e.shiftKey?1:0)*HOT_COLS;if(hi>=0){e.preventDefault();useHot(hi);return;}}
   if(k==='k'){toggleWin('skillWin');return;}if(k==='u'){toggleWin('eqWin');renderEq();return;}
   if(k==='o'){setAuto(!AUTO.on);return;}if(k==='j'){toggleWin('questWin');renderQuest();return;}if(k==='p'){toggleWin('partyWin');renderParty();return;}if(k==='c'){toggleWin('statWin');return;}if(k==='m'){toggleWin('worldWin');return;}if(k==='i'){toggleWin('invWin');return;}
   if(k==='q')rot(1);else if(k==='e')rot(-1);else if(k==='escape'){closeTalk();if(TGT){clearTarget();player.attackTarget=null;pendingAttack=null;}toggleWin('statWin',false);toggleWin('invWin',false);toggleWin('worldWin',false);toggleWin('skillWin',false);toggleWin('eqWin',false);toggleWin('shopWin',false);toggleWin('refWin',false);toggleWin('warpWin',false);toggleWin('autoWin',false);toggleWin('petWin',false);toggleWin('questWin',false);toggleWin('sysWin',false);toggleWin('craftWin',false);toggleWin('partyWin',false);toggleWin('jtWin',false);}
@@ -4363,9 +4375,10 @@ function useItem(name){if(playerDown)return;const u=USE[name];if(u&&cantAct()&&n
   if(!inv[name]){say(`ไม่มี${name}เหลืออยู่`,'sys');return;}if(u.hp&&!u.sp&&php>=maxHp){say('HP เต็มอยู่แล้ว','sys');return;}if(u.sp&&!u.hp&&psp>=maxSp){say('SP เต็มอยู่แล้ว','sys');return;}
   inv[name]--;if(!inv[name])delete inv[name];if(u.hp){php=Math.min(maxHp,php+u.hp);popText(player.x,player.z,'+'+u.hp,'heal');}if(u.sp){psp=Math.min(maxSp,psp+u.sp);popText(player.x,player.z,'SP +'+u.sp,'skill',4);}sfx('heal');updateHP();updateInv();}
 function usePotion(){useItem('ยาแดง');}
-const HOT=['ยาแดง','แอปเปิ้ล','น้ำผึ้ง',{sk:'fang'},null,null,null,null];
+const HOT_COLS=10,HOT_ROWS=3;const HOT=Array.from({length:HOT_COLS*HOT_ROWS},(_,i)=>i===0?{sk:'fang'}:null);
+const hotKeyLbl=i=>{const r=Math.floor(i/HOT_COLS),n=(i%HOT_COLS+1)%10;return ['',`⇧`,'Alt'][r]+n;};
 const hotSlots=document.getElementById('hotSlots');
-HOT.forEach((n,i)=>{const b=document.createElement('button');b.className='slot';b.innerHTML=`<span class="k">F${i+1}</span><img alt=""><span class="si"></span><span class="n"></span><span class="cdv"></span>`;b.onclick=()=>useHot(i);hotSlots.appendChild(b);});
+HOT.forEach((n,i)=>{const b=document.createElement('button');b.className='slot';b.innerHTML=`<span class="k">${hotKeyLbl(i)}</span><img alt=""><span class="si"></span><span class="n"></span><span class="cdv"></span>`;b.onclick=()=>useHot(i);hotSlots.appendChild(b);});
 const invGrid=document.getElementById('invGrid');
 for(let i=0;i<35;i++){const b=document.createElement('button');b.className='slot empty';b.innerHTML='<img alt=""><span class="n"></span>';invGrid.appendChild(b);}
 function fillSlot(b,name,count){const img=b.querySelector('img');if(name){img.src=ICON_URL[name];b.classList.toggle('empty',!count&&!b.classList.contains('hot'));b.title=name+(USE[name]?` — ${itemDesc(name)}`:(typeof CARD_BY_NAME==='function'&&CARD_BY_NAME(name)?` — ${CARD_BY_NAME(name).label} (คลิกแล้วเลือกอุปกรณ์เพื่อเสียบ)`:''));b.querySelector('.n').textContent=count||'';}
@@ -15644,7 +15657,7 @@ function setLine(key){const Ln=LINES[key];if(!Ln)return;if(typeof clearPG==='fun
   refill(SK_CLASSES,Ln.classes);refill(SKILLS,Ln.skills);refill(SK_SAMPLE,Ln.sample);refill(EFF,Ln.eff);refill(FXF,Ln.fx);refill(SKB,Object.fromEntries(Ln.skills.map(s=>[s.id,s])));
   skLv={};SKILLS.forEach(s=>skLv[s.id]=0);skLv[FREE0]=1;classIdx=0;jobLv=1;jobExp=0;reborn=false;skTab=0;skSel=FREE0;
   for(const k in buffs)delete buffs[k];for(const k in skCD)delete skCD[k];clearPets();clearZones();
-  HOT.forEach((h,i)=>{if(h&&h.sk)HOT[i]=null;});HOT[3]={sk:FREE0};
+  HOT.forEach((h,i)=>{HOT[i]=null;});HOT[0]={sk:FREE0};
   document.querySelector('#skillWin .hd span').textContent='สกิล · '+Ln.label;
   starterGear();applyLineSprite();recalc(false);php=maxHp;psp=maxSp;updateHP();updateExp();updateInv();updateJobUI();renderSkills();}
 /* ---- pets ---- */
@@ -18507,7 +18520,7 @@ document.getElementById('skillWin').addEventListener('click',e=>{const lb=e.targ
   else if(t.dataset.skup){const s=SKB[t.dataset.skup];if(skCanUp(s)){skLv[s.id]++;recalc();}skSel=s.id;}
   else if(t.dataset.skdn){const s=SKB[t.dataset.skdn];if(skCanDown(s)){skLv[s.id]--;if(!skLv[s.id])HOT.forEach((h,i)=>{if(h&&h.sk===s.id)HOT[i]=null;});recalc();}skSel=s.id;}
   else if(t.dataset.skjump){skSel=t.dataset.skjump;skTab=SKB[skSel].c;}
-  else if(t.dataset.skhot){const id=t.dataset.skhot,i=HOT.findIndex(h=>h&&h.sk===id);if(i>=0)HOT[i]=null;else{let j=HOT.indexOf(null);if(j<0)j=7;HOT[j]={sk:id};say(`ตั้ง ${SKB[id].n} ไว้ที่ปุ่ม F${j+1}`,'sys');}updateInv();}
+  else if(t.dataset.skhot){const id=t.dataset.skhot,i=HOT.findIndex(h=>h&&h.sk===id);if(i>=0)HOT[i]=null;else{let j=HOT.indexOf(null);if(j<0)j=HOT.length-1;HOT[j]={sk:id};say(`ตั้ง ${SKB[id].n} ไว้ที่ปุ่ม ${hotKeyLbl(j).replace('⇧','Shift+').replace('Alt','Alt+')}`,'sys');}updateInv();}
   renderSkills();
 });
 document.getElementById('skReset').onclick=()=>{SKILLS.forEach(s=>{if(s.c===skTab&&!s.free){skLv[s.id]=0;HOT.forEach((h,i)=>{if(h&&h.sk===s.id)HOT[i]=null;});}});
@@ -18520,8 +18533,8 @@ document.getElementById('skClass').onclick=()=>{if(classIdx>=3||!classReqs().eve
   recalc(false);php=maxHp;psp=maxSp;updateHP();updateExp();updateJobUI();};
 document.getElementById('skResetAll').onclick=()=>{SKILLS.forEach(s=>{skLv[s.id]=s.free?(classIdx>=2||s.c===0?1:0):0;});skLv[FREE0]=1;HOT.forEach((h,i)=>{if(h&&h.sk&&h.sk!==FREE0)HOT[i]=null;});recalc();updateInv();renderSkills();say('คืนแต้มสกิลทุกคลาสแล้ว จัดใหม่ได้ตามเงื่อนไขเดิม','sys');};
 document.getElementById('skTest').onclick=()=>{for(let l=lvl+1;l<=99;l++)statPts+=Math.floor(l/5)+3;if(lvl<99){lvl=99;exp=0;}reborn=true;classIdx=3;jobLv=70;jobExp=0;SKILLS.forEach(s=>skLv[s.id]=s.free?1:(SK_SAMPLE[s.id]||0));
-  LINES[LINE].hot.forEach((id,k)=>HOT[3+k]={sk:id});skTab=3;recalc(false);php=maxHp;psp=maxSp;updateHP();updateExp();updateInv();updateJobUI();
-  say(`โหมดทดลอง: เป็น ${SK_CLASSES[3].name} Base 99 / Job 70 พร้อมบิลด์ตัวอย่าง (มีแต้มสเตตัสให้แจกใน C) · F4–F8 = `+LINES[LINE].hot.map(id=>SKB[id].n).join(' · '),'sys');};
+  HOT.fill(null);HOT[0]={sk:FREE0};LINES[LINE].hot.filter(id=>id!==FREE0).forEach((id,k)=>HOT[1+k]={sk:id});skTab=3;recalc(false);php=maxHp;psp=maxSp;updateHP();updateExp();updateInv();updateJobUI();
+  say(`โหมดทดลอง: เป็น ${SK_CLASSES[3].name} Base 99 / Job 70 พร้อมบิลด์ตัวอย่าง (มีแต้มสเตตัสให้แจกใน C) · ปุ่ม 2–6 = `+LINES[LINE].hot.map(id=>SKB[id].n).join(' · '),'sys');};
 /* hotbar: items or skills */
 function useHot(i){const h=HOT[i];if(!h)return;if(h.sk)castSkill(h.sk);else useItem(h);}
 function hotSkillCD(){[...hotSlots.children].forEach((b,i)=>{const h=HOT[i],cv=b.querySelector('.cdv');if(!h||!h.sk){cv.textContent='';b.classList.remove('cool');return;}
@@ -19285,7 +19298,7 @@ function applySave(d){if(typeof obLoad==='function')setTimeout(()=>obLoad(d.ob),
   csPick=d.line;setLine(d.line);
   lvl=d.lvl;exp=d.exp;statPts=d.statPts;reborn=!!d.reborn;Object.assign(base,d.base);classIdx=d.classIdx;jobLv=d.jobLv;jobExp=d.jobExp;
   for(const k in skLv)skLv[k]=0;Object.assign(skLv,d.skLv);
-  HOT.forEach((h,i)=>HOT[i]=d.hot&&d.hot[i]!==undefined?d.hot[i]:h);
+  {const src=Array.isArray(d.hot)?d.hot:[];const old=src.length<HOT.length;const sk=old?src.filter(h=>h&&h.sk):null;HOT.forEach((h,i)=>HOT[i]=old?(sk[i]||null):(src[i]!==undefined&&!(src[i]&&!src[i].sk)?src[i]:null));}
   for(const k in skLv)if(!SKB[k])delete skLv[k];SKILLS.forEach(q=>{if(skLv[q.id]==null)skLv[q.id]=0;});if(SKB[FREE0]&&!skLv[FREE0])skLv[FREE0]=1;if(classIdx>=2&&SKB[FREE2]&&!skLv[FREE2])skLv[FREE2]=1;
   HOT.forEach((h,i)=>{if(h&&h.sk&&!SKB[h.sk])HOT[i]=null;});if(!HOT.some(h=>h&&h.sk===FREE0)){const fi=HOT.findIndex(h=>!h);if(fi>=0)HOT[fi]={sk:FREE0};}
   for(const k in inv)delete inv[k];Object.assign(inv,d.inv);gold=d.gold;
