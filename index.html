@@ -4830,7 +4830,7 @@ let _skStatSig='';function skStatTick(){const g=STAT_KEYS.map(skStat).join(',');
 function pas(){const L=id=>effLv(id),o={atk:0,crit:0,def:0,flee:0,regen:0,ls:0,dbl:0,dual:0,leader:0,counter:0};
   o.flee+=2*L('wild');o.regen+=5*L('wild');o.atk+=4.5*L('lone');o.def+=5*L('moon');o.atk+=4*L('rend');o.crit+=L('rend');
   if(L('dwm')){o.atk+=5*L('dwm');o.dual=50+5*L('dwm');}else if(L('dual'))o.dual=50;
-  o.hpP=2*L('b_vigor')+3*L('b_hide');o.def+=4*L('b_stone');o.bloodlust=L('b_bloodlust');o.gauge=L('b_gauge');o.aspdP=L('l_agility')+2*0;o.crit+=L('l_keen')*0.5+L('l_vulture')*0.3;o.critDmg=3*L('l_sight');o.flee+=L('l_agility');o.matk=3*L('m_wisdom');o.matkP=2*L('m_sage');o.ls=L('lunar');o.dbl=2*L('soul');o.leader=2*L('leader');if(L('counter'))o.counter=600+180*L('counter');o.matkP=(o.matkP||0)+L('p_wisdom')+2*L('p_mind');o.atk+=3*L('o_tinker');o.matk=(o.matk||0)+3*L('t_wisdom');o.matkP+=4*L('t_throne');if(typeof pdPas==='function'){pdPas(o);ctPas(o);shPas(o);rbPas(o);}return o;}
+  o.hpP=2*L('b_vigor')+3*L('b_hide');o.def+=4*L('b_stone');o.bloodlust=L('b_bloodlust');o.gauge=L('b_gauge');o.aspdP=L('l_agility')+2*0;o.crit+=L('l_keen')*0.5+L('l_vulture')*0.3;o.critDmg=3*L('l_sight');o.flee+=L('l_agility');o.matk=3*L('m_wisdom');o.matkP=2*L('m_sage');o.ls=L('lunar');o.dbl=2*L('soul');o.leader=2*L('leader');if(L('counter'))o.counter=600+180*L('counter');o.matkP=(o.matkP||0)+L('p_wisdom')+2*L('p_mind');o.atk+=3*L('o_tinker');o.matk=(o.matk||0)+3*L('t_wisdom');o.matkP+=4*L('t_throne');if(typeof pdPas==='function'){pdPas(o);ctPas(o);shPas(o);rbPas(o);}if(typeof advPas==='function')advPas(o);return o;}
 function bsum(){const o={atkP:0,aspdP:0,defP:0,dr:0,crit:0,critDmg:0,reflect:0,parry:0,poison:0,drain:0,matkP:0,matkFlat:0,petAtkP:0,petAspdP:0,solar:0,wisps:0,share:0,dblP:0,stealth:0,thorn:0,spin:0};
   for(const id in buffs){const b=buffs[id];if(b.end<time){delete buffs[id];continue;}for(const k in o)if(b[k])o[k]+=b[k];}
   if(typeof zones!=='undefined'&&zones.length){const bz=inZone('banner');if(bz){o.atkP+=bz.E.band(bz.L);o.defP+=bz.E.band(bz.L);}const mz=inZone('mosaic');if(mz)o.defP+=mz.E.def(mz.L);const ta=inZone('tavatar');if(ta)o.matkP+=ta.E.aura(ta.L);}if(typeof EQX!=='undefined'){o.poison+=EQX.poison;o.drain+=EQX.drain;o.reflect+=EQX.reflect;o.critDmg+=EQX.critDmg;}return o;}
@@ -19013,11 +19013,11 @@ const ADV_STAT=['ATK','VIT','AGI','INT','DEF','LCK','TAL','CHA'];
 const ADV={arp:0,rp:0,kills:{},maps:{},lv:0,jl:0,cls:0,seen:1,log:[],tab:'rank'};
 function advLevel(arp=ADV.arp){let l=1;while(l<60&&arp>=ADV_NEED[l+1])l++;return l;}
 function advTier(l=advLevel()){let t=ADV_TIERS[0];for(const T of ADV_TIERS)if(l>=T[0])t=T;return t;}
-function advStat(k){const L=advLevel();let n=0;for(let l=2;l<=L;l++)if(ADV_STAT[(l-2)%ADV_STAT.length]===k)n++;return n;}
+function advStat(k){return 0;}
 function advAdd(n,why){if(!n||!ADV.ready)return;const l0=advLevel();ADV.arp+=n;ADV.rp+=n;ADV.log.unshift([why,n]);if(ADV.log.length>8)ADV.log.length=8;
   const l1=advLevel();if(l1>l0){const T=advTier(l1),nt=ADV_TIERS.find(x=>x[0]===l1);recalc();
-    if(nt){popText(player.x,player.z,`ยศใหม่: ${nt[1]}!`,'lvl',5);levelFx('#ffd24a','#fff6c8',false);sfx('levelup');say(`🎖 ระดับนักผจญภัย Lv ${l1} — ได้ยศ ${nt[1]} (${nt[2]})!`,'sys');}
-    else{popText(player.x,player.z,`ADVENTURE Lv ${l1}`,'gain',4.6);say(`🎖 ระดับนักผจญภัย Lv ${l1} · ${ADV_STAT[(l1-2)%ADV_STAT.length]} +1`,'sys');}
+    if(nt){popText(player.x,player.z,`ยศใหม่: ${nt[1]}!`,'lvl',5);levelFx('#ffd24a','#fff6c8',false);sfx('levelup');say(`🎖 ระดับนักผจญภัย Lv ${l1} — ได้ยศ ${nt[1]} (${nt[2]})! คริ +1% ถาวร`,'sys');}
+    else{popText(player.x,player.z,`ADVENTURE Lv ${l1}`,'gain',4.6);say(`🎖 ระดับนักผจญภัย Lv ${l1} · ATK +1`,'sys');}
     advHud();}
   if(!document.getElementById('advWin').hidden)renderAdv();}
 function advKill(m){if(!m||!m.T)return;const k=m.type,c=(ADV.kills[k]||0)+1;ADV.kills[k]=c;
@@ -19034,9 +19034,9 @@ function advTick(){if(!ADV.ready||SAVE.slot<0)return;
 function advRetro(){ADV.arp=0;ADV.kills={};ADV.maps={};ADV.log=[];let a=lvl*2+classIdx*40+jobLv;
   a+=Object.values(qDone||{}).reduce((s,n)=>s+Math.min(n,3)*8,0);if(ST&&ST.i)a+=ST.i*10;
   ADV.maps[curMap.key]=1;a+=5;ADV.arp=a;ADV.rp=a;ADV.lv=lvl;ADV.jl=jobLv;ADV.cls=classIdx;ADV.log=[['ARP ย้อนหลังจากความคืบหน้าเดิม',a]];}
-function advSave(){return{rp:ADV.rp,arp:ADV.arp,kills:ADV.kills,maps:ADV.maps,lv:ADV.lv,jl:ADV.jl,cls:ADV.cls,log:ADV.log};}
-function advLoad(d){if(d&&typeof d.arp==='number'){Object.assign(ADV,{arp:d.arp,rp:d.rp??d.arp,kills:d.kills||{},maps:d.maps||{},lv:d.lv||lvl,jl:d.jl||jobLv,cls:d.cls??classIdx,log:d.log||[]});}else advRetro();ADV.ready=true;advHud();}
-function advNew(){ADV.arp=0;ADV.rp=0;ADV.kills={};ADV.maps={};ADV.lv=lvl;ADV.jl=jobLv;ADV.cls=classIdx;ADV.log=[];ADV.ready=true;ADV.maps[curMap.key]=1;advHud();}
+function advSave(){return{perm:rpPerm(),rp:ADV.rp,arp:ADV.arp,kills:ADV.kills,maps:ADV.maps,lv:ADV.lv,jl:ADV.jl,cls:ADV.cls,log:ADV.log};}
+function advLoad(d){if(d&&typeof d.arp==='number'){Object.assign(ADV,{perm:Object.assign({atk:0,crit:0,cdmg:0},d.perm||{}),arp:d.arp,rp:d.rp??d.arp,kills:d.kills||{},maps:d.maps||{},lv:d.lv||lvl,jl:d.jl||jobLv,cls:d.cls??classIdx,log:d.log||[]});}else advRetro();ADV.ready=true;advHud();}
+function advNew(){ADV.arp=0;ADV.rp=0;ADV.perm={atk:0,crit:0,cdmg:0};ADV.kills={};ADV.maps={};ADV.lv=lvl;ADV.jl=jobLv;ADV.cls=classIdx;ADV.log=[];ADV.ready=true;ADV.maps[curMap.key]=1;advHud();}
 /* ---- medallion (drawn, original art) ---- */
 const advBadgeCache={};
 function advBadge(ti,size=96){const key=ti+':'+size;if(advBadgeCache[key])return advBadgeCache[key];const T=ADV_TIERS[ti],c=document.createElement('canvas');c.width=c.height=size;const g=c.getContext('2d'),r=size/2;g.translate(r,r);
@@ -19057,27 +19057,33 @@ function advBadge(ti,size=96){const key=ti+':'+size;if(advBadgeCache[key])return
   document.getElementById('game').appendChild(w);
   const bq=document.getElementById('btnQuest');if(bq){const b=document.createElement('button');b.id='btnAdv';b.innerHTML='ยศ<small>ARP</small>';bq.after(b);b.onclick=()=>{toggleWin('advWin');renderAdv();};}})();
 
-const RPS=[{id:'white',n:'ยาขาว ×5',ic:'ยาขาว',it:['ยาขาว',5],c:15,t:0},{id:'blue',n:'ยาน้ำเงิน ×3',ic:'ยาน้ำเงิน',it:['ยาน้ำเงิน',3],c:20,t:0},
- {id:'all',n:'ยาสารพัด ×5',ic:'ยาสารพัด',it:['ยาสารพัด',5],c:20,t:1},{id:'holy',n:'น้ำมนต์ ×2',ic:'น้ำมนต์',it:['น้ำมนต์',2],c:25,t:2},
- {id:'elem',n:'ชุดหินธาตุ ไฟ·น้ำ·ลม·ดิน อย่างละ 1',ic:'หินธาตุไฟ',its:[['หินธาตุไฟ',1],['หินธาตุน้ำ',1],['หินธาตุลม',1],['หินธาตุดิน',1]],c:30,t:2},
- {id:'s1',n:'หินพลัง Ⅰ (สุ่มสเตตัส)',ic:'หินพลัง ATK Ⅰ',stone:0,c:30,t:2},{id:'zeny',n:'ถุงทอง 5,000 z',ic:'แร่เพิ่มพลัง',gold:5000,c:50,t:3},
- {id:'ore',n:'แร่เพิ่มพลัง ×1',ic:'แร่เพิ่มพลัง',it:['แร่เพิ่มพลัง',1],c:40,t:3},{id:'exp',n:'คัมภีร์นักผจญภัย: EXP +50% นาน 30 นาที',ic:'ยาเขียว',buff:'rp_exp',c:60,t:4},
- {id:'s2',n:'หินพลัง Ⅱ (สุ่มสเตตัส)',ic:'หินพลัง ATK Ⅱ',stone:1,c:120,t:5},{id:'drop',n:'ผงนำโชค: ดรอป +30% นาน 30 นาที',ic:'ยาสารพัด',buff:'rp_drop',c:60,t:6},
- {id:'s3',n:'หินพลัง Ⅲ (สุ่มสเตตัส)',ic:'หินพลัง ATK Ⅲ',stone:2,c:400,t:10}];
-function rpBuy(id){const R=RPS.find(x=>x.id===id);if(!R)return;const ti=ADV_TIERS.indexOf(advTier());
-  if(ti<R.t){say(`ต้องได้ยศ ${ADV_TIERS[R.t][1]} ก่อน`,'sys');return;}if(ADV.rp<R.c){say('แต้ม RP ไม่พอ','sys');return;}
-  ADV.rp-=R.c;let got=R.n;
-  if(R.it)inv[R.it[0]]=(inv[R.it[0]]||0)+R.it[1];
-  if(R.its)R.its.forEach(([n,q])=>inv[n]=(inv[n]||0)+q);
-  if(R.stone!=null){const st=STONE_STATS[Math.floor(Math.random()*STONE_STATS.length)],nm=stoneName(st,R.stone);inv[nm]=(inv[nm]||0)+1;got=nm;}
-  if(R.gold){gold+=R.gold;}
-  if(R.buff){const b=buffs[R.buff];buffs[R.buff]={end:Math.max(time,b&&b.end>time?b.end:time)+1800};}
-  sfx('coin');popText(player.x,player.z,'-'+R.c+' RP','skill',4.2);say(`🎖 แลก ${got} ด้วย ${R.c} RP`,'sys');updateInv();saveSoon();renderAdv();}
-function rpShopHtml(){const ti=ADV_TIERS.indexOf(advTier());const bt=k=>{const b=buffs[k];return b&&b.end>time?Math.ceil((b.end-time)/60):0;};
+const RPS=[
+ {id:'atk',perm:'atk',n:'ตราแห่งพลัง: ATK +1 ถาวร',ic:'หินพลัง ATK Ⅲ',base:20,step:5,cap:t=>5*(t+1),t:0},
+ {id:'crit',perm:'crit',n:'ตราตาเหยี่ยว: คริ +1% ถาวร',ic:'หินพลัง LCK Ⅲ',base:60,step:20,cap:t=>t+1,t:0},
+ {id:'cdmg',perm:'cdmg',n:'ตราคมเขี้ยว: แรงคริ +2% ถาวร',ic:'หินพลัง TAL Ⅲ',base:40,step:10,cap:t=>2*(t+1),t:1},
+ {id:'b_atk',n:'ยาเลือดนักรบ: ATK +10% นาน 30 นาที',ic:'ยาแดง',buff:'rp_atk',fx:{atkP:10},c:25,t:0},
+ {id:'b_crit',n:'ยาตาเหยี่ยว: คริ +10% นาน 30 นาที',ic:'ยาเขียว',buff:'rp_crit',fx:{crit:10},c:30,t:2},
+ {id:'b_war',n:'เครื่องรางแม่ทัพ: ATK +20% คริ +15% แรงคริ +20% นาน 30 นาที',ic:'ยาสารพัด',buff:'rp_war',fx:{atkP:20,crit:15,critDmg:20},c:100,t:6},
+ {id:'s1',n:'หินพลัง ATK Ⅰ',ic:'หินพลัง ATK Ⅰ',it:['หินพลัง ATK Ⅰ',1],c:30,t:2},
+ {id:'s2',n:'หินพลัง ATK Ⅱ',ic:'หินพลัง ATK Ⅱ',it:['หินพลัง ATK Ⅱ',1],c:120,t:5},
+ {id:'s3',n:'หินพลัง ATK Ⅲ',ic:'หินพลัง ATK Ⅲ',it:['หินพลัง ATK Ⅲ',1],c:400,t:10}];
+const rpPerm=()=>ADV.perm||(ADV.perm={atk:0,crit:0,cdmg:0});
+function rpCost(R){return R.perm?R.base+R.step*(rpPerm()[R.perm]||0):R.c;}
+function advPas(o){if(!ADV.ready)return o;const P=rpPerm(),L=advLevel(),ti=ADV_TIERS.indexOf(advTier(L));o.atk+=(L-1)+P.atk;o.crit+=ti+P.crit;o.critDmg=(o.critDmg||0)+2*P.cdmg;return o;}
+function rpBuy(id){const R=RPS.find(x=>x.id===id);if(!R)return;const ti=ADV_TIERS.indexOf(advTier()),c=rpCost(R);
+  if(ti<R.t){say(`ต้องได้ยศ ${ADV_TIERS[R.t][1]} ก่อน`,'sys');return;}
+  if(R.perm&&rpPerm()[R.perm]>=R.cap(ti)){say(`ยศตอนนี้อัปได้สูงสุด ${R.cap(ti)} ครั้ง เลื่อนยศเพื่ออัปต่อ`,'sys');return;}
+  if(ADV.rp<c){say('แต้ม RP ไม่พอ','sys');return;}
+  ADV.rp-=c;if(R.it)inv[R.it[0]]=(inv[R.it[0]]||0)+R.it[1];
+  if(R.perm){rpPerm()[R.perm]++;recalc();}
+  if(R.buff){const b=buffs[R.buff];buffs[R.buff]=Object.assign({end:Math.max(time,b&&b.end>time?b.end:time)+1800},R.fx);}
+  sfx('coin');popText(player.x,player.z,'-'+c+' RP','skill',4.2);say(`🎖 แลก ${R.n} ด้วย ${c} RP`,'sys');updateInv();saveSoon();renderAdv();}
+function rpShopHtml(){const ti=ADV_TIERS.indexOf(advTier()),P=rpPerm(),L=advLevel();const bt=k=>{const b=buffs[k];return b&&b.end>time?Math.ceil((b.end-time)/60):0;};
   return `<div class="rpbal"><span>แต้ม RP ที่ใช้ได้</span><b>${ADV.rp.toLocaleString()} RP</b><small>ARP สะสมรวม ${ADV.arp.toLocaleString()} (ใช้จัดยศ ไม่ลดเมื่อแลกของ)</small></div>
-   ${bt('rp_exp')||bt('rp_drop')?`<div class="rpbuf">${bt('rp_exp')?`<span>📜 EXP +50% เหลือ ${bt('rp_exp')} นาที</span>`:''}${bt('rp_drop')?`<span>🍀 ดรอป +30% เหลือ ${bt('rp_drop')} นาที</span>`:''}</div>`:''}
-   <div class="rplist">${RPS.map(R=>{const lock=ti<R.t,poor=ADV.rp<R.c;return `<div class="rpi ${lock?'lock':''}"><img alt="" src="${ICON_URL[R.ic]||''}"><div><b>${R.n}</b><small>${lock?`🔒 ต้องยศ ${ADV_TIERS[R.t][1]}`:'พร้อมแลก'}</small></div>
-     <button data-rpbuy="${R.id}" ${lock||poor?'disabled':''}>${R.c} RP</button></div>`;}).join('')}</div>`;}
+   <div class="rpbuf"><span>⚔ ATK ถาวร +${L-1+P.atk}</span><span>🎯 คริถาวร +${ti+P.crit}%</span>${P.cdmg?`<span>💥 แรงคริ +${2*P.cdmg}%</span>`:''}${bt('rp_atk')?`<span>🩸 ATK +10% · ${bt('rp_atk')} นาที</span>`:''}${bt('rp_crit')?`<span>🦅 คริ +10% · ${bt('rp_crit')} นาที</span>`:''}${bt('rp_war')?`<span>🎖 เครื่องรางแม่ทัพ · ${bt('rp_war')} นาที</span>`:''}</div>
+   <div class="rplist">${RPS.map(R=>{const lock=ti<R.t,c=rpCost(R),full=R.perm&&P[R.perm]>=R.cap(ti),poor=ADV.rp<c;
+     const sub=lock?`🔒 ต้องยศ ${ADV_TIERS[R.t][1]}`:R.perm?`อัปแล้ว ${P[R.perm]}/${R.cap(ti)}${full?' · เลื่อนยศเพื่ออัปต่อ':''}`:R.buff?'บัฟชั่วคราว ซื้อซ้ำต่อเวลา':'ไอเทม';
+     return `<div class="rpi ${lock?'lock':''}"><img alt="" src="${ICON_URL[R.ic]||''}"><div><b>${R.n}</b><small>${sub}</small></div><button data-rpbuy="${R.id}" ${lock||poor||full?'disabled':''}>${c} RP</button></div>`;}).join('')}</div>`;}
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-rpbuy],[data-advtab]');if(!b)return;if(b.dataset.rpbuy)rpBuy(b.dataset.rpbuy);else{ADV.tab=b.dataset.advtab;renderAdv();}});
 function renderAdv(){const B=document.getElementById('advBody');if(!B)return;const tabs=`<div class="advtabs"><button data-advtab="rank" aria-selected="${ADV.tab!=='shop'}">ยศ</button><button data-advtab="shop" aria-selected="${ADV.tab==='shop'}">ร้าน RP · ${ADV.rp.toLocaleString()}</button></div>`;if(ADV.tab==='shop'){B.innerHTML=tabs+rpShopHtml();return;}const L=advLevel(),T=advTier(L),ti=ADV_TIERS.indexOf(T),nx=L<60?ADV_NEED[L+1]:null,pc=nx?Math.min(100,(ADV.arp-ADV_NEED[L])/(nx-ADV_NEED[L])*100):100;
   const nt=ADV_TIERS[ti+1],tot={};ADV_STAT.forEach(k=>{const v=advStat(k);if(v)tot[k]=v;});
@@ -19085,9 +19091,9 @@ function renderAdv(){const B=document.getElementById('advBody');if(!B)return;con
   B.innerHTML=tabs+`<div class="advtop"><img alt="" src="${advBadge(ti,128)}"><div><small>ยศปัจจุบัน</small><b>${T[1]}</b><em>${T[2]} · Adventure Lv ${L}</em>
     <div class="advbar"><i style="width:${pc}%"></i><span>${ADV.arp.toLocaleString()}${nx?' / '+nx.toLocaleString():''} ARP</span></div>
     <small>${nt?`ยศถัดไป ${nt[1]} ที่ ${nt[3].toLocaleString()} ARP`:'ยศสูงสุดแล้ว!'}</small>
-    <div class="advst">${Object.entries(tot).map(([k,v])=>`<span>${k} +${v}</span>`).join('')||'<span>ขึ้น Adventure Lv เพื่อรับสเตตัสถาวร</span>'}</div></div></div>
+    <div class="advst"><span>⚔ ATK +${L-1+rpPerm().atk}</span><span>🎯 คริ +${ti+rpPerm().crit}%</span>${rpPerm().cdmg?`<span>💥 แรงคริ +${2*rpPerm().cdmg}%</span>`:''}</div></div></div>
     <h4>วิธีได้ ARP</h4><div class="advsrc"><span>👾 พบมอนชนิดใหม่ <b>${kinds}/${allMons}</b></span><span>🗺 ค้นพบแมพ <b>${maps}/${allMaps}</b></span><span>📜 ทำเควส / เนื้อเรื่อง</span><span>⭐ ขึ้นเลเวล / เปลี่ยนคลาส</span></div>
-    <small class="advhint">พบมอนใหม่ +3 (บอส +25) · ล่าชนิดเดิมครบ 50 / 200 / 1,000 ตัว · แมพใหม่ +5 · เควสคำร้อง +8 · เนื้อเรื่องหลัก +10 · เรื่องย่อย +5 · Base Lv +2 · Job Lv +1 · เปลี่ยนคลาส +40 · ทุก Adventure Lv ได้สเตตัสถาวร +1 · ARP ที่ได้จะเป็นแต้ม RP ไว้แลกของที่แท็บร้าน RP ด้วย</small>
+    <small class="advhint">พบมอนใหม่ +3 (บอส +25) · ล่าชนิดเดิมครบ 50 / 200 / 1,000 ตัว · แมพใหม่ +5 · เควสคำร้อง +8 · เนื้อเรื่องหลัก +10 · เรื่องย่อย +5 · Base Lv +2 · Job Lv +1 · เปลี่ยนคลาส +40 · ทุก Adventure Lv ได้ ATK +1 ถาวร · ทุกยศใหม่ได้คริ +1% ถาวร · ARP ที่ได้จะเป็นแต้ม RP ไว้แลกของที่แท็บร้าน RP ด้วย</small>
     ${ADV.log.length?`<h4>ได้ ARP ล่าสุด</h4><div class="advlog">${ADV.log.map(([t,n])=>`<div><span>${t}</span><b>+${n}</b></div>`).join('')}</div>`:''}
     <h4>ยศทั้งหมด</h4><div class="advgrid">${ADV_TIERS.map((X,i)=>`<div class="${i<=ti?'on':''}"><img alt="" src="${advBadge(i,64)}"><b>Lv.${X[0]} ${X[1]}</b><small>${X[3].toLocaleString()} ARP</small></div>`).join('')}</div>`;}
 function advHud(){const nm=document.getElementById('face');if(!nm)return;let e=document.getElementById('advMini');if(!e){e=document.createElement('img');e.id='advMini';e.alt='';e.title='ยศนักผจญภัย';e.onclick=()=>{toggleWin('advWin',true);renderAdv();};nm.appendChild(e);e.addEventListener('pointerdown',ev=>ev.stopPropagation());}
