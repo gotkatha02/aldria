@@ -4318,7 +4318,9 @@ const STAT_TH={ATK:'พลังโจมตี — เพิ่มพลัง�
   INT:'สติปัญญา — 1 แต้ม = MaxSP +4 · ลดเวลาร่าย · เพิ่มพลังเวท (MATK)',CHA:'เสน่ห์ — บัฟจากสกิลอยู่นานขึ้น 0.5%/แต้ม · ติดดีบัฟสั้นลงและติดยากขึ้น 0.6%/แต้ม',TAL:'พรสวรรค์ — 1 แต้ม = MaxSP +2 · สกิลแรงขึ้น 0.5%/แต้ม',LCK:'โชค — โอกาสคริติคอล · โอกาสดรอปของ · สกิลบางตัวใช้ค่านี้'};
 const base={ATK:1,DEF:1,AGI:1,VIT:1,INT:1,CHA:1,TAL:1,LCK:1};
 const bonus={ATK:0,DEF:0,AGI:0,VIT:0,INT:0,CHA:0,TAL:0,LCK:0};var EQ={atk:0,matk:0,def:0,hpP:0,aspdP:0,crit:0};
-const S=k=>base[k]+bonus[k]+skStat(k)+(typeof advStat==='function'?advStat(k):0);
+/* every base level also gives +1 to all 8 stats (on top of the free stat points) */
+const lvStat=()=>Math.max(0,(typeof lvl==='number'?lvl:1)-1);
+const S=k=>base[k]+lvStat()+bonus[k]+skStat(k)+(typeof advStat==='function'?advStat(k):0);
 const ICONS={ATK:'M3 21l2-2-1-3 9-9 3 1 6-6-1 4-4 4 1 3-9 9-3-1-2 2z',DEF:'M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z',
   AGI:'M4 18c3 0 5-2 7-5l2-3c1-2 3-3 5-3h2v3h-2c-1 0-2 1-3 2l-2 3c-2 4-5 6-9 6z',VIT:'M12 21l-8-8a5 5 0 017-7l1 1 1-1a5 5 0 017 7z',
   INT:'M5 3h11l3 3v15H5zM8 8h8v2H8zm0 4h8v2H8z',CHA:'M3 8l4 3 5-7 5 7 4-3-2 11H5z',TAL:'M12 2c2 4 6 6 6 11a6 6 0 01-12 0c0-3 2-5 3-7 1 2 2 3 3 3 0-3-1-5 0-7z',
@@ -4344,7 +4346,7 @@ function recalc(keepRatio=true){
   maxHp=Math.round((70+S('VIT')*10+lvl*12)*(reborn?1.25:1)*jtHp()*(LINE==='bison'?1.15:LINE==='lizard'?1.05:LINE==='penguin'?0.9:LINE==='mole'?1.08:LINE==='bat'?0.9:LINE==='panda'?1.05:LINE==='sheep'?0.95:LINE==='rabbit'?1.0:1)*(1+(((typeof pas==='function'?pas().hpP:0)||0)+EQ.hpP)/100));maxSp=Math.round((30+S('INT')*4+S('TAL')*2+lvl*5+(typeof jobLv==='number'?jobLv*3+classIdx*40:0))*(reborn?1.25:1)*jtHp()*(1+(CX('spP')+(typeof btSpP==='function'?btSpP()+shSpP():0))/100));
   if(keepRatio){php=Math.max(1,Math.round(maxHp*r));psp=Math.round(maxSp*rs);}
   const d=derived();player.speed=d.spd;syncAtkAnim(d);
-  STAT_KEYS.forEach(k=>{document.getElementById('sv'+k).textContent=base[k];{const pn=document.getElementById('profName'),pr=document.getElementById('profRace');if(pn)pn.textContent=player.name;if(pr&&typeof RACES!=='undefined'){const rr=RACES.find(r=>r[0]===LINE);if(rr)pr.textContent=rr[1];}}{const bk=bonus[k]+skStat(k)+(typeof advStat==='function'?advStat(k):0);document.getElementById('sb'+k).textContent=bk?'+ '+bk:'';}{const bt=document.getElementById('sp'+k),c=statCost(base[k]);bt.disabled=statPts<c||base[k]>=99;bt.title=base[k]>=99?'สูงสุดแล้ว':`ใช้ ${c} แต้ม`;}});
+  STAT_KEYS.forEach(k=>{document.getElementById('sv'+k).textContent=base[k];{const pn=document.getElementById('profName'),pr=document.getElementById('profRace');if(pn)pn.textContent=player.name;if(pr&&typeof RACES!=='undefined'){const rr=RACES.find(r=>r[0]===LINE);if(rr)pr.textContent=rr[1];}}{const bk=lvStat()+bonus[k]+skStat(k)+(typeof advStat==='function'?advStat(k):0);document.getElementById('sb'+k).textContent=bk?'+ '+bk:'';}{const bt=document.getElementById('sp'+k),c=statCost(base[k]);bt.disabled=statPts<c||base[k]>=99;bt.title=base[k]>=99?'สูงสุดแล้ว':`ใช้ ${c} แต้ม`;}});
   document.getElementById('ptsTxt').textContent=statPts>0?`แต้มสเตตัสคงเหลือ ${statPts} — กด + เพื่อเพิ่ม (ยิ่งค่าสูง ยิ่งใช้แต้มมาก)`:'';document.getElementById('ptsAuto').hidden=statPts<=0;
   document.getElementById('dvSpd').textContent=d.spd.toFixed(1)+' t/s';
   {const g=(i,v)=>{const e=document.getElementById(i);if(e)e.textContent=v;};g('dvCd','−'+Math.round((1-agiCd())*100)+'%');g('dvCast','−'+Math.round(Math.min(0.8,S('INT')/150)*100)+'%');g('dvSk','+'+Math.round((talMul()-1)*100)+'%');g('dvBuff','+'+Math.round((chaBuff()-1)*100)+'%');g('dvDeb','−'+Math.round(stResist()*100)+'%');}
@@ -4379,7 +4381,7 @@ function popText(x,z,txt,cls,y=4.2,o={}){const el=document.createElement('div');
   dmgs.push({el,x,z,t:0,y,life,rise});if(dmgs.length>60){const d=dmgs.shift();d.el.remove();}}
 const baseCap=()=>(typeof classIdx==='number'&&classIdx>=3)?175:99;
 function gainExp(v){v=Math.round(v*1.15);if(lvl>=baseCap()){exp=0;updateExp();return;}exp+=v;let up=false,gp=0;while(lvl<baseCap()&&exp>=expNeed(lvl)){exp-=expNeed(lvl);lvl++;saveSoon();const g=Math.floor(lvl/5)+3;statPts+=g;gp+=g;up=true;}if(lvl>=baseCap())exp=0;
-  if(up){recalc(false);php=maxHp;psp=maxSp;popText(player.x,player.z,`LEVEL UP<small>Base Lv ${lvl}</small>`,'lvl',4.6,{html:true});levelFx();sfx('levelup');say(`เลเวลอัป! Base Lv ${lvl} ได้แต้มสเตตัส +${gp} (กด C เพื่อเพิ่ม)`,'sys');if(typeof updateJobUI==='function')updateJobUI();}
+  if(up){recalc(false);php=maxHp;psp=maxSp;popText(player.x,player.z,`LEVEL UP<small>Base Lv ${lvl}</small>`,'lvl',4.6,{html:true});levelFx();sfx('levelup');say(`เลเวลอัป! Base Lv ${lvl} · สเตตัสทุกตัว +${up} · ได้แต้มสเตตัส +${gp} (กด C เพื่อเพิ่ม)`,'sys');if(typeof updateJobUI==='function')updateJobUI();}
   updateExp();updateHP();}
 /* ---- inventory & hotbar ---- */
 const inv={'ยาแดง':3,'แอปเปิ้ล':2};
