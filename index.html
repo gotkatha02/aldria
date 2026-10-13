@@ -1636,6 +1636,9 @@ const hitMat=new THREE.MeshBasicMaterial({visible:false});
 /* ---------- items on the ground (clickable) ---------- */
 /* ===================== CRAFTING: material sets (12-Tails style set gear) ===================== */
 const MATS={/* name: [colour, shape, price, monsters…] */
+ 'ผ้าโพกหัวโจรสลัด':['#c8342a','cloth',110,'pc_fish pc_craw pc_slug'],
+ 'ก้ามปูเพลิง':['#ff6a2a','shard',160,'pc_crab pc_craw pc_chef'],
+ 'เกล็ดปิศาจทะเล':['#3a8ad8','scale',420,'pc_serpent pc_slug'],
  'ขนนกเพนกวินหิมะ':['#e8f4ff','feather',80,'di_peng di_mage di_papa di_golem'],
  'เขาผลึกน้ำแข็ง':['#7ad8ff','shard',120,'di_golem di_papa di_stag'],
  'แก่นน้ำแข็งนิรันดร์':['#b88aff','core',320,'di_venero di_stag'],
@@ -3607,7 +3610,7 @@ function buildGeneric(key){
   def.build({T,P,clear,dirs});
   const dk=def.dress||(key==='m36'?'volcano':def.base==='snow'?'snow':def.base==='sand'?'sand':'green');
   if(['green','snow','sand','volcano'].includes(dk))dressMap(dk,T,P,true);else if(['temple','castle','frost','shadow','void','forest','mystic','scrap','stumps'].includes(dk))dressNew(dk,T,P);else dressMore(dk,T,P);
-  dressAll(dk,T,P);
+  if(!def.clean)dressAll(dk,T,P);
   const edgeEx=exits.filter(p=>Math.max(Math.abs(p[0]),Math.abs(p[1]))>=68);
   for(let a=-78;a<=78;a+=3.4)[[a,-77],[a,77],[-77,a],[77,a]].forEach(([x,z])=>{if(edgeEx.some(p=>Math.hypot(p[0]-x,p[1]-z)<10))return;BORDER[def.border](x+(rnd()-0.5)*3,z+(rnd()-0.5)*3);});
   afRelease();bakeAll();
@@ -4197,7 +4200,7 @@ let bubble=null,bubbleT=0;
 $('#chatForm').addEventListener('submit',e=>{e.preventDefault();const v=$('#chatIn').value.trim();if(!v)return;$('#chatIn').value='';say(player.name+' : '+v);
   if(!bubble){bubble=document.createElement('div');bubble.className='bubble';labelLayer.appendChild(bubble);}bubble.textContent=v;bubble.hidden=false;bubbleT=5;view.focus();});
 let talkNpc=null,talkIdx=0,pendingTalk=null,pendingAttack=null,pendingPick=null;
-function openTalk(n){if(n.heal){sfx('heal');php=maxHp;psp=maxSp;updateHP();popText(player.x,player.z,'HP/SP FULL','heal',4.2);levelFx('#7dff8a','#e8ffe8',false);}talkNpc=n;talkIdx=0;n.talking=true;n.path=[];n.facing=Math.atan2(player.x-n.x,player.z-n.z);player.facing=Math.atan2(n.x-player.x,n.z-player.z);showLine();$('#talk').hidden=false;{const sv=document.getElementById('talkSvc');sv.innerHTML=n.smith?'<button data-svc="craft">⚒ คราฟชุดเซต</button><button data-svc="refine">🔨 ตีบวกอุปกรณ์</button>':'';}if(n.name==='นักสำรวจ ลิซ่า'&&typeof dgTalk==='function')dgTalk(n);if(n.name==='เพนกวินผู้หลบหนี เพนเน่'&&typeof diTalk==='function')diTalk(n);if(n.shop)openShop();if(n.refine)openRefine();if(n.warp)openWarp();if(n.petup)openPetUp();if(n.quest)openQuest();if(n.craft)openCraft();if(n.name.indexOf('ทหารรับจ้าง')>=0)openParty(true);if(n.name.indexOf('วัฏจักร')>=0)openJt();storyTalk(n.name);if(n.sqZone&&window.sqOn)sqTalk(n);}
+function openTalk(n){if(n.heal){sfx('heal');php=maxHp;psp=maxSp;updateHP();popText(player.x,player.z,'HP/SP FULL','heal',4.2);levelFx('#7dff8a','#e8ffe8',false);}talkNpc=n;talkIdx=0;n.talking=true;n.path=[];n.facing=Math.atan2(player.x-n.x,player.z-n.z);player.facing=Math.atan2(n.x-player.x,n.z-player.z);showLine();$('#talk').hidden=false;{const sv=document.getElementById('talkSvc');sv.innerHTML=n.smith?'<button data-svc="craft">⚒ คราฟชุดเซต</button><button data-svc="refine">🔨 ตีบวกอุปกรณ์</button>':'';}if(n.name==='นักสำรวจ ลิซ่า'&&typeof dgTalk==='function')dgTalk(n);if(n.name==='เพนกวินผู้หลบหนี เพนเน่'&&typeof diTalk==='function')diTalk(n);if(n.name==='ลุงกุยโบ ผู้เฝ้าท่าเรือ'&&typeof dpTalk==='function')dpTalk(n);if(n.shop)openShop();if(n.refine)openRefine();if(n.warp)openWarp();if(n.petup)openPetUp();if(n.quest)openQuest();if(n.craft)openCraft();if(n.name.indexOf('ทหารรับจ้าง')>=0)openParty(true);if(n.name.indexOf('วัฏจักร')>=0)openJt();storyTalk(n.name);if(n.sqZone&&window.sqOn)sqTalk(n);}
 function showLine(){$('#talkName').textContent=talkNpc.name;const l=talkNpc.lines[talkIdx];$('#talkText').textContent=l;say(talkNpc.name+' : '+l,'npc');$('#talkNext').hidden=talkIdx>=talkNpc.lines.length-1;}
 function closeTalk(){if(talkNpc){talkNpc.talking=false;talkNpc.wait=2;}talkNpc=null;$('#talk').hidden=true;}
 $('#talkNext').onclick=()=>{talkIdx++;showLine();};
@@ -4863,7 +4866,7 @@ function rollDmg(mult,t,mag){const D=derived();let crit=Math.random()<D.crit;if(
   if(t&&t.mon){if(t.vulnEnd>time)v*=1+t.vuln/100;if(t.shredEnd>time)v*=1+t.shred/100;}
   if(LINE==='penguin'&&mag)v*=pgMul(t);if(LINE==='mole')v*=mlMul(t);if(LINE==='bat')v*=btMul(t,mag);if(LINE==='panda')v*=pdMul(t,mag);if(LINE==='cat')v*=ctMul(t,mag);if(LINE==='sheep')v*=shMul(t,mag);if(LINE==='rabbit')v*=rbMul(t,mag);v*=cardDmgMul(t,mag);v=elemDmg(v,t,mag);return{v:Math.max(t&&t.mon&&elemMul(playerElem(),t.elem||'neutral')===0?0:1,Math.round(v)),crit};}
 function applyHit(d,v,crit,cls){if(!d||d.dead)return;if(d.mon&&cls!=='pack'&&(!TGT||TGT.dead))setTarget(d);if(cls!=='pack')sfx(crit?'crit':'hit');popDamage(d.x,d.z,v,crit,cls);
-  if(d.mon){if(d.sleepEnd>time&&!btNoWake())v=gWake(d,v);if(d.diBoss&&typeof diDmgMul==='function')v=Math.max(1,Math.round(v*diDmgMul(d)));d.hp-=v;if(typeof shOnHit==='function')shOnHit(d,v,cls);if(cls!=='pack'){const dr=bsum().drain;if(dr){php=Math.min(maxHp,php+v*dr/100);updateHP();}}d.el.classList.add('hurt');d.bar.style.width=Math.max(0,d.hp/d.T.hp*100)+'%';if(d.T.retaliate)d.aggro=true;else d.wait=0;
+  if(d.mon){if(d.sleepEnd>time&&!btNoWake())v=gWake(d,v);if(d.diBoss&&typeof diDmgMul==='function')v=Math.max(1,Math.round(v*diDmgMul(d)));if(d.dpBoss&&typeof dpDmgMul==='function')v=Math.max(1,Math.round(v*dpDmgMul(d)));d.hp-=v;if(typeof shOnHit==='function')shOnHit(d,v,cls);if(cls!=='pack'){const dr=bsum().drain;if(dr){php=Math.min(maxHp,php+v*dr/100);updateHP();}}d.el.classList.add('hurt');d.bar.style.width=Math.max(0,d.hp/d.T.hp*100)+'%';if(d.T.retaliate)d.aggro=true;else d.wait=0;
     const ls=pas().ls;if(ls){php=Math.min(maxHp,php+v*ls/100);updateHP();}
     if(d.hp<=0)killMon(d);return;}
   d.shake=1;}
@@ -17723,6 +17726,7 @@ const CRAFT_SETS=[
  ['tomb','ชุดสุสานฟาโรห์',42,'#e0a830',['ผ้าพันมัมมี่','เขี้ยวอนูบิส','อัญมณีตาแมว'],{ATK:1,INT:1,AGI:1},{stats:{ATK:4,INT:4}},{crit:4,atk:15,matk:15,stats:{AGI:4}},'ฟาโรห์'],
  ['sea','ชุดวังใต้น้ำ',45,'#3ab8d8',['เกล็ดปลา','ไข่มุก','เปลือกปู'],{INT:2,VIT:1},{stats:{INT:5}},{hpP:12,matk:30,stats:{INT:5}},'วังน้ำ'],
  ['frost','ชุดหอคอยน้ำแข็ง',52,'#7ad8ff',['ขนนกเพนกวินหิมะ','เขาผลึกน้ำแข็ง','แก่นน้ำแข็งนิรันดร์'],{INT:1,VIT:1,DEF:1},{stats:{VIT:5,INT:5}},{hpP:10,def:15,matk:25,atk:20,stats:{DEF:5}},'หิมะนิรันดร์'],
+ ['pirate','ชุดโจรสลัดก้ามแดง',62,'#e0402a',['ผ้าโพกหัวโจรสลัด','ก้ามปูเพลิง','เกล็ดปิศาจทะเล'],{ATK:1,AGI:1,LCK:1},{stats:{ATK:5,LCK:5}},{crit:6,atk:30,aspdP:8,stats:{AGI:5}},'ก้ามแดง'],
  ['mech','ชุดจักรกลแซปป้า',62,'#5ad8a0',['ชิปกลไก','กระดูกโบราณ','เศษดาบ'],{ATK:1,DEF:2},{stats:{ATK:4,DEF:5}},{atk:20,crit:5},'จักรกล'],
  ['sage','ชุดปราชญ์เอนลาเจีย',72,'#8ab0ff',['แกนพลังโบราณ','หน้ากระดาษต้องสาป','ผลึกน้ำแข็ง'],{INT:2,CHA:1},{stats:{INT:6}},{matk:40,stats:{INT:6,CHA:6}},'เอนลาเจีย'],
  ['shadow','ชุดเงาราตรี',82,'#8a5ad0',['ผลึกเงา','ขนนกเพลิง','กระดูกโบราณ'],{ATK:1,TAL:1,LCK:1},{stats:{TAL:6}},{crit:6,atk:25},'เงาราตรี'],
@@ -17752,7 +17756,7 @@ function rollMatDrop(m){const L=MAT_SRC[m.type];if(!L)return;const n=m.T.boss?2:
   const name=L[Math.floor(Math.random()*L.length)],ik=ITEM_KINDS.find(k=>k.name===name);if(!ik)continue;createItem(m.x-0.3+i*0.5,m.z-0.5,ik,true,m.map.scene);}}
 function matWhere(n){const M=MATS[n];if(M)return M[3].split(' ').map(t=>MON_TYPES[t]&&MON_TYPES[t].name.replace('★ ','')).filter(Boolean).slice(0,3).join(', ');
   const src=Object.keys(MON_TYPES).filter(t=>(MON_TYPES[t].drops||[]).includes(n)).map(t=>MON_TYPES[t].name).slice(0,3);return src.join(', ')||'ร้านค้า';}
-function craftCost(D){const ix=CRAFT_SETS.filter(s=>!['tomb','frost'].includes(s[0])||s[0]===D.set).findIndex(s=>s[0]===D.set);const [m1,m2,m3]=CRAFT_SET[D.set].mats,w=D.slot==='weapon'?2:D.slot==='armor'?1.5:1;
+function craftCost(D){const ix=CRAFT_SETS.filter(s=>!['tomb','frost','pirate'].includes(s[0])||s[0]===D.set).findIndex(s=>s[0]===D.set);const [m1,m2,m3]=CRAFT_SET[D.set].mats,w=D.slot==='weapon'?2:D.slot==='armor'?1.5:1;
   return {mats:[[m1,Math.round((6+ix*2)*w)],[m2,Math.round((4+ix)*w)],[m3,Math.round(3*w)]],z:Math.round(D.lv*D.lv*4+300)};}
 const QUAL=[['',0],['ดี',1],['ยอดเยี่ยม',2],['ตำนาน',4]];
 function rollQuality(){const r=Math.random(),l=S('LCK')*0.002;return r<0.03+l?3:r<0.12+l*2?2:r<0.35+l*3?1:0;}
@@ -17885,7 +17889,7 @@ function buildCardEff(type,T){const D=CARD_DEF[type];if(!D||!D[1])return null;co
   return{eff,label:parts.join(' · ')};}
 function cardSlotOK(C,slot){const s=C.slot;if(!s)return true;return s===slot||(s==='acc'&&(slot==='acc1'||slot==='acc2'||slot==='acc'));}
 /* runtime helpers used by combat hooks */
-const CX=k=>((typeof EQX!=='undefined'&&EQX[k])||0)+(k==='spd'&&typeof DI!=='undefined'&&DI.on&&DI.sledEnd>time?60:0)+(k==='expP'&&typeof buffs!=='undefined'&&buffs.rp_exp&&buffs.rp_exp.end>time?50:0);
+const CX=k=>((typeof EQX!=='undefined'&&EQX[k])||0)+(k==='spd'&&typeof DI!=='undefined'&&DI.on&&DI.sledEnd>time?60:0)+(k==='spd'&&typeof DP!=='undefined'&&DP.on&&DP.speedEnd>time?55:0)+(k==='expP'&&typeof buffs!=='undefined'&&buffs.rp_exp&&buffs.rp_exp.end>time?50:0);
 function cardDmgMul(t,mag){if(!t||!t.mon)return 1;let k=(1+CX('vsE_'+(t.elem||'neutral'))/100)*(1+CX('vsS_'+t.sz)/100)*(1+CX(mag?'matkP':'atkP')/100);if(t.T.boss)k*=1+CX('vsBoss')/100;return k;}
 function cardResMul(src){if(!src||!src.mon)return 1;const r=CX('resE_'+(src.elem||'neutral'))+CX('resS_'+src.sz)+(src.T.boss?CX('resBoss'):0);return 1-Math.min(60,r)/100;}
 function cardOnHit(d,D){if(!d||!d.mon||d.dead)return;const boss=d.T.boss;
@@ -18105,7 +18109,7 @@ const BS_TABS=[['weapon','Weapon','อาวุธ','#f0b8a8'],['armor','Armor',
 let bsTab='mat',bsSel=null,bsPage=0,bsCare=0,bsResult=null,bsArch=null;
 function bsRecipes(){if(bsTab==='mat'){const R=[];[1,2].forEach(g=>STONE_STATS.forEach(s=>R.push({kind:'stone',id:`stone:${s}:${g}`,s,g,n:stoneName(s,g),lv:g===1?20:50,
     mats:[[stoneName(s,g-1),3]],z:g===1?500:2000,icon:ICON_URL[stoneName(s,g)]})));return R;}
-  const L=[];CRAFT_SETS.filter(s=>['tomb','frost'].includes(s[0])).forEach(([sid])=>{if(bsTab==='weapon')L.push(EQ_DB[`cw_${sid}_${LINE}`]);if(bsTab==='armor')['ch','ca','cs'].forEach(p=>L.push(EQ_DB[`${p}_${sid}`]));if(bsTab==='acc')L.push(EQ_DB[`cr_${sid}`]);});
+  const L=[];CRAFT_SETS.filter(s=>['tomb','frost','pirate'].includes(s[0])).forEach(([sid])=>{if(bsTab==='weapon')L.push(EQ_DB[`cw_${sid}_${LINE}`]);if(bsTab==='armor')['ch','ca','cs'].forEach(p=>L.push(EQ_DB[`${p}_${sid}`]));if(bsTab==='acc')L.push(EQ_DB[`cr_${sid}`]);});
   return L.filter(Boolean).map(D=>{const c=craftCost(D);return{kind:'eq',id:D.id,D,n:D.n,lv:D.lv,mats:c.mats,z:c.z,icon:D.icon};});}
 function bsRate(R){if(R.kind==='stone')return R.g===1?80:60;return R.lv<=20?100:Math.max(45,100-Math.floor((R.lv-20)*0.7));}
 function bsCareStep(R){return Math.max(50,Math.round(R.lv*15));}
@@ -18572,7 +18576,7 @@ function killMon(m){if(AUTO.on)AUTO.kills++;if(typeof advKill==='function')advKi
   {const D=rollEqDrop(m);if(D){createItem(m.x-0.5,m.z+0.4,D.kind,true,m.map.scene);setTimeout(()=>popText(m.x,m.z,`<img alt="" src="${D.icon}">ดรอป ${D.n}!`,'drop',1.3,{html:true,life:2.6,rise:1}),650);say(`★ ${m.T.name} ดรอปอุปกรณ์ ${D.n}!`,'sys');}
    const C=rollCardDrop(m);if(C){ITEM_KINDS.includes(C.kind)||ITEM_KINDS.push(C.kind);createItem(m.x+0.6,m.z-0.4,C.kind,true,m.map.scene);setTimeout(()=>popText(m.x,m.z,`<img alt="" src="${C.icon}">${C.name}!!`,'drop',1.0,{html:true,life:3,rise:1.2}),900);say(`★★ ${m.T.name} ดรอป ${C.name}! (${C.label})`,'sys');sfx('levelup');}}
   rollMatDrop(m);rollOreDrop(m);rollStoneDrop(m);eliteLoot(m);sfx('kill');
-  if(m.dg&&typeof dgKill==='function')dgKill(m);if(m.di&&typeof diKill==='function')diKill(m);if(m.hunt){huntLoot(m);}else{if(!m.sq&&!m.summ&&!m.dg&&!m.di)setTimeout(()=>spawnMon(m.type,m.map,m.reg),m.T.boss?60000:6000);if(m.T.boss)say(`ปราบบอส ${m.T.name} สำเร็จ!`,'sys');}
+  if(m.dg&&typeof dgKill==='function')dgKill(m);if(m.di&&typeof diKill==='function')diKill(m);if(m.dp&&typeof dpKill==='function')dpKill(m);if(m.hunt){huntLoot(m);}else{if(!m.sq&&!m.summ&&!m.dg&&!m.di&&!m.dp)setTimeout(()=>spawnMon(m.type,m.map,m.reg),m.T.boss?60000:6000);if(m.T.boss)say(`ปราบบอส ${m.T.name} สำเร็จ!`,'sys');}
 }
 function monStep(m,tx,tz,spd,dt){const dx=tx-m.x,dz=tz-m.z,d=Math.hypot(dx,dz);if(d<0.05)return false;const st=Math.min(d,spd*dt),nx=m.x+dx/d*st,nz=m.z+dz/d*st;
   m.face=(dx*Math.cos(camYaw)-dz*Math.sin(camYaw))>0?-1:1;
@@ -18600,7 +18604,7 @@ function updateMons(dt){if(HUNT.fx.length)huntFx(dt);
       if(m.wait<=0){m.wait=2+Math.random()*4;const a=Math.random()*Math.PI*2,r=2+Math.random()*6;m.tx=m.x+Math.cos(a)*r;m.tz=m.z+Math.sin(a)*r;}
       moving=monStep(m,m.tx,m.tz,m.T.speed*spm,dt);
     }
-    if(m.hunt)huntAI(m,dt,dp);else if(m.dgBoss)dgBossAI(m,dt,dp);else if(m.diBoss)diBossAI(m,dt,dp);
+    if(m.hunt)huntAI(m,dt,dp);else if(m.dgBoss)dgBossAI(m,dt,dp);else if(m.diBoss)diBossAI(m,dt,dp);else if(m.dpBoss)dpBossAI(m,dt,dp);
     if(m.lunge>0)m.lunge-=dt;
     const b=moving?Math.abs(Math.sin(m.t*7)):Math.abs(Math.sin(m.t*2.4))*0.3;
     const sq=m.lunge>0?1.18:1;
@@ -18616,7 +18620,7 @@ function updatePlayerState(dt){
   else{let ch=false;if(time-lastHurt>4&&php<maxHp){php=Math.min(maxHp,php+dt*(2+S('VIT')*0.1)*(1+(derived().p.regen+CX('regenP'))/100));ch=true;}if(psp<maxSp){psp=Math.min(maxSp,psp+dt*(1+S('INT')*0.08+maxSp*0.004)*(1+CX('spRegenP')/100));ch=true;}if(ch&&Math.random()<0.2)updateHP();}
 }
 let warping=false;
-function warpTo(map,x,z,msg){if(typeof dgOnWarp==='function')dgOnWarp(map);if(typeof diOnWarp==='function')diOnWarp(map);if(typeof cancelCast==='function')cancelCast();sfx('warp');
+function warpTo(map,x,z,msg){if(typeof dgOnWarp==='function')dgOnWarp(map);if(typeof diOnWarp==='function')diOnWarp(map);if(typeof dpOnWarp==='function')dpOnWarp(map);if(typeof cancelCast==='function')cancelCast();sfx('warp');
   if(warping)return;warping=true;const f=document.getElementById('fade');f.classList.add('on');
   player.path=[];player.action=null;player.attackTarget=null;pendingAttack=null;pendingPick=null;pendingTalk=null;if(talkNpc)closeTalk();marker.visible=false;
   setTimeout(()=>{
@@ -19823,14 +19827,14 @@ GEN.diE={name:`${DI_NAME} · โถงราชากวาง`,base:'icefloor',
    for(let k=0;k<6;k++){const a=k/6*6.28+0.52;icCol(Math.cos(a)*19,Math.sin(a)*19,10,1.15);}
    egGlowFinish('diE',[[0,0,'#7ad8ff',1.3,40],[-16,-14,'#9ae8ff',0.8,26],[16,-14,'#9ae8ff',0.8,26]]);},mons:[]};
 const DI_F=[{x:0,z:0,r:26},{x:0,z:30,w:8,x0:0,z0:24,x1:0,z1:44},{x:0,z:46,r:6}];
-GEN.diF={name:`${DI_NAME} · ลานลอยฟ้าชั้นบน`,base:'snow',border:'none',dress:'none',fx:'snow',fog:[80,260],...DI_OPEN,
+GEN.diF={clean:true,name:`${DI_NAME} · ลานลอยฟ้าชั้นบน`,base:'snow',border:'none',dress:'none',fx:'snow',fog:[80,260],...DI_OPEN,
   type(x,z){return inPlat(DI_F,x,z)?(Math.hypot(x,z)<5?'icerune':'icewalk'):'skyfall';},
   build(c){DG.pendingGlow=[];icSkyify();DI_F.forEach(icPlat);icColRing(0,0,24,16,9,[Math.PI/2]);
    const lift=icRune(0,0,4.6);lift.position.y=0.06;(DG.objs.diF=DG.objs.diF||{}).lift=lift;egLabel('diF',0,0,'ลิฟต์ผลึก',3);
    [[-14,-14],[14,-14],[-16,10],[16,10]].forEach(([x,z])=>icShards(x,z,4,1.1));
    egGlowFinish('diF',[[0,0,'#9ae8ff',0.9,30]]);},mons:[]};
 const DI_G=[{x:0,z:58,r:9},{w:4.4,x0:0,z0:50,x1:-24,z1:30,rail:true},{x:-24,z:26,r:8},{w:4,x0:-22,z0:19,x1:-2,z1:-2,rail:true},{x:0,z:-6,r:9},{w:4,x0:6,z0:-12,x1:24,z1:-26,rail:true},{x:26,z:-30,r:8},{w:4.4,x0:22,z0:-37,x1:4,z1:-52,rail:true},{x:0,z:-58,r:9}];
-GEN.diG={name:`${DI_NAME} · สะพานฟ้าหมุนวน`,base:'snow',border:'none',dress:'none',fx:'snow',fog:[80,260],...DI_OPEN,
+GEN.diG={clean:true,name:`${DI_NAME} · สะพานฟ้าหมุนวน`,base:'snow',border:'none',dress:'none',fx:'snow',fog:[80,260],...DI_OPEN,
   type(x,z){return inPlat(DI_G,x,z)?'icewalk':'skyfall';},
   build(c){DG.pendingGlow=[];icSkyify();DI_G.forEach(icPlat);[[0,58],[-24,26],[0,-6],[26,-30],[0,-58]].forEach(([x,z],i)=>{for(let k=0;k<6;k++){const a=k/6*6.28;icCol(x+Math.cos(a)*(i===4||i===0?7.6:6.6),z+Math.sin(a)*(i===4||i===0?7.6:6.6),6,0.6);}});
    frozenTower(70,-10);const pg=new THREE.Mesh(new THREE.TorusGeometry(2,0.14,8,40),new THREE.MeshBasicMaterial({color:'#c8a0ff'}));pg.rotation.x=Math.PI/2;pg.position.set(0,0.1,-60);scene.add(pg);
@@ -19978,6 +19982,292 @@ ITEM_KINDS.push({name:DI_ITEM,w:2,draw(g){g.fillStyle='#2b1f1a';g.beginPath();g.
   g.fillStyle='#b88aff';g.beginPath();g.arc(16,15,2.5,0,7);g.fill();g.fillStyle='#2b1f1a';g.fillRect(3,18,3,3);g.fillRect(26,18,3,3);}});
 {const ik=ITEM_KINDS[ITEM_KINDS.length-1],c=document.createElement('canvas');c.width=c.height=32;ik.draw(c.getContext('2d'));ik.tex=new THREE.CanvasTexture(c);ik.tex.magFilter=THREE.NearestFilter;ik.tex.minFilter=THREE.NearestFilter;ik.tex.generateMipmaps=false;ICON_URL[ik.name]=c.toDataURL();}
 const diCss=document.createElement('style');diCss.textContent=`#diHud{position:absolute;top:calc(48px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);padding:5px 14px;border-radius:18px;background:rgba(14,30,54,.85);border:1px solid #9ad8ff;color:#e8f6ff;font:600 12.5px var(--display);z-index:5;pointer-events:none;white-space:nowrap}#diHud b{color:#bfefff}`;document.head.appendChild(diCss);
+/* ===================== DUNGEON 3: ถ้ำโจรสลัดก้ามแดง (pirate cove, Lv 60+) ===================== */
+var DP={on:false,stage:'',kills:0,need:0,bbq:0,altar:0,timer:0,key:false,boxes:0,boxKey:-1,freed:[0,0,0],freeT:[0,0,0],boss:null,chefDead:false,sharkDead:false,serpDead:false,cannonCd:[0,0,0,0],side:1,vuln:0,t0:0,speedEnd:0};
+const DP_KEYS=['pcA','pcB','pcC','pcD','pcE','pcF','pcG','pcH'],DP_LV=60,DP_ITEM='ชุดอาหารทะเลดีลักซ์',DP_ITEM_Z=6000,DP_NAME='ถ้ำโจรสลัดก้ามแดง';
+const PC={wood:'#8a5a32',wood2:'#6b4226',dark:'#3a2414',red:'#a82a22',red2:'#7a1c18',gold:'#e8b830',rock:'#6a5a50',rock2:'#5a4a42',moss:'#5a7a3a',sand:'#e2c690',iron:'#3a3a42',sail:'#efe6d0'};
+/* ---------- monster art (original) ---------- */
+function pcCrab(g){const o='#3a0c08';g.lineWidth=3;g.strokeStyle=o;const C='#e04a2a',D='#a82a1a';
+  for(let s of[-1,1])for(let k=0;k<3;k++){g.beginPath();g.moveTo(48+s*16,70);g.lineTo(48+s*(30+k*6),82+k*3);g.lineTo(48+s*(34+k*7),92);g.stroke();}
+  g.fillStyle=C;g.beginPath();g.ellipse(48,64,30,18,0,0,7);g.fill();g.stroke();g.fillStyle=D;g.beginPath();g.ellipse(48,70,24,8,0,0,Math.PI);g.fill();
+  g.fillStyle='#1a0a06';for(let k=0;k<7;k++){const a=Math.PI+0.3+k*0.38;g.beginPath();g.moveTo(48+Math.cos(a)*28,64+Math.sin(a)*16);g.lineTo(48+Math.cos(a)*38,62+Math.sin(a)*26);g.lineTo(48+Math.cos(a+0.12)*28,64+Math.sin(a+0.12)*16);g.closePath();g.fill();}
+  for(const s of[-1,1]){g.fillStyle=C;g.beginPath();g.ellipse(48+s*34,46,12,10,s*0.4,0,7);g.fill();g.stroke();g.fillStyle=D;g.beginPath();g.moveTo(48+s*40,40);g.lineTo(48+s*46,30);g.lineTo(48+s*34,38);g.closePath();g.fill();g.stroke();}
+  g.fillStyle='#fff';g.beginPath();g.arc(40,46,4,0,7);g.fill();g.stroke();g.beginPath();g.arc(56,46,4,0,7);g.fill();g.stroke();g.fillStyle='#000';g.beginPath();g.arc(40,46,1.8,0,7);g.fill();g.beginPath();g.arc(56,46,1.8,0,7);g.fill();}
+function pcFish(g){const o='#10202a';g.lineWidth=3;g.strokeStyle=o;
+  g.fillStyle='#3a4a6a';g.fillRect(36,74,9,16);g.strokeRect(36,74,9,16);g.fillRect(52,74,9,16);g.strokeRect(52,74,9,16);
+  g.fillStyle='#4a9ab8';g.beginPath();g.ellipse(48,54,18,24,0,0,7);g.fill();g.stroke();g.fillStyle='#e8f4f8';g.beginPath();g.ellipse(48,60,10,16,0,0,7);g.fill();
+  g.fillStyle='#3a7a98';g.beginPath();g.moveTo(48,30);g.lineTo(40,16);g.lineTo(56,22);g.closePath();g.fill();g.stroke();
+  g.fillStyle=PC.red;g.beginPath();g.ellipse(48,32,17,7,0,Math.PI,0);g.fill();g.stroke();g.beginPath();g.moveTo(62,30);g.lineTo(72,24);g.lineTo(70,36);g.closePath();g.fill();g.stroke();g.fillStyle='#fff';[[42,30],[52,29]].forEach(([x,y])=>{g.beginPath();g.arc(x,y,1.6,0,7);g.fill();});
+  g.fillStyle='#fff';g.beginPath();g.arc(42,42,5,0,7);g.fill();g.stroke();g.fillStyle='#000';g.beginPath();g.arc(41,42,2,0,7);g.fill();g.fillStyle='#1a1a1a';g.fillRect(50,38,10,7);
+  g.strokeStyle='#ff6a6a';g.lineWidth=2;g.beginPath();g.moveTo(38,52);g.quadraticCurveTo(46,56,54,52);g.stroke();
+  g.strokeStyle='#c8ccd4';g.lineWidth=4;g.beginPath();g.moveTo(70,50);g.quadraticCurveTo(84,40,86,24);g.stroke();g.fillStyle=PC.gold;g.fillRect(66,50,8,5);g.strokeStyle=o;g.lineWidth=3;
+  g.fillStyle='#3a7a98';g.beginPath();g.ellipse(30,56,5,12,0.4,0,7);g.fill();g.stroke();}
+function pcCraw(g){const o='#3a0c08';g.lineWidth=3;g.strokeStyle=o;const C='#d8542a',D='#a8381a';
+  g.fillStyle=D;g.fillRect(34,74,11,18);g.strokeRect(34,74,11,18);g.fillRect(52,74,11,18);g.strokeRect(52,74,11,18);
+  g.fillStyle=C;g.beginPath();g.ellipse(48,56,22,24,0,0,7);g.fill();g.stroke();for(let k=0;k<4;k++){g.beginPath();g.moveTo(30,48+k*8);g.lineTo(66,48+k*8);g.stroke();}
+  g.fillStyle='#f4e8d0';g.fillRect(36,44,24,30);g.strokeRect(36,44,24,30);g.strokeStyle='#1a1a1a';g.lineWidth=3;g.beginPath();g.moveTo(36,44);g.lineTo(60,74);g.moveTo(60,44);g.lineTo(36,74);g.stroke();g.strokeStyle=o;
+  for(const s of[-1,1]){g.fillStyle=C;g.beginPath();g.ellipse(48+s*30,52,10,8,0,0,7);g.fill();g.stroke();g.beginPath();g.ellipse(48+s*36,38,12,14,s*0.3,0,7);g.fill();g.stroke();g.fillStyle='#1a0a06';g.beginPath();g.moveTo(48+s*36,30);g.lineTo(48+s*40,42);g.lineTo(48+s*32,40);g.closePath();g.fill();}
+  g.fillStyle=C;g.beginPath();g.ellipse(48,26,14,12,0,0,7);g.fill();g.stroke();g.fillStyle=PC.red;g.beginPath();g.ellipse(48,18,15,6,0,Math.PI,0);g.fill();g.stroke();
+  g.fillStyle='#fff';[[42,26],[54,26]].forEach(([x,y])=>{g.beginPath();g.arc(x,y,3.4,0,7);g.fill();g.stroke();});g.fillStyle='#000';[[42,26],[54,26]].forEach(([x,y])=>{g.beginPath();g.arc(x,y,1.5,0,7);g.fill();});
+  g.strokeStyle='#d8542a';g.lineWidth=2;g.beginPath();g.moveTo(44,14);g.quadraticCurveTo(30,0,18,6);g.moveTo(52,14);g.quadraticCurveTo(66,0,78,6);g.stroke();}
+function pcBox(g){const o='#2a1608';g.lineWidth=3;g.strokeStyle=o;g.fillStyle='#a8743a';g.fillRect(18,34,60,56);g.strokeRect(18,34,60,56);g.fillStyle='#8a5a28';for(let k=0;k<4;k++)g.fillRect(18,40+k*14,60,4);
+  g.fillStyle='#c8963a';g.beginPath();g.moveTo(14,34);g.lineTo(82,34);g.lineTo(76,22);g.lineTo(20,22);g.closePath();g.fill();g.stroke();g.fillStyle=PC.gold;g.fillRect(42,26,12,20);g.strokeRect(42,26,12,20);
+  g.fillStyle='#ffe08a';g.font='bold 28px sans-serif';g.textAlign='center';g.fillText('?',48,76);g.strokeText('?',48,76);}
+function pcSlug(g){const o='#0a2a10';g.lineWidth=3;g.strokeStyle=o;g.fillStyle='#3aa85a';g.beginPath();g.moveTo(10,88);g.quadraticCurveTo(14,50,46,44);g.quadraticCurveTo(80,40,88,72);g.lineTo(88,90);g.closePath();g.fill();g.stroke();
+  g.fillStyle='#2a7a3a';for(let k=0;k<6;k++){g.beginPath();g.ellipse(26+k*11,62-Math.sin(k)*4,5,8,0,0,7);g.fill();}
+  g.fillStyle='#e8a02a';for(let k=0;k<7;k++){const x=28+k*8;g.beginPath();g.moveTo(x,46);g.lineTo(x+2+(k%2)*3,18+(k%3)*6);g.lineTo(x+6,46);g.closePath();g.fill();g.stroke();}
+  g.fillStyle='#2a6ab8';g.beginPath();g.ellipse(18,72,10,12,0,0,7);g.fill();g.stroke();g.fillStyle='#ffe066';g.beginPath();g.arc(16,68,3,0,7);g.fill();g.fillStyle='#ff6a6a';g.beginPath();g.ellipse(14,80,5,2,0,0,7);g.fill();}
+function pcChef(g){const o='#2a0808';g.lineWidth=3;g.strokeStyle=o;const C='#e0402a',D='#a8281a';
+  g.fillStyle=D;g.fillRect(32,76,12,16);g.strokeRect(32,76,12,16);g.fillRect(52,76,12,16);g.strokeRect(52,76,12,16);
+  g.fillStyle='#f4ece0';g.beginPath();g.moveTo(26,40);g.lineTo(70,40);g.lineTo(74,80);g.lineTo(22,80);g.closePath();g.fill();g.stroke();g.fillStyle='#e8a0b0';[[38,56],[56,62],[44,70]].forEach(([x,y])=>{g.beginPath();g.arc(x,y,4,0,7);g.fill();});
+  g.fillStyle='#2a5aa8';g.beginPath();g.moveTo(36,40);g.lineTo(60,40);g.lineTo(48,52);g.closePath();g.fill();g.stroke();
+  g.fillStyle=C;g.beginPath();g.ellipse(48,30,18,14,0,0,7);g.fill();g.stroke();g.fillStyle='#fff';g.beginPath();g.arc(41,24,5,0,7);g.fill();g.stroke();g.beginPath();g.arc(55,24,5,0,7);g.fill();g.stroke();
+  g.fillStyle='#000';g.beginPath();g.arc(42,25,2,0,7);g.fill();g.beginPath();g.arc(54,25,2,0,7);g.fill();g.strokeStyle=o;g.beginPath();g.moveTo(40,36);g.quadraticCurveTo(48,32,56,36);g.stroke();
+  g.fillStyle='#fff';g.beginPath();g.ellipse(48,10,14,8,0,0,7);g.fill();g.stroke();g.fillRect(38,12,20,8);g.strokeRect(38,12,20,8);
+  g.fillStyle=C;g.beginPath();g.ellipse(14,50,10,14,-0.3,0,7);g.fill();g.stroke();g.fillStyle='#c8ccd4';g.fillRect(4,24,12,22);g.strokeRect(4,24,12,22);g.fillStyle='#6a4a2a';g.fillRect(8,46,4,8);
+  g.fillStyle=C;g.beginPath();g.ellipse(82,50,10,14,0.3,0,7);g.fill();g.stroke();g.fillStyle='#d8705a';g.beginPath();g.ellipse(86,28,10,8,0.5,0,7);g.fill();g.stroke();g.fillStyle='#f4ece0';g.fillRect(84,34,4,10);}
+function pcShark(g){const o='#0a1a14';g.lineWidth=3;g.strokeStyle=o;
+  g.fillStyle='#2a3a4a';g.fillRect(32,76,12,16);g.strokeRect(32,76,12,16);g.fillRect(52,76,12,16);g.strokeRect(52,76,12,16);
+  g.fillStyle='#3a8a6a';g.beginPath();g.ellipse(48,54,28,30,0,0,7);g.fill();g.stroke();g.fillStyle='#e8f0e8';g.beginPath();g.ellipse(48,62,18,20,0,0,7);g.fill();
+  g.fillStyle='#fff';g.beginPath();g.moveTo(26,48);g.lineTo(70,48);g.lineTo(64,58);g.lineTo(32,58);g.closePath();g.fill();g.stroke();g.fillStyle='#1a1a1a';for(let k=0;k<6;k++){g.beginPath();g.moveTo(30+k*7,48);g.lineTo(33+k*7,54);g.lineTo(36+k*7,48);g.fill();}
+  g.fillStyle='#fff';g.beginPath();g.arc(38,34,5,0,7);g.fill();g.stroke();g.beginPath();g.arc(58,34,5,0,7);g.fill();g.stroke();g.fillStyle='#000';g.beginPath();g.arc(38,35,2.2,0,7);g.fill();g.beginPath();g.arc(58,35,2.2,0,7);g.fill();
+  g.fillStyle='#d84a3a';g.fillRect(26,64,44,6);g.strokeRect(26,64,44,6);g.fillStyle='#fff';g.beginPath();g.ellipse(48,10,13,9,0,0,7);g.fill();g.stroke();g.fillRect(38,14,20,10);g.strokeRect(38,14,20,10);
+  g.fillStyle='#3a8a6a';g.beginPath();g.moveTo(80,40);g.lineTo(92,30);g.lineTo(88,50);g.closePath();g.fill();g.stroke();g.strokeStyle='#c8ccd4';g.lineWidth=5;g.beginPath();g.moveTo(14,70);g.lineTo(14,30);g.stroke();g.fillStyle='#c8ccd4';g.beginPath();g.moveTo(8,30);g.lineTo(20,30);g.lineTo(14,18);g.closePath();g.fill();}
+function pcSerpent(g){const o='#0a1430';g.lineWidth=3;g.strokeStyle=o;
+  g.fillStyle='#2a5aa8';g.beginPath();g.moveTo(20,96);g.quadraticCurveTo(4,60,30,40);g.quadraticCurveTo(52,24,50,8);g.lineTo(70,10);g.quadraticCurveTo(78,36,54,52);g.quadraticCurveTo(34,68,44,96);g.closePath();g.fill();g.stroke();
+  g.fillStyle='#9ad8f0';g.beginPath();g.moveTo(32,94);g.quadraticCurveTo(22,64,40,48);g.quadraticCurveTo(54,40,58,24);g.lineTo(62,26);g.quadraticCurveTo(62,44,46,56);g.quadraticCurveTo(32,70,40,94);g.closePath();g.fill();
+  g.fillStyle='#8a4ad8';for(let k=0;k<6;k++){g.beginPath();g.moveTo(14+k*3,80-k*12);g.lineTo(2+k*4,70-k*12);g.lineTo(18+k*4,72-k*12);g.closePath();g.fill();g.stroke();}
+  g.fillStyle='#2a5aa8';g.beginPath();g.ellipse(64,14,16,10,0.3,0,7);g.fill();g.stroke();g.fillStyle='#e8f8ff';g.beginPath();g.moveTo(72,6);g.lineTo(90,-2);g.lineTo(78,12);g.closePath();g.fill();g.stroke();
+  g.fillStyle='#ffe066';g.shadowColor='#ffe066';g.shadowBlur=10;g.beginPath();g.arc(66,10,3,0,7);g.fill();g.shadowBlur=0;g.fillStyle='#fff';[[72,20],[78,18],[84,16]].forEach(([x,y])=>{g.beginPath();g.moveTo(x,y);g.lineTo(x+2,y+5);g.lineTo(x+4,y);g.fill();});
+  g.strokeStyle='#b88aff';g.lineWidth=2;[[50,6,40,-4],[56,4,52,-6],[60,4,64,-6]].forEach(([a,b,c,d])=>{g.beginPath();g.moveTo(a,b);g.quadraticCurveTo(a-4,b-6,c,d);g.stroke();});}
+Object.assign(MON_TYPES,{
+  pc_crab:MT('ปูหนามยักษ์',60,{aggro:7,retaliate:true,size:3.2,speed:2.2,drops:['เหรียญทอง','ยาขาว'],draw:pcCrab,sq:true}),
+  pc_fish:MT('ปลาโจรสลัด',62,{aggro:9,retaliate:true,size:2.8,speed:2.8,drops:['เหรียญทอง','ยาขาว'],draw:pcFish,sq:true}),
+  pc_craw:MT('กุ้งเครฟิชโจรสลัด',64,{aggro:8,retaliate:true,size:3.6,speed:2.2,drops:['เหรียญทอง','ยาขาว'],draw:pcCraw,sq:true}),
+  pc_box:MT('กล่องปริศนา',60,{aggro:0,retaliate:false,size:2.4,speed:0,drops:['เหรียญทอง'],draw:pcBox,sq:true}),
+  pc_slug:MT('ทากทะเลหนามทอง',66,{aggro:9,retaliate:true,size:5,speed:1.6,drops:['เหรียญทอง','ยาสารพัด'],draw:pcSlug,sq:true}),
+  pc_chef:MT('★ เชฟปูก้ามเพลิง',66,{aggro:14,retaliate:true,size:5.6,speed:2.2,boss:true,drops:['เหรียญทอง','ยาขาว'],draw:pcChef,sq:true}),
+  pc_shark:MT('★ กัปตันฉลามเขี้ยวเลื่อย',68,{aggro:14,retaliate:true,size:5.4,speed:2.4,boss:true,drops:['เหรียญทอง','ยาขาว'],draw:pcShark,sq:true}),
+  pc_serpent:MT('★ ปิศาจทะเลลึก',72,{aggro:40,retaliate:true,size:9,speed:0,boss:true,drops:['เหรียญทอง','ยาขาว','ยาสารพัด'],draw:pcSerpent,sq:true})});
+[['pc_crab',1.8,1.5],['pc_fish',1.6,1.6],['pc_craw',2.6,2.1],['pc_box',1.4,0.6],['pc_slug',5,4],['pc_chef',36,30],['pc_shark',30,26],['pc_serpent',120,90]].forEach(([k,h,e])=>{const T=MON_TYPES[k];T.hp=Math.round(T.hp*h);T.exp=Math.round(T.exp*e);
+  T.atk=T.atk.map(v=>Math.round(v*(k==='pc_serpent'?2.6:k==='pc_chef'||k==='pc_shark'?2.1:k==='pc_box'?0:k==='pc_slug'||k==='pc_craw'?1.6:1.3)));MON_ELEM[k]=k==='pc_chef'?'fire':k==='pc_box'?'neutral':'water';});
+Object.assign(PAL,{reddeck:[150,40,32,6],plank:[150,108,64,8],stormsea:[28,54,74,10],lagoon:[34,168,168,10]});
+{const tl=tileLines;tileLines=function(t,x,z){if(t==='plank'||t==='reddeck')return Math.abs(((z%1.1)+1.1)%1.1)<0.08||Math.abs((((x+(Math.floor(z/1.1)%3)*1.3)%4)+4)%4)<0.06;return tl(t,x,z);};}
+/* ---------- props ---------- */
+function pcRock(x,z,s=1,moss=true){put(leafGeo,pick([PC.rock,PC.rock2,'#7a6a5e']),x,1.2*s,z,{s:[2.6*s,2.2*s,2.2*s],ry:rnd()*3});if(moss)put(leafGeo,PC.moss,x,2.6*s,z,{s:[1.8*s,0.5*s,1.6*s],ry:rnd()*3});blockCircle(x,z,2*s);}
+function pcCliff(x0,x1,z,h=12){for(let x=x0;x<=x1;x+=4.5){const hh=h*(0.7+rnd()*0.5);put(leafGeo,pick([PC.rock,PC.rock2,'#7a6a5e']),x,hh/2,z+(rnd()-0.5)*3,{s:[4.2,hh,4],ry:rnd()*3});if(rnd()<0.6)put(leafGeo,PC.moss,x,hh*0.9,z,{s:[3,0.8,2.6],ry:rnd()*3});}}
+function pcCliffZ(z0,z1,x,h=12){for(let z=z0;z<=z1;z+=4.5){const hh=h*(0.7+rnd()*0.5);put(leafGeo,pick([PC.rock,PC.rock2,'#7a6a5e']),x+(rnd()-0.5)*3,hh/2,z,{s:[4,hh,4.2],ry:rnd()*3});if(rnd()<0.6)put(leafGeo,PC.moss,x,hh*0.9,z,{s:[2.6,0.8,3],ry:rnd()*3});}}
+function pcSkullCave(x,z){put(leafGeo,'#8a7a6a',x,6,z-2,{s:[11,9,6]});put(leafGeo,PC.moss,x,11.6,z-2,{s:[8,2,4]});bx(4.6,4.6,0.2,'b:#0a0604',x,2.3,z+3.2);
+  for(const s of[-1,1]){put(leafGeo,'b:#0a0604',x+s*2.6,7.4,z+3.0,{s:[1.4,1.1,0.3]});}put(leafGeo,'b:#0a0604',x,5.6,z+3.1,{s:[0.5,0.7,0.3]});for(let k=-2;k<=2;k++)bx(0.6,0.9,0.4,'#e8e0d0',x+k*0.9,4.4,z+3.2);}
+function pcAltar(x,z){cy(1.2,1.4,1,'#4a4a52',x,0.5,z,8);cy(1.3,1.3,0.12,'#2a2a30',x,1.06,z,8);for(let k=-2;k<=2;k++)bx(2,0.06,0.08,'#1a1a1a',x,1.16,z+k*0.35);blockCircle(x,z,1.3);}
+function pcTable(x,z,len=10){bx(2.4,0.18,len,PC.wood,x,1.1,z);for(const s of[-1,1])for(const e of[-1,1])bx(0.2,1,0.2,PC.wood2,x+s*1,0.5,z+e*(len/2-0.4));for(const s of[-1,1])bx(0.6,0.5,len,PC.wood2,x+s*1.9,0.25,z);
+  for(let k=0;k<len/1.6;k++){const zz=z-len/2+0.8+k*1.6;cy(0.32,0.28,0.06,'#c8c0b0',x+(k%2?0.5:-0.5),1.23,zz,10);if(k%3===0)cy(0.14,0.12,0.4,'#7a5a3a',x,1.4,zz+0.4,8);}const L=len;for(let zz=z-L/2;zz<=z+L/2;zz+=1)blockCircle(x,zz,1.3);}
+function pcCrates(x,z){crateStack(x,z,rnd()*3);}
+function pcLantern(x,z){cy(0.08,0.08,4,'#2a2a2a',x,2,z,6);bx(0.5,0.6,0.5,'#2a2a2a',x,3.8,z);bx(0.36,0.42,0.36,'b:#ffc070',x,3.8,z);DG.pendingGlow.push([x,3.8,z,'#ffb050',2.6]);blockCircle(x,z,0.3);}
+function pcBeam(x,z,h=7){bx(0.6,h,0.6,PC.wood2,x,h/2,z);blockCircle(x,z,0.5);}
+function pcCage(x,z){const g=new THREE.Group(),M=new THREE.MeshLambertMaterial({color:'#3a3a42'});for(let k=0;k<12;k++){const a=k/12*6.28,b=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,3,5),M);b.position.set(x+Math.cos(a)*1.3,1.5,z+Math.sin(a)*1.3);g.add(b);}
+  const t=new THREE.Mesh(new THREE.CylinderGeometry(1.5,1.5,0.2,16),M);t.position.set(x,3,z);g.add(t);const r=new THREE.Mesh(new THREE.CylinderGeometry(1.5,1.5,0.2,16),M);r.position.set(x,0.1,z);g.add(r);scene.add(g);return g;}
+function pcCannon(x,z,ry){withFrame(x,z,ry,1,()=>{bx(1.4,0.5,1.8,PC.wood2,0,0.3,0);cy(0.35,0.42,2.4,PC.iron,0,0.95,-0.6,10,{rx:Math.PI/2-0.15});cy(0.45,0.45,0.2,PC.iron,0,0.95,0.6,10,{rx:Math.PI/2});for(const s of[-1,1])cy(0.4,0.4,0.15,PC.wood,s*0.75,0.4,0.2,10,{rz:Math.PI/2});});blockCircle(x,z,0.9);}
+function pcMast(x,z,h=18){cy(0.35,0.45,h,PC.wood2,x,h/2,z,10);for(const y of[h*0.55,h*0.85]){bx(10,0.25,0.25,PC.wood2,x,y,z);bx(9,h*0.24,0.08,PC.sail,x,y-h*0.13,z+0.2);}bx(1.6,0.5,1.6,PC.wood,x,h*0.92,z);blockCircle(x,z,0.6);}
+function pcRail(x0,z0,x1,z1,h=1.2,col=PC.wood){const L=Math.hypot(x1-x0,z1-z0),a=Math.atan2(x1-x0,z1-z0);bx(0.25,0.2,L,col,(x0+x1)/2,h,(z0+z1)/2,{ry:a});for(let t=0;t<=1.001;t+=Math.max(0.05,1.6/L))bx(0.18,h,0.18,col,x0+(x1-x0)*t,h/2,z0+(z1-z0)*t);}
+function pcBulwark(x0,x1,z0,z1,h=1.6){[[x0,z0,x0,z1],[x1,z0,x1,z1],[x0,z0,x1,z0],[x0,z1,x1,z1]].forEach(([a,b,c,d])=>{const L=Math.hypot(c-a,d-b),ry=Math.atan2(c-a,d-b);bx(0.6,h,L,PC.dark,(a+c)/2,h/2,(b+d)/2,{ry});bx(0.7,0.2,L+0.2,PC.gold,(a+c)/2,h+0.05,(b+d)/2,{ry});});}
+function pcWaves(rects,col='#16364e'){const O=[];rects.forEach(([x0,z0,x1,z1])=>{const w=x1-x0,d=z1-z0,geo=new THREE.PlaneGeometry(w,d,Math.max(2,Math.round(w/3)),Math.max(2,Math.round(d/3)));geo.rotateX(-Math.PI/2);
+  const m=new THREE.Mesh(geo,new THREE.MeshLambertMaterial({color:col,transparent:true,opacity:0.95,emissive:'#04101a',emissiveIntensity:0.3}));m.position.set((x0+x1)/2,0.05,(z0+z1)/2);scene.add(m);O.push(m);});return O;}
+/* ---------- maps ---------- */
+const PC_CAVE={sky:'#120c0a',hs:'#ffd8a8',hg:'#2a1a12'},PC_DUSK={sky:'#f4b884',hs:'#fff0d8',hg:'#c8945a'};
+const pcTunX=z=>Math.sin(z*0.05+0.6)*20;
+GEN.pcA={name:`${DP_NAME} · หาดหัวกะโหลก`,base:'beachsand',border:'none',dress:'beach',fx:'pollen',fog:[100,260],...PC_DUSK,
+  type(x,z){if(z>40)return z>52&&Math.abs(x)<3?'plank':(Math.abs(x)<3&&z<56?'plank':'sea');if(z<-30||Math.abs(x)>44)return'cliff';if(Math.abs(x)<4&&z<-20)return'sandpath';return null;},
+  build(c){DG.pendingGlow=[];pcCliff(-50,50,-36,16);pcCliffZ(-36,40,-48,14);pcCliffZ(-36,40,48,14);pcSkullCave(0,-38);egSlab('pcA','n',0,-34.6,0,4.4);DG.objs.pcA.slabs.n.m.material.color.set('#6a5a50');egLabel('pcA',0,-33,'ปากถ้ำกะโหลก',7.6);
+   for(let z=40;z<=58;z+=1.4)bx(5.6,0.16,1.2,PC.wood,0,0.08,z);for(let z=42;z<=58;z+=4)for(const s of[-1,1])cy(0.18,0.2,1.8,PC.wood2,s*2.8,0.5,z,6);boat(-4,54,0.2);
+   const O=DG.objs.pcA=DG.objs.pcA||{};O.altars=[[-18,-16],[0,-10],[18,-16]];O.altars.forEach(([x,z],i)=>{pcAltar(x,z);egLabel('pcA',x,z,`แท่นย่าง ${i+1}`,2.6);});
+   scatter(14,(x,z)=>palm(x,z,0.9+rnd()*0.4),(x,z)=>inR(x,z,-42,42,-26,36)&&Math.hypot(x,z+12)>22);[[-30,-20],[32,-22],[-36,20],[36,24],[-20,30]].forEach(([x,z])=>pcRock(x,z,1.1));
+   [[-14,26],[16,22]].forEach(([x,z])=>pcCrates(x,z));[[-8,30],[8,30],[-24,-6],[24,-6]].forEach(([x,z])=>barrel(x,z));campfire(-10,16);
+   egGlowFinish('pcA');},mons:[]};
+GEN.pcB={name:`${DP_NAME} · อุโมงค์ลมทะเล`,base:'cave',border:'none',dress:'cave',fx:'mote',fog:[45,140],...PC_CAVE,
+  type(x,z){const d=Math.abs(x-pcTunX(z));if(z>66||z<-68)return'wall';if(d<4.2)return'sandpath';return'wall';},
+  build(c){DG.pendingGlow=[];for(let z=-66;z<=66;z+=2.4){const px=pcTunX(z);for(const s of[-1,1]){const h=0.7+rnd()*0.7;put(leafGeo,pick([PC.rock,PC.rock2,'#4a3e38']),px+s*(5.6+rnd()*0.8),h/2,z,{s:[1.1+rnd()*0.5,h,1.3],ry:rnd()*3});if(rnd()<0.25)stalag(px+s*(9+rnd()*4),z);if(rnd()<0.3)put(leafGeo,PC.moss,px+s*6.8,h,z,{s:[1.6,0.4,1.6]});}}
+   for(let z=-60;z<=60;z+=10){const px=pcTunX(z);stalag(px+(rnd()-0.5)*4,z+3);}for(let z=-56;z<=56;z+=14){const px=pcTunX(z);pcLantern(px+3.2,z);}
+   egGlowFinish('pcB',[[pcTunX(40),40,'#ffb050',0.9,30],[pcTunX(0),0,'#ffb050',0.9,30],[pcTunX(-40),-40,'#ffb050',0.9,30]]);},mons:[]};
+GEN.pcC={clean:true,name:`${DP_NAME} · โรงอาหารโจรสลัด`,base:'stone',border:'none',dress:'none',fx:'mote',fog:[50,150],...PC_CAVE,
+  type(x,z){if(inR(x,z,-28,28,-26,28))return'plank';if(Math.abs(x)<2.6&&z<=-26&&z>-31)return'plank';if(Math.abs(x)<3&&z>=28&&z<33)return'plank';return'wall';},
+  build(c){DG.pendingGlow=[];buildWalls(c.T,[PC.rock,PC.rock2,'#5a4a40'],8);egDoorFrame(0,-26.6,0);egSlab('pcC','n',0,-26.3,0);DG.objs.pcC.slabs.n.m.material.color.set(PC.wood);egLabel('pcC',0,-26,'ประตูโกดัง',7.4);
+   [-16,-6,6,16].forEach(x=>pcTable(x,2,26));for(let z=-20;z<=24;z+=11)for(const s of[-1,1])pcBeam(s*23,z,8);for(let z=-20;z<=24;z+=11)bx(47,0.5,0.6,PC.wood2,0,8,z);
+   [[-25,-22],[25,-22],[-25,25],[25,25]].forEach(([x,z])=>{pcCrates(x,z);barrel(x+2,z+(z<0?2:-2));});[[-11,-20],[11,-20],[-11,24],[11,24]].forEach(([x,z])=>pcLantern(x,z));
+   for(let k=0;k<6;k++){const x=-20+k*8;bx(0.06,1.6,0.06,'#2a2a2a',x,7,8);bx(0.4,0.4,0.4,'b:#ffc070',x,6.1,8);DG.pendingGlow.push([x,6.1,8,'#ffb050',2]);}
+   egGlowFinish('pcC',[[0,0,'#ffb050',1.1,36],[-14,-16,'#ffb050',0.8,24],[14,18,'#ffb050',0.8,24]]);},mons:[]};
+GEN.pcD={clean:true,name:`${DP_NAME} · โกดังกล่องปริศนา`,base:'stone',border:'none',dress:'none',fx:'mote',fog:[50,150],...PC_CAVE,
+  type(x,z){if(inR(x,z,-30,30,-24,26))return Math.abs(x)<3?'plank':'cave';if(Math.abs(x)<2.6&&z<=-24&&z>-29)return'plank';if(Math.abs(x)<3&&z>=26&&z<31)return'plank';return'wall';},
+  build(c){DG.pendingGlow=[];buildWalls(c.T,[PC.rock,PC.rock2,'#5a4a40'],8);egDoorFrame(0,-24.6,0);egSlab('pcD','n',0,-24.3,0);DG.objs.pcD.slabs.n.m.material.color.set('#5a3a1a');egLabel('pcD',0,-24,'ประตูครัว (ต้องใช้กุญแจ)',7.4);
+   for(let k=0;k<16;k++){const x=(rnd()<0.5?-1:1)*(8+rnd()*19),z=-20+rnd()*42;if(rnd()<0.6)pcCrates(x,z);else barrel(x,z,pick([PC.wood,'#6a4a2a']));}
+   for(let z=-18;z<=20;z+=12)for(const s of[-1,1])pcBeam(s*26,z,8);[[-6,-18],[6,-18],[-6,20],[6,20]].forEach(([x,z])=>pcLantern(x,z));
+   egGlowFinish('pcD',[[0,0,'#ffb050',1,36],[-18,10,'#ffb050',0.7,24],[18,-10,'#ffb050',0.7,24]]);},mons:[]};
+GEN.pcE={clean:true,name:`${DP_NAME} · ครัวนรกของเชฟก้ามเพลิง`,base:'stone',border:'none',dress:'none',fx:'ember',fog:[50,150],sky:'#1a0806',hs:'#ffb080',hg:'#3a1208',
+  type(x,z){if(!inR(x,z,-30,30,-28,30)){if(Math.abs(x)<3&&z>=30&&z<35)return'plank';if(Math.abs(x)<2.6&&z<=-28&&z>-33)return'plank';return'wall';}
+   if(Math.abs(x)<3.4||Math.abs(z+2)<3.4)return'plank';if(Math.hypot(x,z+2)<11)return'plank';if(inR(x,z,-28,28,18,30))return'cave';return'lava';},
+  build(c){DG.pendingGlow=[];buildWalls(c.T,['#5a3028','#4a2620','#6a3a30'],9);egDoorFrame(0,-28.6,0);egSlab('pcE','n',0,-28.3,0);DG.objs.pcE.slabs.n.m.material.color.set('#5a3a1a');egLabel('pcE',0,-28,'ทางออกสู่หาดลับ',7.4);
+   cy(10.5,10.5,0.3,'#3a2a26',0,0.15,-2,40);cy(3,2.6,2.4,'#2a2a30',0,1.2,-2,16);cy(3.1,3.1,0.2,'#4a4a52',0,2.4,-2,16);cy(2.7,2.7,0.1,'b:#ff8a3a',0,2.42,-2,16);blockCircle(0,-2,3.2);
+   for(let k=0;k<6;k++){const a=k/6*6.28;bx(0.12,10,0.12,'#2a2a2a',Math.cos(a)*8,9,Math.sin(a)*8-2);bx(0.6,2.4,0.3,'#c8ccd4',Math.cos(a)*8,4,Math.sin(a)*8-2,{ry:a});}
+   for(let x=-26;x<=26;x+=3.2)bx(1.6,0.12,1.4,'#2a2a30',x,0.06,-2+((x/3.2)%2?0:0));DG.pendingGlow.push([0,3,-2,'#ff8a3a',6]);
+   for(let k=0;k<18;k++){const x=(rnd()-0.5)*54,z=-26+rnd()*42;if(Math.abs(x)<5||Math.abs(z+2)<5||Math.hypot(x,z+2)<12)continue;DG.pendingGlow.push([x,0.6,z,'#ff6a1a',4+rnd()*3]);}
+   egGlowFinish('pcE',[[0,-2,'#ff7a3a',1.4,40],[-18,-16,'#ff6a2a',1,30],[18,-16,'#ff6a2a',1,30],[0,22,'#ffb050',0.8,24]]);},mons:[]};
+GEN.pcF={name:`${DP_NAME} · หาดลับแห่งเชลย`,base:'beachsand',border:'none',dress:'beach',fx:'pollen',fog:[90,240],...PC_DUSK,
+  type(x,z){if(!inR(x,z,-42,42,-56,52))return'cliff';if(x>26&&z>-30)return'sea';if(x>20&&z>-10)return'foam';return null;},
+  build(c){DG.pendingGlow=[];pcCliff(-48,48,-60,14);pcCliffZ(-60,52,-46,14);pcCliff(-48,28,56,12);pcCliffZ(-60,-30,46,14);
+   const O=DG.objs.pcF=DG.objs.pcF||{};O.cages=[[-24,24],[10,0],[-20,-34]].map(([x,z],i)=>{pcCage(x,z);egLabel('pcF',x,z,`ชาวบ้านถูกขัง ${i+1}`,3.8);return{x,z};});
+   O.villagers=[];O.cages.forEach((p,i)=>{const ch=new Char(['ชาวบ้าน มานี','ชาวประมง ทิม','เด็กหญิง ลูน่า'][i],{skin:'#f0c8a0',hair:pick(['#3a2418','#8a5a2a','#e8c070']),shirt:pick(['#4a9ad8','#e86a5a','#5ab87a']),shirt2:'#8a6a45',pants:'#5b4a3a',boots:'#3a2a1e'},p.x,p.z,{npc:true,facing:0,lines:['ช่วยด้วย!']});ch.map=MAPS.pcF;O.villagers.push(ch);});
+   scatter(16,(x,z)=>palm(x,z,0.9+rnd()*0.4),(x,z)=>inR(x,z,-40,18,-50,48));[[-34,0],[0,30],[-10,-20]].forEach(([x,z])=>pcRock(x,z,1.2));[[-30,40],[6,40]].forEach(([x,z])=>pcCrates(x,z));
+   egSlab('pcF','n',0,-56.4,0,5);DG.objs.pcF.slabs.n.m.material.color.set('#6a5a50');egLabel('pcF',0,-56,'ทางลงลากูน',7);
+   egGlowFinish('pcF');},mons:[]};
+GEN.pcG={clean:true,name:`${DP_NAME} · ลากูนเรือโจรสลัด`,base:'cave',border:'none',dress:'none',fx:'mote',fog:[60,180],sky:'#0e1a1a',hs:'#c8fff0',hg:'#1a3a34',
+  type(x,z){if(!inR(x,z,-46,46,-60,60))return'wall';if(inR(x,z,-30,30,40,60))return'sandpath';if(inR(x,z,-12,12,-52,-10))return'reddeck';
+   if((Math.abs(x)<2.4&&z>-10&&z<=40)||(Math.abs(z-14)<2.2&&x>-26&&x<0)||(inR(x,z,-30,-20,6,22)))return'plank';return'lagoon';},
+  build(c){DG.pendingGlow=[];pcCliff(-50,50,-64,16);pcCliffZ(-64,60,-50,16);pcCliffZ(-64,60,50,16);pcCliff(-50,50,64,12);
+   for(let z=-10;z<=40;z+=1.1)bx(4.8,0.12,1,PC.wood,0,0.06,z);for(let x=-26;x<=0;x+=1.1)bx(1,0.12,4.4,PC.wood,x,0.06,14);bx(10,0.12,16,PC.wood,-25,0.06,14);
+   for(let z=-8;z<=40;z+=4)for(const s of[-1,1])cy(0.18,0.2,1.6,PC.wood2,s*2.4,0.4,z,6);pcRail(-2.4,-10,-2.4,40,1);pcRail(2.4,-10,2.4,40,1);
+   pcBulwark(-12.5,12.5,-52.5,-9.5,1.6);bx(26,1.8,1.2,PC.red2,0,0.9,-9.6);[-40,-26].forEach(z=>pcMast(0,z,16));bx(22,3,6,PC.dark,0,1.5,-49);bx(23,0.3,6.4,PC.gold,0,3,-49);
+   for(let z=-46;z<=-14;z+=8)for(const s of[-1,1])pcCannon(s*10.6,z,s>0?-Math.PI/2:Math.PI/2);
+   const lw=new THREE.Mesh(new THREE.PlaneGeometry(1,1),new THREE.MeshBasicMaterial({color:'#2ad8c8',transparent:true,opacity:0.0,blending:THREE.AdditiveBlending,depthWrite:false}));lw.rotation.x=-Math.PI/2;lw.position.y=0.03;scene.add(lw);(DG.objs.pcG=DG.objs.pcG||{}).water=lw;
+   for(let k=0;k<10;k++)stalag((rnd()-0.5)*80,(rnd()-0.5)*100);for(let k=0;k<12;k++)DG.pendingGlow.push([(rnd()-0.5)*80,0.3,(rnd()-0.5)*100,'#3affe0',3+rnd()*3]);
+   [[-20,50],[20,50]].forEach(([x,z])=>pcCrates(x,z));[[-6,44],[6,44]].forEach(([x,z])=>pcLantern(x,z));
+   egGlowFinish('pcG',[[0,20,'#3affe0',1,40],[0,-30,'#ffb050',1,34],[-24,14,'#3affe0',0.7,26]]);},mons:[]};
+GEN.pcH={clean:true,name:`${DP_NAME} · กลางทะเลพายุ`,base:'stormsea',border:'none',dress:'none',fx:'mote',fog:[50,170],sky:'#28323e',hs:'#c8d8e8',hg:'#1a2a34',
+  type(x,z){if(inR(x,z,-13.6,13.6,-42,42))return'reddeck';return'sea';},
+  build(c){DG.pendingGlow=[];pcBulwark(-13.5,13.5,-42.5,42.5,1.8);for(const s of[-1,1]){bx(1.6,1.4,86,PC.dark,s*14.6,0.7,0,{rz:s*0.3});bx(0.4,0.3,86,PC.gold,s*14,1.9,0);}
+   bx(28,4,10,PC.dark,0,2,-46);bx(28.4,0.3,10.4,PC.gold,0,4,-46);bx(20,3,8,PC.dark,0,1.5,46.5);[-24,0,24].forEach(z=>pcMast(0,z,22));
+   const O=DG.objs.pcH=DG.objs.pcH||{};O.cannons=[[-11,-16],[11,-16],[-11,16],[11,16]];O.cannons.forEach(([x,z],i)=>{pcCannon(x,z,x>0?-Math.PI/2:Math.PI/2);egLabel('pcH',x,z,'🔫 ปืนใหญ่',2.8);
+     const pad=new THREE.Mesh(new THREE.CircleGeometry(1.8,24),new THREE.MeshBasicMaterial({color:'#ffd84a',transparent:true,opacity:0.3,depthWrite:false}));pad.rotation.x=-Math.PI/2;pad.position.set(x-(x>0?1.8:-1.8),0.05,z);scene.add(pad);(O.pads=O.pads||[]).push(pad);});
+   for(const z of[-34,-8,8,34])for(const s of[-1,1])barrel(s*10.5,z);pcRail(-8,-30,8,-30,1);
+   O.waves=pcWaves([[-110,-110,-14,110],[14,-110,110,110],[-14,-110,14,-43],[-14,43,14,110]]);
+   egGlowFinish('pcH',[[0,0,'#c8d8ff',0.6,50]]);},mons:[]};
+DP_KEYS.forEach(k=>{MAPS[k]={key:k,name:GEN[k].name,built:false};});
+/* ---------- run state ---------- */
+function dpClearMons(){for(let i=mons.length-1;i>=0;i--){const m=mons[i];if(!m.dp)continue;if(m.mesh.parent)m.mesh.parent.remove(m.mesh);if(m.shadow.parent)m.shadow.parent.remove(m.shadow);m.el.remove();if(m.ering&&m.ering.parent)m.ering.parent.remove(m.ering);
+  const h=hitMeshes.indexOf(m.mesh);if(h>=0)hitMeshes.splice(h,1);if(TGT===m)clearTarget();mons.splice(i,1);}}
+function dpSpawn(type,key,reg,n=1,o={}){const mp=MAPS[key],out=[];for(let i=0;i<n;i++){spawnMon(type,mp,reg);const m=mons[mons.length-1];m.dp=true;m.reg=null;if(o.x!=null){m.x=o.x+(i?(Math.random()-0.5)*3:0);m.z=o.z+(i?(Math.random()-0.5)*3:0);}if(o.aggro)m.aggro=true;
+  if(type==='pc_box'||o.plain){m.elite=null;if(m.ering&&m.ering.parent){m.ering.parent.remove(m.ering);m.ering=null;}m.T=MON_TYPES[type];m.hp=m.T.hp;m.sc=1;m.mesh.material.color.setRGB(1,1,1);m.mesh.userData.tint=null;}out.push(m);}return out;}
+function dpHud(){let e=document.getElementById('dpHud');if(!e){e=document.createElement('div');e.id='dpHud';document.getElementById('game').appendChild(e);}
+  if(!DP.on){e.hidden=true;return;}e.hidden=false;const R={A:'หาดหัวกะโหลก',B:'อุโมงค์ลมทะเล',C:'โรงอาหารโจรสลัด',D:'โกดังกล่องปริศนา',E:'เชฟก้ามเพลิง',F:'หาดลับแห่งเชลย',G:'เรือโจรสลัด',H:'ปิศาจทะเลลึก'}[DP.stage]||'';let k='';
+  if(DP.stage==='A')k=` · บาร์บีคิว <b>${DP.bbq}</b>`;else if(DP.stage==='B'){const t=Math.max(0,Math.ceil(DP.timer));k=` · เวลา <b>${Math.floor(t/60)}:${String(t%60).padStart(2,'0')}</b>${t<=0?' ⚠ TIME OUT!':''}`;}
+  else if(DP.stage==='D')k=DP.key?' · 🗝 ได้กุญแจแล้ว!':` · ทุบกล่องหากุญแจ (${DP.boxes} กล่อง)`;else if(DP.stage==='F')k=` · ช่วยชาวบ้าน <b>${DP.freed.filter(Boolean).length}/3</b>`;
+  else if(DP.stage==='H'&&DP.vuln>time)k=' · 💥 ปิศาจมึนงง! โจมตีเต็มแรง';else if(DP.need)k=` · กำจัด <b>${Math.min(DP.kills,DP.need)}/${DP.need}</b>`;e.innerHTML=`🏴‍☠️ ${DP_NAME} · ${R}${k}`;}
+function dpEnter(){if(lvl<DP_LV){say(`ต้องเลเวล ${DP_LV} ขึ้นไปถึงจะออกเรือได้`,'sys');return;}if(!inv[DP_ITEM]){say(`ต้องใช้ ${DP_ITEM} 1 ชุดเป็นค่าเรือ (ซื้อจากลุงกุยโบ)`,'sys');return;}
+  inv[DP_ITEM]--;if(!inv[DP_ITEM])delete inv[DP_ITEM];updateInv();closeTalk();dpClearMons();
+  Object.assign(DP,{altT:null,altarDone:false,on:true,stage:'A',kills:0,need:0,bbq:2,altar:Math.floor(Math.random()*3),timer:0,key:false,boxes:0,freed:[0,0,0],freeT:[0,0,0],boss:null,chefDead:false,sharkDead:false,serpDead:false,cannonCd:[0,0,0,0],t0:Date.now()});
+  warpTo(MAPS.pcA,0,52,'⛵ ลุงกุยโบพายเรือพาคุณมาถึงหาดหัวกะโหลก — วางบาร์บีคิวบนแท่นย่างที่ถูกต้องเพื่อเปิดปากถ้ำ');setTimeout(dpStageA,700);saveSoon();}
+function dpStageA(){DP.stage='A';DP.need=0;dgSlabSet('pcA','n',false);dpSpawn('pc_crab','pcA',{x0:-34,x1:34,z0:-24,z1:24},8);say('🍖 ได้รับบาร์บีคิวปิ้ง 2 ไม้ (ปูหนามดรอปเพิ่มได้) — เดินไปยืนบนแท่นย่างเพื่อวาง','sys');dpHud();}
+function dpSpeed(sec){DP.speedEnd=time+sec;recalc();setTimeout(()=>recalc(),sec*1000+200);popText(player.x,player.z,'🥥 SPEED UP!','gain',3.6);}
+function dpStageB(){DP.stage='B';DP.need=0;DP.timer=100;DP.ambush=false;setTimeout(()=>{dpClearMons();[[40,20],[14,-6],[-14,-34],[-40,-60]].forEach(([z1,z0],i)=>{const zc=(z0+z1)/2,px=pcTunX(zc);dpSpawn('pc_fish','pcB',{x0:px-3,x1:px+3,z0,z1},3);if(i%2)dpSpawn('pc_craw','pcB',{x0:px-3,x1:px+3,z0,z1},1);});dpSpeed(60);dpHud();},750);}
+function dpStageC(){DP.stage='C';DP.kills=0;DP.need=17;setTimeout(()=>{dpClearMons();dgSlabSet('pcC','n',false);dpSpawn('pc_fish','pcC',{x0:-24,x1:24,z0:-22,z1:22},12);dpSpawn('pc_craw','pcC',{x0:-20,x1:20,z0:-20,z1:10},6);dpHud();},750);}
+function dpStageD(){DP.stage='D';DP.need=0;DP.key=false;setTimeout(()=>{dpClearMons();dgSlabSet('pcD','n',false);const n=14;DP.boxes=n;DP.boxKey=4+Math.floor(Math.random()*(n-4));DP.boxN=0;
+  for(let i=0;i<n;i++){const[m]=dpSpawn('pc_box','pcD',{x0:-26,x1:26,z0:-20,z1:22},1);m.box=true;}dpSpawn('pc_fish','pcD',{x0:-20,x1:20,z0:-16,z1:16},4);dpHud();},750);}
+function dpStageE(){DP.stage='E';DP.need=0;setTimeout(()=>{dpClearMons();dgSlabSet('pcE','n',false);const[m]=dpSpawn('pc_chef','pcE',null,1,{x:0,z:-12});m.dpBoss='chef';m.sk={a:4,b:6,c:10};m.phase=0;
+  say('🦀 "ปู-ระ-ฮ่า ฮ่า! วัตถุดิบมาเสิร์ฟถึงครัวเลยเรอะ!" — เชฟปูก้ามเพลิง','sys');dpHud();},750);}
+function dpStageF(){DP.stage='F';DP.need=0;DP.freed=[0,0,0];DP.freeT=[0,0,0];setTimeout(()=>{dpClearMons();dgSlabSet('pcF','n',false);dpSpawn('pc_fish','pcF',{x0:-36,x1:14,z0:-46,z1:40},8);dpSpawn('pc_craw','pcF',{x0:-30,x1:10,z0:-40,z1:30},4);
+  const[s]=dpSpawn('pc_slug','pcF',null,1,{x:-6,z:-44});dpHud();},750);}
+function dpStageG(){DP.stage='G';DP.need=0;setTimeout(()=>{dpClearMons();dpSpawn('pc_fish','pcG',{x0:-2,x1:2,z0:-6,z1:36},3);dpSpawn('pc_fish','pcG',{x0:-10,x1:10,z0:-48,z1:-14},5);dpSpawn('pc_craw','pcG',{x0:-10,x1:10,z0:-48,z1:-14},2);
+  const[m]=dpSpawn('pc_shark','pcG',null,1,{x:0,z:-34});m.dpBoss='shark';m.sk={a:5,b:7,c:12};m.phase=0;dpHud();},750);}
+function dpStageH(){DP.stage='H';DP.need=0;DP.cannonCd=[0,0,0,0];DP.vuln=0;DP.side=1;weather.rain=true;weather.next=9999;setTimeout(()=>{dpClearMons();dpSerpent(1);dpSpawn('pc_fish','pcH',{x0:-10,x1:10,z0:-30,z1:30},4);
+  say('🌊 "ฮึ่มมม... ใครกล้าล่องเรือในทะเลของข้า!" — ปิศาจทะเลลึกโผล่ขึ้นจากคลื่น!','sys');say('🔫 ยืนบนวงทองข้างปืนใหญ่ฝั่งเดียวกับปิศาจเพื่อยิง! โดนปืนใหญ่แล้วปิศาจจะมึนงงและโดนดาเมจเต็ม','sys');dpHud();},750);}
+function dpSerpent(side){let m=DP.boss;const z=(Math.random()-0.5)*40;if(!m||m.dead){[m]=dpSpawn('pc_serpent','pcH',null,1,{x:side*14.2,z,aggro:true,plain:true});m.dpBoss='serpent';m.sk={a:3,b:6,c:9,d:20};m.phase=0;DP.boss=m;}
+  else{m.x=side*14.2;m.z=z;fxRing(m.x,m.z,4,'#9ad8ff');}DP.side=side;m.face=side>0?1:-1;popText(m.x,m.z,'🌊','skill',5);}
+/* ---------- triggers ---------- */
+function dpTrig(){const k=curMap.key,px=player.x,pz=player.z,near=(x,z,r)=>Math.hypot(px-x,pz-z)<r;
+  if(k==='pcA'){const O=DG.objs.pcA;if(O&&!DP.altarDone)O.altars.forEach(([x,z],i)=>{if(!near(x,z,2.2))return;if(DP.altT!=null&&time-DP.altT<2)return;DP.altT=time;
+      if(DP.bbq<=0){say('ไม่มีบาร์บีคิวเหลือ — ล่าปูหนามเพื่อหาเพิ่ม','sys');return;}DP.bbq--;
+      if(i===DP.altar){DP.altarDone=true;fxRing(x,z,2.6,'#ffb050');popText(x,z,'🍖 ควันหอมลอยขึ้น!','gain',3);say('🔓 ควันบาร์บีคิวลอยเข้าปากถ้ำ... หินเลื่อนเปิดออก!','sys');dgSlabSet('pcA','n',true);try{sfx('job');}catch(e){}}
+      else{say('✖ วางผิดแท่น! บาร์บีคิวไหม้เกรียม และปูหนามได้กลิ่นกรูกันมา','sys');dpSpawn('pc_crab','pcA',null,2,{x:x+3,z:z+3,aggro:true});}});
+    if(near(0,-33.5,2.6)){if(!DP.altarDone){dgPush(0,-28,'ปากถ้ำถูกหินปิดไว้ — ต้องวางบาร์บีคิวให้ถูกแท่นก่อน');return;}dpStageB();warpTo(MAPS.pcB,pcTunX(62),62,'🌀 อุโมงค์ลมทะเล — ดื่มน้ำมะพร้าวเร่งฝีเท้าแล้ววิ่งผ่านให้ทันเวลา!');return;}}
+  if(k==='pcB'&&pz<-63){dpStageC();warpTo(MAPS.pcC,0,26,'🍽 โรงอาหารโจรสลัด — "เฮ้ย! พวกแกบุกมาถึงนี่เชียวเรอะ!?" กำจัดโจรสลัด 17 ตัว');return;}
+  if(k==='pcC'&&near(0,-25.5,2.4)){if(DP.kills<DP.need){dgPush(0,-20,`ประตูยังลงกลอนอยู่ (กำจัด ${DP.kills}/${DP.need})`);return;}dpStageD();warpTo(MAPS.pcD,0,24,'📦 โกดังกล่องปริศนา — ทุบกล่องหากุญแจห้องครัว');return;}
+  if(k==='pcD'&&near(0,-23.5,2.4)){if(!DP.key){dgPush(0,-18,'ประตูครัวล็อกอยู่ ต้องหากุญแจในกล่องปริศนา');return;}dpStageE();warpTo(MAPS.pcE,0,28,'🔥 ครัวนรก — เชฟปูก้ามเพลิงกำลังรอวัตถุดิบ...');return;}
+  if(k==='pcE'&&near(0,-27.5,2.4)){if(!DP.chefDead){dgPush(0,-22,'ประตูถูกปิดตาย จนกว่าเชฟจะล้ม');return;}dpStageF();warpTo(MAPS.pcF,-10,46,'🏝 หาดลับแห่งเชลย — ปลดปล่อยชาวบ้านที่ถูกขังให้ครบ 3 คน');return;}
+  if(k==='pcF'){const O=DG.objs.pcF;if(O)O.cages.forEach((c2,i)=>{if(DP.freed[i])return;if(near(c2.x,c2.z,2.6)){DP.freeT[i]+=0.25;if(DP.freeT[i]>=1.5){DP.freed[i]=1;const v=O.villagers[i];if(v){v.lines=['ขอบคุณมากนะผู้กล้า! พวกมันพาคนที่เหลือไปที่เรือในลากูน!'];popText(v.x,v.z,'ขอบคุณ!','heal',3);}
+        say(`🔓 ปลดปล่อย${['ชาวบ้าน มานี','ชาวประมง ทิม','เด็กหญิง ลูน่า'][i]}แล้ว (${DP.freed.filter(Boolean).length}/3)`,'sys');try{sfx('job');}catch(e){}if(DP.freed.every(Boolean)){dgSlabSet('pcF','n',true);say('🔓 ทางลงลากูนเปิดแล้ว!','sys');}}}else DP.freeT[i]=0;});
+    if(near(0,-55,3)){if(!DP.freed.every(Boolean)){dgPush(0,-50,'ทางยังถูกปิด — ช่วยชาวบ้านให้ครบก่อน');return;}dpStageG();warpTo(MAPS.pcG,0,52,'⚓ ลากูนเรือโจรสลัด — ขึ้นเรือแล้วจัดการกัปตันฉลาม!');return;}}
+  if(k==='pcG'&&DP.sharkDead&&near(0,-50,3)){dpStageH();warpTo(MAPS.pcH,0,30,'⛈ เรือออกสู่ทะเลพายุ... ปิศาจทะเลลึกกำลังไล่ตามมา!');return;}
+  if(k==='pcH'){const O=DG.objs.pcH;if(O&&DP.boss&&!DP.boss.dead)O.cannons.forEach(([x,z],i)=>{const ok=Math.sign(x)===DP.side,cd=DP.cannonCd[i]>time;O.pads[i].material.opacity=ok&&!cd?0.45+Math.sin(time*6)*0.15:0.12;O.pads[i].material.color.set(ok&&!cd?'#ffd84a':'#8a8a8a');
+      if(ok&&!cd&&near(x-(x>0?1.8:-1.8),z,2)){DP.cannonCd[i]=time+12;const m=DP.boss;m.hp-=Math.round(m.T.hp*0.04);m.bar.style.width=Math.max(0,m.hp/m.T.hp*100)+'%';popDamage(m.x,m.z,Math.round(m.T.hp*0.04),true,'');DP.vuln=time+7;fxRing(m.x,m.z,5,'#ffb050');try{sfx('crit');}catch(e){}
+        weather.flash=0.2;popText(m.x,m.z,'BOOM! มึนงง','crit',6);if(m.hp<=0){m.hp=1;applyHit(m,1,false);}}});
+    if(DP.serpDead&&near(0,0,3)){dpExit(true);return;}}}
+function dpExit(done){if(DP.exitRing){DP.exitRing.parent&&DP.exitRing.parent.remove(DP.exitRing);DP.exitRing=null;}DP.on=false;weather.rain=false;weather.next=150;dpClearMons();dpHud();warpTo(MAPS.twbeach,DP_CAMP[0],DP_CAMP[1]-3,done?'⛵ ลุงกุยโบพาเรือกลับสู่แคมป์ชายทะเล พร้อมชาวบ้านที่ช่วยมาได้!':'⛵ ออกจากถ้ำโจรสลัดกลับสู่แคมป์ชายทะเล');}
+function dpOnWarp(map){if(DP.on&&!DP_KEYS.includes(map.key)){DP.on=false;weather.rain=false;weather.next=150;dpClearMons();setTimeout(dpHud,10);}}
+/* ---------- per-frame ---------- */
+function dpTick(dt){const k=curMap.key;const O=DG.objs[k];if(O&&O.waves){const t=time;O.waves.forEach(w=>{const p=w.geometry.attributes.position;for(let i=0;i<p.count;i++){const x=p.getX(i)+w.position.x,z=p.getZ(i)+w.position.z;p.setY(i,Math.sin(x*0.25+t*1.8)*0.5+Math.cos(z*0.21+t*1.3)*0.45);}p.needsUpdate=true;w.geometry.computeVertexNormals();});}
+  if(!DP_KEYS.includes(k)||!DP.on){if(!DP.on&&document.getElementById('dpHud'))dpHud();return;}if(playerDown)return;
+  if(DP.stage==='C'&&DP.kills>=DP.need)dgSlabSet('pcC','n',true);if(DP.stage==='D'&&DP.key)dgSlabSet('pcD','n',true);if(DP.chefDead)dgSlabSet('pcE','n',true);
+  if(k==='pcB'&&DP.stage==='B'){DP.timer-=dt;if(DP.timer<=0&&!DP.ambush){DP.ambush=true;say('⏰ TIME OUT! โจรสลัดไล่ตามมาทัน!','sys');dpSpawn('pc_craw','pcB',null,2,{x:player.x+3,z:player.z+3,aggro:true});dpSpawn('pc_fish','pcB',null,3,{x:player.x-3,z:player.z-3,aggro:true});}}
+  if(k==='pcE'||k==='pcG'||k==='pcH'){DP.trapT=(DP.trapT||0)-dt;if(DP.trapT<=0){DP.trapT=k==='pcH'?2.6:5;
+    if(k==='pcH'){const sx=Math.random()<0.5?-1:1,z=player.z+(Math.random()-0.5)*8;for(let s=0;s<8;s++)diTrap(sx*(13-s*3.2),z,1.6,1.1+s*0.1,90+lvl*8,'#ff8a3a');popText(sx*13,z,'💣 ปืนใหญ่เรือผี!','skill',3);}}}
+  if((dpTick.t=(dpTick.t||0)+dt)>0.25){dpTick.t=0;dpTrig();dpHud();}}
+/* "food falls on your head": strips buffs */
+function dpFood(m,n,dmg){for(let i=0;i<n;i++){const a=Math.random()*6.28,r=i?1+Math.random()*6:0,x=player.x+Math.cos(a)*r,z=player.z+Math.sin(a)*r;huntWarn(m,x,z,2.4,1.4+i*0.1,dmg,'#ffb030');const F=HUNT.fx[HUNT.fx.length-1];F.dispel=true;}}
+{const of=huntFx;huntFx=function(dt){HUNT.fx.forEach(F=>{if(F.dispel&&F.t+dt>=F.delay&&F.map===curMap&&Math.hypot(player.x-F.x,player.z-F.z)<=F.r){let n=0;for(const b in buffs){if(/^(rp_|food|elix|scroll)/.test(b))continue;delete buffs[b];n++;}if(n){recalc();popText(player.x,player.z,'🍲 บัฟถูกล้าง!','hurt',4);}}});of(dt);};}
+function dpDmgMul(m){if(m.dpBoss!=='serpent')return 1;return DP.vuln>time?1:0.3;}
+function dpBossAI(m,dt,dp){if(m.stunEnd>time+1)m.stunEnd=time+1;if(m.fearEnd>time+0.5)m.fearEnd=time+0.5;if(m.sleepEnd>time+1)m.sleepEnd=time+1;if(m.slowEnd>time&&m.slow>40)m.slow=40;
+  if(!m.aggro){if(dp<24&&!playerDown)m.aggro=true;return;}if(playerDown)return;const big=m.T.atk[1],pct=m.hp/m.T.hp;for(const s in m.sk)m.sk[s]-=dt;
+  if(m.dpBoss==='chef'){
+    if(m.sk.a<=0&&dp<9){m.sk.a=6;huntWarn(m,m.x,m.z,5.5,1.2,Math.round(big*1.9),'#ff6a2a');popText(m.x,m.z,'สับมีดอีโต้!','skill',m.T.size*0.9+0.6);}
+    if(m.sk.b<=0&&dp<24){m.sk.b=8;dpFood(m,3+m.phase,Math.round(big*1.3));popText(m.x,m.z,'อาหารร่วงใส่หัว!','skill',m.T.size*0.9+0.6);}
+    if(m.sk.c<=0){m.sk.c=14;dpSpawn('pc_fish','pcE',null,2,{x:m.x+3,z:m.z+3,aggro:true});say('🦀 "ลูกมือ! มาช่วยกันหั่นวัตถุดิบ!"','sys');}
+    const ph=pct<0.5?1:0;if(ph>m.phase){m.phase=ph;for(let i=0;i<10;i++){const a=i/10*6.28;huntWarn(m,m.x+Math.cos(a)*8,m.z+Math.sin(a)*8,2.6,1.6,Math.round(big*1.6),'#ff4a1a');}say('🔥 เชฟเทน้ำมันเดือด! หลบวงรอบตัว','sys');}
+    if(pct<0.25&&!m.rage){m.rage=1;m.T=Object.assign(Object.create(m.T),{atk:m.T.atk.map(v=>Math.round(v*1.4)),speed:m.T.speed*1.3});m.mesh.material.color.setRGB(1.4,0.6,0.5);say('🔥 เชฟปูก้ามเพลิงคลั่ง!','sys');}return;}
+  if(m.dpBoss==='shark'){
+    if(m.sk.a<=0&&dp<9){m.sk.a=5.5;const a=Math.atan2(player.z-m.z,player.x-m.x);for(let s=1;s<=5;s++)huntWarn(m,m.x+Math.cos(a)*s*2.4,m.z+Math.sin(a)*s*2.4,1.8,1+s*0.08,Math.round(big*1.7),'#9ad8ff');popText(m.x,m.z,'แทงหอกฉมวก!','skill',m.T.size*0.9+0.6);}
+    if(m.sk.b<=0&&dp<24){m.sk.b=9;dpFood(m,3,Math.round(big*1.3));popText(m.x,m.z,'โยนหม้อซุป!','skill',m.T.size*0.9+0.6);}
+    if(m.sk.c<=0){m.sk.c=13;dpSpawn('pc_fish','pcG',null,2,{x:m.x,z:m.z+4,aggro:true});}
+    if(pct<0.3&&!m.rage){m.rage=1;m.T=Object.assign(Object.create(m.T),{atk:m.T.atk.map(v=>Math.round(v*1.4)),speed:m.T.speed*1.3});say('🦈 กัปตันฉลามคลั่ง!','sys');}return;}
+  /* sea serpent */
+  if(m.sk.d<=0){m.sk.d=20;dpSerpent(-DP.side);say('🌊 ปิศาจดำลงแล้วโผล่อีกฝั่ง! ไปที่ปืนใหญ่ฝั่งนั้น','sys');}
+  if(m.sk.a<=0){m.sk.a=m.phase>=2?4:5.5;const a=Math.atan2(player.z-m.z,player.x-m.x);for(const o of[-0.25,0,0.25])for(let s=1;s<=8;s++)huntWarn(m,m.x+Math.cos(a+o)*s*2.8,m.z+Math.sin(a+o)*s*2.8,1.8,1+s*0.07,Math.round(big*1.4),'#7ad8ff');popText(m.x,m.z,'พ่นน้ำ!','skill',m.T.size*0.6+0.6);}
+  if(m.sk.b<=0){m.sk.b=8;for(let i=0;i<5+m.phase*2;i++)huntWarn(m,(Math.random()-0.5)*24,player.z+(Math.random()-0.5)*20,2.6,1.6+i*0.08,Math.round(big*1.3),'#8ab0d8');popText(m.x,m.z,'พายุฝน!','skill',m.T.size*0.6+0.6);}
+  if(m.sk.c<=0){m.sk.c=10;const pts=[[player.x,player.z]];MERCS.forEach(M=>{if(mercAlive(M))pts.push([M.x,M.z]);});pts.forEach(([x,z],i)=>huntWarn(m,x,z,3.2,1.2,Math.round(big*1.8),'#ffe066'));setTimeout(()=>{weather.flash=0.35;try{sfx('thunder');}catch(e){}},1200);popText(m.x,m.z,'สายฟ้าช็อต!','skill',m.T.size*0.6+0.6);}
+  const ph=pct<0.33?2:pct<0.66?1:0;if(ph>m.phase){m.phase=ph;dpSpawn('pc_fish','pcH',null,3,{x:0,z:player.z,aggro:true});say(ph===2?'🌊 ปิศาจทะเลโกรธจัด! คลื่นยักษ์ถาโถม':'🌊 โจรสลัดผีปีนขึ้นมาบนเรือ!','sys');if(ph===2){m.T=Object.assign(Object.create(m.T),{atk:m.T.atk.map(v=>Math.round(v*1.4))});}}}
+/* ---------- kills & loot ---------- */
+const DP_MAT={cloth:'ผ้าโพกหัวโจรสลัด',claw:'ก้ามปูเพลิง',scale:'เกล็ดปิศาจทะเล'};
+function dpKill(m){if(!DP.on)return;const L=gDropMul();
+  if(['pc_fish','pc_craw','pc_crab','pc_slug'].includes(m.type)){DP.kills++;if(m.type!=='pc_crab'&&Math.random()<0.3*L)dgDrop(m,DP_MAT.cloth);if((m.type==='pc_crab'||m.type==='pc_craw')&&Math.random()<0.3*L)dgDrop(m,DP_MAT.claw);
+    if(m.type==='pc_slug'){dgDrop(m,DP_MAT.claw,2);if(Math.random()<0.4)dgDrop(m,DP_MAT.scale,1);}
+    if(m.type==='pc_crab'&&DP.stage==='A'&&!DP.altarDone&&Math.random()<0.35){DP.bbq++;popText(m.x,m.z,'🍖 +1 บาร์บีคิว','gain',2.4);}
+    if(DP.need&&DP.kills===DP.need){say('🔓 ได้ยินเสียงกลอนประตูปลดล็อก!','sys');try{sfx('job');}catch(e){}}}
+  if(m.box){DP.boxes--;DP.boxN++;const r=Math.random();if(!DP.key&&(DP.boxN>=DP.boxKey||DP.boxes<=0)){DP.key=true;popText(m.x,m.z,'🗝 เจอกุญแจ!','lvl',3);say('🗝 เจอกุญแจห้องครัวในกล่องปริศนา!','sys');try{sfx('levelup');}catch(e){}}
+    else if(r<0.3){dpSpawn(Math.random()<0.5?'pc_fish':'pc_craw','pcD',null,1,{x:m.x,z:m.z,aggro:true});popText(m.x,m.z,'โจรสลัดซุ่มอยู่!','hurt',2.6);}
+    else if(r<0.5){diTrap(m.x,m.z,3,1,80+lvl*7,'#ff6a2a');popText(m.x,m.z,'💣 ระเบิด!','hurt',2.6);}else if(r<0.75)dgDrop(m,DP_MAT.cloth);else popText(m.x,m.z,'ว่างเปล่า...','miss',2.4);}
+  if(m.dpBoss==='chef'){DP.chefDead=true;dgDrop(m,DP_MAT.claw,3);dgDrop(m,DP_MAT.cloth,2);if(Math.random()<0.5)dgDrop(m,DP_MAT.scale,1);mons.forEach(q=>{if(q.dp&&q!==m&&q.map===curMap&&!q.dead)q.hp=Math.min(q.hp,1);});say('🦀 "ไม่จริ้ง... สูตรลับของข้า..." เชฟปูก้ามเพลิงล้มลง! ประตูเปิดออก','sys');if(typeof advAdd==='function')advAdd(14,'ปราบเชฟปูก้ามเพลิง');}
+  if(m.dpBoss==='shark'){DP.sharkDead=true;dgDrop(m,DP_MAT.cloth,3);dgDrop(m,DP_MAT.claw,2);say('🦈 กัปตันฉลามล้มลง! ยึดเรือได้แล้ว — เดินไปที่หัวเรือเพื่อออกเรือ','sys');egLabel('pcG',0,-50,'⛵ ออกเรือ!',4.2);if(typeof advAdd==='function')advAdd(10,'ยึดเรือโจรสลัด');}
+  if(m.dpBoss==='serpent'){DP.serpDead=true;DP.boss=null;weather.rain=false;const g=Math.round(80000*(1+S('CHA')*0.01));gold+=g;inv[DP_MAT.scale]=(inv[DP_MAT.scale]||0)+3+(Math.random()<0.5?1:0);inv[DP_MAT.claw]=(inv[DP_MAT.claw]||0)+3;inv[DP_MAT.cloth]=(inv[DP_MAT.cloth]||0)+4;inv['ยาสารพัด']=(inv['ยาสารพัด']||0)+3;updateInv();
+    mons.forEach(q=>{if(q.dp&&q!==m&&!q.dead)q.hp=Math.min(q.hp,1);});ADV.hunt=ADV.hunt||{};const first=!ADV.hunt.pc1;ADV.hunt.pc1=(ADV.hunt.pc1||0)+1;if(typeof advAdd==='function')advAdd(first?180:50,first?`พิชิต ${DP_NAME} ครั้งแรก!`:`พิชิต ${DP_NAME}`);
+    const g2=new THREE.Group();const t1=new THREE.Mesh(new THREE.TorusGeometry(2,0.12,8,48),new THREE.MeshBasicMaterial({color:'#ffd84a'}));t1.rotation.x=Math.PI/2;t1.position.y=0.12;g2.add(t1);
+    const c1=new THREE.Mesh(new THREE.CylinderGeometry(1.9,1.9,5,32,1,true),new THREE.MeshBasicMaterial({color:'#ffe08a',transparent:true,opacity:0.22,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));c1.position.y=2.5;g2.add(c1);m.map.scene.add(g2);DP.exitRing=g2;
+    const mins=Math.round((Date.now()-DP.t0)/60000);levelFx('#ffd84a','#fff6c8',false);try{sfx('levelup');}catch(e){}popText(0,0,'CLEAR!','lvl',6);
+    say(`👑 พิชิต ${DP_NAME} สำเร็จ! (${mins} นาที) +${g.toLocaleString()} z · เกล็ดปิศาจทะเล ${inv[DP_MAT.scale]} ชิ้นเข้ากระเป๋า · เดินเข้าวงแสงกลางเรือเพื่อกลับแคมป์`,'sys');saveSoon();}}
+/* ---------- Uncle Guibo at the beach camp pier ---------- */
+const DP_CAMP=[6,40];
+function dpGuiboOpts(){const c=document.createElement('canvas');c.width=384;c.height=192;const g=c.getContext('2d');
+  for(let f=0;f<2;f++){g.save();g.translate(f*192,0);g.scale(2,2);const o='#2a1a0a',bob=f?1.5:0;g.lineWidth=3;g.strokeStyle=o;
+    g.fillStyle='#4a7a3a';g.fillRect(34,74,10,16);g.strokeRect(34,74,10,16);g.fillRect(52,74,10,16);g.strokeRect(52,74,10,16);
+    g.fillStyle='#8a5a2a';g.beginPath();g.ellipse(48,56,26,22,0,0,7);g.fill();g.stroke();g.strokeStyle='#5a3a1a';g.lineWidth=2;for(let k=-1;k<=1;k++){g.beginPath();g.moveTo(32,56+k*8);g.lineTo(64,56+k*8);g.stroke();}g.strokeStyle=o;g.lineWidth=3;
+    g.fillStyle='#e8dcc0';g.beginPath();g.ellipse(48,60,14,16,0,0,7);g.fill();g.stroke();
+    g.fillStyle='#6aa85a';g.beginPath();g.arc(48,28+bob,15,0,7);g.fill();g.stroke();g.fillStyle='#fff';g.beginPath();g.arc(42,26+bob,4,0,7);g.fill();g.stroke();g.beginPath();g.arc(54,26+bob,4,0,7);g.fill();g.stroke();
+    g.fillStyle='#000';g.beginPath();g.arc(42,27+bob,1.8,0,7);g.fill();g.beginPath();g.arc(54,27+bob,1.8,0,7);g.fill();g.strokeStyle='#5a3a1a';g.beginPath();g.moveTo(37,21+bob);g.lineTo(46,23+bob);g.moveTo(59,21+bob);g.lineTo(50,23+bob);g.stroke();g.strokeStyle=o;
+    g.fillStyle='#f4f4f0';g.beginPath();g.moveTo(38,34+bob);g.quadraticCurveTo(48,52+bob,58,34+bob);g.quadraticCurveTo(48,40+bob,38,34+bob);g.fill();g.stroke();
+    g.fillStyle='#1e3a6a';g.beginPath();g.ellipse(48,15+bob,17,5,0,0,7);g.fill();g.stroke();g.fillRect(38,6+bob,20,9);g.strokeRect(38,6+bob,20,9);g.fillStyle=PC.gold;g.fillRect(44,9+bob,8,4);
+    g.fillStyle='#6aa85a';g.beginPath();g.ellipse(74,54,6,12,-0.3,0,7);g.fill();g.stroke();g.strokeStyle='#6a4a2a';g.lineWidth=4;g.beginPath();g.moveTo(80,30);g.lineTo(78,92);g.stroke();g.beginPath();g.arc(84,30,4,Math.PI,0);g.stroke();g.restore();}
+  const t=new THREE.CanvasTexture(c);t.repeat.set(0.5,1);const geo=new THREE.PlaneGeometry(2.8,2.8);geo.translate(0,1.35,0);return{tex:t,geo,front:{cols:2,fps:2,seq:[0,0,0,1,0,1,1]}};}
+{const ob=GEN.twbeach.build;GEN.twbeach.build=function(c){ob.call(this,c);const[x,z]=DP_CAMP;bx(1.6,0.9,1.2,PC.wood,x+2.2,0.45,z+1);barrel(x-2.4,z+1.4);bx(0.1,3.2,0.1,PC.wood2,x+3.2,1.6,z-1);bx(1.6,1,0.06,'#1a1a1a',x+3.9,2.7,z-1);
+  townNPC('ลุงกุยโบ ผู้เฝ้าท่าเรือ',null,x,z,{...dpGuiboOpts(),facing:0,lines:['หึ่ม... เจ้าคงเป็นผู้กล้าที่เขาลือกันสินะ ข้าชื่อกุยโบ ดูแลท่าเรือนี้มาสี่สิบปีแล้ว',
+   'ช่วงนี้ชาวบ้านหายตัวไปเรื่อยๆ ข้าสืบจนรู้ว่าเป็นฝีมือกลุ่มโจรสลัดก้ามแดง พวกมันซ่อนตัวอยู่ในถ้ำบนเกาะหัวกะโหลก','ถ้าเจ้าจะไปช่วยพวกเขา ข้าจะพายเรือไปส่งเอง แค่เตรียมชุดอาหารทะเลดีลักซ์มาเป็นค่าเรือก็พอ — ไว้ใช้ล่อพวกโจรสลัดตะกละนั่นด้วย']});};}
+function dpTalk(n){const sv=document.getElementById('talkSvc');sv.innerHTML=`<button data-dp="enter">⛵ ออกเรือ (Lv ${DP_LV}+)</button><button data-dp="buy">🛒 ${DP_ITEM} ${DP_ITEM_Z.toLocaleString()} z</button><button data-dp="info">📜 รายละเอียด</button>`;}
+document.getElementById('talkSvc').addEventListener('click',e=>{const b=e.target.closest('[data-dp]');if(!b)return;const a=b.dataset.dp;
+  if(a==='enter')dpEnter();else if(a==='buy'){if(gold<DP_ITEM_Z){say('เงินไม่พอ','sys');return;}gold-=DP_ITEM_Z;inv[DP_ITEM]=(inv[DP_ITEM]||0)+1;updateInv();sfx('coin');say(`ซื้อ ${DP_ITEM} แล้ว (มี ${inv[DP_ITEM]} ชุด)`,'sys');}
+  else['🏴‍☠️ ถ้ำโจรสลัดก้ามแดง · เลเวล 60 ขึ้นไป · ปาร์ตี้สูงสุด 4 ตัว','1) หาดหัวกะโหลก — วางบาร์บีคิวบนแท่นย่างที่ถูกต้อง 1 ใน 3 (ผิด = ไหม้ + ปูหนามบุก) · 2) อุโมงค์ลมทะเล — มีบัฟน้ำมะพร้าว วิ่งให้ทัน 100 วิ',
+    '3) โรงอาหาร — กำจัดโจรสลัด 17 ตัว · 4) โกดัง — ทุบกล่องปริศนาหากุญแจ (บางกล่องมีโจรซุ่ม/ระเบิด) · 5) เชฟปูก้ามเพลิง — อาหารร่วงใส่หัวจะล้างบัฟ!',
+    '6) หาดลับ — ยืนข้างกรงเพื่อปลดปล่อยชาวบ้าน 3 คน · 7) ลากูน — ขึ้นเรือจัดการกัปตันฉลาม · 8) ปิศาจทะเลลึก — ดาเมจปกติเข้าแค่ 30% ต้องยิงปืนใหญ่ฝั่งเดียวกับปิศาจให้มันมึนงงก่อน',
+    'วัตถุดิบ: ผ้าโพกหัวโจรสลัด · ก้ามปูเพลิง · เกล็ดปิศาจทะเล (บอส) → คราฟ "ชุดโจรสลัดก้ามแดง" ที่ช่างคราฟ'].forEach(l=>say(l,'npc'));});
+ITEM_KINDS.push({name:DP_ITEM,w:2,draw(g){g.fillStyle='#2b1f1a';g.fillRect(4,12,24,16);g.fillStyle='#e8d8b0';g.fillRect(5,13,22,14);g.fillStyle='#e04a2a';g.beginPath();g.ellipse(11,18,5,4,0,0,7);g.fill();
+  g.fillStyle='#ff9a6a';g.beginPath();g.ellipse(21,19,5,3,0.3,0,7);g.fill();g.fillStyle='#5ab87a';g.fillRect(9,23,14,3);g.fillStyle='#c8963a';g.fillRect(3,8,26,5);g.fillStyle='#2b1f1a';g.fillRect(14,4,4,5);}});
+{const ik=ITEM_KINDS[ITEM_KINDS.length-1],c=document.createElement('canvas');c.width=c.height=32;ik.draw(c.getContext('2d'));ik.tex=new THREE.CanvasTexture(c);ik.tex.magFilter=THREE.NearestFilter;ik.tex.minFilter=THREE.NearestFilter;ik.tex.generateMipmaps=false;ICON_URL[ik.name]=c.toDataURL();}
+const dpCss=document.createElement('style');dpCss.textContent=`#dpHud{position:absolute;top:calc(48px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);padding:5px 14px;border-radius:18px;background:rgba(40,16,10,.86);border:1px solid #e8b830;color:#ffe9c8;font:600 12.5px var(--display);z-index:5;pointer-events:none;white-space:nowrap}#dpHud b{color:#ffd84a}`;document.head.appendChild(dpCss);
 
 const RPS=[
  {id:'atk',perm:'atk',n:'ตราแห่งพลัง: ATK +2 ถาวร',ic:'หินพลัง ATK Ⅲ',base:20,step:5,cap:t=>5*(t+1),t:0},
@@ -20028,7 +20318,7 @@ function renderAdv(){const B=document.getElementById('advBody');if(!B)return;con
 function advHud(){const nm=document.getElementById('face');if(!nm)return;let e=document.getElementById('advMini');if(!e){e=document.createElement('img');e.id='advMini';e.alt='';e.title='ยศนักผจญภัย';e.onclick=()=>{toggleWin('advWin',true);renderAdv();};nm.appendChild(e);e.addEventListener('pointerdown',ev=>ev.stopPropagation());}
   const ti=ADV_TIERS.indexOf(advTier());if(e.dataset.t!=String(ti)){e.dataset.t=ti;e.src=advBadge(ti,48);e.title=`ยศ ${ADV_TIERS[ti][1]} · Adventure Lv ${advLevel()}`;}}
 setInterval(()=>{try{advTick();}catch(e){}},1000);
-function partyTick(dt){if(typeof dgTick==='function')dgTick(dt);if(typeof diTick==='function')diTick(dt);fsTick(dt);if(typeof iceShieldFx==='function')iceShieldFx();if(window.sqOn)sqTick(dt);if(typeof updateNav==='function')updateNav(dt);if((partyTick.s=(partyTick.s||0)+dt)>0.5){partyTick.s=0;skStatTick();}updateMercs(dt);updateJtAura();
+function partyTick(dt){if(typeof dgTick==='function')dgTick(dt);if(typeof diTick==='function')diTick(dt);if(typeof dpTick==='function')dpTick(dt);fsTick(dt);if(typeof iceShieldFx==='function')iceShieldFx();if(window.sqOn)sqTick(dt);if(typeof updateNav==='function')updateNav(dt);if((partyTick.s=(partyTick.s||0)+dt)>0.5){partyTick.s=0;skStatTick();}updateMercs(dt);updateJtAura();
   if((partyTick.h=(partyTick.h||0)+dt)>1){partyTick.h=0;if(autoTab==='stat'&&!document.getElementById('autoWin').hidden)renderAutoWin();if(!document.getElementById('partyWin').hidden)renderParty();
     if(dqGen()&&qTab==='daily'&&!document.getElementById('questWin').hidden)renderQuest();}}
 function partySave(){altFlush();return{jt:JUTTI||0,al:MERCS.filter(M=>M.alt).map(M=>M.alt.slot),mc:MERCS.filter(M=>!M.alt).map(M=>({t:M.type,l:Math.round(M.left)})),dq:JSON.parse(JSON.stringify(DQ)),fs:JSON.parse(JSON.stringify(FST))};}
@@ -20085,6 +20375,7 @@ function applySave(d){if(typeof obLoad==='function')setTimeout(()=>obLoad(d.ob),
   if(typeof advLoad==='function'){advLoad(d.adv);recalc();}
   if(typeof DG_KEYS!=='undefined'&&DG_KEYS.includes(d.map)){d.map='twdesert';d.x=DG_CAMP[0]+2;d.z=DG_CAMP[1]+3;}
   if(typeof DI_KEYS!=='undefined'&&DI_KEYS.includes(d.map)){d.map='twsnow';d.x=DI_CAMP[0];d.z=DI_CAMP[1]+4;}
+  if(typeof DP_KEYS!=='undefined'&&DP_KEYS.includes(d.map)){d.map='twbeach';d.x=DP_CAMP[0];d.z=DP_CAMP[1]-3;}
   const M=MAPS[d.map];if(M&&M!==curMap)warpTo(M,d.x,d.z);else{player.x=d.x;player.z=d.z;camT.x=d.x;camT.z=d.z;}}
 /* --- storage back-ends --- */
 function slotIdx(pre){const o=[];try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith(pre)){const n=+k.slice(pre.length);if(Number.isInteger(n)&&n>=0&&n<500)o.push(n);}}}catch(e){}return o;}
