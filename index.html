@@ -1369,8 +1369,8 @@ setInterval(tgtPlace,300);addEventListener('resize',tgtPlace);
 function weakTo(el){return Object.keys(ELEM_TAB).filter(a=>elemMul(a,el)>1);}
 function renderTgt(full){const m=TGT;if(!m)return;const T=m.T,hp=Math.max(0,Math.round(m.hp)),pc=Math.max(0,m.hp/T.hp*100);
   if(full||!tgtFrame._built){const e=m.elem||'neutral',wk=weakTo(e),pe=playerElem(),pm=elemMul(pe,e)*(((SIZE_MOD[LINE]||{})[m.sz])||1);
-    tgtFrame.className=T.boss?'boss':m.elite?'elite':'';
-    tgtFrame.innerHTML=`<div class="tf1"><span class="tfel" title="ธาตุ${ELEM_N[e]}">${ELEM_I[e]}</span><b>${T.boss?'<em>BOSS</em>':m.elite?'<em class="el">ELITE</em>':''}${T.name.replace('★ ','')}</b><span class="tflv">Lv ${T.lv||1}</span><button class="tfx" aria-label="เลิกล็อกเป้า">✕</button></div>
+    tgtFrame.className=m.hunt==='mvp'?'boss mvp':m.hunt?'elite':T.boss?'boss':m.elite?'elite':'';
+    tgtFrame.innerHTML=`<div class="tf1"><span class="tfel" title="ธาตุ${ELEM_N[e]}">${ELEM_I[e]}</span><b>${m.hunt==='mvp'?'<em class="mv">MVP BOSS</em>':m.hunt?'<em class="mi">MINI BOSS</em>':T.boss?'<em>BOSS</em>':m.elite?'<em class="el">ELITE</em>':''}${T.name.replace('★ ','')}</b><span class="tflv">Lv ${T.lv||1}</span><button class="tfx" aria-label="เลิกล็อกเป้า">✕</button></div>
       <div class="tfhp"><i style="width:${pc}%"></i><span>${hp.toLocaleString()} / ${T.hp.toLocaleString()}</span></div>
       <div class="tf2"><span>ธาตุ<b>${ELEM_N[e]}</b></span><span>ขนาด<b>${SIZE_N[m.sz]}</b></span><span>แพ้ทาง<b>${wk.length?wk.map(a=>ELEM_I[a]+ELEM_N[a]).join(' '):'—'}</b></span>
       <span class="${pm>1?'good':pm<1?'bad':''}">ดาเมจคุณ<b>×${pm.toFixed(2).replace(/\.?0+$/,'')}</b></span></div><div class="tfst"></div>`;tgtFrame._built=true;}
@@ -3610,7 +3610,7 @@ function buildGeneric(key){
   mp.fx=makeFx(sc,def.fx||(dk==='snow'?'snow':dk==='volcano'?'ember':dk==='sand'?'dust':'pollen'));
   linkMap(mp);makeBase(mp);
   {let hs=0;for(const ch of key)hs=(hs*31+ch.charCodeAt(0))>>>0;const mul=(MON_MUL[key]||(1.3+((hs%1000)/1000)*1.3))*MON_DENSE;mp.monMul=mul;
-   def.mons.forEach(([t,n,reg])=>{const T=MON_TYPES[t],cnt=T&&T.boss?n:Math.max(n+1,Math.round(n*mul*(0.85+((hs>>(n%7))%30)/100)));for(let k=0;k<cnt;k++)spawnMon(t,mp,reg);});}
+   def.mons.forEach(([t,n,reg])=>{const T=MON_TYPES[t],cnt=T&&T.boss?n:Math.max(n+1,Math.round(n*mul*(0.85+((hs>>(n%7))%30)/100)));for(let k=0;k<cnt;k++)spawnMon(t,mp,reg);});if(typeof huntInit==='function')huntInit(mp);}
   scene=ps;blocked=pb;
 }
 
@@ -4267,6 +4267,7 @@ function drawMini(){
   if(curMap.fc){
     const k=W/FW,o=FHW;mg.drawImage(curMap.base,0,0,W,W);
     mons.forEach(m=>{if(m.dead||m.map!==curMap)return;mg.fillStyle=m.type==='shroom'?'#ff6a4a':m.type==='green'?'#3fbf2a':m.type==='bee'?'#ffd23a':'#ff7eb0';mg.beginPath();mg.arc((m.x+o)*k,(m.z+o)*k,2*dpr,0,7);mg.fill();});
+    mons.forEach(m=>{if(!m.hunt||m.dead||m.map!==curMap)return;const x=(m.x+o)*k,y=(m.z+o)*k,r=(m.hunt==='mvp'?5:3.6)*dpr;mg.fillStyle=m.hunt==='mvp'?'#ffcf3a':'#ff7a3a';mg.strokeStyle='#2a1000';mg.lineWidth=1.2*dpr;mg.beginPath();for(let q=0;q<10;q++){const a=q*Math.PI/5-Math.PI/2,rr=q%2?r*0.45:r;mg.lineTo(x+Math.cos(a)*rr,y+Math.sin(a)*rr);}mg.closePath();mg.fill();mg.stroke();});
     mg.fillStyle='#9be7ff';portals.forEach(p=>{if(p.map===curMap.scene){mg.beginPath();mg.arc((p.x+o)*k,(p.z+o)*k,2.8*dpr,0,7);mg.fill();}});
     qgMini(mg,k,o,dpr);const px=(player.x+o)*k,pz=(player.z+o)*k;
     mg.save();mg.translate(px,pz);mg.rotate(-player.facing+Math.PI);mg.fillStyle='#fff';mg.strokeStyle='#c0392b';mg.lineWidth=1.5*dpr;
@@ -4393,7 +4394,7 @@ function updateInv(){
   const wt=weightNow(),mx=derived().wtMax;document.getElementById('wtTxt').textContent=`${wt} / ${mx}`;document.getElementById('dvWt').textContent=`${wt} / ${mx}`;
 }
 /* ---- windows: toggle + drag ---- */
-function toggleWin(id,show){const w=document.getElementById(id);w.hidden=show===undefined?!w.hidden:!show;if(!w.hidden&&innerWidth<700)['statWin','invWin','worldWin','skillWin','eqWin','shopWin','refWin','warpWin','autoWin','petWin','questWin','sysWin','craftWin','partyWin','jtWin'].forEach(o=>{if(o!==id)document.getElementById(o).hidden=true;});if(!w.hidden){w.style.zIndex=++zTop;if(id==='statWin')drawRadar();if(id==='invWin')updateInv();if(id==='worldWin')updateWorld();if(id==='skillWin')renderSkills();}}
+function toggleWin(id,show){const w=document.getElementById(id);w.hidden=show===undefined?!w.hidden:!show;if(!w.hidden&&innerWidth<700)['statWin','invWin','worldWin','skillWin','eqWin','shopWin','refWin','warpWin','autoWin','petWin','questWin','sysWin','craftWin','partyWin','jtWin','huntWin','advWin'].forEach(o=>{const e=document.getElementById(o);if(o!==id&&e)e.hidden=true;});if(!w.hidden){w.style.zIndex=++zTop;if(id==='statWin')drawRadar();if(id==='invWin')updateInv();if(id==='worldWin')updateWorld();if(id==='skillWin')renderSkills();}}
 let zTop=10;
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-close]');if(b){e.preventDefault();toggleWin(b.dataset.close,false);}});
 document.getElementById('btnStat').onclick=()=>toggleWin('statWin');document.getElementById('btnEq').onclick=()=>{toggleWin('eqWin');renderEq();};document.getElementById('btnSound').onclick=()=>{audioInit();setSound(!soundOn);};document.getElementById('btnSkill').onclick=()=>toggleWin('skillWin');document.getElementById('btnWorld').onclick=()=>toggleWin('worldWin');
@@ -18416,7 +18417,7 @@ function autoSkills(t){if(!AUTO.cfg.skills||time<AUTO.skT||casting)return false;
     if(!want)continue;
     AUTO.skT=time+0.9;AUTO_LAST[id]=time;castSkill(id,self?null:t);return true;}
   return false;}
-function autoOK(m){return m.map===curMap&&!m.dead&&!(m.T.boss&&!AUTO.cfg.boss)&&!((AUTO.black.get(m)||0)>time);}
+function autoOK(m){return m.map===curMap&&!m.dead&&!((m.T.boss||m.hunt)&&!AUTO.cfg.boss)&&!((AUTO.black.get(m)||0)>time);}
 function autoThreats(){const P=player;return mons.filter(m=>autoOK(m)&&m.aggro&&Math.hypot(m.x-P.x,m.z-P.z)<8);}
 function autoNearest(L){const P=player;let best=null,bd=1e9;for(const m of L){const d=Math.hypot(m.x-P.x,m.z-P.z);if(d<bd){bd=d;best=m;}}return best;}
 function autoTarget(){const P=player,cand=mons.filter(autoOK);if(!cand.length)return null;let best=null,bs=1e9;
@@ -18563,12 +18564,12 @@ function killMon(m){if(AUTO.on)AUTO.kills++;if(typeof advKill==='function')advKi
   {const D=rollEqDrop(m);if(D){createItem(m.x-0.5,m.z+0.4,D.kind,true,m.map.scene);setTimeout(()=>popText(m.x,m.z,`<img alt="" src="${D.icon}">ดรอป ${D.n}!`,'drop',1.3,{html:true,life:2.6,rise:1}),650);say(`★ ${m.T.name} ดรอปอุปกรณ์ ${D.n}!`,'sys');}
    const C=rollCardDrop(m);if(C){ITEM_KINDS.includes(C.kind)||ITEM_KINDS.push(C.kind);createItem(m.x+0.6,m.z-0.4,C.kind,true,m.map.scene);setTimeout(()=>popText(m.x,m.z,`<img alt="" src="${C.icon}">${C.name}!!`,'drop',1.0,{html:true,life:3,rise:1.2}),900);say(`★★ ${m.T.name} ดรอป ${C.name}! (${C.label})`,'sys');sfx('levelup');}}
   rollMatDrop(m);rollOreDrop(m);rollStoneDrop(m);eliteLoot(m);sfx('kill');
-  if(!m.sq)setTimeout(()=>spawnMon(m.type,m.map,m.reg),m.T.boss?60000:6000);if(m.T.boss)say(`ปราบบอส ${m.T.name} สำเร็จ!`,'sys');
+  if(m.hunt){huntLoot(m);}else{if(!m.sq&&!m.summ)setTimeout(()=>spawnMon(m.type,m.map,m.reg),m.T.boss?60000:6000);if(m.T.boss)say(`ปราบบอส ${m.T.name} สำเร็จ!`,'sys');}
 }
 function monStep(m,tx,tz,spd,dt){const dx=tx-m.x,dz=tz-m.z,d=Math.hypot(dx,dz);if(d<0.05)return false;const st=Math.min(d,spd*dt),nx=m.x+dx/d*st,nz=m.z+dz/d*st;
   m.face=(dx*Math.cos(camYaw)-dz*Math.sin(camYaw))>0?-1:1;
   const F=m.map.bounds;if(isB(cellOf(nx),cellOf(nz))||nx<F.x0+1||nx>F.x1-1||nz<F.z0+3||nz>F.z1-1){m.wait=0;return false;}m.x=nx;m.z=nz;return true;}
-function updateMons(dt){
+function updateMons(dt){if(HUNT.fx.length)huntFx(dt);
   for(let i=mons.length-1;i>=0;i--){const m=mons[i];if(m.map!==curMap){if(m.el.style.visibility!=='hidden')m.el.style.visibility='hidden';continue;}
     if(m.dead){m.dead+=dt;if(m.ering)updateEliteFx(m);const k=Math.max(0.01,1-m.dead/0.5),sc=m.sc||1;m.mesh.scale.set(m.face*(1+(1-k)*0.6)*sc,k*sc,1);m.shadow.scale.setScalar(k*m.T.size/1.6);
       if(m.dead>0.5){m.map.scene.remove(m.mesh);m.map.scene.remove(m.shadow);mons.splice(i,1);}continue;}
@@ -18591,6 +18592,7 @@ function updateMons(dt){
       if(m.wait<=0){m.wait=2+Math.random()*4;const a=Math.random()*Math.PI*2,r=2+Math.random()*6;m.tx=m.x+Math.cos(a)*r;m.tz=m.z+Math.sin(a)*r;}
       moving=monStep(m,m.tx,m.tz,m.T.speed*spm,dt);
     }
+    if(m.hunt)huntAI(m,dt,dp);
     if(m.lunge>0)m.lunge-=dt;
     const b=moving?Math.abs(Math.sin(m.t*7)):Math.abs(Math.sin(m.t*2.4))*0.3;
     const sq=m.lunge>0?1.18:1;
@@ -19067,7 +19069,7 @@ function iceShieldFx(){const sh=buffs.p_ishield,on=sh&&sh.end>time&&sh.hp>0;
   u.sh.forEach((c,k)=>{const a=time*1.6+k/6*Math.PI*2;c.position.set(Math.cos(a)*1.3,1+0.5*Math.sin(time*2+k),Math.sin(a)*1.3);c.rotation.y=a;c.material.opacity=0.85*fade*(k<Math.ceil(f*6)?1:0.15);});}
 /* ===================== OFFLINE BOT (farm while the game is closed) ===================== */
 const OFB={on:false,t:0,map:null,types:[]};const OB_MAX=12*3600,OB_EFF=0.7;
-function obField(){return mons.filter(m=>m.map===curMap&&!m.dead&&!m.T.boss&&!m.sq);}
+function obField(){return mons.filter(m=>m.map===curMap&&!m.dead&&!m.T.boss&&!m.sq&&!m.hunt&&!m.summ);}
 function obRate(types,mapKey){const L=(types||[]).map(t=>MON_TYPES[t]).filter(Boolean);if(!L.length)return{kph:0,avgLv:0,L};
   const d=derived(),dmg=Math.max(1,Math.max(d.atk,d.matk)*1.4);const avgLv=L.reduce((a,T)=>a+(T.lv||1),0)/L.length;
   const secPerKill=L.reduce((a,T)=>a+Math.ceil((T.hp||100)/dmg)*1.1+3.5,0)/L.length;
@@ -19156,10 +19158,10 @@ function advRetro(){ADV.arp=0;ADV.kills={};ADV.maps={};ADV.log=[];let a=lvl*2+cl
   ADV.maps[curMap.key]=1;a+=5;ADV.arp=a;ADV.rp=a;ADV.lv=lvl;ADV.jl=jobLv;ADV.cls=classIdx;ADV.log=[['ARP ย้อนหลังจากความคืบหน้าเดิม',a]];}
 /* ---- rank is shared by every hero in the account (newest copy wins) ---- */
 const acctKey=()=>`aldria.acct.${SAVE.uid}`;
-function advPack(){return{acct:1,rev:ADV.rev,perm:rpPerm(),rp:ADV.rp,arp:ADV.arp,kills:ADV.kills,maps:ADV.maps,ch:ADV.ch,log:ADV.log};}
+function advPack(){return{acct:1,rev:ADV.rev,perm:rpPerm(),rp:ADV.rp,arp:ADV.arp,kills:ADV.kills,maps:ADV.maps,ch:ADV.ch,log:ADV.log,hunt:ADV.hunt||{}};}
 function advSave(){const a=advPack();try{localStorage.setItem(acctKey(),JSON.stringify(a));}catch(e){}return a;}
 function advApply(a){Object.assign(ADV,{perm:Object.assign({atk:0,crit:0,cdmg:0},a.perm||{}),arp:a.arp||0,rp:a.rp??a.arp??0,kills:{...(a.kills||{})},maps:{...(a.maps||{})},
-  ch:JSON.parse(JSON.stringify(a.ch||{})),log:(a.log||[]).slice(0,8),rev:a.rev||0});}
+  ch:JSON.parse(JSON.stringify(a.ch||{})),log:(a.log||[]).slice(0,8),rev:a.rev||0,hunt:{...(a.hunt||{})}});}
 /* fold a hero's old (pre-link) rank into the account rank, once per hero */
 function advAbsorb(o,slot,d){const a=d.adv;if(a&&typeof a.arp==='number'){o.arp+=a.arp;o.rp+=(a.rp??a.arp);for(const k in (a.perm||{}))o.perm[k]=Math.max(o.perm[k]||0,a.perm[k]||0);
     for(const k in (a.kills||{}))o.kills[k]=(o.kills[k]||0)+a.kills[k];Object.assign(o.maps,a.maps||{});o.ch[slot]={lv:a.lv||d.lvl||1,jl:a.jl||d.jobLv||1,cls:a.cls??d.classIdx??0};return a.arp;}
@@ -19204,6 +19206,109 @@ function advBadge(ti,size=96){const key=ti+':'+size;if(advBadgeCache[key])return
   w.innerHTML=`<div class="hd"><span>🎖 ยศนักผจญภัย (ARP)</span><button class="x" data-close="advWin" aria-label="ปิด">✕</button></div><div class="advb" id="advBody"></div>`;
   document.getElementById('game').appendChild(w);
   const bq=document.getElementById('btnQuest');if(bq){const b=document.createElement('button');b.id='btnAdv';b.innerHTML='ยศ<small>ARP</small>';bq.after(b);b.onclick=()=>{toggleWin('advWin');renderAdv();};}})();
+/* ===================== BOSS HUNT (MVP + mini bosses on almost every field map) ===================== */
+var HUNT={next:{},fx:[],kills:{}};
+const HUNT_CFG={
+  mvp:{tag:'MVP',pre:'จ้าว',ic:'👑',col:'#ffcf3a',tint:[1.25,0.62,0.5],hp:60,atk:3.5,sc:2.3,exp:80,lvp:10,spd:1.05,aggro:5,respawn:600},
+  mini:{tag:'MINI',pre:'หัวหน้า',ic:'◆',col:'#ff7a3a',tint:[1.1,0.75,1.15],hp:15,atk:2.2,sc:1.7,exp:18,lvp:5,spd:1.15,aggro:7,respawn:180}};
+const FARM_TYPES={farm1:['pink','green','shroom'],farm2:['green','shroom','bee']};
+function huntHash(s){let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))>>>0;return h;}
+function huntTypes(key){const L=FARM_TYPES[key]||((GEN[key]&&!GEN[key].town&&GEN[key].mons)||[]).map(x=>x[0]);
+  return [...new Set(L)].filter(t=>MON_TYPES[t]&&!MON_TYPES[t].boss&&!MON_TYPES[t].sq&&MON_TYPES[t].atk&&MON_TYPES[t].atk[1]>0);}
+/* which bosses live on a map: strongest monster → MVP, two others → mini bosses */
+function huntDef(key){const ts=huntTypes(key);if(!ts.length)return null;const h=huntHash(key);
+  const by=[...ts].sort((a,b)=>(MON_TYPES[b].lv||1)-(MON_TYPES[a].lv||1));
+  const mvp=key!=='farm1'&&h%7!==3?by[0]:null;
+  const rest=by.length>1?by.slice(1):by;const minis=[rest[0],rest[(h>>3)%rest.length]===rest[0]&&by.length>2?rest[1]:rest[(h>>3)%rest.length]];
+  return{key,mvp,minis,lv:MON_TYPES[by[0]].lv||1};}
+function huntName(kind,T0){const C=HUNT_CFG[kind];return `${C.ic} ${C.pre}${T0.name.replace(/^★ /,'')}`;}
+function huntSpawn(mp,kind,type,idx){if(!mp.built&&mp!==FIELDM&&mp!==FARM2)return;const id=`${mp.key}:${kind}:${idx}`;
+  if(mons.some(m=>m.huntId===id&&!m.dead))return;
+  spawnMon(type,mp);const m=mons[mons.length-1];const C=HUNT_CFG[kind],T0=MON_TYPES[type];
+  if(m.elite){m.elite=null;if(m.ering){m.ering.parent&&m.ering.parent.remove(m.ering);m.ering=null;}}
+  m.hunt=kind;m.huntId=id;m.sc=C.sc;m.combatT=-99;m.sk={a:4,b:7};m.phase=0;
+  m.T=Object.assign(Object.create(T0),{name:huntName(kind,T0),lv:(T0.lv||1)+C.lvp,hp:Math.round(T0.hp*C.hp),atk:T0.atk.map(v=>Math.round(v*C.atk)),exp:Math.round(T0.exp*C.exp),
+    speed:T0.speed*C.spd,size:T0.size*C.sc,aggro:C.aggro,retaliate:true,boss:kind==='mvp',drops:T0.drops&&T0.drops.length?T0.drops:['เหรียญทอง']});
+  m.hp=m.T.hp;m.mesh.userData.tint=new THREE.Color(...C.tint);m.mesh.material.color.setRGB(...C.tint);
+  m.el.classList.add('elite','hunt');m.el.style.setProperty('--ec',C.col);m.el.querySelector('.mn').textContent=`${m.T.name} · Lv ${m.T.lv}`;
+  const ring=new THREE.Mesh(eliteRingGeo,new THREE.MeshBasicMaterial({color:C.col,transparent:true,opacity:0.7,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending}));
+  ring.rotation.x=-Math.PI/2;ring.renderOrder=2;ring.userData.noTint=true;mp.scene.add(ring);m.ering=ring;
+  if(mp===curMap&&kind==='mvp')say(`👑 บอส ${m.T.name} (Lv ${m.T.lv}) ปรากฏตัวในแมพนี้!`,'sys');}
+function huntSchedule(mp,kind,type,idx){const id=`${mp.key}:${kind}:${idx}`,wait=Math.max(0,(HUNT.next[id]||0)-Date.now());
+  setTimeout(()=>huntSpawn(mp,kind,type,idx),wait);}
+function huntInit(mp,types){const D=huntDef(mp.key);if(!D)return;if(D.mvp)huntSchedule(mp,'mvp',D.mvp,0);D.minis.forEach((t,i)=>huntSchedule(mp,'mini',t,i));}
+/* ---- telegraphed area attacks ---- */
+const huntDisc=new THREE.CircleGeometry(1,40);
+function huntWarn(m,x,z,r,delay,v,col){const mesh=new THREE.Mesh(huntDisc,new THREE.MeshBasicMaterial({color:col||'#ff3a2a',transparent:true,opacity:0.15,depthWrite:false,side:THREE.DoubleSide}));
+  mesh.rotation.x=-Math.PI/2;mesh.position.set(x,0.07,z);mesh.scale.set(r,r,r);m.map.scene.add(mesh);
+  const edge=new THREE.Mesh(new THREE.RingGeometry(r*0.94,r,48),new THREE.MeshBasicMaterial({color:col||'#ff3a2a',transparent:true,opacity:0.9,depthWrite:false,side:THREE.DoubleSide}));
+  edge.rotation.x=-Math.PI/2;edge.position.set(x,0.08,z);m.map.scene.add(edge);
+  HUNT.fx.push({m,mesh,edge,x,z,r,v,t:0,delay,map:m.map});}
+function huntFx(dt){for(let i=HUNT.fx.length-1;i>=0;i--){const F=HUNT.fx[i];F.t+=dt;const k=Math.min(1,F.t/F.delay);
+    F.mesh.material.opacity=0.12+k*0.38;const s=F.r*k;F.mesh.scale.set(Math.max(0.01,s),Math.max(0.01,s),1);
+    if(F.t>=F.delay){F.map.scene.remove(F.mesh);F.map.scene.remove(F.edge);F.edge.geometry.dispose();HUNT.fx.splice(i,1);
+      if(F.map!==curMap||F.m.dead)continue;fxRing(F.x,F.z,F.r,'#ffb03a');try{sfx('crit');}catch(e){}
+      if(Math.hypot(player.x-F.x,player.z-F.z)<=F.r)hurtPlayer(F.v,F.m);
+      MERCS.forEach(M=>{if(mercAlive(M)&&Math.hypot(M.x-F.x,M.z-F.z)<=F.r)mercHurt(M,Math.round(F.v*0.7));});}}}
+/* ---- boss behaviour ---- */
+function huntAI(m,dt,dp){const C=HUNT_CFG[m.hunt];
+  if(m.stunEnd>time+1)m.stunEnd=time+1;if(m.fearEnd>time+1)m.fearEnd=time+1;if(m.sleepEnd>time+1.5)m.sleepEnd=time+1.5;if(m.slowEnd>time&&m.slow>50)m.slow=50;
+  if(!m.aggro){if(time-m.combatT>6&&m.hp<m.T.hp){m.hp=Math.min(m.T.hp,m.hp+m.T.hp*0.1*dt);m.bar.style.width=m.hp/m.T.hp*100+'%';if(m.hp>=m.T.hp){m.phase=0;}}return;}
+  m.combatT=time;if(playerDown)return;const big=m.T.atk[1],pct=m.hp/m.T.hp;
+  if(pct<0.3&&!m.rage){m.rage=1;m.T.atk=m.T.atk.map(v=>Math.round(v*1.5));m.T.speed*=1.3;m.mesh.material.color.setRGB(1.4,0.45,0.4);m.mesh.userData.tint=new THREE.Color(1.4,0.45,0.4);
+    popText(m.x,m.z,'ENRAGE!','hurt',m.T.size*0.9+1);say(`🔥 ${m.T.name} คลั่ง! พลังโจมตีเพิ่มขึ้นมาก`,'sys');}
+  m.sk.a-=dt;m.sk.b-=dt;
+  if(m.sk.a<=0&&dp<9){m.sk.a=m.hunt==='mvp'?(m.rage?5:7):(m.rage?6.5:9);const r=m.hunt==='mvp'?5.5:4;
+    huntWarn(m,m.x,m.z,r,1.3,Math.round(big*(m.hunt==='mvp'?2.2:1.8)));popText(m.x,m.z,m.hunt==='mvp'?'กระแทกพื้น!':'ฟาดรอบตัว!','skill',m.T.size*0.9+0.6);}
+  if(m.hunt==='mvp'){
+    if(m.sk.b<=0&&dp<16){m.sk.b=m.rage?8:11;const pts=[[player.x,player.z]];for(let k=0;k<(m.rage?4:2);k++){const a=Math.random()*6.28,r=2+Math.random()*4;pts.push([player.x+Math.cos(a)*r,player.z+Math.sin(a)*r]);}
+      pts.forEach(([x,z],k)=>huntWarn(m,x,z,3,1.5+k*0.15,Math.round(big*1.8),'#ff6a1a'));popText(m.x,m.z,'อุกกาบาต!','skill',m.T.size*0.9+0.6);}
+    const ph=pct<0.4?2:pct<0.7?1:0;if(ph>m.phase){m.phase=ph;huntSummon(m);}}}
+function huntSummon(m){const ts=huntTypes(m.map.key);if(!ts.length)return;say(`⚠ ${m.T.name} เรียกลูกน้องมาช่วย!`,'sys');
+  for(let k=0;k<4;k++){spawnMon(ts[k%ts.length],m.map);const s=mons[mons.length-1];s.summ=true;const a=k/4*6.28;s.x=m.x+Math.cos(a)*3;s.z=m.z+Math.sin(a)*3;s.aggro=true;fxRing(s.x,s.z,1.4,'#c86aff');}}
+/* ---- rewards ---- */
+function huntLoot(m){const C=HUNT_CFG[m.hunt],lv=m.T.lv||1,id=m.huntId;HUNT.next[id]=Date.now()+C.respawn*1000;HUNT.kills[m.hunt]=(HUNT.kills[m.hunt]||0)+1;
+  const def=MON_TYPES[m.type],mp=m.map,kind=m.hunt,idx=+id.split(':')[2];setTimeout(()=>huntSpawn(mp,kind,m.type,idx),C.respawn*1000);
+  const g=Math.round(lv*(kind==='mvp'?500:150)*(1+S('CHA')*0.01));gold+=g;popText(m.x,m.z,`+${g.toLocaleString()} z`,'gain',2.2);
+  const n=kind==='mvp'?5:2;for(let i=0;i<n;i++){rollMatDrop(m);const it=m.T.drops[Math.floor(Math.random()*m.T.drops.length)];if(it)inv[it]=(inv[it]||0)+1;}
+  if(kind==='mvp'){rollStoneDrop(m);rollOreDrop(m);inv['ยาขาว']=(inv['ยาขาว']||0)+3;}
+  updateInv();
+  if(typeof advAdd==='function'){ADV.hunt=ADV.hunt||{};const first=!ADV.hunt[id];ADV.hunt[id]=1;advAdd(kind==='mvp'?(first?60:20):(first?15:5),`${first?'ล่าครั้งแรก: ':'ล่าบอส '}${m.T.name.replace(/^\S+ /,'')}`);}
+  say(`${C.ic} ล่า ${m.T.name} สำเร็จ! +${g.toLocaleString()} z · เกิดใหม่ใน ${Math.round(C.respawn/60)} นาที`,'sys');
+  if(kind==='mvp'){levelFx('#ffcf3a','#fff6c8',false);try{sfx('levelup');}catch(e){}}saveSoon();
+  if(!document.getElementById('huntWin').hidden)renderHunt();}
+/* ---- window: every boss on the map list ---- */
+function huntStatus(key,kind,idx){const id=`${key}:${kind}:${idx}`,m=mons.find(q=>q.huntId===id&&!q.dead);if(m)return{alive:true,hp:m.hp/m.T.hp};
+  const w=(HUNT.next[id]||0)-Date.now();if(w>0)return{wait:w};return{alive:MAPS[key]&&(MAPS[key].built||key==='farm1'||key==='farm2'),unknown:!(MAPS[key]&&MAPS[key].built)&&key!=='farm1'&&key!=='farm2'};}
+function huntRow(key,kind,type,idx){const T0=MON_TYPES[type],C=HUNT_CFG[kind],s=huntStatus(key,kind,idx);
+  const st=s.wait?`<i class="hw">เกิดใหม่ใน ${obFmt(s.wait/1000)}</i>`:s.unknown?'<i class="hu">ไปถึงแมพแล้วจะปรากฏ</i>':s.hp!=null?`<i class="ha">อยู่ · HP ${Math.ceil(s.hp*100)}%</i>`:'<i class="ha">อยู่</i>';
+  return `<span class="hk ${kind}"><b>${huntName(kind,T0)}</b><small>Lv ${(T0.lv||1)+C.lvp}</small>${st}</span>`;}
+function renderHunt(){const B=document.getElementById('huntBody');if(!B)return;
+  const keys=['farm1','farm2',...Object.keys(GEN)].map(huntDef).filter(Boolean).sort((a,b)=>a.lv-b.lv);
+  const near=keys.filter(D=>D.lv<=lvl+15);const show=HUNT.all?keys:near;
+  B.innerHTML=`<p class="hhint">บอสโหดกว่ามอนปกติหลายสิบเท่า มีท่าโจมตีเป็นวง (หลบออกจากวงแดง) เรียกลูกน้อง และคลั่งเมื่อเลือดต่ำ · 👑 MVP เกิดใหม่ทุก 10 นาที · ◆ มินิบอส ทุก 3 นาที · ล่าได้ ARP เงิน และของหายาก</p>
+   <div class="htabs"><button data-hall="0" aria-selected="${!HUNT.all}">ใกล้เลเวลฉัน</button><button data-hall="1" aria-selected="${!!HUNT.all}">ทั้งหมด (${keys.length} แมพ)</button><span>ล่าแล้ว 👑 ${HUNT.kills.mvp||0} · ◆ ${HUNT.kills.mini||0}</span></div>
+   <div class="hlist">${show.map(D=>`<div class="hr${curMap.key===D.key?' here':''}"><div class="hm"><b>${(MAPS[D.key]&&MAPS[D.key].name)||D.key}</b><small>มอน Lv ~${D.lv}</small>
+     ${curMap.key===D.key?'<em>คุณอยู่ที่นี่</em>':`<button data-hnav="${D.key}">นำทาง</button>`}</div>
+     ${D.mvp?huntRow(D.key,'mvp',D.mvp,0):''}${D.minis.map((t,i)=>huntRow(D.key,'mini',t,i)).join('')}</div>`).join('')||'<p class="hhint">ยังไม่มีบอสในช่วงเลเวลนี้ ลองกด "ทั้งหมด"</p>'}</div>`;}
+(function(){const w=document.createElement('section');w.id='huntWin';w.className='pw drag';w.hidden=true;w.setAttribute('aria-label','ล่าบอส');
+  w.innerHTML=`<div class="hd"><span>👑 ล่าบอส</span><button class="x" data-close="huntWin" aria-label="ปิด">✕</button></div><div class="huntb" id="huntBody"></div>`;
+  document.getElementById('game').appendChild(w);
+  w.addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;if(t.dataset.hall){HUNT.all=t.dataset.hall==='1';renderHunt();}
+    else if(t.dataset.hnav){toggleWin('huntWin',false);if(typeof navStart==='function')navStart(t.dataset.hnav);}});
+  setInterval(()=>{if(!w.hidden)renderHunt();},1000);
+  const ba=document.getElementById('btnAdv')||document.getElementById('btnQuest');if(ba){const b=document.createElement('button');b.id='btnHunt';b.innerHTML='บอส<small>ล่า</small>';ba.after(b);b.onclick=()=>{toggleWin('huntWin');renderHunt();};}
+  const st=document.createElement('style');st.textContent=`#huntWin{top:calc(60px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);width:min(600px,calc(100vw - 20px));max-height:calc(100% - 140px);display:flex;flex-direction:column}
+  .huntb{display:flex;flex-direction:column;min-height:0;padding:8px 10px 10px;gap:6px}.hhint{margin:0;font-size:11.5px;color:var(--muted)}
+  .htabs{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.htabs button{height:28px;padding:0 12px}.htabs button[aria-selected=true]{background:#6e4a2c;color:#fbecc8}.htabs span{margin-left:auto;font-size:12px}
+  .hlist{overflow:auto;display:flex;flex-direction:column;gap:6px}.hr{padding:7px 9px;border-radius:8px;background:rgba(255,255,255,.42);border:1px solid rgba(110,75,44,.25);display:flex;flex-direction:column;gap:3px}
+  .hr.here{border-color:#c9a24a;background:#fff3cf}.hm{display:flex;align-items:center;gap:8px}.hm b{font:600 13.5px var(--display)}.hm small{color:var(--muted);font-size:11px}.hm button{margin-left:auto;height:26px;padding:0 10px;font-size:12px}.hm em{margin-left:auto;font-style:normal;font-size:11px;color:#8a5a1a}
+  .hk{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;font-size:12px;padding:2px 4px;border-radius:5px}.hk.mvp{background:rgba(255,200,60,.18)}.hk.mvp b{color:#9a5a00}.hk.mini b{color:#a8401a}.hk small{color:var(--muted)}
+  .hk i{font-style:normal;font-size:11px;white-space:nowrap}.hk .ha{color:#2a7a2a;font-weight:600}.hk .hw{color:#8a5a1a}.hk .hu{color:var(--muted)}
+  .mlabel.hunt .mn{font-size:13px;text-shadow:0 0 3px #000,0 0 6px rgba(0,0,0,.6)}.mlabel.hunt .hpb{width:90px;height:7px}
+  #tgtFrame.mvp{border-color:#ffcf3a;box-shadow:0 0 0 2px #ffcf3a66,0 6px 26px rgba(255,190,40,.45)}#tgtFrame .tf1 b em.mv{background:linear-gradient(#ffe27a,#e0a020);color:#3a2000}#tgtFrame .tf1 b em.mi{background:#ff7a3a;color:#2a0a00}`;
+  document.head.appendChild(st);
+  huntInit(FIELDM,FARM_TYPES.farm1);huntInit(FARM2,FARM_TYPES.farm2);})();
 
 const RPS=[
  {id:'atk',perm:'atk',n:'ตราแห่งพลัง: ATK +2 ถาวร',ic:'หินพลัง ATK Ⅲ',base:20,step:5,cap:t=>5*(t+1),t:0},
