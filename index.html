@@ -526,6 +526,20 @@ body.touch #chat::after{content:'แตะเพื่อขยาย/ย่อ'
 .bsi img{width:78%;height:78%;image-rendering:pixelated}.bsi u{position:absolute;right:1px;bottom:0;text-decoration:none;font:800 12px var(--body);color:#fff;background:#2a1e14;border-radius:8px;padding:0 4px}.bsi.need{outline:2px solid #ffe060;box-shadow:0 0 8px #ffd24a}.bsi.craft::after{content:'★';position:absolute;right:1px;top:-3px;color:#e0281e;font-size:12px;text-shadow:0 0 2px #fff}
 .splist{padding:0;overflow:hidden;background:linear-gradient(180deg,#d8c3a0,#ccb48e)}.sphd,.spr{display:grid;grid-template-columns:1fr 54px 90px;align-items:center}.sphd{background:#cdb896;border-bottom:2px solid #8a7050;font:700 14px Georgia,serif;color:#3a2a18;padding:6px 10px}.sphd span:nth-child(n+2){text-align:center}
 #spList{display:flex;flex-direction:column}.spr{grid-template-columns:40px 1fr 54px 90px;gap:8px;padding:3px 10px;min-height:0;border:0;border-bottom:1px solid #b89e7a;border-radius:0;background:transparent;text-align:left;color:#2a1e12}.spr:nth-child(odd){background:#e2d0ae}.spr.sel{background:#a8d0c0}
+#advWin{top:calc(60px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);width:min(560px,calc(100vw - 20px));max-height:calc(100% - 140px);display:flex;flex-direction:column}
+.advb{overflow:auto;padding:10px 12px 12px}.advb h4{margin:12px 0 6px;font:700 13px var(--display);color:#8a5a1a;letter-spacing:.5px}
+.advtop{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center}.advtop img{width:96px;height:96px;filter:drop-shadow(0 3px 6px #0008)}
+.advtop b{display:block;font:700 22px Georgia,serif;color:#7a3a10}.advtop em{display:block;font-style:normal;color:#5a4a30;font-size:12px;margin-bottom:6px}.advtop small{color:#7a6a50;font-size:11px}
+.advbar{position:relative;height:16px;border-radius:8px;background:#2a1a10;border:1px solid #6a4a2a;overflow:hidden;margin:4px 0}.advbar i{display:block;height:100%;background:linear-gradient(90deg,#c88a2a,#ffd24a)}
+.advbar span{position:absolute;inset:0;text-align:center;font:600 10.5px/16px var(--body);color:#fff;text-shadow:0 1px 2px #000}
+.advst{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}.advst span{font-size:11px;background:#3a7a2a18;border:1px solid #3a7a2a44;border-radius:10px;padding:1px 8px;color:#2a6a1a;font-weight:600}
+.advsrc{display:grid;grid-template-columns:1fr 1fr;gap:5px}.advsrc span{font-size:12px;background:#00000010;border-radius:6px;padding:5px 8px;color:#3a2a18}.advsrc b{color:#a8601a}
+.advhint{display:block;margin-top:6px;color:#6a5a40;font-size:10.5px;line-height:1.5}
+.advlog div{display:flex;justify-content:space-between;font-size:12px;padding:3px 2px;border-bottom:1px solid #00000014;color:#3a2a18}.advlog b{color:#2a8a3a}
+.advgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:6px}.advgrid div{display:grid;justify-items:center;text-align:center;padding:6px 4px;border-radius:8px;background:#00000008;opacity:.5;filter:grayscale(.85)}
+.advgrid div.on{opacity:1;filter:none;background:#ffd24a30}.advgrid img{width:52px;height:52px}.advgrid b{font-size:11px;color:#3a2a18}.advgrid small{font-size:10px;color:#7a6a50}
+#advMini{position:absolute;left:-6px;top:-6px;width:26px;height:26px;cursor:pointer;z-index:2;filter:drop-shadow(0 1px 2px #0008)}#face{position:relative}
+
 #actPad #apPick,#actPad #apAtk,#actPad #apAuto{display:none!important}
 #actPad #apBot{width:58px;height:58px;font-size:10px;background:radial-gradient(circle at 40% 35%,#7ac8ff,#2a6ab8)}
 #actPad #apBot .ic{font-size:22px}
@@ -1394,7 +1408,7 @@ document.getElementById('questWin').addEventListener('click',e=>{const t=e.targe
   if(t.dataset.qab){const q=D.find(x=>x.id===t.dataset.qab);if(t.dataset.sure!=='1'){t.dataset.sure='1';t.textContent='ยืนยัน?';return;}delete qActive[q.id];say(`ยกเลิกเควสต์: ${q.title}`,'sys');renderQuest();renderTracker();return;}
   if(t.dataset.qdone){const q=D.find(x=>x.id===t.dataset.qdone);if(!q||!qReady(q))return;
     if(q.kind==='item'){inv[q.it]-=q.n;if(inv[q.it]<=0)delete inv[q.it];}
-    delete qActive[q.id];qDone[q.id]=(qDone[q.id]||0)+1;dqQuest();gold+=q.z;if(q.item)inv[q.item[0]]=(inv[q.item[0]]||0)+q.item[1];
+    delete qActive[q.id];qDone[q.id]=(qDone[q.id]||0)+1;if(typeof advAdd==='function')advAdd(q.kind==='daily'?2:8,'เควส: '+(q.title||q.id));dqQuest();gold+=q.z;if(q.item)inv[q.item[0]]=(inv[q.item[0]]||0)+q.item[1];
     gainExp(Math.round(q.exp/1.15));gainJob(q.job);levelFx('#7ae0ff','#e8fbff',false);sfx('levelup');
     popText(player.x,player.z,`<i>+${q.exp.toLocaleString('en-US')} EXP</i><em>+${q.job.toLocaleString('en-US')} JOB</em>`,'gain',4.4,{html:true,life:2.2,rise:1.4});
     say(`ส่งเควสต์ "${q.title}" สำเร็จ! ได้ ${q.exp.toLocaleString()} EXP · ${q.job.toLocaleString()} Job · ${q.z.toLocaleString()} z${q.item?` · ${q.item[0]} ×${q.item[1]}`:''}`,'sys');
@@ -1487,7 +1501,7 @@ document.getElementById('stNext').onclick=storyNext;document.getElementById('sto
 function storyBrief(){const S=curStep();if(!S)return;const ch=parseInt(S.id);
   storyShow(`บทที่ ${ch} · ${STORY_CH[ch]} — ${S.id} ${S.t}`,S.s.concat([['ภารกิจ',`${stepGoal(S)} · ที่ ${stepMapName(S)} (แนะนำ Lv ${S.lv})`]]));renderTracker();}
 function storyStart(){if(ST.started)return;ST.started=true;storyShow('บทนำ',[['ระบบ','อาณาจักรอัลเดรียสงบสุขมานานนับร้อยปี... จนกระทั่งคืนหนึ่ง แสงประหลาดหลายดวงตกลงมาจากฟ้า'],['ระบบ','นับจากคืนนั้น มอนสเตอร์ทั่วอาณาจักรเริ่มคลั่ง และเรื่องราวของคุณก็เริ่มต้นขึ้นที่ไร่เล็กๆ นอกเมืองหลวง...']],storyBrief);}
-function storyAdvance(){const S=curStep();if(!S)return;const r=stepReward(S);gainExp(Math.round(r.exp/1.15));gainJob(r.job);gold+=r.z;updateInv();
+function storyAdvance(){const S=curStep();if(!S)return;if(typeof advAdd==='function')advAdd(10,'เนื้อเรื่อง '+S.id);const r=stepReward(S);gainExp(Math.round(r.exp/1.15));gainJob(r.job);gold+=r.z;updateInv();
   levelFx('#ffd24a','#fff6c8',false);sfx('levelup');popText(player.x,player.z,'STORY CLEAR!','gain',4.8);
   say(`★ เนื้อเรื่อง ${S.id} "${S.t}" สำเร็จ! +${r.exp.toLocaleString()} EXP · +${r.job.toLocaleString()} Job · ${r.z.toLocaleString()} z`,'sys');
   const prevCh=parseInt(S.id);ST.i++;ST.prog=0;saveSoon();const N=curStep();
@@ -4266,7 +4280,7 @@ const STAT_TH={ATK:'พลังโจมตี — เพิ่มพลัง�
   INT:'สติปัญญา — 1 แต้ม = MaxSP +4 · ลดเวลาร่าย · เพิ่มพลังเวท (MATK)',CHA:'เสน่ห์ — บัฟจากสกิลอยู่นานขึ้น 0.5%/แต้ม · ติดดีบัฟสั้นลงและติดยากขึ้น 0.6%/แต้ม',TAL:'พรสวรรค์ — 1 แต้ม = MaxSP +2 · สกิลแรงขึ้น 0.5%/แต้ม',LCK:'โชค — โอกาสคริติคอล · โอกาสดรอปของ · สกิลบางตัวใช้ค่านี้'};
 const base={ATK:1,DEF:1,AGI:1,VIT:1,INT:1,CHA:1,TAL:1,LCK:1};
 const bonus={ATK:0,DEF:0,AGI:0,VIT:0,INT:0,CHA:0,TAL:0,LCK:0};var EQ={atk:0,matk:0,def:0,hpP:0,aspdP:0,crit:0};
-const S=k=>base[k]+bonus[k]+skStat(k);
+const S=k=>base[k]+bonus[k]+skStat(k)+(typeof advStat==='function'?advStat(k):0);
 const ICONS={ATK:'M3 21l2-2-1-3 9-9 3 1 6-6-1 4-4 4 1 3-9 9-3-1-2 2z',DEF:'M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z',
   AGI:'M4 18c3 0 5-2 7-5l2-3c1-2 3-3 5-3h2v3h-2c-1 0-2 1-3 2l-2 3c-2 4-5 6-9 6z',VIT:'M12 21l-8-8a5 5 0 017-7l1 1 1-1a5 5 0 017 7z',
   INT:'M5 3h11l3 3v15H5zM8 8h8v2H8zm0 4h8v2H8z',CHA:'M3 8l4 3 5-7 5 7 4-3-2 11H5z',TAL:'M12 2c2 4 6 6 6 11a6 6 0 01-12 0c0-3 2-5 3-7 1 2 2 3 3 3 0-3-1-5 0-7z',
@@ -4292,7 +4306,7 @@ function recalc(keepRatio=true){
   maxHp=Math.round((70+S('VIT')*10+lvl*12)*(reborn?1.25:1)*jtHp()*(LINE==='bison'?1.15:LINE==='lizard'?1.05:LINE==='penguin'?0.9:LINE==='mole'?1.08:LINE==='bat'?0.9:LINE==='panda'?1.05:LINE==='sheep'?0.95:LINE==='rabbit'?1.0:1)*(1+(((typeof pas==='function'?pas().hpP:0)||0)+EQ.hpP)/100));maxSp=Math.round((30+S('INT')*4+S('TAL')*2+lvl*5+(typeof jobLv==='number'?jobLv*3+classIdx*40:0))*(reborn?1.25:1)*jtHp()*(1+(CX('spP')+(typeof btSpP==='function'?btSpP()+shSpP():0))/100));
   if(keepRatio){php=Math.max(1,Math.round(maxHp*r));psp=Math.round(maxSp*rs);}
   const d=derived();player.speed=d.spd;syncAtkAnim(d);
-  STAT_KEYS.forEach(k=>{document.getElementById('sv'+k).textContent=base[k];{const pn=document.getElementById('profName'),pr=document.getElementById('profRace');if(pn)pn.textContent=player.name;if(pr&&typeof RACES!=='undefined'){const rr=RACES.find(r=>r[0]===LINE);if(rr)pr.textContent=rr[1];}}{const bk=bonus[k]+skStat(k);document.getElementById('sb'+k).textContent=bk?'+ '+bk:'';}{const bt=document.getElementById('sp'+k),c=statCost(base[k]);bt.disabled=statPts<c||base[k]>=99;bt.title=base[k]>=99?'สูงสุดแล้ว':`ใช้ ${c} แต้ม`;}});
+  STAT_KEYS.forEach(k=>{document.getElementById('sv'+k).textContent=base[k];{const pn=document.getElementById('profName'),pr=document.getElementById('profRace');if(pn)pn.textContent=player.name;if(pr&&typeof RACES!=='undefined'){const rr=RACES.find(r=>r[0]===LINE);if(rr)pr.textContent=rr[1];}}{const bk=bonus[k]+skStat(k)+(typeof advStat==='function'?advStat(k):0);document.getElementById('sb'+k).textContent=bk?'+ '+bk:'';}{const bt=document.getElementById('sp'+k),c=statCost(base[k]);bt.disabled=statPts<c||base[k]>=99;bt.title=base[k]>=99?'สูงสุดแล้ว':`ใช้ ${c} แต้ม`;}});
   document.getElementById('ptsTxt').textContent=statPts>0?`แต้มสเตตัสคงเหลือ ${statPts} — กด + เพื่อเพิ่ม (ยิ่งค่าสูง ยิ่งใช้แต้มมาก)`:'';document.getElementById('ptsAuto').hidden=statPts<=0;
   document.getElementById('dvSpd').textContent=d.spd.toFixed(1)+' t/s';
   {const g=(i,v)=>{const e=document.getElementById(i);if(e)e.textContent=v;};g('dvCd','−'+Math.round((1-agiCd())*100)+'%');g('dvCast','−'+Math.round(Math.min(0.8,S('INT')/150)*100)+'%');g('dvSk','+'+Math.round((talMul()-1)*100)+'%');g('dvBuff','+'+Math.round((chaBuff()-1)*100)+'%');g('dvDeb','−'+Math.round(stResist()*100)+'%');}
@@ -4577,7 +4591,7 @@ function sqShow(head,lines,cb){if(!lines||!lines.length){if(cb)cb();return;}cons
 function sqHead(Z){return `📖 เนื้อเรื่องย่อย · ${Z.title}`;}
 function sqStepReward(Z){const e=Math.round(expNeed(Math.max(1,Z.lv))*0.07);gainExp(Math.round(e/1.15));gainJob(Math.round(e*0.7));gold+=Z.lv*60;updateInv();
   popText(player.x,player.z,`<i>+${e.toLocaleString('en-US')} EXP</i>`,'gain',4.4,{html:true,life:1.8,rise:1.2});}
-function sqAdvance(z){const Z=sqZ(z),s=SQ[z],S=sqStep(z);if(!S)return;sqStepReward(Z);sfx('pickup');
+function sqAdvance(z){const Z=sqZ(z),s=SQ[z],S=sqStep(z);if(!S)return;if(typeof advAdd==='function')advAdd(5,'เรื่องย่อย: '+(Z.title||z));sqStepReward(Z);sfx('pickup');
   const doneL=S.done||[];s.i++;s.p=0;const N=Z.steps[s.i];renderTracker();renderQuest();
   if(!N){sqShow(sqHead(Z),doneL,()=>sqFinish(z));return;}
   say(`📖 ${Z.title} — ขั้นต่อไป: ${sqGoal(z)}`,'sys');
@@ -18272,7 +18286,7 @@ function buildCharSel(){const box=document.getElementById('csCards');
   document.getElementById('csName').addEventListener('keydown',e=>{if(e.key==='Enter')startGame();e.stopPropagation();});}
 function startGame(){const nm=(document.getElementById('csName').value||'').trim().slice(0,16)||'ผู้เล่นใหม่';
   player.name=nm;meLabel.textContent=nm;const nmEl=document.querySelector('#me .nm');if(nmEl&&nmEl.firstChild)nmEl.firstChild.textContent=nm;
-  partyNew();sqLoad(null);setLine(csPick);document.getElementById('charSel').hidden=true;audioInit();sfx('levelup');setTimeout(storyStart,1200);setTimeout(()=>{if(typeof saveNow==='function')saveNow(false);},2500);
+  partyNew();sqLoad(null);setLine(csPick);if(typeof advNew==='function')advNew();document.getElementById('charSel').hidden=true;audioInit();sfx('levelup');setTimeout(storyStart,1200);setTimeout(()=>{if(typeof saveNow==='function')saveNow(false);},2500);
   say(`ยินดีต้อนรับ ${nm} แห่ง${RACES.find(r=>r[0]===csPick)[1]}! กด U ดูอุปกรณ์ · คุยกับหลินหลินหรือบรูโน่เพื่อซื้อของ · ช่างราซานที่เต็นท์รับคราฟชุดเซตและตีบวก · รับเควสต์จากฟิน`,'sys');}
 
 
@@ -18499,7 +18513,7 @@ function hurtPlayer(v,src){if(playerDown)return;if(buffs.p_block&&buffs.p_block.
   if(src&&src.mon&&php>0)statusOnHit(src);
   if(php<=0&&(btFrog()||ctRevive()||rbRevive()))php=Math.max(1,php);if(php<=0)rbOnDown();if(php<=0){php=0;FST.deaths++;playerDown=1.6;player.path=[];player.action=null;player.attackTarget=null;pendingAttack=null;pendingPick=null;mons.forEach(m=>m.aggro=false);say('คุณหมดสติ... จะฟื้นขึ้นที่ลานน้ำพุ','sys');}
   updateHP();}
-function killMon(m){if(AUTO.on)AUTO.kills++;if(typeof apOnKill==='function')apOnKill(m);mlOnKill(m);btOnKill(m);ctOnKill(m);rbOnKill(m);cardOnKill(m);questKill(m.type);storyKill(m.type);if(window.sqOn)sqKill(m);
+function killMon(m){if(AUTO.on)AUTO.kills++;if(typeof advKill==='function')advKill(m);if(typeof apOnKill==='function')apOnKill(m);mlOnKill(m);btOnKill(m);ctOnKill(m);rbOnKill(m);cardOnKill(m);questKill(m.type);storyKill(m.type);if(window.sqOn)sqKill(m);
   m.dead=0.001;m.el.remove();hitMeshes.splice(hitMeshes.indexOf(m.mesh),1);
   if(player.attackTarget===m)player.attackTarget=null;if(pendingAttack===m)pendingAttack=null;
   const be=Math.max(1,Math.round(m.T.exp*expMod(m.T.lv||1)*(1+CX('expP')/100))),ge=Math.round(be*1.15),gj=Math.round(be*0.8*1.15),mx=m.x,mz=m.z,top=Math.max(2.6,m.T.size*0.95);
@@ -18560,7 +18574,7 @@ function warpTo(map,x,z,msg){if(typeof cancelCast==='function')cancelCast();sfx(
   player.path=[];player.action=null;player.attackTarget=null;pendingAttack=null;pendingPick=null;pendingTalk=null;if(talkNpc)closeTalk();marker.visible=false;
   setTimeout(()=>{
     if(!map.built)buildGeneric(map.key);
-    curMap=map;blocked=map.blocked;player.map=map;map.scene.add(player.mesh);map.scene.add(player.shadow);map.scene.add(marker);
+    curMap=map;blocked=map.blocked;player.map=map;if(typeof advVisit==='function')advVisit(map.key);map.scene.add(player.mesh);map.scene.add(player.shadow);map.scene.add(marker);
     player.x=x;player.z=z;camT.x=x;camT.z=z;
     mons.forEach(m=>{m.el.style.visibility='hidden';if(m.aggro)m.aggro=false;});chars.forEach(c=>{if(c.label)c.label.style.visibility='hidden';});
     say(msg||`เข้าสู่ ${map.name}`,'sys');if(!document.getElementById('worldWin').hidden)updateWorld();
@@ -18983,6 +18997,73 @@ obWin.addEventListener('click',e=>{const t=e.target.closest('button');if(!t)retu
 document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('[data-obstop]');if(t)obStop();});
 {const pad=document.getElementById('actPad');if(pad){const b=document.createElement('button');b.id='apBot';b.setAttribute('aria-label','บอทออฟไลน์');b.innerHTML='<span class="ic">🤖</span>บอท<br>ออฟไลน์';pad.appendChild(b);b.onclick=obPanel;}
  const ba=document.getElementById('btnAuto');if(ba){const b=document.createElement('button');b.id='btnBot';b.innerHTML='บอท<small>ออฟไลน์</small>';ba.after(b);b.onclick=obPanel;}}
+/* ===================== ADVENTURE RANK (ARP) ===================== */
+const ADV_TIERS=[[1,'Novice','มือใหม่',0,'#a8a090'],[5,'Rookie','หน้าใหม่',40,'#8ac070'],[10,'Soldier','พลทหาร',100,'#70a8c8'],[15,'Sergeant','จ่า',200,'#c88050'],
+ [20,'Lieutenant','ร้อยตรี',400,'#5aa080'],[25,'Captain','ร้อยเอก',800,'#5878c0'],[30,'Colonel','พันเอก',1600,'#b05a7a'],[35,'Major','พันตรีอาวุโส',3200,'#c0a050'],
+ [40,'Chancellor','อัครเสนาบดี',5200,'#8a68c8'],[45,'Admiral','พลเรือเอก',8400,'#3aa0b0'],[50,'General','แม่ทัพ',13200,'#c84a3a'],[55,'Marshal','จอมพล',22800,'#d08a30'],[60,'Grand Marshal','จอมพลสูงสุด',38800,'#e8c040']];
+/* ARP needed for every adventure level 1..60 (geometric between the 13 milestone ranks) */
+const ADV_NEED=(()=>{const a=[0,0];for(let t=0;t<ADV_TIERS.length-1;t++){const[l0,,,p0]=ADV_TIERS[t],[l1,,,p1]=ADV_TIERS[t+1];for(let l=l0+1;l<=l1;l++){const f=(l-l0)/(l1-l0);a[l]=Math.round(p0<=0?p1*f:p0*Math.pow(p1/p0,f));}}return a;})();
+const ADV_STAT=['ATK','VIT','AGI','INT','DEF','LCK','TAL','CHA'];
+const ADV={arp:0,kills:{},maps:{},lv:0,jl:0,cls:0,seen:1,log:[]};
+function advLevel(arp=ADV.arp){let l=1;while(l<60&&arp>=ADV_NEED[l+1])l++;return l;}
+function advTier(l=advLevel()){let t=ADV_TIERS[0];for(const T of ADV_TIERS)if(l>=T[0])t=T;return t;}
+function advStat(k){const L=advLevel();let n=0;for(let l=2;l<=L;l++)if(ADV_STAT[(l-2)%ADV_STAT.length]===k)n++;return n;}
+function advAdd(n,why){if(!n||!ADV.ready)return;const l0=advLevel();ADV.arp+=n;ADV.log.unshift([why,n]);if(ADV.log.length>8)ADV.log.length=8;
+  const l1=advLevel();if(l1>l0){const T=advTier(l1),nt=ADV_TIERS.find(x=>x[0]===l1);recalc();
+    if(nt){popText(player.x,player.z,`ยศใหม่: ${nt[1]}!`,'lvl',5);levelFx('#ffd24a','#fff6c8',false);sfx('levelup');say(`🎖 ระดับนักผจญภัย Lv ${l1} — ได้ยศ ${nt[1]} (${nt[2]})!`,'sys');}
+    else{popText(player.x,player.z,`ADVENTURE Lv ${l1}`,'gain',4.6);say(`🎖 ระดับนักผจญภัย Lv ${l1} · ${ADV_STAT[(l1-2)%ADV_STAT.length]} +1`,'sys');}
+    advHud();}
+  if(!document.getElementById('advWin').hidden)renderAdv();}
+function advKill(m){if(!m||!m.T)return;const k=m.type,c=(ADV.kills[k]||0)+1;ADV.kills[k]=c;
+  if(c===1)advAdd(m.T.boss?25:3,`พบมอนใหม่: ${m.T.name.replace('★ ','')}`);
+  else if(c===50||c===200)advAdd(c===50?3:6,`ล่า ${m.T.name.replace('★ ','')} ครบ ${c}`);
+  else if(c===1000)advAdd(15,`ล่า ${m.T.name.replace('★ ','')} ครบ 1,000`);
+  else if(m.T.boss&&c%5===0)advAdd(5,`ปราบบอส ${m.T.name.replace('★ ','')} ${c} ครั้ง`);}
+function advVisit(key){if(!key||ADV.maps[key])return;ADV.maps[key]=1;const M=MAPS[key];advAdd(5,`ค้นพบแมพ ${(M&&M.name)||key}`);}
+function advTick(){if(!ADV.ready||SAVE.slot<0)return;
+  if(lvl>ADV.lv){const d=lvl-ADV.lv;ADV.lv=lvl;if(d<20)advAdd(2*d,`Base Lv ${lvl}`);}
+  if(classIdx>ADV.cls){ADV.cls=classIdx;advAdd(40,`เปลี่ยนคลาส ${SK_CLASSES[classIdx].name}`);ADV.jl=jobLv;}
+  if(jobLv>ADV.jl){const d=jobLv-ADV.jl;ADV.jl=jobLv;if(d<20)advAdd(d,`Job Lv ${jobLv}`);}}
+/* characters that existed before ARP get credit for what they already did */
+function advRetro(){ADV.arp=0;ADV.kills={};ADV.maps={};ADV.log=[];let a=lvl*2+classIdx*40+jobLv;
+  a+=Object.values(qDone||{}).reduce((s,n)=>s+Math.min(n,3)*8,0);if(ST&&ST.i)a+=ST.i*10;
+  ADV.maps[curMap.key]=1;a+=5;ADV.arp=a;ADV.lv=lvl;ADV.jl=jobLv;ADV.cls=classIdx;ADV.log=[['ARP ย้อนหลังจากความคืบหน้าเดิม',a]];}
+function advSave(){return{arp:ADV.arp,kills:ADV.kills,maps:ADV.maps,lv:ADV.lv,jl:ADV.jl,cls:ADV.cls,log:ADV.log};}
+function advLoad(d){if(d&&typeof d.arp==='number'){Object.assign(ADV,{arp:d.arp,kills:d.kills||{},maps:d.maps||{},lv:d.lv||lvl,jl:d.jl||jobLv,cls:d.cls??classIdx,log:d.log||[]});}else advRetro();ADV.ready=true;advHud();}
+function advNew(){ADV.arp=0;ADV.kills={};ADV.maps={};ADV.lv=lvl;ADV.jl=jobLv;ADV.cls=classIdx;ADV.log=[];ADV.ready=true;ADV.maps[curMap.key]=1;advHud();}
+/* ---- medallion (drawn, original art) ---- */
+const advBadgeCache={};
+function advBadge(ti,size=96){const key=ti+':'+size;if(advBadgeCache[key])return advBadgeCache[key];const T=ADV_TIERS[ti],c=document.createElement('canvas');c.width=c.height=size;const g=c.getContext('2d'),r=size/2;g.translate(r,r);
+  const ring=g.createLinearGradient(-r,-r,r,r);ring.addColorStop(0,'#f0d8a0');ring.addColorStop(.5,'#a8783a');ring.addColorStop(1,'#e8c888');
+  g.fillStyle=ring;g.beginPath();g.arc(0,0,r*0.96,0,7);g.fill();g.fillStyle='#5a3a1a';g.beginPath();g.arc(0,0,r*0.8,0,7);g.fill();
+  const disc=g.createRadialGradient(-r*.2,-r*.25,r*.1,0,0,r*.76);disc.addColorStop(0,'#ffffff');disc.addColorStop(.25,T[4]);disc.addColorStop(1,'#2a1a10');g.fillStyle=disc;g.beginPath();g.arc(0,0,r*0.74,0,7);g.fill();
+  g.strokeStyle='rgba(255,240,200,.85)';g.fillStyle='rgba(255,244,214,.95)';g.lineWidth=r*0.07;g.lineJoin='round';
+  if(ti<4){for(let i=0;i<=ti;i++){const y=-r*.05+i*r*.17-ti*r*.08;g.beginPath();g.moveTo(-r*.36,y-r*.1);g.lineTo(0,y+r*.12);g.lineTo(r*.36,y-r*.1);g.stroke();}}
+  else if(ti<8){const n=ti-3;for(let i=0;i<n;i++){const a=-Math.PI/2+(i-(n-1)/2)*0.55;star(g,Math.cos(a)*r*.36,Math.sin(a)*r*.36+r*.22,r*.13);}g.beginPath();g.moveTo(-r*.3,r*.05);g.lineTo(0,-r*.32);g.lineTo(r*.3,r*.05);g.stroke();}
+  else{const n=ti-7;star(g,0,-r*.04,r*.3);for(let i=0;i<n;i++){const a=Math.PI*0.15+(i/(Math.max(1,n-1)))*Math.PI*0.7;g.beginPath();g.arc(Math.cos(a)*r*.52,Math.sin(a)*r*.52,r*.06,0,7);g.fill();}}
+  g.fillStyle='#fff4d6';g.font=`700 ${Math.round(r*.2)}px Georgia,serif`;g.textAlign='center';g.textBaseline='middle';g.strokeStyle='#3a2410';g.lineWidth=r*.06;
+  const lab=T[1].toUpperCase().slice(0,9);g.strokeText(lab,0,r*.86);g.fillText(lab,0,r*.86);
+  function star(g,x,y,s){g.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,q=i%2?s*.45:s;g.lineTo(x+Math.cos(a)*q,y+Math.sin(a)*q);}g.closePath();g.fill();}
+  return advBadgeCache[key]=c.toDataURL();}
+/* ---- UI ---- */
+(function(){const w=document.createElement('section');w.id='advWin';w.className='pw drag';w.hidden=true;w.setAttribute('aria-label','ยศนักผจญภัย');
+  w.innerHTML=`<div class="hd"><span>🎖 ยศนักผจญภัย (ARP)</span><button class="x" data-close="advWin" aria-label="ปิด">✕</button></div><div class="advb" id="advBody"></div>`;
+  document.getElementById('game').appendChild(w);
+  const bq=document.getElementById('btnQuest');if(bq){const b=document.createElement('button');b.id='btnAdv';b.innerHTML='ยศ<small>ARP</small>';bq.after(b);b.onclick=()=>{toggleWin('advWin');renderAdv();};}})();
+function renderAdv(){const B=document.getElementById('advBody');if(!B)return;const L=advLevel(),T=advTier(L),ti=ADV_TIERS.indexOf(T),nx=L<60?ADV_NEED[L+1]:null,pc=nx?Math.min(100,(ADV.arp-ADV_NEED[L])/(nx-ADV_NEED[L])*100):100;
+  const nt=ADV_TIERS[ti+1],tot={};ADV_STAT.forEach(k=>{const v=advStat(k);if(v)tot[k]=v;});
+  const kinds=Object.keys(ADV.kills).length,allMons=Object.values(MON_TYPES).filter(t=>!t.sq).length,maps=Object.keys(ADV.maps).length,allMaps=Object.keys(MAPS).length;
+  B.innerHTML=`<div class="advtop"><img alt="" src="${advBadge(ti,128)}"><div><small>ยศปัจจุบัน</small><b>${T[1]}</b><em>${T[2]} · Adventure Lv ${L}</em>
+    <div class="advbar"><i style="width:${pc}%"></i><span>${ADV.arp.toLocaleString()}${nx?' / '+nx.toLocaleString():''} ARP</span></div>
+    <small>${nt?`ยศถัดไป ${nt[1]} ที่ ${nt[3].toLocaleString()} ARP`:'ยศสูงสุดแล้ว!'}</small>
+    <div class="advst">${Object.entries(tot).map(([k,v])=>`<span>${k} +${v}</span>`).join('')||'<span>ขึ้น Adventure Lv เพื่อรับสเตตัสถาวร</span>'}</div></div></div>
+    <h4>วิธีได้ ARP</h4><div class="advsrc"><span>👾 พบมอนชนิดใหม่ <b>${kinds}/${allMons}</b></span><span>🗺 ค้นพบแมพ <b>${maps}/${allMaps}</b></span><span>📜 ทำเควส / เนื้อเรื่อง</span><span>⭐ ขึ้นเลเวล / เปลี่ยนคลาส</span></div>
+    <small class="advhint">พบมอนใหม่ +3 (บอส +25) · ล่าชนิดเดิมครบ 50 / 200 / 1,000 ตัว · แมพใหม่ +5 · เควสคำร้อง +8 · เนื้อเรื่องหลัก +10 · เรื่องย่อย +5 · Base Lv +2 · Job Lv +1 · เปลี่ยนคลาส +40 · ทุก Adventure Lv ได้สเตตัสถาวร +1</small>
+    ${ADV.log.length?`<h4>ได้ ARP ล่าสุด</h4><div class="advlog">${ADV.log.map(([t,n])=>`<div><span>${t}</span><b>+${n}</b></div>`).join('')}</div>`:''}
+    <h4>ยศทั้งหมด</h4><div class="advgrid">${ADV_TIERS.map((X,i)=>`<div class="${i<=ti?'on':''}"><img alt="" src="${advBadge(i,64)}"><b>Lv.${X[0]} ${X[1]}</b><small>${X[3].toLocaleString()} ARP</small></div>`).join('')}</div>`;}
+function advHud(){const nm=document.getElementById('face');if(!nm)return;let e=document.getElementById('advMini');if(!e){e=document.createElement('img');e.id='advMini';e.alt='';e.title='ยศนักผจญภัย';e.onclick=()=>{toggleWin('advWin',true);renderAdv();};nm.appendChild(e);e.addEventListener('pointerdown',ev=>ev.stopPropagation());}
+  const ti=ADV_TIERS.indexOf(advTier());if(e.dataset.t!=String(ti)){e.dataset.t=ti;e.src=advBadge(ti,48);e.title=`ยศ ${ADV_TIERS[ti][1]} · Adventure Lv ${advLevel()}`;}}
+setInterval(()=>{try{advTick();}catch(e){}},1000);
 function partyTick(dt){fsTick(dt);if(typeof iceShieldFx==='function')iceShieldFx();if(window.sqOn)sqTick(dt);if(typeof updateNav==='function')updateNav(dt);if((partyTick.s=(partyTick.s||0)+dt)>0.5){partyTick.s=0;skStatTick();}updateMercs(dt);updateJtAura();
   if((partyTick.h=(partyTick.h||0)+dt)>1){partyTick.h=0;if(autoTab==='stat'&&!document.getElementById('autoWin').hidden)renderAutoWin();if(!document.getElementById('partyWin').hidden)renderParty();
     if(dqGen()&&qTab==='daily'&&!document.getElementById('questWin').hidden)renderQuest();}}
@@ -19022,7 +19103,7 @@ function raceLoad(r){if(!r)return;try{
     RB.lfEnd=b.lf?time+b.lf:0;RB.invest=b.invest?{amt:b.invest.amt,p:b.invest.p,end:time+b.invest.left}:null;}}catch(e){}}
 function gatherSave(){return {v:SAVE_VER,t:Date.now(),name:player.name,line:LINE,lvl,exp,statPts,reborn,base:{...base},classIdx,jobLv,jobExp,skLv:{...skLv},
   hot:HOT.map(h=>h?JSON.parse(JSON.stringify(h)):null),inv:{...inv},gold,eqUid,equipBag:JSON.parse(JSON.stringify(equipBag)),equipped:JSON.parse(JSON.stringify(equipped)),
-  cos:typeof curCos!=='undefined'?curCos:'base',pet:{...PET_STAR},qa:{...qActive},qd:{...qDone},st:{...ST},map:curMap.key,x:Math.round(player.x*10)/10,z:Math.round(player.z*10)/10,php:Math.round(php),psp:Math.round(psp),dayT:Math.round(dayT),rs:raceSave(),pt:partySave(),sq:sqSave(),ob:OFB.on?{...OFB}:null};}
+  cos:typeof curCos!=='undefined'?curCos:'base',pet:{...PET_STAR},qa:{...qActive},qd:{...qDone},st:{...ST},map:curMap.key,x:Math.round(player.x*10)/10,z:Math.round(player.z*10)/10,php:Math.round(php),psp:Math.round(psp),dayT:Math.round(dayT),rs:raceSave(),pt:partySave(),sq:sqSave(),ob:OFB.on?{...OFB}:null,adv:typeof advSave==='function'?advSave():null};}
 function applySave(d){if(typeof obLoad==='function')setTimeout(()=>obLoad(d.ob),0);player.name=d.name;meLabel.textContent=d.name;const nmEl=document.querySelector('#me .nm');if(nmEl&&nmEl.firstChild)nmEl.firstChild.textContent=d.name;
   csPick=d.line;setLine(d.line);
   lvl=d.lvl;exp=d.exp;statPts=d.statPts;reborn=!!d.reborn;Object.assign(base,d.base);classIdx=d.classIdx;jobLv=d.jobLv;jobExp=d.jobExp;
@@ -19037,6 +19118,7 @@ function applySave(d){if(typeof obLoad==='function')setTimeout(()=>obLoad(d.ob),
   if(d.line==='wolf'&&d.cos&&typeof wearCostume==='function')wearCostume(d.cos);
   partyLoad(d.pt);sqLoad(d.sq);raceLoad(d.rs);if(typeof eqCalc==='function')eqCalc();recalc(false);php=Math.min(maxHp,d.php||maxHp);psp=Math.min(maxSp,d.psp||maxSp);
   updateHP();updateExp();updateInv();updateJobUI();renderSkills();renderTracker();jtLabel();
+  if(typeof advLoad==='function'){advLoad(d.adv);recalc();}
   const M=MAPS[d.map];if(M&&M!==curMap)warpTo(M,d.x,d.z);else{player.x=d.x;player.z=d.z;camT.x=d.x;camT.z=d.z;}}
 /* --- storage back-ends --- */
 function slotIdx(pre){const o=[];try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith(pre)){const n=+k.slice(pre.length);if(Number.isInteger(n)&&n>=0&&n<500)o.push(n);}}}catch(e){}return o;}
