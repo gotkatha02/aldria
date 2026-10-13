@@ -4872,7 +4872,7 @@ function bsum(){const o={atkP:0,aspdP:0,defP:0,dr:0,crit:0,critDmg:0,reflect:0,p
   for(const id in buffs){const b=buffs[id];if(b.end<time){delete buffs[id];continue;}for(const k in o)if(b[k])o[k]+=b[k];}
   if(typeof zones!=='undefined'&&zones.length){const bz=inZone('banner');if(bz){o.atkP+=bz.E.band(bz.L);o.defP+=bz.E.band(bz.L);}const mz=inZone('mosaic');if(mz)o.defP+=mz.E.def(mz.L);const ta=inZone('tavatar');if(ta)o.matkP+=ta.E.aura(ta.L);}if(typeof EQX!=='undefined'){o.poison+=EQX.poison;o.drain+=EQX.drain;o.reflect+=EQX.reflect;o.critDmg+=EQX.critDmg;}return o;}
 function rollDmg(mult,t,mag){const D=derived();let crit=Math.random()<D.crit;if(nextCrit){crit=true;nextCrit=false;}
-  const A=mag?D.matk:D.atk;let v=(A*1.7+lvl*2+Math.random()*A*0.8)*mult/100*(LINE_DMG[LINE]?LINE_DMG[LINE](lvl):1)*(_basic?1:talMul()*(MAGE_SK[LINE]||1));if(crit)v*=D.critMul;
+  const A=mag?D.matk:D.atk;let v=(A*1.7+lvl*2+Math.random()*A*0.8)*mult/100*(LINE_DMG[LINE]?LINE_DMG[LINE](lvl):1)*(_basic?1:talMul()*(MAGE_SK[LINE]||1));if(crit)v*=D.critMul*(LINE==='cat'&&typeof ctOver==='function'?ctOver(D):1);
   if(t&&t.mon){if(t.vulnEnd>time)v*=1+t.vuln/100;if(t.shredEnd>time)v*=1+t.shred/100;}
   if(LINE==='penguin'&&mag)v*=pgMul(t);if(LINE==='mole')v*=mlMul(t);if(LINE==='bat')v*=btMul(t,mag);if(LINE==='panda')v*=pdMul(t,mag);if(LINE==='cat')v*=ctMul(t,mag);if(LINE==='sheep')v*=shMul(t,mag);if(LINE==='rabbit')v*=rbMul(t,mag);if(LINE==='whale')v*=whMul(t,mag);v*=cardDmgMul(t,mag);v=elemDmg(v,t,mag);return{v:Math.max(t&&t.mon&&elemMul(playerElem(),t.elem||'neutral')===0?0:1,Math.round(v)),crit};}
 function applyHit(d,v,crit,cls){if(!d||d.dead)return;if(d.mon&&cls!=='pack'&&(!TGT||TGT.dead))setTarget(d);if(cls!=='pack')sfx(crit?'crit':'hit');popDamage(d.x,d.z,v,crit,cls);
@@ -18433,7 +18433,7 @@ LINES.cat={label:'สายแมว',classes:CT_CLASSES,skills:CT_SKILLS,sample
 const CT={hand:[],lives:9,lifeT:0,house:0,allinEnd:0,slotDrop:0};const ctOn=()=>LINE==='cat';
 const SUIT='♠♥♦♣',RANK=['','A','2','3','4','5','6','7','8','9','10','J','Q','K'];
 function cardStr(c){return RANK[c.r]+SUIT[c.s];}
-function newCard(){const st=effLv('g_stacked')+(ctMaek()?effLv('g_maekwak'):0);if(CT.hand.length&&Math.random()<st*0.04){const b=CT.hand[Math.floor(Math.random()*CT.hand.length)];return Math.random()<0.5?{r:b.r,s:(b.s+1+Math.floor(Math.random()*3))%4}:{r:1+Math.floor(Math.random()*13),s:b.s};}
+function newCard(){const st=effLv('g_stacked')+(ctMaek()?effLv('g_maekwak'):0);if(CT.hand.length&&Math.random()<st*0.04+0.002*ctLk()){const b=CT.hand[Math.floor(Math.random()*CT.hand.length)];return Math.random()<0.5?{r:b.r,s:(b.s+1+Math.floor(Math.random()*3))%4}:{r:1+Math.floor(Math.random()*13),s:b.s};}
   return{r:1+Math.floor(Math.random()*13),s:Math.floor(Math.random()*4)};}
 function addCard(n=1){if(Math.random()<0.02*effLv('g_clover'))n++;for(let i=0;i<n;i++){if(CT.hand.length>=5)break;CT.hand.push(newCard());}}
 const HAND_N=['ไพ่สูง','คู่','สองคู่','ตอง','เรียง','ดอกเดียวกัน','ฟูลเฮาส์','โฟร์การ์ด','รอยัลฟลัช'],HAND_M=[1,1.5,2,3,4,5,6,8,12];
@@ -18444,6 +18444,13 @@ function ctMaek(){return zones.some(z=>z.kind==='ct_maek'&&z.sc===curMap.scene&&
 function gDropMul(){let k=1;if(buffs.rp_drop&&buffs.rp_drop.end>time)k*=1.3;if(LINE==='cat'){k*=1+0.01*effLv('g_curious');if(ctMaek())k*=2;if(CT.slotDrop>time)k*=2;if(buffs.g_relic&&buffs.g_relic.end>time&&buffs.g_relic.kind==='coin')k*=1.5;}if(LINE==='rabbit'&&typeof rbDropMul==='function')k*=rbDropMul();return k;}
 function behind(m){return !m.aggro||m.stunEnd>time;}
 function addClaw(m,n=1){if(!m||m.dead)return;m.claw=Math.min(10,(m.claw||0)+n);}
+/* LCK = the cat's gambling stat: invested LCK (points + gear + cards, not the free +1/level) powers luck skills */
+function ctLk(){return Math.max(0,S('LCK')-lvStat());}
+function ctLkMul(){return 1+0.005*ctLk();}
+function ctOver(D){return 1+Math.max(0,0.04+S('LCK')*0.004+(D.p.crit+D.b.crit+EQ.crit)/100-0.8);}
+(()=>{const add={g_deal:'ดาเมจ +0.5% ต่อ LCK ที่อัพ',g_slot:'LCK ที่อัพเพิ่มโอกาสออกตรงกัน (สูงสุด 85%) และดาเมจ +0.5% ต่อ LCK',g_dice:'LCK ที่อัพมีโอกาสทอยแต้มต่ำใหม่ และดาเมจ +0.5% ต่อ LCK',
+  g_showhand:'ดาเมจ +0.5% ต่อ LCK ที่อัพ และ LCK ช่วยให้ได้ไพ่ต่อแต้ม',g_wheel:'LCK ที่อัพเพิ่มโอกาส ×9',g_jackpot:'ดาเมจ +0.5% ต่อ LCK ที่อัพ'};
+  CT_SKILLS.forEach(s=>{if(add[s.id]){const e0=s.e;s.e=L=>e0(L)+' · 🍀 '+add[s.id];}});})();
 function ctMul(t,mag){if(!ctOn())return 1;let k=gMul();if(CT.lives===1&&effLv('g_ninth')&&effLv('g_nine'))k*=1+0.08*effLv('g_ninth');
   if(t&&t.mon&&(behind(t)||stealthCat()))k*=1+0.03*effLv('g_prowl');if(t&&buffs.g_spyglass&&buffs.g_spyglass.end>time&&Math.hypot(t.x-player.x,t.z-player.z)>5)k*=1+0.06*effLv('g_spyglass');
   if(buffs.g_challenge&&buffs.g_challenge.end>time)k*=1+buffs.g_challenge.v/100;return k;}
@@ -18465,26 +18472,26 @@ function castCT(id,E,L,t,col){
     case'sense':{spawnX(2+Math.floor(L/2),4.5);popText(player.x,player.z,'เห็นจุด X!','skill',4.4);return true;}
     case'dig':{const z=zones.find(q=>q.kind==='ct_x'&&q.sc===curMap.scene&&q.end>time&&Math.hypot(q.x-player.x,q.z-player.z)<2.2);if(!z){say('ต้องยืนบนจุด X (ใช้ Treasure Sense ก่อน)','sys');return false;}z.end=0;relicBuff(L);return true;}
     case'hairball':{if(!T0)return false;arrowFx(player.x,player.z,T0.x,T0.z,'#c8a878');T0.slow=Math.max(T0.slow||0,10*L);T0.slowEnd=time+5;if(!T0.T.boss&&Math.random()<0.05*L){T0.stunEnd=time+1;popText(T0.x,T0.z,'สะดุด!','skill',3.2);}return true;}
-    case'deal':{if(!T0)return false;arrowFx(player.x,player.z,T0.x,T0.z,'#fff');gHit(T0,E.m(L));addCard();popText(player.x,player.z,CT.hand.map(cardStr).join(' '),'skill',4.6);return true;}
-    case'slot':{const sym=['🐟','7','🐾','🪙'];const a=Math.floor(Math.random()*4);const r=[a,Math.random()<0.55?a:Math.floor(Math.random()*4),Math.random()<0.55?a:Math.floor(Math.random()*4)];
-      popText(player.x,player.z,r.map(i=>sym[i]).join(' '),'crit',5);if(r[0]===r[1]&&r[1]===r[2]){if(a===0)gHeal(0.2*L);else if(a===1){boomFx(player.x,player.z,2.6,'#ffd24a');gAoe(player.x,player.z,2.6,E.m(L));}else if(a===2)addCard(5);else{CT.slotDrop=time+60;say('ดรอปของ ×2 นาน 60 วินาที!','sys');}}
-      else if(T0||tgt)gHit(T0||skTarget(),100);return true;}
-    case'dice':{if(!T0)return false;let tot=0,txt=[];for(let k=0;k<2;k++){const a=1+Math.floor(Math.random()*6),b=1+Math.floor(Math.random()*6);tot+=a+b;txt.push(`${a}+${b}`);if(a!==b)break;}
-      popText(player.x,player.z,'🎲 '+txt.join(' / '),'skill',4.6);gHit(T0,E.m(L)*tot);return true;}
-    case'showhand':{if(!T0)return false;const tier=evalHand(CT.hand);popText(player.x,player.z,`${HAND_N[tier]}! ${CT.hand.map(cardStr).join(' ')}`,'crit',5);gHit(T0,E.m(L)*HAND_M[tier]);if(tier>=5)fxRing(T0.x,T0.z,2,'#ffd24a');CT.hand=[];return true;}
+    case'deal':{if(!T0)return false;arrowFx(player.x,player.z,T0.x,T0.z,'#fff');gHit(T0,E.m(L)*ctLkMul());addCard();popText(player.x,player.z,CT.hand.map(cardStr).join(' '),'skill',4.6);return true;}
+    case'slot':{const sym=['🐟','7','🐾','🪙'];const a=Math.floor(Math.random()*4);const pm=Math.min(0.85,0.55+0.002*ctLk());const r=[a,Math.random()<pm?a:Math.floor(Math.random()*4),Math.random()<pm?a:Math.floor(Math.random()*4)];
+      popText(player.x,player.z,r.map(i=>sym[i]).join(' '),'crit',5);if(r[0]===r[1]&&r[1]===r[2]){if(a===0)gHeal(0.2*L);else if(a===1){boomFx(player.x,player.z,2.6,'#ffd24a');gAoe(player.x,player.z,2.6,E.m(L)*ctLkMul());}else if(a===2)addCard(5);else{CT.slotDrop=time+60;say('ดรอปของ ×2 นาน 60 วินาที!','sys');}}
+      else if(T0||tgt)gHit(T0||skTarget(),100*ctLkMul());return true;}
+    case'dice':{if(!T0)return false;let tot=0,txt=[];for(let k=0;k<2;k++){const d6=()=>{let v=1+Math.floor(Math.random()*6);if(v<4&&Math.random()<0.004*ctLk())v=1+Math.floor(Math.random()*6);return v;};const a=d6(),b=d6();tot+=a+b;txt.push(`${a}+${b}`);if(a!==b)break;}
+      popText(player.x,player.z,'🎲 '+txt.join(' / '),'skill',4.6);gHit(T0,E.m(L)*tot*ctLkMul());return true;}
+    case'showhand':{if(!T0)return false;const tier=evalHand(CT.hand);popText(player.x,player.z,`${HAND_N[tier]}! ${CT.hand.map(cardStr).join(' ')}`,'crit',5);gHit(T0,E.m(L)*HAND_M[tier]*ctLkMul());if(tier>=5)fxRing(T0.x,T0.z,2,'#ffd24a');CT.hand=[];return true;}
     case'cheat':{if(!CT.hand.length){addCard();return true;}const cnt={};CT.hand.forEach(c=>cnt[c.r]=(cnt[c.r]||0)+1);const best=+Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a])[0];const i=CT.hand.findIndex(c=>c.r!==best);
       if(i>=0)CT.hand[i]={r:best,s:(CT.hand[i].s+1)%4};popText(player.x,player.z,'🂡 '+CT.hand.map(cardStr).join(' '),'skill',4.6);return true;}
     case'shadowclaw':{if(!T0)return false;const b=behind(T0);gHit(T0,E.m(L)*(b?1.5:1));addClaw(T0,b?3:1);if(b)popText(T0.x,T0.z,'BACKSTAB','crit',3.6);return true;}
     case'paws':{buffs.g_paws={end:time+3+L};mons.forEach(m=>{if(m.map===curMap&&Math.hypot(m.x-player.x,m.z-player.z)<12)m.aggro=false;});player.attackTarget=null;popText(player.x,player.z,'ย่องเงียบ','skill',4.4);return true;}
     case'leap':{if(!T0)return false;const[ux,uz]=gDir(T0);const x=T0.x+ux*1.4,z=T0.z+uz*1.4;if(!moveP(x,z))moveP(T0.x-ux*1.4,T0.z-uz*1.4);if(!T0.T.boss)T0.stunEnd=Math.max(T0.stunEnd||0,time+1);T0.aggro=false;fxRing(player.x,player.z,1,'#c99aff');return true;}
     case'venom':{if(!T0)return false;gHit(T0,E.m(L));const c=T0.claw||0;if(c){T0.dot={v:Math.round(derived().atk*0.25*c),end:time+8,next:time+1};popText(T0.x,T0.z,`POISON Lv${c}`,'skill',3.4);}return true;}
-    case'wheel':{const p9=0.08+0.02*L+(ctMaek()?0.04*effLv('g_maekwak'):0);const r=Math.random();let txt;
+    case'wheel':{const p9=0.08+0.02*L+(ctMaek()?0.04*effLv('g_maekwak'):0)+0.0006*ctLk();const r=Math.random();let txt;
       if(r<p9){gSetNext(9,id);txt='×9!!';}else if(r<p9+0.12){gSetNext(5,id);txt='×5';}else if(r<p9+0.27){gSetNext(3,id);txt='×3';}else if(r<p9+0.45){gSetNext(2,id);txt='×2';}
       else if(r<p9+0.6){gHeal(0.15);txt='ฮีล';}else if(r<p9+0.72){buffs.g_wdef={end:time+15,dr:25};txt='ป้องกัน';}else if(r<0.93){buffs.g_wstar={end:time+20,atkP:15,crit:10};txt='ดาว';}
       else{const d=Math.round(maxHp*0.1);php=Math.max(1,php-d);updateHP();txt='หัวกะโหลก 💀';}popText(player.x,player.z,'วงล้อ: '+txt,'crit',5);return true;}
     case'allin':{php=Math.max(1,Math.round(php*0.5));updateHP();gSetNext(3+0.4*L,id);CT.allinEnd=time+8;return true;}
     case'house':{CT.house=Math.round(derived().matk*(2+0.5*L)*(1+0.2*CT.hand.length)+maxHp*0.1);CT.houseL=L;buffs.g_house={end:time+20};popText(player.x,player.z,`ปราสาทไพ่ ${CT.house}`,'skill',4.4);return true;}
-    case'jackpot':{popText(player.x,player.z,'7 7 7 JACKPOT!','crit',5.4);boomFx(player.x,player.z,3.6,'#ffd24a');gAoe(player.x,player.z,3.6,E.m(L));CT.hand=[];return true;}
+    case'jackpot':{popText(player.x,player.z,'7 7 7 JACKPOT!','crit',5.4);boomFx(player.x,player.z,3.6,'#ffd24a');gAoe(player.x,player.z,3.6,E.m(L)*ctLkMul());CT.hand=[];return true;}
     case'whip':{const[ux,uz]=gDir(tgt);const ms=gCone(ux,uz,5,35);for(let i=0;i<9;i++)setTimeout(()=>ms.forEach(m=>{if(!m.dead){gHit(m,E.m(L));addClaw(m);}}),i*70);fxLine(player.x,player.z,ux,uz,5,'#c83a3a');return true;}
     case'crescent':{if(!T0)return false;const c=T0.claw||0;gHit(T0,E.m(L)*(1+0.2*c));setTimeout(()=>{if(!T0.dead)gHit(T0,E.m(L)*(1+0.2*c));},180);T0.claw=0;if(c)popText(T0.x,T0.z,`รอยเล็บ ×${c}`,'crit',3.8);return true;}
     case'clones':{const n=2+Math.floor(L/2);for(let i=0;i<n;i++)gMinion({tex:gTex('catshadow',g=>{g.globalAlpha=0.75;paintCat(g,'#3a2a5a');}),size:1.8,end:time+8,pct:60,every:1,line:'cat',x:player.x+Math.cos(i)*1.5,z:player.z+Math.sin(i)*1.5});return true;}
