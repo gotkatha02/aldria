@@ -18543,7 +18543,7 @@ function killMon(m){if(AUTO.on)AUTO.kills++;if(typeof advKill==='function')advKi
   const be=Math.max(1,Math.round(m.T.exp*expMod(m.T.lv||1)*(1+CX('expP')/100))),ge=Math.round(be*1.15),gj=Math.round(be*0.8*1.15),mx=m.x,mz=m.z,top=Math.max(2.6,m.T.size*0.95);
   setTimeout(()=>{popText(mx,mz,`<i>+${ge.toLocaleString('en-US')} EXP</i><em>+${gj.toLocaleString('en-US')} JOB</em>`,'gain',top,{html:true,life:1.8,rise:1.3});},140);
   if(effLv('b_bloodlust')){php=Math.min(maxHp,php+maxHp*effLv('b_bloodlust')/100);updateHP();}
-  gainExp(be);gainJob(gj);if(typeof altExp==='function')altExp(be);fsKill(m,ge,gj);dqKill(m);say(`ปราบ ${m.T.name} ได้ +${ge} EXP · +${gj} Job EXP`,'sys');
+  gainExp(be);gainJob(gj);if(typeof altExp==='function')altExp(be,gj);fsKill(m,ge,gj);dqKill(m);say(`ปราบ ${m.T.name} ได้ +${ge} EXP · +${gj} Job EXP`,'sys');
   {const pl=pas().leader;if(pl){const n=Math.min(((buffs.leader&&buffs.leader.end>time)?buffs.leader.n:0)+1,pl);buffs.leader={n,atkP:2*n,end:time+30};}}
   if(Math.random()<Math.min(0.95,(0.55+S('LCK')*0.01)*gDropMul())){const name=m.T.drops[Math.floor(Math.random()*m.T.drops.length)],ik=ITEM_KINDS.find(k=>k.name===name);const skipD=isCraftMat(name)&&!qActive.hasOwnProperty('c_'+m.type)&&Math.random()>CRAFT_SUB_RATE;if(!skipD)createItem(m.x+0.4,m.z+0.3,ik,true,m.map.scene);
     if(ik&&!skipD){if(!ik.icon)ik.icon=ik.tex.image.toDataURL();const ic=ik.icon,mx2=m.x,mz2=m.z;setTimeout(()=>popText(mx2,mz2,`<img alt="" src="${ic}">ดรอป ${name}`,'drop',1.6,{html:true,life:2.2,rise:0.9}),420);say(`${m.T.name} ดรอป ${name}`,'sys');}}
@@ -18944,8 +18944,16 @@ function altPower(d){const W=d.equipped&&d.equipped.weapon&&EQ_DB[d.equipped.wea
   return (mag?Math.max(b.INT||1,b.ATK||1):(b.ATK||1))+d.lvl+(W?Math.max(W.atk||0,W.matk||0)*(1+0.08*((d.equipped.weapon.ref)||0)):0);}
 function altCap(d){return (d.classIdx||0)>=3?175:99;}
 function altPct(d){const n=expNeed(d.lvl);return d.lvl>=altCap(d)?100:Math.min(99,Math.floor((d.exp||0)/n*100));}
-function altExp(v){if(!MERCS.some(M=>M.alt))return;MERCS.forEach(M=>{if(!M.alt||M.down)return;const d=M.alt.d;if(d.lvl>=altCap(d))return;d.exp=(d.exp||0)+Math.round(v*1.15);let up=0;
+function jobNeedAt(j,ci){const [lo,hi,J,A,m]=JOB_R[ci],u=(j-1)/(J-1),L=Math.min(100,lo+(hi-lo)*u);return Math.round(JOB_SLOW*(A+JOB_B[ci]*u*u)*(5+1.2*Math.pow(L,1.75))*0.8*1.15*m);}
+function altJobCap(d){const Ln=LINES[d.line],C=Ln&&Ln.classes&&Ln.classes[d.classIdx||0];return C?C.job:50;}
+function altExp(v,gj){if(!MERCS.some(M=>M.alt))return;MERCS.forEach(M=>{if(!M.alt||M.down)return;const d=M.alt.d,sl=M.alt.slot;let up=0,jup=0;
+  if(gj&&(d.jobLv||1)<altJobCap(d)){d.jobLv=d.jobLv||1;d.jobExp=(d.jobExp||0)+Math.round(gj*1.15);const ci=Math.min(d.classIdx||0,JOB_R.length-1);
+    while(d.jobLv<altJobCap(d)&&d.jobExp>=jobNeedAt(d.jobLv,ci)){d.jobExp-=jobNeedAt(d.jobLv,ci);d.jobLv++;jup++;}if(d.jobLv>=altJobCap(d))d.jobExp=0;
+    if(jup){popText(M.x,M.z,'JOB UP!','job',4.4);say(`✨ ${d.name} Job Lv ${d.jobLv} ได้แต้มสกิล +${jup} (เก็บไว้ในตัวละครนั้น)`,'sys');if(typeof advAltProg==='function')advAltProg(sl,d);}
+    M.alt.dirty=true;}
+  if(d.lvl>=altCap(d))return;d.exp=(d.exp||0)+Math.round(v*1.15);
   while(d.lvl<altCap(d)&&d.exp>=expNeed(d.lvl)){d.exp-=expNeed(d.lvl);d.lvl++;d.statPts=(d.statPts||0)+Math.floor(d.lvl/5)+3;up++;}
+  if(up&&typeof advAltProg==='function')advAltProg(sl,d);
   if(up){M.alt.dirty=true;mercHpCalc(M);M.hp=M.hpMax;popText(M.x,M.z,`LEVEL UP Lv ${d.lvl}`,'lvl',3.8);say(`🎉 ${d.name} เลเวลอัปเป็น Lv ${d.lvl}! (แต้มสเตตัสเก็บไว้ในตัวละครนั้น)`,'sys');const sm=M.el.querySelector('.altlv');if(sm)sm.textContent='Lv '+d.lvl;}
   M.alt.dirty=true;});}
 function altFlush(only){MERCS.filter(M=>M.alt&&M.alt.dirty&&(!only||M===only)).forEach(M=>{M.alt.dirty=false;const d=M.alt.d,sl=M.alt.slot;if(sl===SAVE.slot)return;
@@ -19105,33 +19113,65 @@ const ADV_MAX=ADV_TIERS[ADV_TIERS.length-1][0];
 /* ARP needed for every adventure level 1..60 (geometric between the 13 milestone ranks) */
 const ADV_NEED=(()=>{const a=[0,0];for(let t=0;t<ADV_TIERS.length-1;t++){const[l0,,,p0]=ADV_TIERS[t],[l1,,,p1]=ADV_TIERS[t+1];for(let l=l0+1;l<=l1;l++){const f=(l-l0)/(l1-l0);a[l]=Math.round(p0<=0?p1*f:p0*Math.pow(p1/p0,f));}}return a;})();
 const ADV_STAT=['ATK','VIT','AGI','INT','DEF','LCK','TAL','CHA'];
-const ADV={arp:0,rp:0,kills:{},maps:{},lv:0,jl:0,cls:0,seen:1,log:[],tab:'rank'};
+const ADV={arp:0,rp:0,kills:{},maps:{},lv:0,jl:0,cls:0,seen:1,log:[],tab:'rank',rev:0,ch:{}};
 function advLevel(arp=ADV.arp){let l=1;while(l<ADV_MAX&&arp>=ADV_NEED[l+1])l++;return l;}
 function advTier(l=advLevel()){let t=ADV_TIERS[0];for(const T of ADV_TIERS)if(l>=T[0])t=T;return t;}
 function advStat(k){return 0;}
-function advAdd(n,why){if(!n||!ADV.ready)return;const l0=advLevel();ADV.arp+=n;ADV.rp+=n;ADV.log.unshift([why,n]);if(ADV.log.length>8)ADV.log.length=8;
+function advAdd(n,why){if(!n||!ADV.ready)return;const l0=advLevel();ADV.rev++;ADV.arp+=n;ADV.rp+=n;ADV.log.unshift([why,n]);if(ADV.log.length>8)ADV.log.length=8;
   const l1=advLevel();if(l1>l0){const T=advTier(l1),nt=ADV_TIERS.find(x=>x[0]===l1);recalc();
     if(nt){popText(player.x,player.z,`ยศใหม่: ${nt[1]}!`,'lvl',5);levelFx('#ffd24a','#fff6c8',false);sfx('levelup');say(`🎖 ระดับนักผจญภัย Lv ${l1} — ได้ยศ ${nt[1]} (${nt[2]})! คริ +1% ถาวร`,'sys');}
     else{popText(player.x,player.z,`ADVENTURE Lv ${l1}`,'gain',4.6);say(`🎖 ระดับนักผจญภัย Lv ${l1} · ATK +1`,'sys');}
     advHud();}
   if(!document.getElementById('advWin').hidden)renderAdv();}
-function advKill(m){if(!m||!m.T)return;const k=m.type,c=(ADV.kills[k]||0)+1;ADV.kills[k]=c;
+function advKill(m){if(!m||!m.T)return;const k=m.type,c=(ADV.kills[k]||0)+1;ADV.kills[k]=c;ADV.rev++;
   if(c===1)advAdd(m.T.boss?25:3,`พบมอนใหม่: ${m.T.name.replace('★ ','')}`);
   else if(c===50||c===200)advAdd(c===50?3:6,`ล่า ${m.T.name.replace('★ ','')} ครบ ${c}`);
   else if(c===1000)advAdd(15,`ล่า ${m.T.name.replace('★ ','')} ครบ 1,000`);
   else if(m.T.boss&&c%5===0)advAdd(5,`ปราบบอส ${m.T.name.replace('★ ','')} ${c} ครั้ง`);}
 function advVisit(key){if(!key||ADV.maps[key])return;ADV.maps[key]=1;const M=MAPS[key];advAdd(5,`ค้นพบแมพ ${(M&&M.name)||key}`);}
-function advTick(){if(!ADV.ready||SAVE.slot<0)return;
-  if(lvl>ADV.lv){const d=lvl-ADV.lv;ADV.lv=lvl;if(d<20)advAdd(2*d,`Base Lv ${lvl}`);}
-  if(classIdx>ADV.cls){ADV.cls=classIdx;advAdd(40,`เปลี่ยนคลาส ${SK_CLASSES[classIdx].name}`);ADV.jl=jobLv;}
-  if(jobLv>ADV.jl){const d=jobLv-ADV.jl;ADV.jl=jobLv;if(d<20)advAdd(d,`Job Lv ${jobLv}`);}}
+function advCh(sl){return ADV.ch[sl]||(ADV.ch[sl]={lv:1,jl:1,cls:0});}
+function advProg(c,L,J,C,who){if(C>c.cls){c.cls=C;advAdd(40,`${who}เปลี่ยนคลาส`);c.jl=J;}
+  if(L>c.lv){const d=L-c.lv;c.lv=L;if(d<20)advAdd(2*d,`${who}Base Lv ${L}`);}
+  if(J>c.jl){const d=J-c.jl;c.jl=J;if(d<20)advAdd(d,`${who}Job Lv ${J}`);}}
+function advTick(){if(!ADV.ready||SAVE.slot<0)return;const c=advCh(SAVE.slot);ADV.lv=lvl;ADV.jl=jobLv;ADV.cls=classIdx;
+  if(classIdx>c.cls){c.cls=classIdx;c.jl=jobLv;advAdd(40,`เปลี่ยนคลาส ${SK_CLASSES[classIdx].name}`);}
+  advProg(c,lvl,jobLv,classIdx,'');}
+function advAltProg(sl,d){if(!ADV.ready)return;advProg(advCh(sl),d.lvl,d.jobLv||1,d.classIdx||0,`${d.name} `);}
 /* characters that existed before ARP get credit for what they already did */
 function advRetro(){ADV.arp=0;ADV.kills={};ADV.maps={};ADV.log=[];let a=lvl*2+classIdx*40+jobLv;
   a+=Object.values(qDone||{}).reduce((s,n)=>s+Math.min(n,3)*8,0);if(ST&&ST.i)a+=ST.i*10;
   ADV.maps[curMap.key]=1;a+=5;ADV.arp=a;ADV.rp=a;ADV.lv=lvl;ADV.jl=jobLv;ADV.cls=classIdx;ADV.log=[['ARP ย้อนหลังจากความคืบหน้าเดิม',a]];}
-function advSave(){return{perm:rpPerm(),rp:ADV.rp,arp:ADV.arp,kills:ADV.kills,maps:ADV.maps,lv:ADV.lv,jl:ADV.jl,cls:ADV.cls,log:ADV.log};}
-function advLoad(d){if(d&&typeof d.arp==='number'){Object.assign(ADV,{perm:Object.assign({atk:0,crit:0,cdmg:0},d.perm||{}),arp:d.arp,rp:d.rp??d.arp,kills:d.kills||{},maps:d.maps||{},lv:d.lv||lvl,jl:d.jl||jobLv,cls:d.cls??classIdx,log:d.log||[]});}else advRetro();ADV.ready=true;advHud();}
-function advNew(){ADV.arp=0;ADV.rp=0;ADV.perm={atk:0,crit:0,cdmg:0};ADV.kills={};ADV.maps={};ADV.lv=lvl;ADV.jl=jobLv;ADV.cls=classIdx;ADV.log=[];ADV.ready=true;ADV.maps[curMap.key]=1;advHud();}
+/* ---- rank is shared by every hero in the account (newest copy wins) ---- */
+const acctKey=()=>`aldria.acct.${SAVE.uid}`;
+function advPack(){return{acct:1,rev:ADV.rev,perm:rpPerm(),rp:ADV.rp,arp:ADV.arp,kills:ADV.kills,maps:ADV.maps,ch:ADV.ch,log:ADV.log};}
+function advSave(){const a=advPack();try{localStorage.setItem(acctKey(),JSON.stringify(a));}catch(e){}return a;}
+function advApply(a){Object.assign(ADV,{perm:Object.assign({atk:0,crit:0,cdmg:0},a.perm||{}),arp:a.arp||0,rp:a.rp??a.arp??0,kills:{...(a.kills||{})},maps:{...(a.maps||{})},
+  ch:JSON.parse(JSON.stringify(a.ch||{})),log:(a.log||[]).slice(0,8),rev:a.rev||0});}
+/* fold a hero's old (pre-link) rank into the account rank, once per hero */
+function advAbsorb(o,slot,d){const a=d.adv;if(a&&typeof a.arp==='number'){o.arp+=a.arp;o.rp+=(a.rp??a.arp);for(const k in (a.perm||{}))o.perm[k]=Math.max(o.perm[k]||0,a.perm[k]||0);
+    for(const k in (a.kills||{}))o.kills[k]=(o.kills[k]||0)+a.kills[k];Object.assign(o.maps,a.maps||{});o.ch[slot]={lv:a.lv||d.lvl||1,jl:a.jl||d.jobLv||1,cls:a.cls??d.classIdx??0};return a.arp;}
+  const g=(d.lvl||1)*2+(d.classIdx||0)*40+(d.jobLv||1);o.arp+=g;o.rp+=g;o.ch[slot]={lv:d.lvl||1,jl:d.jobLv||1,cls:d.classIdx||0};return g;}
+function advBest(cands){let b=null;cands.forEach(a=>{if(a&&a.acct&&(!b||(a.rev||0)>(b.rev||0)||((a.rev||0)===(b.rev||0)&&(a.arp||0)>(b.arp||0))))b=a;});return b;}
+function advLocal(){try{return JSON.parse(localStorage.getItem(acctKey())||'null');}catch(e){return null;}}
+function advLoad(d){const b=advBest([d&&d.adv,advLocal()]);ADV.linked=!!b;
+  if(b)advApply(b);
+  else if(d&&d.adv&&typeof d.adv.arp==='number'){advApply(d.adv);ADV.ch={};}
+  else{advRetro();ADV.ch={};}
+  ADV.ready=true;advHud();advSync();}
+/* every hero's save: take the newest shared rank, then add any hero whose rank was still separate */
+async function advSync(){try{const L=await store().list(),all=L.map((d,i)=>d?{slot:i,d}:null).filter(Boolean);if(SAVE.slot<0)return;
+    let base=advBest(all.map(x=>x.d.adv).concat([advLocal(),ADV.linked?advPack():null]));
+    const o=base?JSON.parse(JSON.stringify(base)):{acct:1,rev:0,perm:{atk:0,crit:0,cdmg:0},arp:0,rp:0,kills:{},maps:{},ch:{},log:[]};o.ch=o.ch||{};o.perm=o.perm||{};
+    let add=0,n=0;all.forEach(x=>{if(x.d.adv&&x.d.adv.acct)return;if(o.ch[x.slot])return;add+=advAbsorb(o,x.slot,x.d);n++;});
+    if(n){o.log=[[`รวมยศจากฮีโร่ ${n} ตัวในไอดี`,add]].concat(o.log||[]).slice(0,8);}
+    if(!o.ch[SAVE.slot])o.ch[SAVE.slot]={lv:lvl,jl:jobLv,cls:classIdx};
+    o.rev=Math.max(o.rev||0,ADV.rev||0)+1;advApply(o);ADV.linked=true;
+    if(n&&all.length>1)say(`🎖 ยศเชื่อมกันทั้งไอดีแล้ว — ARP ${ADV.arp.toLocaleString()} · RP ${ADV.rp.toLocaleString()}`,'sys');
+    recalc();advHud();advSave();saveSoon();if(!document.getElementById('advWin').hidden)renderAdv();}catch(e){console.warn(e);}}
+function advNew(){const loc=advLocal();ADV.linked=!!(loc&&loc.acct);
+  if(ADV.linked)advApply(loc);else{ADV.arp=0;ADV.rp=0;ADV.perm={atk:0,crit:0,cdmg:0};ADV.kills={};ADV.maps={};ADV.log=[];ADV.ch={};ADV.rev=0;}
+  ADV.lv=lvl;ADV.jl=jobLv;ADV.cls=classIdx;ADV.ready=true;ADV.maps[curMap.key]=1;advHud();
+  setTimeout(()=>{if(SAVE.slot>=0){ADV.ch[SAVE.slot]={lv:lvl,jl:jobLv,cls:classIdx};advSync();}},1500);}
 /* ---- medallion (drawn, original art) ---- */
 const advBadgeCache={};
 function advBadge(ti,size=96){const key=ti+':'+size;if(advBadgeCache[key])return advBadgeCache[key];const T=ADV_TIERS[ti],c=document.createElement('canvas');c.width=c.height=size;const g=c.getContext('2d'),r=size/2;g.translate(r,r);
@@ -19169,12 +19209,12 @@ const RP_EQ_SLOTS=[['w','อาวุธ',1],['a','เกราะ',0.7],['h','�
 function rpEqId(sid,sl){return sl==='w'?`rw_${sid}_${LINE}`:`r${sl}_${sid}`;}
 function rpBuyEq(sid,sl){const S_=RP_SETS.find(x=>x[0]===sid),SL=RP_EQ_SLOTS.find(x=>x[0]===sl);if(!S_||!SL)return;const ti=ADV_TIERS.indexOf(advTier()),c=Math.round(S_[6]*SL[2]),id=rpEqId(sid,sl),D=EQ_DB[id];
   if(!D)return;if(ti<S_[4]){say(`ต้องได้ยศ ${ADV_TIERS[S_[4]][1]} ก่อน`,'sys');return;}if(ADV.rp<c){say('แต้ม RP ไม่พอ','sys');return;}
-  ADV.rp-=c;equipBag.push(newEq(id));sfx('levelup');popText(player.x,player.z,`${D.n}!`,'lvl',4.6);say(`🎖 แลก ${D.n} ด้วย ${c.toLocaleString()} RP (กด I แล้วคลิกเพื่อสวมใส่)`,'sys');updateInv();saveSoon();renderAdv();}
+  ADV.rp-=c;ADV.rev++;equipBag.push(newEq(id));sfx('levelup');popText(player.x,player.z,`${D.n}!`,'lvl',4.6);say(`🎖 แลก ${D.n} ด้วย ${c.toLocaleString()} RP (กด I แล้วคลิกเพื่อสวมใส่)`,'sys');updateInv();saveSoon();renderAdv();}
 function rpBuy(id){const R=RPS.find(x=>x.id===id);if(!R)return;const ti=ADV_TIERS.indexOf(advTier()),c=rpCost(R);
   if(ti<R.t){say(`ต้องได้ยศ ${ADV_TIERS[R.t][1]} ก่อน`,'sys');return;}
   if(R.perm&&rpPerm()[R.perm]>=R.cap(ti)){say(`ยศตอนนี้อัปได้สูงสุด ${R.cap(ti)} ครั้ง เลื่อนยศเพื่ออัปต่อ`,'sys');return;}
   if(ADV.rp<c){say('แต้ม RP ไม่พอ','sys');return;}
-  ADV.rp-=c;if(R.it)inv[R.it[0]]=(inv[R.it[0]]||0)+R.it[1];
+  ADV.rp-=c;ADV.rev++;if(R.it)inv[R.it[0]]=(inv[R.it[0]]||0)+R.it[1];
   if(R.perm){rpPerm()[R.perm]++;recalc();}
   if(R.buff){const b=buffs[R.buff];buffs[R.buff]=Object.assign({end:Math.max(time,b&&b.end>time?b.end:time)+1800},R.fx);}
   sfx('coin');popText(player.x,player.z,'-'+c+' RP','skill',4.2);say(`🎖 แลก ${R.n} ด้วย ${c} RP`,'sys');updateInv();saveSoon();renderAdv();}
@@ -19190,7 +19230,7 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
 function renderAdv(){const B=document.getElementById('advBody');if(!B)return;const tabs=`<div class="advtabs"><button data-advtab="rank" aria-selected="${ADV.tab!=='shop'}">ยศ</button><button data-advtab="shop" aria-selected="${ADV.tab==='shop'}">ร้าน RP · ${ADV.rp.toLocaleString()}</button></div>`;if(ADV.tab==='shop'){B.innerHTML=tabs+rpShopHtml();return;}const L=advLevel(),T=advTier(L),ti=ADV_TIERS.indexOf(T),nx=L<ADV_MAX?ADV_NEED[L+1]:null,pc=nx?Math.min(100,(ADV.arp-ADV_NEED[L])/(nx-ADV_NEED[L])*100):100;
   const nt=ADV_TIERS[ti+1],tot={};ADV_STAT.forEach(k=>{const v=advStat(k);if(v)tot[k]=v;});
   const kinds=Object.keys(ADV.kills).length,allMons=Object.values(MON_TYPES).filter(t=>!t.sq).length,maps=Object.keys(ADV.maps).length,allMaps=Object.keys(MAPS).length;
-  B.innerHTML=tabs+`<div class="advtop"><img alt="" src="${advBadge(ti,128)}"><div><small>ยศปัจจุบัน</small><b>${T[1]}</b><em>${T[2]} · Adventure Lv ${L}</em>
+  B.innerHTML=tabs+`<div class="advtop"><img alt="" src="${advBadge(ti,128)}"><div><small>ยศปัจจุบัน · 🔗 ใช้ร่วมกันทุกฮีโร่ในไอดี</small><b>${T[1]}</b><em>${T[2]} · Adventure Lv ${L}</em>
     <div class="advbar"><i style="width:${pc}%"></i><span>${ADV.arp.toLocaleString()}${nx?' / '+nx.toLocaleString():''} ARP</span></div>
     <small>${nt?`ยศถัดไป ${nt[1]} ที่ ${nt[3].toLocaleString()} ARP`:'ยศสูงสุดแล้ว!'}</small>
     <div class="advst"><span>⚔ ATK +${L-1+2*rpPerm().atk}</span><span>🎯 คริ +${ti+rpPerm().crit}%</span>${rpPerm().cdmg?`<span>💥 แรงคริ +${2*rpPerm().cdmg}%</span>`:''}</div></div></div>
