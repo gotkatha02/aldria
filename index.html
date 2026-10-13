@@ -18916,13 +18916,15 @@ function updateMercs(dt){if(!MERCS.length)return;const town=isTownMap(),tg=town?
     if(M.mesh.parent!==curMap.scene){curMap.scene.add(M.mesh);curMap.scene.add(M.shadow);M.x=player.x+Math.cos(i*2.4+1)*1.6;M.z=player.z+Math.sin(i*2.4+1)*1.6;}
     if(M.alt&&M.hurtT&&time-M.hurtT>5&&M.hp<M.hpMax&&!M.down)M.hp=Math.min(M.hpMax,M.hp+M.hpMax*0.02*dt);
     if(M.down){M.down=Math.max(0,M.down-dt);M.mesh.visible=M.shadow.visible=false;M.el.style.visibility='hidden';if(!M.down){M.hp=M.hpMax*0.5;M.x=player.x+1;M.z=player.z;say(`${M.D.n} กลับมาสู้ต่อ!`,'sys');}continue;}
-    M.mesh.visible=M.shadow.visible=true;M.t+=dt;M.cd-=dt;M.atkT=Math.max(0,M.atkT-dt);
+    M.mesh.visible=M.shadow.visible=true;M.t+=dt;M.cd-=dt;altTick(M,dt);M.atkT=Math.max(0,M.atkT-dt);
     if(M.type==='bison'&&time-(M.hurtT||-99)>5&&M.hp<M.hpMax)M.hp=Math.min(M.hpMax,M.hp+M.hpMax*0.03*dt);
     const dp=Math.hypot(player.x-M.x,player.z-M.z);if(dp>18){M.x=player.x+Math.cos(i*2.4+1)*1.5;M.z=player.z+Math.sin(i*2.4+1)*1.5;}
     let gx,gz,stop=0.35;const fight=tg&&M.type!=='sheep'&&!playerDown;
-    if(fight){const d=Math.hypot(tg.x-M.x,tg.z-M.z);gx=tg.x;gz=tg.z;stop=M.D.range*0.9;if(d<=M.D.range+0.2){M.facing=Math.atan2(tg.x-M.x,tg.z-M.z);mercCur=M;if(M.cd<=0&&mercAct(M,tg)){M.cd=M.D.every;M.atkT=0.45;}mercCur=null;}}
+    if(fight){const d=Math.hypot(tg.x-M.x,tg.z-M.z);gx=tg.x;gz=tg.z;stop=M.D.range*0.9;if(d<=M.D.range+0.2){M.facing=Math.atan2(tg.x-M.x,tg.z-M.z);mercCur=M;if(M.cd<=0&&M.alt&&altAI(M,tg)){M.cd=Math.max(0.8,M.D.every*0.8);M.atkT=0.45;}else if(M.cd<=0&&mercAct(M,tg)){M.cd=M.D.every;M.atkT=0.45;}mercCur=null;}}
     else{const a=camYaw+[1.95,-1.95,Math.PI][i%3],r=M.type==='sheep'&&tg?3:2.3;gx=player.x+Math.sin(a)*r;gz=player.z+Math.cos(a)*r;
-      if(M.type==='sheep'&&M.cd<=0&&!town&&mercAct(M,tg)){M.cd=M.D.every;M.atkT=0.45;}}
+      if(M.type==='sheep'&&M.cd<=0&&!town){mercCur=M;if((M.alt&&altAI(M,tg))||mercAct(M,tg)){M.cd=M.D.every;M.atkT=0.45;}mercCur=null;}}
+    if(M.alt&&tg){const hp=M.hp/M.hpMax;if(hp<0.3){const ang=Math.atan2(player.x-tg.x,player.z-tg.z);gx=player.x+Math.sin(ang)*2;gz=player.z+Math.cos(ang)*2;stop=0.4;}
+      else if(M.D.range>4){const nm=mons.filter(m=>m.map===curMap&&!m.dead&&(m.aggro||m.tauntEnd>time)&&Math.hypot(m.x-M.x,m.z-M.z)<2.2)[0];if(nm){const ex=M.x-nm.x,ez=M.z-nm.z,el=Math.hypot(ex,ez)||1;gx=M.x+ex/el*3;gz=M.z+ez/el*3;stop=0.2;}}}
     const dx=gx-M.x,dz=gz-M.z,d=Math.hypot(dx,dz);M.moving=d>stop+0.05&&M.atkT<=0;
     if(M.moving){const s=Math.min(d-stop,(fight?6.5:Math.max(5,player.speed*(dp>4?1.25:1)))*dt);M.x+=dx/d*s;M.z+=dz/d*s;M.facing=Math.atan2(dx,dz);}
     const sd=((Math.round(norm(M.facing-camYaw)/(Math.PI/4))%8)+8)%8,[row,sx]=DIRMAP[sd],A=M.A;let act=A.idle,col=0;
@@ -18960,6 +18962,50 @@ function altListHtml(){if(!ALT_LIST){altFetch();return '<h5 class="dqh">ตั�
   const rows=ALT_LIST.map(a=>{const d=a.d,R=RACES.find(r=>r[0]===d.line),inP=MERCS.some(M=>M.alt&&M.alt.slot===a.slot),role=ALT_RN[ALT_ROLE[d.line]||'wolf'];
     return `<div class="qr ${inP?'ok':''}"><div><b>${d.name} <em class="mrole">${R?R[1]:''} · Lv ${d.lvl}</em></b><small>บทบาท: ${role} · พลังโจมตีจากค่าสถานะและอาวุธของตัวละครนั้น</small></div><button data-ajoin="${a.slot}" ${inP||MERCS.length>=PARTY_MAX?'disabled':''}>${inP?'อยู่ในปาร์ตี้':'ชวนเข้าปาร์ตี้'}</button></div>`;}).join('');
   return `<h5 class="dqh">ตัวละครในไอดีเดียวกัน <small>ชวนมาช่วยสู้ ได้ EXP และเลเวลไปด้วย</small></h5>${rows||'<p class="auhint">ยังไม่มีตัวละครอื่นในไอดีนี้ สร้างฮีโร่เพิ่มได้ที่หน้าเลือกตัวละคร</p>'}`;}
+
+/* ---------- party AI: invited heroes fight with their own learned skills ---------- */
+const ALT_AOE_K=['aoe','aoeSelf','zone','line','chain','dashThrough','cross4','pull'];
+function altSkills(M){const d=M.alt.d,Ln=LINES[d.line];if(!Ln)return[];if(M._sk&&M._skLv===d.lvl)return M._sk;const out=[];
+  Ln.skills.forEach(s=>{const L=(d.skLv||{})[s.id]||0,E=Ln.eff[s.id];if(!L||!E||E.k==='pas'||E.k==='summon'||E.k==='pet'||E.k==='cmd')return;
+    let txt='';try{txt=s.e(L)||'';}catch(e){}const m=E.m?(()=>{try{return E.m(L)}catch(e){return 0}})():0;
+    const heal=E.k==='heal'||(/ฟื้น|ฮีล|รักษา/.test(txt)&&(E.dmg===false||!m));
+    const buff=!heal&&(E.k==='buff'||s.t==='Buff'||(E.dmg===false&&E.self&&!m));
+    const aoe=!heal&&!buff&&m>0&&(E.r||ALT_AOE_K.includes(E.k)||E.self||/AoE|รอบตัว|\d+\s*×\s*\d+/.test(txt));
+    const tag=heal?'heal':buff?'buff':aoe?'aoe':m>0?'hit':null;if(!tag)return;
+    const sp=+(s.sp?s.sp(L):10)||10,cd=Math.max(typeof E.cd==='function'?E.cd(L):(E.cd||0),1.5+sp/20);
+    const hits=Math.min(5,E.hitsL?L:E.hitsF?E.hitsF(L):(E.hits||1));
+    out.push({id:s.id,s,E,L,tag,m,sp,cd,hits,r:Math.min(5,E.r||(E.k==='line'?2:2.6)),dur:(()=>{try{return E.dur?(typeof E.dur==='function'?E.dur(L):E.dur):20}catch(e){return 20}})()});});
+  M._sk=out;M._skLv=d.lvl;return out;}
+function altSpMax(d){const b=d.base||{};return Math.round(30+(b.INT||1)*4+(b.TAL||1)*2+d.lvl*5);}
+function altFx(M,x,tg){const line=M.alt.d.line,rid=x.id.replace(/^[a-z]_/,'');let ok=false;
+  try{if(line==='wolf'&&typeof WOLFFX!=='undefined'&&WOLFFX.designs[x.id]&&WOLFFX.designs[x.id].duration){const D=WOLFFX.designs[x.id];WFX.push({id:x.id,t0:time,dur:D.duration,tgt:tg,tx:tg?tg.x:M.x,tz:tg?tg.z:M.z,cx:M.x,cz:M.z,face:M.facing,map:curMap,tgtMode:!!tg});ok=true;}
+   else if((line==='lizard'||line==='panda')){const LIB=line==='lizard'?LIZFX:PANFX,D=LIB.designs[rid];if(D&&D.duration&&!D.passive){WFX.push({id:rid,lib:LIB,sf:1.1,cyf:.68,lv:x.L,t0:time,dur:D.duration,tgt:tg,tx:tg?tg.x:M.x,tz:tg?tg.z:M.z,cx:M.x,cz:M.z,face:M.facing,map:curMap,tgtMode:!!tg});ok=true;}}
+   else if(VFXLIB[line]){const L=VFXLIB[line],S=L.byName[x.s.n.toLowerCase()];if(S&&!S.passive){PGV.push({L,S,id:x.id,t0:time,dur:S.previewDuration||4,tgt:tg,tx:tg?tg.x:M.x+Math.sin(M.facing)*3,tz:tg?tg.z:M.z+Math.cos(M.facing)*3,cx:M.x,cz:M.z,map:curMap,lv:x.L});ok=true;}}}catch(e){}
+  if(!ok)fxRing(tg?tg.x:M.x,tg?tg.z:M.z,x.tag==='aoe'?x.r:1.2,M.D.col);}
+function altHitN(M,m,pct,hits,x){for(let h=0;h<hits;h++)setTimeout(()=>{if(m.dead)return;mercCur=M;mercHit(m,pct*(M.buffAtk&&M.buffAtk.end>time?M.buffAtk.k:1));mercCur=null;try{if(h===0)applyStatus(m,x.E,x.L);}catch(e){}},h*140);}
+function altCast(M,x,tg){M.sp-=x.sp;M.scd[x.id]=time+x.cd;popText(M.x,M.z,x.s.n+'!','skill',3.5);
+  if(x.tag==='heal'){const pool=[{w:'p',r:php/maxHp}].concat(MERCS.filter(q=>!q.down&&q.mesh.parent===curMap.scene).map(q=>({w:q,r:q.hp/q.hpMax}))).sort((a,b)=>a.r-b.r)[0];
+    const k=(10+2*x.L)/100;if(pool.w==='p'){const h=Math.round(maxHp*k);php=Math.min(maxHp,php+h);updateHP();popText(player.x,player.z,'+'+h,'heal',4.2);arrowFx(M.x,M.z,player.x,player.z,'#9affc0');}
+    else{const q=pool.w,h=Math.round(q.hpMax*k);q.hp=Math.min(q.hpMax,q.hp+h);popText(q.x,q.z,'+'+h,'heal',3.4);}altFx(M,x,null);return;}
+  if(x.tag==='buff'){const E=x.E,L=x.L,v=f=>{try{return E[f]?E[f](L):0}catch(e){return 0}};const atk=v('atkP')||(6+L),dur=Math.min(60,x.dur||20);
+    M.buffAtk={k:1+atk/100,end:time+dur};if(M.alt.d.line==='sheep'||M.type==='sheep'){buffs['ally_'+x.id]={end:time+dur,atkP:Math.round(atk/2),defP:v('defP')||Math.round(4+L/2)};popText(player.x,player.z,x.s.n,'heal',4.4);}
+    altFx(M,x,null);return;}
+  const pct=x.m*0.7;
+  if(x.tag==='aoe'){const cx=x.E.self||x.E.k==='aoeSelf'?M.x:tg.x,cz=x.E.self||x.E.k==='aoeSelf'?M.z:tg.z;monsNear(cx,cz,x.r).forEach(m=>altHitN(M,m,pct,x.hits,x));}
+  else altHitN(M,tg,pct,x.hits,x);
+  altFx(M,x,tg);}
+function altAI(M,tg){const S=altSkills(M);if(!S.length)return false;const ready=S.filter(x=>(M.scd[x.id]||0)<=time&&M.sp>=x.sp);if(!ready.length)return false;
+  const hpP=php/maxHp,low=MERCS.filter(q=>!q.down&&q.hp/q.hpMax<0.55).length;
+  const heal=ready.find(x=>x.tag==='heal');if(heal&&(hpP<0.65||low)){altCast(M,heal,null);return true;}
+  if(!tg)return false;
+  const buff=ready.find(x=>x.tag==='buff'&&!(M.buffAtk&&M.buffAtk.end>time+2)&&!(buffs['ally_'+x.id]&&buffs['ally_'+x.id].end>time));if(buff){altCast(M,buff,tg);return true;}
+  const d=Math.hypot(tg.x-M.x,tg.z-M.z),pack=monsNear(tg.x,tg.z,3).length,spLow=M.sp<M.spMax*0.25;
+  const aoe=ready.filter(x=>x.tag==='aoe').sort((a,b)=>b.m*b.hits-a.m*a.hits)[0];
+  if(aoe&&(pack>=2||tg.T.boss)&&!(spLow&&!tg.T.boss)&&(d<=Math.max(M.D.range,3.2)||!(aoe.E.self||aoe.E.k==='aoeSelf'))){altCast(M,aoe,tg);return true;}
+  const hit=ready.filter(x=>x.tag==='hit').sort((a,b)=>b.m*b.hits-a.m*a.hits)[0];
+  if(hit&&(!spLow||tg.T.boss||tg.hp>tg.T.hp*0.5)){altCast(M,hit,tg);return true;}
+  return false;}
+function altTick(M,dt){if(!M.alt)return;if(M.spMax==null){M.spMax=altSpMax(M.alt.d);M.sp=M.spMax;M.scd={};}M.spMax=altSpMax(M.alt.d);M.sp=Math.min(M.spMax,M.sp+M.spMax*0.012*dt*(M.moving?1:1.6));}
 /* party HUD + window */
 const partyHud=document.createElement('div');partyHud.id='partyHud';partyHud.hidden=true;document.getElementById('game').appendChild(partyHud);
 partyHud.addEventListener('click',()=>openParty(false));
