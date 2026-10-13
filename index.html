@@ -799,7 +799,7 @@ if(!window.THREE){$('#loading').textContent='โหลดเอนจิน 3D �
 const view=$('#view');
 const GFX_MOB=matchMedia('(pointer:coarse)').matches||/Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
 let gfxMode=(()=>{try{const v=localStorage.getItem('aldria.gfx');if(v!==null&&+v>=0&&+v<=2)return +v;}catch(e){}return GFX_MOB?2:0;})(),gfxTick=0;
-const GFX_MODES=[['ละเอียด',1.75,true,0],['ลื่นไหล',1,false,0],['ประหยัดแบต',0.8,false,1000/30]];
+const GFX_MODES=[['ละเอียด',2.5,true,0],['ลื่นไหล',2,false,0],['ประหยัดแบต',1.5,false,1000/30]];
 const renderer=new THREE.WebGLRenderer({canvas:view,antialias:gfxMode===0,powerPreference:gfxMode===2?'low-power':'default'});
 renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.75));
 renderer.shadowMap.enabled=true;
@@ -4097,7 +4097,7 @@ class Char{
 const SK='#f6d3b6',SK2='#e9bc98';
 const heroTex=new THREE.TextureLoader().load(assetURL("hero.png"));
 const HERO={cols:6,rows:20,idle:{row:0,n:1,fps:1},walk:{row:5,n:4,fps:8},attack:{row:10,n:6,fps:13},pickup:{row:15,n:2,fps:5}};
-heroTex.minFilter=THREE.LinearFilter;heroTex.generateMipmaps=false;heroTex.repeat.set(1/HERO.cols,1/HERO.rows);
+heroTex.minFilter=THREE.LinearMipmapLinearFilter;heroTex.generateMipmaps=true;heroTex.anisotropy=4;heroTex.repeat.set(1/HERO.cols,1/HERO.rows);
 const HK=3.67*0.75/166,heroGeo=new THREE.PlaneGeometry(224*HK,192*HK);heroGeo.translate(0,96*HK-5*HK,0);
 const player=new Char('ผู้เล่นใหม่',null,0,40,{speed:6.2,tex:heroTex,geo:heroGeo});
 player.anims=HERO;player.action=null;player.attackTarget=null;
@@ -4106,7 +4106,7 @@ player.anims=HERO;player.action=null;player.attackTarget=null;
 const COSTUMES=[{id:'base',n:'ชุดหมาป่า',f:assetURL("hero.png")},{id:'gold',n:'เกราะทองศักดิ์สิทธิ์',f:assetURL("cos_gold.webp")},{id:'wingred',n:'อัศวินปีกขาวแดง',f:assetURL("cos_wingred.webp")},{id:'black',n:'เกราะเหล็กอสูรดำ',f:assetURL("cos_black.webp")},{id:'crimson',n:'เกราะมังกรแดง',f:assetURL("cos_crimson.webp")}];
 COSTUMES[0].tex=heroTex;let curCos='base';
 function wearCostume(id){const C=COSTUMES.find(c=>c.id===id);if(!C)return;
-  if(!C.tex){C.tex=new THREE.TextureLoader().load(C.f);C.tex.minFilter=THREE.LinearFilter;C.tex.generateMipmaps=false;C.tex.repeat.set(1/HERO.cols,1/HERO.rows);}
+  if(!C.tex){C.tex=new THREE.TextureLoader().load(C.f);C.tex.minFilter=THREE.LinearMipmapLinearFilter;C.tex.generateMipmaps=true;C.tex.anisotropy=4;C.tex.repeat.set(1/HERO.cols,1/HERO.rows);}
   C.tex.offset.copy(player.tex.offset);player.tex=C.tex;player.mesh.material.map=C.tex;player.mesh.material.needsUpdate=true;
   curCos=id;$('#face').style.backgroundImage=`url(${C.f})`;
   document.querySelectorAll('#cosRow .cos').forEach(b=>b.setAttribute('aria-pressed',b.dataset.cos===id));
@@ -15628,7 +15628,7 @@ const LINE_SPR={cat:{f:assetURL("cos_cat.webp"),anims:{cols:6,rows:20,idle:{row:
 function applyLineSprite(){const S2=LINE_SPR[LINE];
   player.mesh.geometry=(S2&&S2.geo)||heroGeo;
   if(!S2){player.anims=HERO;wearCostume(curCos);return;}
-  if(!S2.tex){S2.tex=new THREE.TextureLoader().load(S2.f);S2.tex.minFilter=THREE.LinearFilter;S2.tex.generateMipmaps=false;S2.tex.repeat.set(1/S2.anims.cols,1/S2.anims.rows);}
+  if(!S2.tex){S2.tex=new THREE.TextureLoader().load(S2.f);S2.tex.minFilter=THREE.LinearMipmapLinearFilter;S2.tex.generateMipmaps=true;S2.tex.anisotropy=4;S2.tex.repeat.set(1/S2.anims.cols,1/S2.anims.rows);}
   player.anims=S2.anims;player.tex=S2.tex;player.mesh.material.map=S2.tex;player.mesh.material.needsUpdate=true;const fe=$('#face');fe.style.backgroundImage=`url(${S2.f})`;if(S2.face){const k=(fe.clientWidth||66)/66;fe.style.backgroundSize=S2.face[0]*k+'px auto';fe.style.backgroundPosition=`${S2.face[1]*k}px ${S2.face[2]*k}px`;}else{fe.style.backgroundSize='';fe.style.backgroundPosition='';}}
 function setLine(key){const Ln=LINES[key];if(!Ln)return;if(typeof clearPG==='function')clearPG();if(typeof clearML==='function')clearML();if(typeof clearBT==='function')clearBT();if(typeof clearPD==='function')clearPD();if(typeof clearCT==='function'){clearCT();clearSH();clearRB();['ctHud','shHud','rbHud'].forEach(k=>{const e=document.getElementById(k);if(e)e.hidden=true;});}LINE=key;FREE0=Ln.free0;FREE2=Ln.free2;
   refill(SK_CLASSES,Ln.classes);refill(SKILLS,Ln.skills);refill(SK_SAMPLE,Ln.sample);refill(EFF,Ln.eff);refill(FXF,Ln.fx);refill(SKB,Object.fromEntries(Ln.skills.map(s=>[s.id,s])));
