@@ -4257,8 +4257,8 @@ window.addEventListener('keydown',e=>{
   if(e.target.id==='chatIn'){if(e.key==='Escape')view.focus();return;}
   const k=e.key.toLowerCase();
   {const dm=/^Digit(\d)$/.exec(e.code||''),fm=/^F(\d{1,2})$/.exec(e.key);let hi=-1;if(dm&&!e.ctrlKey&&!e.metaKey){const c=(+dm[1]+9)%10;hi=c+(e.altKey?2:e.shiftKey?1:0)*HOT_COLS;}else if(fm&&+fm[1]>=1&&+fm[1]<=10&&!e.ctrlKey)hi=+fm[1]-1+(e.altKey?2:e.shiftKey?1:0)*HOT_COLS;if(hi>=0){e.preventDefault();useHot(hi);return;}}
-  if(k==='k'){toggleWin('skillWin');return;}if(k==='u'){toggleWin('eqWin');renderEq();return;}
-  if(k==='o'){setAuto(!AUTO.on);return;}if(k==='j'){toggleWin('questWin');renderQuest();return;}if(k==='p'){toggleWin('partyWin');renderParty();return;}if(k==='c'){toggleWin('statWin');return;}if(k==='m'){toggleWin('worldWin');return;}if(k==='i'){toggleWin('invWin');return;}
+  if(k==='k'){toggleWin('skillWin');return;}if(k==='u'){if(typeof openHero==='function'){heroOpen()?toggleWin('heroWin',false):openHero('set');}else{toggleWin('eqWin');renderEq();}return;}
+  if(k==='o'){setAuto(!AUTO.on);return;}if(k==='j'){toggleWin('questWin');renderQuest();return;}if(k==='p'){toggleWin('partyWin');renderParty();return;}if(k==='c'||k==='i'){if(typeof openHero==='function'){heroOpen()?toggleWin('heroWin',false):openHero('items');}else toggleWin(k==='c'?'statWin':'invWin');return;}if(k==='m'){toggleWin('worldWin');return;}if(k==='i'){toggleWin('invWin');return;}
   if(k==='q')rot(1);else if(k==='e')rot(-1);else if(k==='escape'){closeTalk();if(TGT){clearTarget();player.attackTarget=null;pendingAttack=null;}toggleWin('statWin',false);toggleWin('invWin',false);toggleWin('worldWin',false);toggleWin('skillWin',false);toggleWin('eqWin',false);toggleWin('shopWin',false);toggleWin('refWin',false);toggleWin('warpWin',false);toggleWin('autoWin',false);toggleWin('petWin',false);toggleWin('questWin',false);toggleWin('sysWin',false);toggleWin('craftWin',false);toggleWin('partyWin',false);toggleWin('jtWin',false);}
 });
 
@@ -4410,7 +4410,7 @@ function updateInv(){
   const wt=weightNow(),mx=derived().wtMax;document.getElementById('wtTxt').textContent=`${(names.length+eqs.length).toLocaleString()} ช่อง · ไม่จำกัด`;document.getElementById('dvWt').textContent=`${wt} · ไม่จำกัด`;
 }
 /* ---- windows: toggle + drag ---- */
-function toggleWin(id,show){const w=document.getElementById(id);w.hidden=show===undefined?!w.hidden:!show;if(!w.hidden&&innerWidth<700)['statWin','invWin','worldWin','skillWin','eqWin','shopWin','refWin','warpWin','autoWin','petWin','questWin','sysWin','craftWin','partyWin','jtWin','huntWin','advWin','cardWin','gbWin'].forEach(o=>{const e=document.getElementById(o);if(o!==id&&e)e.hidden=true;});if(!w.hidden){w.style.zIndex=++zTop;if(id==='statWin')drawRadar();if(id==='invWin')updateInv();if(id==='worldWin')updateWorld();if(id==='skillWin')renderSkills();}}
+function toggleWin(id,show){const w=document.getElementById(id);w.hidden=show===undefined?!w.hidden:!show;if(!w.hidden&&innerWidth<700)['statWin','invWin','worldWin','skillWin','eqWin','shopWin','refWin','warpWin','autoWin','petWin','questWin','sysWin','craftWin','partyWin','jtWin','huntWin','advWin','cardWin','gbWin','heroWin'].forEach(o=>{const e=document.getElementById(o);if(o!==id&&e)e.hidden=true;});if(!w.hidden){w.style.zIndex=++zTop;if(id==='statWin')drawRadar();if(id==='invWin')updateInv();if(id==='worldWin')updateWorld();if(id==='skillWin')renderSkills();}}
 let zTop=10;
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-close]');if(b){e.preventDefault();toggleWin(b.dataset.close,false);}});
 document.getElementById('btnStat').onclick=()=>toggleWin('statWin');document.getElementById('btnEq').onclick=()=>{toggleWin('eqWin');renderEq();};document.getElementById('btnSound').onclick=()=>{audioInit();setSound(!soundOn);};document.getElementById('btnSkill').onclick=()=>toggleWin('skillWin');document.getElementById('btnWorld').onclick=()=>toggleWin('worldWin');
@@ -17965,7 +17965,7 @@ function equipItem(I){const D=EQ_DB[I.id],why=canWear(D);if(why){say(`ใส่ 
 function unequip(slot){const I=equipped[slot];if(!I)return;equipped[slot]=null;equipBag.push(I);say(`ถอด ${eqName(I)}`,'sys');afterEq();}
 function afterEq(){eqCalc();recalc();updateInv();renderEq();saveSoon();}
 /* equipment window */
-function renderEq(){const w=document.getElementById('eqWin');if(!w||w.hidden)return;
+function renderEq(){const w=document.getElementById('eqWin');if(!w||(w.hidden&&!(typeof heroOpen==='function'&&heroOpen())))return;
   document.getElementById('eqSlots').innerHTML=EQ_SLOTS.map(([s,l])=>{const I=equipped[s],D=I&&EQ_DB[I.id];
     return `<button class="eqs ${I?'':'empty'} ${D&&D.craft?'craft':''}" data-unq="${s}" ${I?`data-eqc="uid:${I.uid}"`:`title="${l}"`}><span class="ei">${D?`<img alt="" src="${D.icon}">`:''}</span><span class="et"><small>${l}</small><b>${I?eqName(I):'—'}</b><em>${D?eqStatLine(D,I):''}</em></span></button>`;}).join('');
   const d=derived();document.getElementById('eqSum').innerHTML=`<span>ATK <b>${Math.round(d.atk)}</b></span><span>MATK <b>${Math.round(d.matk)}</b></span><span>DEF <b>${S('DEF')+EQ.def}</b></span><span>MaxHP <b>${maxHp}</b></span><span>ตี <b>${(1/atkInterval(d)).toFixed(2)}</b>/วิ</span>`+cardSetHtml()+Object.entries(setCounts()).filter(([k,n])=>n>=3&&CRAFT_SET[k]&&Object.keys(CRAFT_SET[k].b3).some(q=>q!=='stats')).map(([k,n])=>`<span class="eqset">✔ ${CRAFT_SET[k].n} (${n} ชิ้น): ${bonusTxt(Object.fromEntries(Object.entries(CRAFT_SET[k].b3).filter(([q])=>q!=='stats')))||'-'}</span>`).join('')+Object.entries(archCounts()).filter(([a,x])=>x.n>=3).map(([a,x])=>`<span class="eqset">✔ สาย${ARCH[a].n} (${x.n} ชิ้น): ${ARCH[a].st[0]} +${Math.round(x.lv/20)}</span>`).join('');}
@@ -20352,6 +20352,60 @@ ITEM_KINDS.push({name:DP_ITEM,w:2,draw(g){g.fillStyle='#2b1f1a';g.fillRect(4,12,
   g.fillStyle='#ff9a6a';g.beginPath();g.ellipse(21,19,5,3,0.3,0,7);g.fill();g.fillStyle='#5ab87a';g.fillRect(9,23,14,3);g.fillStyle='#c8963a';g.fillRect(3,8,26,5);g.fillStyle='#2b1f1a';g.fillRect(14,4,4,5);}});
 {const ik=ITEM_KINDS[ITEM_KINDS.length-1],c=document.createElement('canvas');c.width=c.height=32;ik.draw(c.getContext('2d'));ik.tex=new THREE.CanvasTexture(c);ik.tex.magFilter=THREE.NearestFilter;ik.tex.minFilter=THREE.NearestFilter;ik.tex.generateMipmaps=false;ICON_URL[ik.name]=c.toDataURL();}
 const dpCss=document.createElement('style');dpCss.textContent=`#dpHud{position:absolute;top:calc(48px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);padding:5px 14px;border-radius:18px;background:rgba(40,16,10,.86);border:1px solid #e8b830;color:#ffe9c8;font:600 12.5px var(--display);z-index:5;pointer-events:none;white-space:nowrap}#dpHud b{color:#ffd84a}`;document.head.appendChild(dpCss);
+/* ===================== HERO SHEET: status + rank/RP + equipment + bag in one window ===================== */
+const HERO_PARTS=[['ptsTxt','statWin'],['ptsAuto','statWin'],['statRows','statWin'],['radarCv','statWin'],['eqSlots','eqWin'],['eqSum','eqWin'],['invGrid','invWin']];
+const heroHome={};let heroTab='items';
+function heroOpen(){const w=document.getElementById('heroWin');return!!w&&!w.hidden;}
+function heroMount(){HERO_PARTS.forEach(([id])=>{const el=document.getElementById(id);if(!el)return;if(!heroHome[id])heroHome[id]={p:el.parentNode,n:el.nextSibling};const slot=document.querySelector(`#heroWin [data-hslot="${id}"]`);if(slot&&el.parentNode!==slot)slot.appendChild(el);});}
+function heroUnmount(){HERO_PARTS.forEach(([id])=>{const el=document.getElementById(id),H=heroHome[id];if(!el||!H)return;if(el.parentNode!==H.p)H.p.insertBefore(el,H.n&&H.n.parentNode===H.p?H.n:null);});}
+function renderHero(){if(!heroOpen())return;const L=advLevel(),T=advTier(L),ti=ADV_TIERS.indexOf(T),d=derived(),R=RACES.find(r=>r[0]===LINE);
+  document.getElementById('hrName').textContent=player.name;document.getElementById('hrLv').textContent=lvl;
+  document.getElementById('hrRace').textContent=R?R[1]:LINE;document.getElementById('hrCls').textContent=`${SK_CLASSES[classIdx].name} · Job ${jobLv}`;
+  document.getElementById('hrBadge').src=advBadge(ti,96);document.getElementById('hrRank').textContent=T[1];document.getElementById('hrRp').textContent=ADV.rp.toLocaleString();
+  document.getElementById('hrFace').style.backgroundImage=getComputedStyle(document.getElementById('face')).backgroundImage;
+  const need=expNeed(lvl),p=lvl>=99&&!reborn?100:Math.min(100,exp/need*100);document.getElementById('hrExp').textContent=`${Math.floor(exp).toLocaleString()} / ${need.toLocaleString()}`;document.getElementById('hrExpBar').style.width=p+'%';
+  document.getElementById('hrDv').innerHTML=[['ATK',Math.round(d.atk)],['MATK',Math.round(d.matk)],['DEF',S('DEF')+EQ.def],['HP',maxHp],['SP',maxSp],['ตี/วิ',(1/atkInterval(d)).toFixed(2)],['CRIT',Math.round(d.crit*100)+'%'],['Speed',d.spd.toFixed(1)]].map(([k,v])=>`<span>${k}</span><b>${v}</b>`).join('');
+  document.getElementById('hrGold').textContent=gold.toLocaleString();document.getElementById('hrBagN').textContent=(Object.keys(inv).length+equipBag.length).toLocaleString();
+  document.querySelectorAll('#heroWin [data-htab]').forEach(b=>b.setAttribute('aria-selected',b.dataset.htab===heroTab));document.getElementById('hrItems').hidden=heroTab!=='items';document.getElementById('hrSet').hidden=heroTab!=='set';
+  renderEq();drawRadar();}
+function openHero(tab){if(tab)heroTab=tab;['statWin','invWin','eqWin'].forEach(id=>{const w=document.getElementById(id);if(w)w.hidden=true;});toggleWin('heroWin',true);heroMount();updateInv();recalc();renderHero();}
+(function(){const w=document.createElement('section');w.id='heroWin';w.className='pw drag';w.hidden=true;w.setAttribute('aria-label','ตัวละคร');
+  w.innerHTML=`<div class="hd"><span>📜 ตัวละคร</span><button class="x" data-close="heroWin" aria-label="ปิด">✕</button></div>
+  <div class="hrb"><div class="hrhead"><div class="hrid"><div class="hrnm"><b id="hrName"></b><span>LV. <em id="hrLv"></em></span></div>
+     <div class="hrrow"><span>RACE</span><b id="hrRace"></b></div><div class="hrrow"><span>CLASS</span><b id="hrCls"></b></div>
+     <button class="hrrank" data-hadv="1" title="เปิดหน้ายศ"><img id="hrBadge" alt=""><span><b id="hrRank"></b><small>RP <em id="hrRp"></em></small></span></button></div>
+    <div class="hrface" id="hrFace"></div></div>
+   <div class="hrsec"><span class="hrtab">Status</span></div>
+   <div class="hrstat"><div data-hslot="ptsTxt"></div><div data-hslot="ptsAuto"></div><div class="hrsg"><div data-hslot="statRows"></div><div class="hrrad"><div data-hslot="radarCv"></div><div class="hrdv" id="hrDv"></div></div></div>
+     <div class="hrexp">EXP <div class="gauge xp"><i id="hrExpBar"></i></div><b id="hrExp"></b></div></div>
+   <div class="hreq" data-hslot="eqSlots"></div>
+   <div class="hrsec"><button class="hrtab" data-htab="items">Items <small id="hrBagN"></small></button><button class="hrtab" data-htab="set">โบนัสชุด</button><span class="hrgold">💰 <b id="hrGold"></b> z</span></div>
+   <div class="hrbag" id="hrItems"><div data-hslot="invGrid"></div></div><div class="hrbag" id="hrSet" hidden><div data-hslot="eqSum"></div></div></div>`;
+  document.getElementById('game').appendChild(w);
+  w.addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;if(t.dataset.htab){heroTab=t.dataset.htab;renderHero();}else if(t.dataset.hadv){toggleWin('advWin',true);renderAdv();}});
+  new MutationObserver(()=>{if(w.hidden)heroUnmount();}).observe(w,{attributes:true,attributeFilter:['hidden']});
+  setInterval(()=>{if(!w.hidden){renderHero();}},1000);
+  ['btnStat','btnInv','btnEq'].forEach((id,i)=>{const b=document.getElementById(id);if(b)b.onclick=()=>{if(heroOpen())toggleWin('heroWin',false);else openHero(i===2?'set':'items');};});
+  const st=document.createElement('style');st.textContent=`
+  #heroWin{top:calc(8px + env(safe-area-inset-top,0px));right:calc(10px + env(safe-area-inset-right,0px));width:min(470px,calc(100vw - 16px));max-height:calc(100% - var(--hb,62px) - 20px);display:flex;flex-direction:column;
+    background:linear-gradient(#efe0bc,#e2cc9c);border:3px solid #6a4a2a;box-shadow:inset 0 0 0 2px #c9a45a,0 10px 26px rgba(0,0,0,.4)}
+  .hrb{overflow-y:auto;padding:8px 10px 10px;display:flex;flex-direction:column;gap:6px}
+  .hrhead{display:flex;gap:8px;align-items:stretch}.hrid{flex:1;min-width:0;background:linear-gradient(#e6f0ee,#cfe0dc);border:2px solid #7a5a3a;border-radius:8px;padding:6px 10px;display:flex;flex-direction:column;gap:2px}
+  .hrnm{display:flex;align-items:baseline;gap:8px}.hrnm b{font:700 24px Cinzel,var(--display);color:#fff;-webkit-text-stroke:1px #3a5a6a;text-shadow:0 2px 0 #3a5a6a;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hrnm span{font:700 15px Cinzel,serif;color:#5a3a1a}.hrnm em{font-size:26px;color:#3a8aa8;font-style:normal}
+  .hrrow{display:flex;gap:8px;font-size:12.5px}.hrrow span{font:700 11px Cinzel,serif;color:#3a2a14;width:44px}.hrrow b{color:#2a6a7a;font-weight:600}
+  .hrrank{all:unset;cursor:pointer;display:flex;align-items:center;gap:6px;margin-top:2px}.hrrank img{width:34px;height:34px}.hrrank b{font:600 13px var(--display);color:#6a3a8a;display:block}.hrrank small{font-size:12px;color:#5a3a1a}.hrrank em{font-style:normal;font-weight:700;color:#7a3ab0}
+  .hrface{width:96px;flex:none;border-radius:50%;aspect-ratio:1;border:4px solid #7a5a3a;box-shadow:0 0 0 2px #c9a45a;background:#bfe3f2 no-repeat;background-size:1480px auto;background-position:-76px -12px;align-self:center}
+  .hrsec{display:flex;gap:4px;align-items:flex-end;border-bottom:2px solid #6a4a2a}.hrtab{all:unset;cursor:pointer;padding:3px 16px;font:700 14px Cinzel,var(--display);color:#fbecc8;background:#5a3a22;border-radius:6px 14px 0 0}.hrtab[aria-selected=false]{background:#9a7a52;color:#efe0bc}.hrtab small{font:500 11px var(--body);opacity:.8}
+  .hrgold{margin-left:auto;font-size:13px;padding-bottom:2px}.hrgold b{color:#7a3ab0}
+  .hrstat{background:rgba(255,250,236,.55);border:2px solid #9a7a52;border-radius:8px;padding:6px 8px}
+  .hrsg{display:grid;grid-template-columns:minmax(0,1fr) 170px;gap:6px;align-items:start}.hrsg .stats{gap:2px}.hrsg .st{border-bottom:none;padding:1px 2px;grid-template-columns:24px 34px 30px 1fr 22px}
+  .hrrad canvas{width:170px!important;height:170px!important;display:block}.hrdv{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:1px 6px;font-size:11px}.hrdv span{color:var(--muted);font:600 10px var(--fant)}.hrdv b{text-align:right;color:#5a3ab0}
+  .hrexp{display:flex;align-items:center;gap:8px;font:700 13px Cinzel,serif;color:#3a2a14;margin-top:4px}.hrexp .gauge{flex:1}.hrexp b{font:600 12px var(--body);color:#5a3ab0}
+  .hreq .eqslots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;padding:0}.hreq .eqs{flex-direction:column;gap:2px;padding:4px 2px;text-align:center;background:linear-gradient(#a88458,#7a5a38);border:2px solid #4a3020;border-radius:9px;box-shadow:inset 0 1px 0 rgba(255,255,255,.3)}
+  .hreq .eqs .ei{width:40px;height:40px;background:radial-gradient(circle,#6a4a2a,#3a2614)}.hreq .eqs .ei img{width:34px;height:34px}.hreq .eqs .et small{color:#fbecc8;font-size:10px}.hreq .eqs .et b{font-size:10.5px;color:#fff;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hreq .eqs .et em{display:none}.hreq .eqs.empty{opacity:.75}
+  .hrbag{background:linear-gradient(#c8a878,#b8956a);border:2px solid #6a4a2a;border-radius:8px;padding:6px}.hrbag .grid{grid-template-columns:repeat(6,1fr);gap:5px;padding:0;max-height:min(40vh,300px)}.hrbag .slot{background:radial-gradient(circle at 50% 40%,#7a5a38,#4a3420);border:1px solid #2a1a0e;border-radius:8px;box-shadow:inset 0 2px 4px rgba(0,0,0,.4)}.hrbag .slot .n{color:#fff;text-shadow:0 0 2px #000,0 0 2px #000}
+  .hrbag .eqsum{padding:4px;font-size:12px;background:rgba(255,250,236,.7);border-radius:6px}
+  @media (max-width:700px){#heroWin{left:8px;right:8px;width:auto;top:calc(6px + env(safe-area-inset-top,0px))}.hrsg{grid-template-columns:minmax(0,1fr) 128px}.hrrad canvas{width:128px!important;height:128px!important}.hrdv{grid-template-columns:auto 1fr}.hrface{width:74px}.hrnm b{font-size:20px}}`;document.head.appendChild(st);})();
 /* ===================== GUILD BOSS: weekly schedule, 7 bug bosses, Lv 50+ ===================== */
 var GB={on:false,day:-1,parts:[],t0:0,end:0,done:{},force:null,sel:null,next:0,mokGoal:-70,ph:0};
 const GB_SLOTS=[[10,11],[15,16],[17,18],[18,19],[19,20],[22,23]],GB_OPEN_MIN=40;
