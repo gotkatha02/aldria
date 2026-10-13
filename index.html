@@ -18446,10 +18446,14 @@ function behind(m){return !m.aggro||m.stunEnd>time;}
 function addClaw(m,n=1){if(!m||m.dead)return;m.claw=Math.min(10,(m.claw||0)+n);}
 /* LCK = the cat's gambling stat: invested LCK (points + gear + cards, not the free +1/level) powers luck skills */
 function ctLk(){return Math.max(0,S('LCK')-lvStat());}
-function ctLkMul(){return 1+0.005*ctLk();}
+function ctLkMul(r){return 1+(r==null?0.005:r)*ctLk();}
 function ctOver(D){return 1+Math.max(0,0.04+S('LCK')*0.004+(D.p.crit+D.b.crit+EQ.crit)/100-0.8);}
 (()=>{const add={g_deal:'ดาเมจ +0.5% ต่อ LCK ที่อัพ',g_slot:'LCK ที่อัพเพิ่มโอกาสออกตรงกัน (สูงสุด 85%) และดาเมจ +0.5% ต่อ LCK',g_dice:'LCK ที่อัพมีโอกาสทอยแต้มต่ำใหม่ และดาเมจ +0.5% ต่อ LCK',
   g_showhand:'ดาเมจ +0.5% ต่อ LCK ที่อัพ และ LCK ช่วยให้ได้ไพ่ต่อแต้ม',g_wheel:'LCK ที่อัพเพิ่มโอกาส ×9',g_jackpot:'ดาเมจ +0.5% ต่อ LCK ที่อัพ'};
+  Object.assign(add,{g_buried:'ดาเมจ +0.5% ต่อ LCK ที่อัพ',g_nil:'ดาเมจ +0.5% ต่อ LCK ที่อัพ',g_cursed:'LCK ที่อัพเพิ่มดาเมจที่ศัตรูได้รับอีก +0.1% ต่อแต้ม',g_bottle:'LCK ที่อัพเพิ่มโอกาสได้คำท้า และคำท้าแรงขึ้น',
+    g_parrot:'LCK ที่อัพมีโอกาสขโมยบัฟเพิ่มอีก 1 อย่าง',g_crew:'โชคโจรสลัด: ลูกเรือแรงขึ้น +0.3% ต่อ LCK ที่อัพ'});
+  ['g_volley','g_broadside','g_anchor','g_plank','g_kraken','g_whirl','g_wave','g_rum'].forEach(id=>{add[id]='โชคโจรสลัด: ดาเมจ +0.3% ต่อ LCK ที่อัพ';const E=CT_EFF[id];if(E&&E.m){const m0=E.m;E.m=L=>m0(L)*ctLkMul(0.003);}});
+  {const E=CT_EFF.g_buried;const m0=E.m;E.m=L=>m0(L)*ctLkMul();}
   CT_SKILLS.forEach(s=>{if(add[s.id]){const e0=s.e;s.e=L=>e0(L)+' · 🍀 '+add[s.id];}});})();
 function ctMul(t,mag){if(!ctOn())return 1;let k=gMul();if(CT.lives===1&&effLv('g_ninth')&&effLv('g_nine'))k*=1+0.08*effLv('g_ninth');
   if(t&&t.mon&&(behind(t)||stealthCat()))k*=1+0.03*effLv('g_prowl');if(t&&buffs.g_spyglass&&buffs.g_spyglass.end>time&&Math.hypot(t.x-player.x,t.z-player.z)>5)k*=1+0.06*effLv('g_spyglass');
@@ -18508,18 +18512,18 @@ function castCT(id,E,L,t,col){
     case'wave':{const[ux,uz]=gDir(tgt);fxLine(player.x,player.z,ux,uz,9,'#3a8ad8');gLine(player.x,player.z,ux,uz,9,2.4).forEach(m=>{gHit(m,E.m(L));gPush(m,ux,uz,5);});return true;}
     case'mermaid':{fxRing(player.x,player.z,3.6,'#ff9ad8');monsNear(player.x,player.z,3.6).forEach(m=>{if(m.T.boss)return;m.stunEnd=Math.max(m.stunEnd||0,time+1+Math.floor(L/2));m.aggro=false;popText(m.x,m.z,'CHARM ♥','skill',3.2);});return true;}
     case'buried':{const x=player.x+Math.sin(player.facing)*2,z=player.z+Math.cos(player.facing)*2;gZone('ct_chest',x,z,1,10,{L,taunt:true,hp:()=>200,m:E.m(L),onEnd:q=>{if(q.sc!==curMap.scene)return;boomFx(q.x,q.z,2.6,'#ffd24a');gAoe(q.x,q.z,2.6,q.m);}});return true;}
-    case'cursed':{fxRing(tx,tz,2.6,'#ffd24a');monsNear(tx,tz,2.6).forEach(m=>{m.vuln=Math.max(m.vuln||0,5*L);m.vulnEnd=time+15;m.hexEnd=time+15;popText(m.x,m.z,'CURSED GOLD','skill',3.2);});return true;}
-    case'parrot':{if(!T0)return false;const pool=[{atkP:10},{aspdP:10},{crit:8},{dr:10},{regen3:2}];const n=1+Math.floor(L/2);const B={end:time+30};for(let i=0;i<n;i++)Object.assign(B,pool[Math.floor(Math.random()*pool.length)]);buffs.g_parrot=B;
+    case'cursed':{fxRing(tx,tz,2.6,'#ffd24a');const cv=Math.round(5*L+0.1*ctLk());monsNear(tx,tz,2.6).forEach(m=>{m.vuln=Math.max(m.vuln||0,cv);m.vulnEnd=time+15;m.hexEnd=time+15;popText(m.x,m.z,'CURSED GOLD','skill',3.2);});return true;}
+    case'parrot':{if(!T0)return false;const pool=[{atkP:10},{aspdP:10},{crit:8},{dr:10},{regen3:2}];const n=1+Math.floor(L/2)+(Math.random()<0.005*ctLk()?1:0);const B={end:time+30};for(let i=0;i<n;i++)Object.assign(B,pool[Math.floor(Math.random()*pool.length)]);buffs.g_parrot=B;
       arrowFx(player.x,player.z,T0.x,T0.z,'#4ad84a');rollMatDrop(T0);popText(player.x,player.z,`นกแก้วขโมยบัฟ ×${n}`,'skill',4.4);return true;}
-    case'bottle':{const r=Math.floor(Math.random()*3);if(r===0){spawnX(5,8);popText(player.x,player.z,'แผนที่สมบัติ!','skill',4.4);}else if(r===1)gHeal(0.1*L);else{buffs.g_challenge={end:time+30,v:4*L};popText(player.x,player.z,'คำท้า! ดาเมจ +'+4*L+'%','skill',4.4);}return true;}
-    case'crew':{const n=1+Math.floor(L/2);for(let i=0;i<n;i++){const gun=i%2===1;gMinion({tex:gTex('catcrew',g=>paintCat(g,'#e8a050',true)),size:1.9,end:time+30,pct:60,every:gun?1.4:1,range:gun?5:1.6,line:'cat',x:player.x+Math.cos(i*2)*1.6,z:player.z+Math.sin(i*2)*1.6,
+    case'bottle':{const r=Math.random()<0.004*ctLk()?2:Math.floor(Math.random()*3);if(r===0){spawnX(5,8);popText(player.x,player.z,'แผนที่สมบัติ!','skill',4.4);}else if(r===1)gHeal(0.1*L);else{const cv=Math.round(4*L+0.1*ctLk());buffs.g_challenge={end:time+30,v:cv};popText(player.x,player.z,'คำท้า! ดาเมจ +'+cv+'%','skill',4.4);}return true;}
+    case'crew':{const n=1+Math.floor(L/2);for(let i=0;i<n;i++){const gun=i%2===1;gMinion({tex:gTex('catcrew',g=>paintCat(g,'#e8a050',true)),size:1.9,end:time+30,pct:Math.round(60*ctLkMul(0.003)),every:gun?1.4:1,range:gun?5:1.6,line:'cat',x:player.x+Math.cos(i*2)*1.6,z:player.z+Math.sin(i*2)*1.6,
       hit:(p,m)=>gHit(m,p.pct*(buffs.g_order&&buffs.g_order.end>time?1+0.05*effLv('g_order'):1),false,'pack')});}popText(player.x,player.z,`ลูกเรือ ×${n}`,'skill',4.4);return true;}
     case'order':{buffs.g_order={end:time+15,atkP:5*L,aspdP:3*L};popText(player.x,player.z,'ออกคำสั่ง!','crit',4.6);return true;}
     case'rum':{if(T0){const[ux,uz]=gDir(T0);fxLine(player.x,player.z,ux,uz,Math.hypot(T0.x-player.x,T0.z-player.z),'#8a5a32');boomFx(T0.x,T0.z,1.6,'#c88a3a');gAoe(T0.x,T0.z,1.6,E.m(L),{each:m=>{if(!m.T.boss){m.fearEnd=time+3;popText(m.x,m.z,'เมา','skill',3);}}});}
       else gHeal(0.08*L);return true;}
     case'spyglass':{buffs.g_spyglass={end:time+20};popText(player.x,player.z,'ส่องกล้อง','skill',4.4);return true;}
     case'maekwak':{gZone('ct_maek',player.x,player.z,2.6,30,{L});popText(player.x,player.z,'แมวกวักนำโชค','skill',4.6);return true;}
-    case'nil':{const xs=zones.filter(z=>z.kind==='ct_x'&&z.end>time).length,n=xs+CT.hand.length+CT.lives;boomFx(player.x,player.z,5.6,'#3a8ad8');monsNear(player.x,player.z,5.6).forEach(m=>gHit(m,4000+200*n));
+    case'nil':{const xs=zones.filter(z=>z.kind==='ct_x'&&z.end>time).length,n=xs+CT.hand.length+CT.lives;boomFx(player.x,player.z,5.6,'#3a8ad8');monsNear(player.x,player.z,5.6).forEach(m=>gHit(m,(4000+200*n)*ctLkMul()));
       for(let k=1;k<=3;k++)setTimeout(()=>{monsNear(player.x,player.z,5.6).forEach(m=>{boomFx(m.x,m.z,1.2,'#ffb347');gHit(m,800);});},k*500);popText(player.x,player.z,`ม้านิลมังกร ×${n}`,'crit',5.4);return true;}
   }
   return false;}
