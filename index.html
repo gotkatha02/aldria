@@ -4315,7 +4315,7 @@ const expNeed=l=>Math.round(LEVEL_SLOW*(l>40?1+(l-40)*0.012:1)*killsAt(l)*(5+1.2
 /* ---- stats (RO-like): base can be raised with points, bonus comes from equipment ---- */
 const STAT_KEYS=['ATK','DEF','AGI','VIT','INT','CHA','TAL','LCK'];
 const STAT_TH={ATK:'พลังโจมตี — เพิ่มพลังโจมตีกายภาพ',DEF:'พลังป้องกัน — ลดดาเมจที่ได้รับ',AGI:'ความว่องไว — เดินเร็วขึ้น · ลดคูลดาวน์สกิล 0.4%/แต้ม (สูงสุด 40%) · ตีเร็วขึ้น',VIT:'พลังชีวิต — 1 แต้ม = MaxHP +10 · แบกของได้มากขึ้น · ฟื้น HP เร็วขึ้น',
-  INT:'สติปัญญา — 1 แต้ม = MaxSP +4 · ลดเวลาร่าย · เพิ่มพลังเวท (MATK)',CHA:'เสน่ห์ — บัฟจากสกิลอยู่นานขึ้น 0.5%/แต้ม · ติดดีบัฟสั้นลงและติดยากขึ้น 0.6%/แต้ม',TAL:'พรสวรรค์ — 1 แต้ม = MaxSP +2 · สกิลแรงขึ้น 0.5%/แต้ม',LCK:'โชค — โอกาสคริติคอล · โอกาสดรอปของ · สกิลบางตัวใช้ค่านี้'};
+  INT:'สติปัญญา — 1 แต้ม = MaxSP +6 · ร่ายเร็วขึ้น · ฟื้น SP เร็วขึ้น',CHA:'เสน่ห์ — บัฟจากสกิลอยู่นานขึ้น 0.5%/แต้ม · ติดดีบัฟสั้นลงและติดยากขึ้น 0.6%/แต้ม',TAL:'พรสวรรค์ — พลังเวทของสายเวท (รวม MATK จากคทา/ไม้เท้า) · สกิลแรงขึ้น 0.5%/แต้ม · MaxSP +2',LCK:'โชค — โอกาสคริติคอล · โอกาสดรอปของ · สกิลบางตัวใช้ค่านี้'};
 const base={ATK:1,DEF:1,AGI:1,VIT:1,INT:1,CHA:1,TAL:1,LCK:1};
 const bonus={ATK:0,DEF:0,AGI:0,VIT:0,INT:0,CHA:0,TAL:0,LCK:0};var EQ={atk:0,matk:0,def:0,hpP:0,aspdP:0,crit:0};
 /* every base level also gives +1 to all 8 stats (on top of the free stat points) */
@@ -4342,14 +4342,14 @@ function derived0(){
   const p=typeof pas==='function'?pas():{atk:0,crit:0,def:0,flee:0,regen:0,ls:0,dbl:0,dual:0,leader:0,counter:0},b=typeof bsum==='function'?bsum():{atkP:0,aspdP:0,defP:0,dr:0,crit:0,critDmg:0,reflect:0,parry:0,poison:0};
   const dm=b.defP>=0?100/(100+b.defP):1-b.defP/100;
   return{p,b,spd:(5.4+S('AGI')*0.0375)*(CURSED?0.6:1)*(LINE==='penguin'&&typeof onIce==='function'&&onIce(player.x,player.z)?1.3:1)*(LINE==='mole'&&typeof mlSpd==='function'?mlSpd():1)*(LINE==='bat'&&typeof btSpd==='function'?btSpd():1)*(LINE==='panda'&&typeof pdSpd==='function'?pdSpd():1)*(LINE==='cat'&&typeof ctSpd==='function'?ctSpd():1)*(LINE==='sheep'&&typeof shSpd==='function'?shSpd():1)*(LINE==='whale'&&typeof whSpd==='function'?whSpd():1)*(1+CX('spd')/100),aspd:(1+S('AGI')*0.03)*(1+(b.aspdP+(p.aspdP||0)+EQ.aspdP)/100),crit:Math.min(0.8,0.04+S('LCK')*0.004+(p.crit+b.crit+EQ.crit)/100),critMul:1.4*(1+(b.critDmg+(p.critDmg||0))/100),
-    defMul:100/(100+(S('DEF')+p.def+EQ.def)*2.5)*dm*(1-Math.min(0.7,b.dr/100)),wtMax:1400+S('VIT')*40,atk:(CURSED?0.8:1)*jtAtk()*(ATK_M*(S('ATK')+EQ.atk/ATK_DIV)+p.atk+EQF.atk)*(1+b.atkP/100)*(1+(p.bloodlust?Math.floor((1-php/Math.max(1,maxHp))*10)*p.bloodlust/100:0)+(p.gauge&&typeof furyStacks!=='undefined'?furyStacks*0.5*p.gauge/100:0)),matk:jtAtk()*(ATK_M*(S('INT')+EQ.matk/ATK_DIV)+(p.matk||0)+(b.matkFlat||0)+EQF.matk)*(1+((b.matkP||0)+(p.matkP||0))/100),flee:Math.min(0.45,p.flee*0.006+CX('flee')/100)};
+    defMul:100/(100+(S('DEF')+p.def+EQ.def)*2.5)*dm*(1-Math.min(0.7,b.dr/100)),wtMax:1400+S('VIT')*40,atk:(CURSED?0.8:1)*jtAtk()*(ATK_M*(S('ATK')+EQ.atk/ATK_DIV)+p.atk+EQF.atk)*(1+b.atkP/100)*(1+(p.bloodlust?Math.floor((1-php/Math.max(1,maxHp))*10)*p.bloodlust/100:0)+(p.gauge&&typeof furyStacks!=='undefined'?furyStacks*0.5*p.gauge/100:0)),matk:jtAtk()*(ATK_M*(S('TAL')+EQ.matk/ATK_DIV)+(p.matk||0)+(b.matkFlat||0)+EQF.matk)*(1+((b.matkP||0)+(p.matkP||0))/100),flee:Math.min(0.45,p.flee*0.006+CX('flee')/100)};
 }
 function recalc(keepRatio=true){
   const r=php/maxHp,rs=psp/maxSp;
-  maxHp=Math.round((70+S('VIT')*10+lvl*12)*(reborn?1.25:1)*jtHp()*(LINE==='bison'?1.15:LINE==='lizard'?1.05:LINE==='penguin'?0.9:LINE==='mole'?1.08:LINE==='bat'?0.9:LINE==='panda'?1.05:LINE==='sheep'?0.95:LINE==='rabbit'?1.0:LINE==='whale'?1.2:1)*(1+(((typeof pas==='function'?pas().hpP:0)||0)+EQ.hpP)/100));maxSp=Math.round((30+S('INT')*4+S('TAL')*2+lvl*5+(typeof jobLv==='number'?jobLv*3+classIdx*40:0))*(reborn?1.25:1)*jtHp()*(1+(CX('spP')+(typeof btSpP==='function'?btSpP()+shSpP():0))/100));
+  maxHp=Math.round((70+S('VIT')*10+lvl*12)*(reborn?1.25:1)*jtHp()*(LINE==='bison'?1.15:LINE==='lizard'?1.05:LINE==='penguin'?0.9:LINE==='mole'?1.08:LINE==='bat'?0.9:LINE==='panda'?1.05:LINE==='sheep'?0.95:LINE==='rabbit'?1.0:LINE==='whale'?1.2:1)*(1+(((typeof pas==='function'?pas().hpP:0)||0)+EQ.hpP)/100));maxSp=Math.round((30+S('INT')*6+S('TAL')*2+lvl*5+(typeof jobLv==='number'?jobLv*3+classIdx*40:0))*(reborn?1.25:1)*jtHp()*(1+(CX('spP')+(typeof btSpP==='function'?btSpP()+shSpP():0))/100));
   if(keepRatio){php=Math.max(1,Math.round(maxHp*r));psp=Math.round(maxSp*rs);}
   const d=derived();player.speed=d.spd;syncAtkAnim(d);
-  STAT_KEYS.forEach(k=>{document.getElementById('sv'+k).textContent=base[k]+lvStat();{const pn=document.getElementById('profName'),pr=document.getElementById('profRace');if(pn)pn.textContent=player.name;if(pr&&typeof RACES!=='undefined'){const rr=RACES.find(r=>r[0]===LINE);if(rr)pr.textContent=rr[1];}}{const bk=k==='ATK'?Math.round(d.atkStat)-(base[k]+lvStat()):k==='INT'?Math.round(d.matkStat)-(base[k]+lvStat()):bonus[k]+skStat(k)+(typeof advStat==='function'?advStat(k):0);document.getElementById('sb'+k).textContent=bk?'+ '+bk:'';}{const bt=document.getElementById('sp'+k),c=statCost(base[k]);bt.disabled=statPts<c||base[k]>=99;bt.title=base[k]>=99?'สูงสุดแล้ว':`ใช้ ${c} แต้ม`;}});
+  STAT_KEYS.forEach(k=>{document.getElementById('sv'+k).textContent=base[k]+lvStat();{const pn=document.getElementById('profName'),pr=document.getElementById('profRace');if(pn)pn.textContent=player.name;if(pr&&typeof RACES!=='undefined'){const rr=RACES.find(r=>r[0]===LINE);if(rr)pr.textContent=rr[1];}}{const bk=k==='ATK'?Math.round(d.atkStat)-(base[k]+lvStat()):k==='TAL'?Math.round(d.matkStat)-(base[k]+lvStat()):bonus[k]+skStat(k)+(typeof advStat==='function'?advStat(k):0);document.getElementById('sb'+k).textContent=bk?'+ '+bk:'';}{const bt=document.getElementById('sp'+k),c=statCost(base[k]);bt.disabled=statPts<c||base[k]>=99;bt.title=base[k]>=99?'สูงสุดแล้ว':`ใช้ ${c} แต้ม`;}});
   document.getElementById('ptsTxt').textContent=statPts>0?`แต้มสเตตัสคงเหลือ ${statPts} — กด + เพื่อเพิ่ม (ยิ่งค่าสูง ยิ่งใช้แต้มมาก)`:'';document.getElementById('ptsAuto').hidden=statPts<=0;
   document.getElementById('dvSpd').textContent=d.spd.toFixed(1)+' t/s';
   {const g=(i,v)=>{const e=document.getElementById(i);if(e)e.textContent=v;};g('dvCd','−'+Math.round((1-agiCd())*100)+'%');g('dvCast','−'+Math.round(Math.min(0.8,S('INT')/150)*100)+'%');g('dvSk','+'+Math.round((talMul()-1)*100)+'%');g('dvBuff','+'+Math.round((chaBuff()-1)*100)+'%');g('dvDeb','−'+Math.round(stResist()*100)+'%');}
@@ -16918,7 +16918,7 @@ const LINES={
   wolf:{label:'สายหมาป่า',classes:SK_CLASSES.slice(),skills:SKILLS.slice(),sample:Object.assign({},SK_SAMPLE),eff:Object.assign({},EFF),fx:Object.assign({},FXF),free0:'fang',free2:'dual',
     hot:['fang','cross','storm','blink','rag'],w:{ATK:3,AGI:2,VIT:2,DEF:1,LCK:1,TAL:1,INT:1,CHA:0},wtxt:'ATK / AGI / VIT'},
   monkey:{label:'สายลิง',classes:MK_CLASSES,skills:MK_SKILLS,sample:MK_SAMPLE,eff:MK_EFF,fx:MK_FX,free0:'m_summon',free2:'m_pact',
-    hot:['m_summon','m_fireball','m_familiar','m_volcano','m_mountain'],w:{INT:3,VIT:2,AGI:1,DEF:1,TAL:1,LCK:1,ATK:0,CHA:0},wtxt:'INT / VIT'}};
+    hot:['m_summon','m_fireball','m_familiar','m_volcano','m_mountain'],w:{TAL:3,VIT:2,AGI:1,DEF:1,INT:2,LCK:1,ATK:0,CHA:0},wtxt:'TAL / INT / VIT'}};
 let LINE='wolf',FREE0='fang',FREE2='dual';
 const refill=(o,src)=>{if(Array.isArray(o)){o.length=0;o.push(...src);}else{for(const k in o)delete o[k];Object.assign(o,src);}};
 const HKB=HK*1.35*1.25,bisonGeo=new THREE.PlaneGeometry(320*HKB,224*HKB);bisonGeo.translate(0,112*HKB-6*HKB,0);
@@ -17353,7 +17353,7 @@ const PG_FX={};PG_SKILLS.forEach(s=>PG_FX[s.id]='pg-'+s.id.slice(2)+'.svg');PG_F
 const PG_SAMPLE={p_spark:10,p_wisdom:10,p_spiral:7,p_pages:5,p_peek:3,p_comet:10,p_chart:5,p_connect:5,p_well:5,p_orbit:3,p_shard:10,p_floor:7,p_window:3,p_block:3,p_snowman:5,
   p_meteor:10,p_blackhole:5,p_pulsar:5,p_dust:5,p_blizzard:10,p_shatter:7,p_zero:5,p_cycle:1,p_bite:7,p_icomet:7,p_globe:5,p_mind:10,p_eclipse:1};
 LINES.penguin={label:'สายเพนกวิน',classes:PG_CLASSES,skills:PG_SKILLS,sample:PG_SAMPLE,eff:PG_EFF,fx:PG_FX,free0:'p_spark',free2:'p_calendar',
-  hot:['p_spark','p_comet','p_shard','p_meteor','p_blizzard'],w:{INT:3,VIT:2,AGI:1,TAL:1,LCK:1,DEF:1,ATK:0,CHA:1},wtxt:'INT / VIT / AGI'};
+  hot:['p_spark','p_comet','p_shard','p_meteor','p_blizzard'],w:{TAL:3,VIT:2,AGI:1,INT:2,LCK:1,DEF:1,ATK:0,CHA:1},wtxt:'TAL / INT / VIT'};
 /* ---------- penguin systems: stars, chill, calendar, moon ---------- */
 const PG={stars:[],day:0,mulEnd:0,mul:1,pages:0,weekend:0,hist:[],histT:0,moonOff:0,snowman:null,globe:null,ecl:null};
 const DAYN=['จันทร์','อังคาร','พุธ','พฤหัส','ศุกร์','เสาร์','อาทิตย์'],DAYC=['#ffe066','#ff8ab0','#7ae07a','#ffa54a','#7ab8ff','#b88aff','#ff6a5a'];
@@ -17926,7 +17926,7 @@ const BT_FX={};BT_SKILLS.forEach(s=>BT_FX[s.id]='bt-'+s.id.slice(2)+'.svg');
 const BT_SAMPLE={t_darkbolt:10,t_swarm:10,t_echo:5,t_hang:3,t_wisdom:10,t_moonflame:5,t_skull:7,t_spikes:3,t_puppet:5,t_hypno:7,t_lullaby:3,t_nightmare:5,t_board:1,t_reaper:5,
   t_eater:5,t_theater:3,t_bia:5,t_ma:5,t_ruea:5,t_checkmate:3,t_throne:5,t_kiss:5,t_bloodmoon:3};
 LINES.bat={label:'สายค้างคาว',classes:BT_CLASSES,skills:BT_SKILLS,sample:BT_SAMPLE,eff:BT_EFF,fx:BT_FX,free0:'t_darkbolt',free2:'t_board',
-  hot:['t_darkbolt','t_swarm','t_echo','t_skull','t_hypno'],w:{INT:3,VIT:2,AGI:1,TAL:1,LCK:1,DEF:1,ATK:0,CHA:1},wtxt:'INT / VIT / AGI'};
+  hot:['t_darkbolt','t_swarm','t_echo','t_skull','t_hypno'],w:{TAL:3,VIT:2,AGI:1,INT:2,LCK:1,DEF:1,ATK:0,CHA:1},wtxt:'TAL / INT / VIT'};
 /* ---------- state ---------- */
 const BT={dead:[],stock:0,board:null,pieces:[],puppets:[],orbs:[],hang:false,hide:0,met:0,frogAt:-999,carnival:null,kingdom:null,dolls:[]};
 const btOn=()=>LINE==='bat';
@@ -18630,7 +18630,7 @@ const SH_EFF={h_pasture:H_({pk:'pasture',self:1,cd:2,dmg:false}),h_faith:{k:'pas
 const SH_FX={};SH_SKILLS.forEach(s=>SH_FX[s.id]='sh-'+s.id.slice(2)+'.svg');
 const SH_SAMPLE={h_pasture:10,h_faith:10,h_wool:10,h_ram:5,h_step:3,h_psalm:7,h_gale:5,h_pillar:5,h_crown:5,h_starflash:5,h_overflow:1,h_tablets:3,h_counting:3,h_featherstorm:5,h_fury:5,h_wings:1,h_choir:3};
 LINES.sheep={label:'สายแกะ',classes:SH_CLASSES,skills:SH_SKILLS,sample:SH_SAMPLE,eff:SH_EFF,fx:SH_FX,free0:'h_pasture',free2:'h_overflow',
-  hot:['h_pasture','h_ram','h_psalm','h_pillar','h_crown'],w:{INT:3,VIT:2,AGI:1,DEF:1,TAL:1,LCK:1,ATK:0,CHA:1},wtxt:'INT / VIT'};
+  hot:['h_pasture','h_ram','h_psalm','h_pillar','h_crown'],w:{TAL:3,VIT:2,AGI:1,DEF:1,INT:2,LCK:1,ATK:0,CHA:1},wtxt:'TAL / INT / VIT'};
 /* ---------- state ---------- */
 const SH={wool:0,halos:[],merit:0,might:0,chalice:null,ward:0,wardL:1,immune:0,fly:0,prayer:null,descent:0,rule:0,offer:null};const shOn=()=>LINE==='sheep';
 function woolCap(){return maxHp*(0.10+0.02*effLv('h_wool'))*(1+0.05*effLv('h_fleece'));}
@@ -19366,11 +19366,11 @@ const RC_SETS=[
  ['xwh','whale','abyssv',66,'v','ชุดห้วงสมุทรอานนท์',[["เกล็ดปิศาจทะเล", 6], ["แก่นน้ำแข็งนิรันดร์", 4], ["แกนพลังโบราณ", 4]],{w:'หอกห้วงสมุทรอานนท์',a:'เกราะห้วงสมุทรอานนท์',h:'หมวกห้วงสมุทรอานนท์'},{w:'Anon Abyss Spear V',a:'Anon Abyss Armor V',h:'Anon Abyss Helm V'},'หอก'],
  ['xwh','whale','abyssr',66,'r','ชุดห้วงสมุทรอานนท์ ★แดง',[["เกล็ดปิศาจทะเล", 6], ["แร่เพิ่มพลัง", 3], ["ผลึกเงา", 4]],{w:'หอกห้วงสมุทรอานนท์ ★',a:'เกราะห้วงสมุทรอานนท์ ★',h:'หมวกห้วงสมุทรอานนท์ ★'},{w:'Anon Abyss Spear R',a:'Anon Abyss Armor R',h:'Anon Abyss Helm R'},'หอก','abyssv']];
 /* stat flavour per race: penguin = INT/VIT/LCK mage, sheep = INT/CHA/VIT healer */
-const RC_ST={penguin:{w:lv=>({INT:Math.round(lv/12)}),a:lv=>({VIT:Math.round(lv/16),INT:Math.round(lv/20)}),h:lv=>({INT:Math.round(lv/14),LCK:Math.round(lv/24)})},
- sheep:{w:lv=>({INT:Math.round(lv/14),CHA:Math.round(lv/18)}),a:lv=>({VIT:Math.round(lv/14),CHA:Math.round(lv/22)}),h:lv=>({INT:Math.round(lv/16),CHA:Math.round(lv/16)})}};
+const RC_ST={penguin:{w:lv=>({TAL:Math.round(lv/12)}),a:lv=>({VIT:Math.round(lv/16),INT:Math.round(lv/20)}),h:lv=>({TAL:Math.round(lv/14),LCK:Math.round(lv/24)})},
+ sheep:{w:lv=>({TAL:Math.round(lv/14),CHA:Math.round(lv/18)}),a:lv=>({VIT:Math.round(lv/14),CHA:Math.round(lv/22)}),h:lv=>({TAL:Math.round(lv/16),CHA:Math.round(lv/16)})}};
 /* other races: [weapon main, weapon 2nd, armor main, armor 2nd, head main, head 2nd] */
-const RC_KEYS={wolf:['ATK','AGI','VIT','AGI','AGI','LCK'],monkey:['INT','TAL','VIT','INT','INT','TAL'],lizard:['AGI','ATK','VIT','AGI','ATK','LCK'],bison:['ATK','VIT','VIT','DEF','VIT','ATK'],
- mole:['ATK','TAL','VIT','DEF','TAL','ATK'],bat:['INT','CHA','VIT','INT','INT','CHA'],panda:['ATK','VIT','VIT','AGI','ATK','TAL'],cat:['ATK','LCK','VIT','AGI','LCK','AGI'],rabbit:['ATK','AGI','VIT','LCK','AGI','LCK'],whale:['ATK','VIT','VIT','DEF','VIT','ATK']};
+const RC_KEYS={wolf:['ATK','AGI','VIT','AGI','AGI','LCK'],monkey:['TAL','INT','VIT','INT','TAL','INT'],lizard:['AGI','ATK','VIT','AGI','ATK','LCK'],bison:['ATK','VIT','VIT','DEF','VIT','ATK'],
+ mole:['ATK','TAL','VIT','DEF','TAL','ATK'],bat:['TAL','CHA','VIT','INT','TAL','CHA'],panda:['ATK','VIT','VIT','AGI','ATK','TAL'],cat:['ATK','LCK','VIT','AGI','LCK','AGI'],rabbit:['ATK','AGI','VIT','LCK','AGI','LCK'],whale:['ATK','VIT','VIT','DEF','VIT','ATK']};
 Object.entries(RC_KEYS).forEach(([r,k])=>{RC_ST[r]={w:lv=>({[k[0]]:Math.round(lv/12),[k[1]]:Math.round(lv/22)}),a:lv=>({[k[2]]:Math.round(lv/14),[k[3]]:Math.round(lv/20)}),h:lv=>({[k[4]]:Math.round(lv/15),[k[5]]:Math.round(lv/22)})};});
 const RC_RN={wolf:'หมาป่า',monkey:'ลิง',lizard:'กิ้งก่า',bison:'ไบสัน',penguin:'เพนกวิน',mole:'ตุ่น',bat:'ค้างคาว',panda:'แพนด้า',cat:'แมว',sheep:'แกะ',rabbit:'กระต่าย',whale:'วาฬ'};
 const RC_MAG=r=>r==='monkey'||r==='penguin'||r==='bat'||r==='sheep';
@@ -19392,7 +19392,7 @@ const CSLOT_N={weapon:'อาวุธ',armor:'เกราะ',head:'หมว�
 /* key: [label, value at Lv1, value at Lv100, suffix] — stats.* are base stats, x.* are extra effects */
 const CFX={
  ATK:['ATK',1,10,''],AGI:['AGI',1,10,''],VIT:['VIT',1,10,''],INT:['INT',1,10,''],DEF:['DEF',1,10,''],LCK:['LCK',1,10,''],TAL:['TAL',1,10,''],
- atk:['ATK',2,25,''],matk:['INT',3,33,''],def:['DEF',3,35,''],hpP:['MaxHP',3,18,'%'],aspdP:['ASPD',2,12,'%'],crit:['คริติคอล',2,12,'%'],
+ atk:['ATK',2,25,''],matk:['TAL',3,33,''],def:['DEF',3,35,''],hpP:['MaxHP',3,18,'%'],aspdP:['ASPD',2,12,'%'],crit:['คริติคอล',2,12,'%'],
  atkP:['ดาเมจกายภาพ',3,15,'%'],matkP:['ดาเมจเวท',3,15,'%'],critDmg:['ดาเมจคริ',5,30,'%'],drain:['ดูดเลือด',1,5,'%'],splash:['ตีโดนศัตรูรอบข้าง',5,25,'%'],reflect:['สะท้อนดาเมจ',3,15,'%'],
  poison:['โอกาสติดพิษ',4,15,'%'],stunCh:['โอกาสมึน',2,8,'%'],freezeCh:['โอกาสแช่แข็ง',2,9,'%'],slowCh:['โอกาสทำให้ช้า',5,20,'%'],bleedCh:['โอกาสเลือดไหล',4,15,'%'],
  vsS_S:['ดาเมจใส่มอนขนาดเล็ก',6,25,'%'],vsS_M:['ดาเมจใส่มอนขนาดกลาง',6,25,'%'],vsS_L:['ดาเมจใส่มอนขนาดใหญ่',6,25,'%'],vsBoss:['ดาเมจใส่บอส',5,25,'%'],
@@ -19482,7 +19482,7 @@ function eqCalc(){for(const k in EQ)EQ[k]=0;EQF.atk=0;EQF.matk=0;STAT_KEYS.forEa
   {const c=setCounts();for(const k in c){const S_=CRAFT_SET[k];if(!S_)continue;const ns=b=>{const o=Object.assign({},b);delete o.stats;return o;};if(c[k]>=3)addO(ns(S_.b3));}}
   {const ac=archCounts();for(const a in ac){const x=ac[a];if(x.n>=3)addO({stats:{[ARCH[a].st[0]]:Math.round(x.lv/20)}});}}
   cardSetsActive().forEach(cs=>addO(cs[3]));}
-function eqStatLine(D,I){const p=[];const rb=I?refBonus(I):{};if(D.atk)p.push(`ATK +${eqA(D.atk)}${rb.atk?` (+${eqA(rb.atk)})`:''}`);if(D.matk)p.push(`INT +${eqA(D.matk)}${rb.matk?` (+${eqA(rb.matk)})`:''}`);
+function eqStatLine(D,I){const p=[];const rb=I?refBonus(I):{};if(D.atk)p.push(`ATK +${eqA(D.atk)}${rb.atk?` (+${eqA(rb.atk)})`:''}`);if(D.matk)p.push(`TAL +${eqA(D.matk)}${rb.matk?` (+${eqA(rb.matk)})`:''}`);
   if(D.def)p.push(`DEF ${D.def}${rb.def?` (+${rb.def})`:''}`);if(D.hpP)p.push(`MaxHP +${D.hpP}%`);if(D.aspdP)p.push(`ASPD ${D.aspdP>0?'+':''}${D.aspdP}%`);if(D.stats)for(const k in D.stats)p.push(`${k} +${D.stats[k]}`);
   if(I&&I.bonus)p.push('โบนัส '+Object.entries(I.bonus).map(([k,v])=>k+' +'+v).join(' '));if(D.set)p.push('['+CRAFT_SET[D.set].n+']');
   if(I&&I.cards.length)p.push('การ์ด: '+I.cards.map(t=>cardOf(t).label).join(', '));return p.join(' · ');}
@@ -19497,7 +19497,7 @@ function afterEq(){eqCalc();recalc();updateInv();renderEq();saveSoon();}
 function renderEq(){const w=document.getElementById('eqWin');if(!w||(w.hidden&&!(typeof heroOpen==='function'&&heroOpen())))return;
   document.getElementById('eqSlots').innerHTML=EQ_SLOTS.map(([s,l])=>{const I=equipped[s],D=I&&EQ_DB[I.id];
     return `<button class="eqs ${I?'':'empty'} ${D&&D.craft?'craft':''}" data-unq="${s}" ${I?`data-eqc="uid:${I.uid}"`:`title="${l}"`}><span class="ei">${D?`<img alt="" src="${D.icon}">`:''}</span><span class="et"><small>${l}</small><b>${I?eqName(I):'—'}</b><em>${D?eqStatLine(D,I):''}</em></span></button>`;}).join('');
-  const d=derived();document.getElementById('eqSum').innerHTML=`<span>ATK <b>${Math.round(d.atkStat)}</b></span><span>INT <b>${Math.round(d.matkStat)}</b></span><span>DEF <b>${S('DEF')+EQ.def}</b></span><span>MaxHP <b>${maxHp}</b></span><span>ตี <b>${(1/atkInterval(d)).toFixed(2)}</b>/วิ</span>`+cardSetHtml()+Object.entries(setCounts()).filter(([k,n])=>n>=3&&CRAFT_SET[k]&&Object.keys(CRAFT_SET[k].b3).some(q=>q!=='stats')).map(([k,n])=>`<span class="eqset">✔ ${CRAFT_SET[k].n} (${n} ชิ้น): ${bonusTxt(Object.fromEntries(Object.entries(CRAFT_SET[k].b3).filter(([q])=>q!=='stats')))||'-'}</span>`).join('')+Object.entries(archCounts()).filter(([a,x])=>x.n>=3).map(([a,x])=>`<span class="eqset">✔ สาย${ARCH[a].n} (${x.n} ชิ้น): ${ARCH[a].st[0]} +${Math.round(x.lv/20)}</span>`).join('');}
+  const d=derived();document.getElementById('eqSum').innerHTML=`<span>ATK <b>${Math.round(d.atkStat)}</b></span><span>TAL <b>${Math.round(d.matkStat)}</b></span><span>DEF <b>${S('DEF')+EQ.def}</b></span><span>MaxHP <b>${maxHp}</b></span><span>ตี <b>${(1/atkInterval(d)).toFixed(2)}</b>/วิ</span>`+cardSetHtml()+Object.entries(setCounts()).filter(([k,n])=>n>=3&&CRAFT_SET[k]&&Object.keys(CRAFT_SET[k].b3).some(q=>q!=='stats')).map(([k,n])=>`<span class="eqset">✔ ${CRAFT_SET[k].n} (${n} ชิ้น): ${bonusTxt(Object.fromEntries(Object.entries(CRAFT_SET[k].b3).filter(([q])=>q!=='stats')))||'-'}</span>`).join('')+Object.entries(archCounts()).filter(([a,x])=>x.n>=3).map(([a,x])=>`<span class="eqset">✔ สาย${ARCH[a].n} (${x.n} ชิ้น): ${ARCH[a].st[0]} +${Math.round(x.lv/20)}</span>`).join('');}
 document.addEventListener('click',e=>{const u=e.target.closest('[data-unq]');if(u){unequip(u.dataset.unq);}});
 /* inventory click: equipment + cards */
 let cardPick=null;
@@ -19578,9 +19578,9 @@ const ARCH={
  blade:{n:'ใบมีดเงา',st:['ATK','AGI','LCK'],col:'#d05a4a',b5:lv=>({crit:Math.round(2+lv/30)}),b5t:lv=>`Critical +${Math.round(2+lv/30)}%`},
  swift:{n:'เหยี่ยวลม',st:['AGI','ATK','LCK'],col:'#4ab88a',b5:lv=>({aspdP:Math.round(4+lv/15)}),b5t:lv=>`ASPD +${Math.round(4+lv/15)}%`},
  fury:{n:'ดุดัน',st:['ATK','TAL','VIT'],col:'#e0803a',b5:lv=>({atk:Math.round(lv*0.4)}),b5t:lv=>`ATK +${Math.round(lv*0.4)}`},
- arcane:{n:'อาคม',st:['INT','TAL','AGI'],col:'#6a7ae8',b5:lv=>({matk:Math.round(lv*0.5)}),b5t:lv=>`MATK +${Math.round(lv*0.5)}`},
- sage:{n:'ปราชญ์',st:['INT','VIT','DEF'],col:'#5ab0c8',b5:lv=>({hpP:Math.round(3+lv/15)}),b5t:lv=>`MaxHP +${Math.round(3+lv/15)}%`},
- mystic:{n:'มนตรา',st:['INT','CHA','TAL'],col:'#b06ad8',b5:lv=>({matk:Math.round(lv*0.3)}),b5t:lv=>`MATK +${Math.round(lv*0.3)}`},
+ arcane:{n:'อาคม',st:['TAL','INT','AGI'],col:'#6a7ae8',b5:lv=>({matk:Math.round(lv*0.5)}),b5t:lv=>`MATK +${Math.round(lv*0.5)}`},
+ sage:{n:'ปราชญ์',st:['TAL','VIT','INT'],col:'#5ab0c8',b5:lv=>({hpP:Math.round(3+lv/15)}),b5t:lv=>`MaxHP +${Math.round(3+lv/15)}%`},
+ mystic:{n:'มนตรา',st:['TAL','CHA','INT'],col:'#b06ad8',b5:lv=>({matk:Math.round(lv*0.3)}),b5t:lv=>`MATK +${Math.round(lv*0.3)}`},
  trick:{n:'เล่ห์กล',st:['ATK','CHA','TAL'],col:'#c8a03a',b5:lv=>({atk:Math.round(lv*0.3)}),b5t:lv=>`ATK +${Math.round(lv*0.3)}`},
  fortune:{n:'โชคลาภ',st:['LCK','ATK','CHA'],col:'#e8c830',b5:lv=>({crit:Math.round(2+lv/25)}),b5t:lv=>`Critical +${Math.round(2+lv/25)}%`}};
 /* two class-2 branches per race → archetype */
@@ -19629,7 +19629,7 @@ const EQC_SLOTN={weapon:'Weapon',head:'Headgear',armor:'Armor',shield:'Shield',s
 let eqcPrevArch=null;function eqcArch(D,I){if(!(D.craft||D.archable))return null;return I?archOf(I):(eqcPrevArch||archDefault());}
 function eqCardHtml(D,I){const rb=I?refBonus(I):{},bn=(I&&I.bonus)||{},ar=eqcArch(D,I),st=Object.assign({},D.stats||{});if(ar){const as=archStats(ar,D.lv);for(const k in as)st[k]=(st[k]||0)+as[k];}
   const sv=k=>(I&&I.stones||[]).reduce((a,x)=>a+(x&&x.s===k?x.v:0),0);
-  const v=k=>{if(!k)return'';let n=0;if(k==='ATK')n=eqA((D.atk||0)+(rb.atk||0));else if(k==='INT')n=eqA((D.matk||0)+(rb.matk||0));else if(k==='DEF')n=(D.def||0)+(rb.def||0);if(k!=='MATK')n+=(k==='ATK'||k==='DEF'?(st[k]||0):(st[k]||0))+(bn[k]||0);const x=k==='MATK'?0:sv(k);n+=x;return n?`<b class="${x?'up':''}">${n}${x?`<small>(+${x})</small>`:''}</b>`:'<i>-</i>';};
+  const v=k=>{if(!k)return'';let n=0;if(k==='ATK')n=eqA((D.atk||0)+(rb.atk||0));else if(k==='TAL')n=eqA((D.matk||0)+(rb.matk||0));else if(k==='DEF')n=(D.def||0)+(rb.def||0);if(k!=='MATK')n+=(k==='ATK'||k==='DEF'?(st[k]||0):(st[k]||0))+(bn[k]||0);const x=k==='MATK'?0:sv(k);n+=x;return n?`<b class="${x?'up':''}">${n}${x?`<small>(+${x})</small>`:''}</b>`:'<i>-</i>';};
   const row=(a,b)=>`<span>${a}</span>${v(a)}<span>${b}</span>${v(b)}`;
   const q=I&&I.q?I.q:0,ref=I&&I.ref?I.ref:0;
   const holes=D.craft?Array.from({length:I?sockN(I,D):(D.star==='r'?4:3)},(_,k)=>{const x=I&&I.stones&&I.stones[k];return x?`<em class="hole on" style="--sc:${STONE_COL[x.s]}" title="${x.s} +${x.v}"><u>${x.v}</u></em>`:'<em class="hole"></em>';}).join(''):'none';
@@ -19718,7 +19718,7 @@ function bsRecipes(){if(bsTab==='mat'){const R=[];[1,2].forEach(g=>STONE_STATS.f
 function bsRate(R){if(R.kind==='stone')return R.g===1?80:60;return R.lv<=20?100:Math.max(45,100-Math.floor((R.lv-20)*0.7));}
 function bsCareStep(R){return Math.max(50,Math.round(R.lv*15));}
 function bsRateNow(R){return Math.min(100,bsRate(R)+bsCare);}
-function bsStatHtml(R){if(!R||R.kind!=='eq')return '';const D=R.D,st=Object.assign({},D.stats||{});if(D.craft){const as=archStats(bsArch||archDefault(),D.lv);for(const k in as)st[k]=(st[k]||0)+as[k];}const v=k=>{let n=k==='ATK'?eqA(D.atk)+(st.ATK||0):k==='INT'?eqA(D.matk)+(st.INT||0):k==='DEF'?(D.def||0)+(st.DEF||0):(st[k]||0);return n?`<b>${n}</b>`:'<i>-</i>';};
+function bsStatHtml(R){if(!R||R.kind!=='eq')return '';const D=R.D,st=Object.assign({},D.stats||{});if(D.craft){const as=archStats(bsArch||archDefault(),D.lv);for(const k in as)st[k]=(st[k]||0)+as[k];}const v=k=>{let n=k==='ATK'?eqA(D.atk)+(st.ATK||0):k==='TAL'?eqA(D.matk)+(st.TAL||0):k==='DEF'?(D.def||0)+(st.DEF||0):(st[k]||0);return n?`<b>${n}</b>`:'<i>-</i>';};
   return ['ATK','INT','DEF','CHA','AGI','TAL','VIT','LCK'].map(k=>`<span>${k}</span>${v(k)}`).join('')+'';}
 function renderCraft(){const w=document.getElementById('craftWin');if(w.hidden)return;if(!bsArch)bsArch=archDefault();eqcPrevArch=bsArch;
   const L=bsRecipes(),per=24,pages=Math.max(1,Math.ceil(L.length/per));bsPage=Math.min(bsPage,pages-1);
@@ -19787,7 +19787,7 @@ function spRows(){if(spMode==='buy'){const st=shopStock();if(spCat==='eq')return
 function spDesc(r){if(r.D)return eqcDesc(r.D);const d=itemDesc(r.n);if(d)return d;if(STN[r.n]){const S_=STN[r.n];return `ยัดลงรูของคราฟ ⭐ เพื่อเพิ่ม ${S_.s} แบบสุ่ม +${STONE_G[S_.g][1]}~${STONE_G[S_.g][2]}`;}
   if(typeof CARD_BY_NAME==='function'&&CARD_BY_NAME(r.n))return CARD_BY_NAME(r.n).label;if(isCraftMat(r.n))return 'วัตถุดิบสำหรับคราฟชุดเซตที่ช่างตีเหล็ก ดรอปจาก '+matWhere(r.n);return 'ของดรอปทั่วไป ขายเป็นเงินได้';}
 function spStat(r){const D=r.D;if(!D)return'';const st=Object.assign({},D.stats||{}),rb=r.I?refBonus(r.I):{};if(D.archable||D.craft){const a=r.I?archOf(r.I):spArch;const as=archStats(a,D.lv);for(const k in as)st[k]=(st[k]||0)+as[k];}
-  const v=k=>{let n=k==='ATK'?eqA((D.atk||0)+(rb.atk||0))+(st.ATK||0):k==='INT'?eqA((D.matk||0)+(rb.matk||0))+(st.INT||0):k==='DEF'?(D.def||0)+(rb.def||0)+(st.DEF||0):(st[k]||0);return n?`<b>${n}</b>`:'<i>-</i>';};
+  const v=k=>{let n=k==='ATK'?eqA((D.atk||0)+(rb.atk||0))+(st.ATK||0):k==='TAL'?eqA((D.matk||0)+(rb.matk||0))+(st.TAL||0):k==='DEF'?(D.def||0)+(rb.def||0)+(st.DEF||0):(st[k]||0);return n?`<b>${n}</b>`:'<i>-</i>';};
   return `<div class="spst">${['ATK','INT','DEF','CHA','AGI','TAL','VIT','LCK'].map(k=>`<span>${k}</span>${v(k)}`).join('')}</div>`;}
 /* bulk sell: loot (+ craft materials when ticked), or every unequipped, un-refined, non-craft piece of gear */
 function spBulk(kind){if(kind==='eq'){const L=equipBag.filter(I=>{const D=EQ_DB[I.id];return!Object.values(equipped).includes(I)&&!I.ref&&!I.q&&!D.craft&&!(I.cards&&I.cards.length)&&!(I.stones&&Object.keys(I.stones).length);});
@@ -19957,15 +19957,15 @@ function setSound(on){soundOn=on;try{localStorage.setItem('aldria.sound',on?'1':
 
 /* ===================== CHARACTER SELECT ===================== */
 const RACES=[['wolf','เผ่าหมาป่า','นักดาบสายบู๊ ตีแรง คล่องตัว เล่นง่าย',assetURL("hero.png"),6,224,192,'ATK / AGI'],
-  ['monkey','เผ่าลิง','นักเวทผู้อัญเชิญ มีสัตว์ช่วยสู้ ตีจากระยะกลาง',assetURL("cos_monkey.webp"),6,224,192,'INT / VIT'],
+  ['monkey','เผ่าลิง','นักเวทผู้อัญเชิญ มีสัตว์ช่วยสู้ ตีจากระยะกลาง',assetURL("cos_monkey.webp"),6,224,192,'TAL / INT'],
   ['lizard','เผ่ากิ้งก่า','นักธนูยิงไกล กับดัก คำสาป พรางตัว',assetURL("cos_lizard.webp"),6,288,224,'AGI / ATK'],
-  ['penguin','เผ่าเพนกวิน','จอมเวทดวงดาวและน้ำแข็ง ยิงไกล คุมพื้นที่',assetURL("cos_penguin.webp"),6,320,224,'INT / VIT'],
+  ['penguin','เผ่าเพนกวิน','จอมเวทดวงดาวและน้ำแข็ง ยิงไกล คุมพื้นที่',assetURL("cos_penguin.webp"),6,320,224,'TAL / INT'],
   ['cat','เผ่าแมว','โจรสลัดนักพนัน ไพ่ โชค เก้าชีวิต กองเรือ',assetURL("cos_cat.webp"),6,376,256,'ATK / LCK'],
-  ['sheep','เผ่าแกะ','นักบวชฮีลเลอร์ ขนแกะ บัญญัติ ตาชั่งบุญฤทธิ์',assetURL("cos_sheep.webp"),6,376,256,'INT / VIT'],
+  ['sheep','เผ่าแกะ','นักบวชฮีลเลอร์ ขนแกะ บัญญัติ ตาชั่งบุญฤทธิ์',assetURL("cos_sheep.webp"),6,376,256,'TAL / INT'],
   ['rabbit','เผ่ากระต่าย','มือปืนนักต้มตุ๋น ยา ตลาด ลวงหรือจริง',assetURL("cos_rabbit.webp"),6,320,224,'ATK / AGI'],
   ['whale','เผ่าวาฬ','อัศวินโล่หอก ถึกที่สุด แรงดันน้ำ เพรียง ดำน้ำ',assetURL("cos_whale.webp"),6,376,256,'VIT / ATK'],
   ['panda','เผ่าแพนด้า','นักมวยกังฟู ต่อกระบวนท่า เรียกพายุฟ้าผ่า',assetURL("cos_panda.webp"),6,320,224,'ATK / VIT'],
-  ['bat','เผ่าค้างคาว','แม่มดราตรี สะกดฝัน ขโมยเงา หมากรุกไทย',assetURL("cos_bat.webp"),6,224,192,'INT / VIT'],
+  ['bat','เผ่าค้างคาว','แม่มดราตรี สะกดฝัน ขโมยเงา หมากรุกไทย',assetURL("cos_bat.webp"),6,224,192,'TAL / INT'],
   ['mole','เผ่าตุ่น','วิศวกรระเบิด วางป้อม ขับหุ่นยักษ์',assetURL("cos_mole.webp"),6,320,224,'ATK / VIT'],
   ['bison','เผ่าไบสัน','นักรบขวานสองมือ ถึกที่สุด ยั่วมอน ตีหมู่',assetURL("cos_bison.webp"),6,320,224,'ATK / VIT']];
 let csPick='wolf';
@@ -21931,7 +21931,7 @@ function renderHero(){if(!heroOpen())return;const L=advLevel(),T=advTier(L),ti=A
   document.getElementById('hrBadge').src=advBadge(ti,96);document.getElementById('hrRank').textContent=T[1];document.getElementById('hrRp').textContent=ADV.rp.toLocaleString();
   document.getElementById('hrFace').style.backgroundImage=getComputedStyle(document.getElementById('face')).backgroundImage;
   const need=expNeed(lvl),p=lvl>=99&&!reborn?100:Math.min(100,exp/need*100);document.getElementById('hrExp').textContent=`${Math.floor(exp).toLocaleString()} / ${need.toLocaleString()}`;document.getElementById('hrExpBar').style.width=p+'%';
-  document.getElementById('hrDv').innerHTML=[['ATK',Math.round(d.atkStat)],['INT',Math.round(d.matkStat)],['DEF',S('DEF')+EQ.def],['HP',maxHp],['SP',maxSp],['ตี/วิ',(1/atkInterval(d)).toFixed(2)],['CRIT',Math.round(d.crit*100)+'%'],['Speed',d.spd.toFixed(1)]].map(([k,v])=>`<span>${k}</span><b>${v}</b>`).join('');
+  document.getElementById('hrDv').innerHTML=[['ATK',Math.round(d.atkStat)],['TAL',Math.round(d.matkStat)],['DEF',S('DEF')+EQ.def],['HP',maxHp],['SP',maxSp],['ตี/วิ',(1/atkInterval(d)).toFixed(2)],['CRIT',Math.round(d.crit*100)+'%'],['Speed',d.spd.toFixed(1)]].map(([k,v])=>`<span>${k}</span><b>${v}</b>`).join('');
   document.getElementById('hrGold').textContent=gold.toLocaleString();document.getElementById('hrBagN').textContent=(Object.keys(inv).length+equipBag.length).toLocaleString();
   document.querySelectorAll('#heroWin [data-htab]').forEach(b=>b.setAttribute('aria-selected',b.dataset.htab===heroTab));document.getElementById('hrItems').hidden=heroTab!=='items';document.getElementById('hrSet').hidden=heroTab!=='set';
   renderEq();drawRadar();}
@@ -22207,7 +22207,7 @@ function rpShopHtml(){const ti=ADV_TIERS.indexOf(advTier()),P=rpPerm(),L=advLeve
   return `<div class="rpbal"><span>แต้ม RP ที่ใช้ได้</span><b>${ADV.rp.toLocaleString()} RP</b><small>ARP สะสมรวม ${ADV.arp.toLocaleString()} (ใช้จัดยศ ไม่ลดเมื่อแลกของ)</small></div>
    <div class="rpbuf"><span>⚔ ATK ถาวร +${L-1+2*P.atk}</span><span>🎯 คริถาวร +${ti+P.crit}%</span>${P.cdmg?`<span>💥 แรงคริ +${2*P.cdmg}%</span>`:''}${bt('rp_atk')?`<span>🩸 ATK +10% · ${bt('rp_atk')} นาที</span>`:''}${bt('rp_crit')?`<span>🦅 คริ +10% · ${bt('rp_crit')} นาที</span>`:''}${bt('rp_war')?`<span>🎖 เครื่องรางแม่ทัพ · ${bt('rp_war')} นาที</span>`:''}</div>
    <h4>อุปกรณ์ยศ (ATK สูงสุดในเกม)</h4>${RP_SETS.map(S_=>{const lock=ti<S_[4];return `<div class="rpset ${lock?'lock':''}" style="--sc:${S_[3]}"><div class="rpsh"><img alt="" src="${advBadge(S_[4],48)}"><b>ชุด${S_[1]}</b><small>${lock?`🔒 ต้องยศ ${ADV_TIERS[S_[4]][1]}`:`ปลดล็อกแล้ว`} · ใส่ได้ Base Lv ${S_[2]}</small></div>
-     <div class="rplist">${RP_EQ_SLOTS.map(([sl,nm,mul])=>{const id=rpEqId(S_[0],sl),D=EQ_DB[id];if(!D)return'';const c=Math.round(S_[6]*mul);return `<div class="rpi"><img alt="" src="${D.icon}" data-eqc="id:${id}"><div><b>${D.n}</b><small>${D.atk?'ATK +'+eqA(D.atk)+' · ':''}${D.matk?'INT +'+eqA(D.matk)+' · ':''}${D.stats&&D.stats.ATK?'สเตตัส ATK +'+D.stats.ATK+' · ':''}คริ +${D.crit}%</small></div><button data-rpeq="${S_[0]}:${sl}" ${lock||ADV.rp<c?'disabled':''}>${c.toLocaleString()} RP</button></div>`;}).join('')}</div></div>`;}).join('')}
+     <div class="rplist">${RP_EQ_SLOTS.map(([sl,nm,mul])=>{const id=rpEqId(S_[0],sl),D=EQ_DB[id];if(!D)return'';const c=Math.round(S_[6]*mul);return `<div class="rpi"><img alt="" src="${D.icon}" data-eqc="id:${id}"><div><b>${D.n}</b><small>${D.atk?'ATK +'+eqA(D.atk)+' · ':''}${D.matk?'TAL +'+eqA(D.matk)+' · ':''}${D.stats&&D.stats.ATK?'สเตตัส ATK +'+D.stats.ATK+' · ':''}คริ +${D.crit}%</small></div><button data-rpeq="${S_[0]}:${sl}" ${lock||ADV.rp<c?'disabled':''}>${c.toLocaleString()} RP</button></div>`;}).join('')}</div></div>`;}).join('')}
    <h4>อัปถาวร · บัฟ · หินพลัง</h4>   <div class="rplist">${RPS.map(R=>{const lock=ti<R.t,c=rpCost(R),full=R.perm&&P[R.perm]>=R.cap(ti),poor=ADV.rp<c;
      const sub=lock?`🔒 ต้องยศ ${ADV_TIERS[R.t][1]}`:R.perm?`อัปแล้ว ${P[R.perm]}/${R.cap(ti)}${full?' · เลื่อนยศเพื่ออัปต่อ':''}`:R.buff?'บัฟชั่วคราว ซื้อซ้ำต่อเวลา':'ไอเทม';
      return `<div class="rpi ${lock?'lock':''}"><img alt="" src="${ICON_URL[R.ic]||''}"><div><b>${R.n}</b><small>${sub}</small></div><button data-rpbuy="${R.id}" ${lock||poor||full?'disabled':''}>${c} RP</button></div>`;}).join('')}</div>`;}
@@ -22263,12 +22263,12 @@ function raceLoad(r){if(!r)return;try{
   if(r.sh&&typeof SH!=='undefined'){SH.wool=r.sh.wool||0;SH.merit=r.sh.merit||0;SH.might=r.sh.might||0;}
   if(r.rb&&typeof RB!=='undefined'){const b=r.rb;RB.pots=Array.isArray(b.pots)?b.pots:[];RB.mats=b.mats??3;RB.fame=b.fame||0;RB.luck=b.luck||0;RB.luckT=time;RB.price=b.price||1;RB.shot=b.shot||0;RB.silver=b.silver||0;RB.wit=b.wit||0;
     RB.lfEnd=b.lf?time+b.lf:0;RB.invest=b.invest?{amt:b.invest.amt,p:b.invest.p,end:time+b.invest.left}:null;}}catch(e){}}
-function gatherSave(){return {v:SAVE_VER,t:Date.now(),name:player.name,line:LINE,lvl,exp,statPts,reborn,base:{...base},classIdx,jobLv,jobExp,skLv:{...skLv},
+function gatherSave(){return {v:SAVE_VER,t:Date.now(),name:player.name,line:LINE,lvl,exp,statPts,reborn,base:{...base},talSwap:1,classIdx,jobLv,jobExp,skLv:{...skLv},
   hot:HOT.map(h=>h?JSON.parse(JSON.stringify(h)):null),inv:{...inv},gold,eqUid,equipBag:JSON.parse(JSON.stringify(equipBag)),equipped:JSON.parse(JSON.stringify(equipped)),
   cos:typeof curCos!=='undefined'?curCos:'base',pet:{...PET_STAR},qa:{...qActive},qd:{...qDone},st:{...ST},map:curMap.key,x:Math.round(player.x*10)/10,z:Math.round(player.z*10)/10,php:Math.round(php),psp:Math.round(psp),dayT:Math.round(dayT),rs:raceSave(),pt:partySave(),sq:sqSave(),ob:OFB.on?{...OFB}:null,adv:typeof advSave==='function'?advSave():null};}
 function applySave(d){if(typeof obLoad==='function')setTimeout(()=>obLoad(d.ob),0);player.name=d.name;meLabel.textContent=d.name;const nmEl=document.querySelector('#me .nm');if(nmEl&&nmEl.firstChild)nmEl.firstChild.textContent=d.name;
   csPick=d.line;setLine(d.line);
-  lvl=d.lvl;exp=d.exp;statPts=d.statPts;reborn=!!d.reborn;Object.assign(base,d.base);classIdx=d.classIdx;jobLv=d.jobLv;jobExp=d.jobExp;
+  lvl=d.lvl;exp=d.exp;statPts=d.statPts;reborn=!!d.reborn;Object.assign(base,d.base);if(!d.talSwap&&['monkey','penguin','bat','sheep'].includes(d.line)){const t=base.TAL;base.TAL=base.INT;base.INT=t;setTimeout(()=>say('🔄 เวทมนตร์ตอนนี้แรงตาม TAL — สลับแต้ม INT ↔ TAL ให้อัตโนมัติแล้ว (ดาเมจเท่าเดิม)','sys'),1500);}classIdx=d.classIdx;jobLv=d.jobLv;jobExp=d.jobExp;
   for(const k in skLv)skLv[k]=0;Object.assign(skLv,d.skLv);
   {const src=Array.isArray(d.hot)?d.hot:[];const old=src.length<HOT.length;const sk=old?src.filter(h=>h&&h.sk):null;HOT.forEach((h,i)=>HOT[i]=old?(sk[i]||null):(src[i]!==undefined&&!(src[i]&&!src[i].sk)?src[i]:null));}
   for(const k in skLv)if(!SKB[k])delete skLv[k];SKILLS.forEach(q=>{if(skLv[q.id]==null)skLv[q.id]=0;});if(SKB[FREE0]&&!skLv[FREE0])skLv[FREE0]=1;if(classIdx>=2&&SKB[FREE2]&&!skLv[FREE2])skLv[FREE2]=1;
