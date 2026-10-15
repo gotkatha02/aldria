@@ -21680,7 +21680,7 @@ function renderCraftOld(){const w=document.getElementById('craftWin');if(w.hidde
   document.getElementById('craftTabs').innerHTML=CRAFT_SETS.map(([sid,sn,lv,col])=>`<button data-cset="${sid}" aria-selected="${sid===craftSet}" style="--c:${col}"><i></i>${sn}<small>Lv ${lv}</small></button>`).join('');
   const S_=CRAFT_SET[craftSet],cnt=setCounts()[craftSet]||0;
   document.getElementById('craftInfo').innerHTML=`<b style="color:${S_.col}">${S_.n}</b> · Lv ${S_.lv} · สวมอยู่ ${cnt}/5 ชิ้น<div class="cfb"><span class="${cnt>=3?'on':''}">ใส่ 3 ชิ้น: ${bonusTxt(S_.b3)}</span><span class="${cnt>=5?'on':''}">ใส่ครบ 5 ชิ้น: ${bonusTxt(S_.b5)}</span></div>
-    <div class="cfm">วัตถุดิบ: ${S_.mats.map(n=>`<span title="ดรอปจาก ${matWhere(n)}"><img alt="" src="${ICON_URL[n]||''}">${n} <small>(${matWhere(n)})</small></span>`).join('')}</div>`;
+    <div class="cfm">วัตถุดิบ: ${S_.mats.map(n=>`<span data-mw="${n}" style="cursor:pointer" title="ดรอปจาก ${matWhere(n)} — แตะดูรายละเอียด"><img alt="" src="${ICON_URL[n]||''}">${n} <small>(${matWhere(n)})</small></span>`).join('')}</div>`;
   document.getElementById('craftList').innerHTML=craftPieces(craftSet).map(D=>{const c=craftCost(D),ok=c.mats.every(([n,q])=>(inv[n]||0)>=q)&&gold>=c.z;
     return `<div class="cfr" data-eqc="id:${D.id}"><img alt="" src="${D.icon}"><div><b>${D.n}</b><small>Lv ${D.lv} · ${eqStatLine(D)}${D.slots?` · ช่องการ์ด ${D.slots}`:''}</small>
       <div class="cfc">${c.mats.map(([n,q])=>{const h=inv[n]||0;return `<span class="${h>=q?'ok':'no'}"><img alt="" src="${ICON_URL[n]||''}">${h}/${q}</span>`;}).join('')}<span class="${gold>=c.z?'ok':'no'}">${c.z.toLocaleString()} z</span></div></div>
@@ -21906,7 +21906,7 @@ const RC_RN={wolf:'หมาป่า',monkey:'ลิง',lizard:'กิ้ง�
 const RC_MAG=r=>r==='monkey'||r==='penguin'||r==='bat'||r==='sheep';
 RC_SETS.forEach(([px,race,sid,lv,star,sn,mats,th,en,wt,from])=>{const tf=lv/15,t=Math.min(6,Math.round(tf)),M=CRAFT_MUL,col=star==='r'?'#ff4a5a':'#ffd24a';
   const cost=(w,k)=>({mats:(from?[[`@eq:${px}_${from}_${k}`,2]]:[]).concat(mats.map(([n,q])=>[n,Math.round(q*w)])),z:Math.round((lv*lv*4+300)*w*(star==='r'?2:1))});
-  const desc=k=>`${en[k]} — ชิ้นส่วนของ${sn} (เฉพาะเผ่า${RC_RN[race]||race}) ${star==='r'?'★แดง การันตีรูใส่หิน 4 รู · คราฟจากชิ้น ★เหลืองแบบเดียวกัน 2 ชิ้น':'★เหลือง รูใส่หินสุ่ม 1–3 รู'} · ยัดหินพลังเพื่อเพิ่มสเตตัส`;
+  const desc=k=>`${en[k]} — ชิ้นส่วนของ${sn} (เฉพาะเผ่า${RC_RN[race]||race}) ${star==='r'?'★แดง การันตีรูใส่หิน 4 รู · ได้จากการนำชิ้น ★เหลืองแบบเดียวกันไปอัปดาวแดงที่ช่างตีเหล็ก (ใช้ผลึกดาวแดง)':'★เหลือง รูใส่หินสุ่ม 1–3 รู · นำไปอัปเป็น ★แดง ได้ด้วยผลึกดาวแดง'} · ยัดหินพลังเพื่อเพิ่มสเตตัส`;
   const base=Math.round((22+tf*42+tf*tf*4)*M*1.06),S_=RC_ST[race];
   const wb=Math.round(base*(race==='bison'?1.2:race==='lizard'||race==='rabbit'?0.95:1));addEq(`${px}_${sid}_w`,{n:th.w,slot:'weapon',line:race,lv,t,type:wt,...(RC_MAG(race)?{matk:base,atk:Math.round(base*0.35)}:{atk:wb}),slots:Math.min(3,1+(t>>1)),craft:true,star,col,stats:S_.w(lv),desc:desc('w'),pgcost:cost(2,'w'),rc:race});
   addEq(`${px}_${sid}_a`,{n:th.a,slot:'armor',line:race,lv,t,type:'เกราะ',def:Math.round((5+6*tf)*M),hpP:Math.round(tf*2*M),slots:1,craft:true,star,col,stats:S_.a(lv),desc:desc('a'),pgcost:cost(1.5,'a'),rc:race});
@@ -22001,20 +22001,20 @@ function addExtra(o){if(o.x)for(const k in o.x)EQX[k]=(EQX[k]||0)+o.x[k];if(o.im
 /* instances */
 const equipBag=[],equipped={weapon:null,head:null,armor:null,shield:null,shoes:null,acc1:null,acc2:null};
 function newEq(id){return{uid:eqUid++,id,ref:0,cards:[]};}
-function eqName(I){const D=EQ_DB[I.id];return(I.ref?`+${I.ref} `:'')+(I.q?`[${QUAL[I.q][0]}] `:'')+D.n+(D.slots?` [${I.cards.length}/${D.slots}]`:'');}
+function eqName(I){const D=EQ_DB[I.id];return(I.ref?`+${I.ref} `:'')+(I.q?`[${QUAL[I.q][0]}] `:'')+D.n+(I.red?' ★แดง':'')+(D.slots?` [${I.cards.length}/${D.slots}]`:'');}
 /* refBonus(): ย้ายไปอยู่ที่หัวข้อ refine window (v177b) */
 function cardSetHtml(){const have=new Set(),own=new Set(Object.keys(inv));Object.values(equipped).forEach(I=>{if(I)I.cards.forEach(t=>have.add(t));});equipBag.forEach(I=>I.cards.forEach(t=>own.add(cardOf(t).name)));
   const act=CARD_SETS.filter(s=>s[2].every(t=>have.has(t))).length;
   return `<details class="csets"><summary>ชุดการ์ด (ทำงาน ${act}/${CARD_SETS.length})</summary>`+CARD_SETS.map(([id,n,ts,,lab])=>{const on=ts.every(t=>have.has(t));return `<div class="cset ${on?'on':''}"><b>${on?'✔ ':''}${n}</b><small>${lab}</small><span>${ts.map(t=>{const C=cardOf(t),h=have.has(t);return `<i class="${h?'in':own.has(C.name)?'own':''}">${C.name.replace('การ์ด','')}</i>`;}).join('')}</span></div>`;}).join('')+'<p class="cshint">เสียบการ์ดครบ 3 ใบในอุปกรณ์ที่สวมอยู่ (ชิ้นไหนก็ได้) · สีเขียว = เสียบแล้ว · สีเหลือง = มีในกระเป๋า</p></details>';}
 function eqCalc(){for(const k in EQ)EQ[k]=0;EQF.atk=0;EQF.matk=0;STAT_KEYS.forEach(k=>bonus[k]=0);for(const k in EQX)EQX[k]=0;for(const k in EQIMM)delete EQIMM[k];
   const addO=o=>{if(!o)return;addExtra(o);['atk','matk','def','hpP','aspdP','crit'].forEach(k=>{if(o[k])EQ[k]+=o[k];});if(o.stats)for(const k in o.stats)bonus[k]=(bonus[k]||0)+o.stats[k];};
-  Object.values(equipped).forEach(I=>{if(!I)return;const D=EQ_DB[I.id];addO(D);addO(refBonus(I));if(I.bonus)addO({stats:I.bonus});I.cards.forEach(t=>{const C=cardOf(t);if(C){const e=Object.assign({},C.eff);EQF.atk+=(e.atk||0)*ATK_M;EQF.matk+=(e.matk||0)*ATK_M;delete e.atk;delete e.matk;addO(e);}});if(I.stones)I.stones.forEach(x=>{if(x)addO({stats:{[x.s]:x.v}});});{const a=archOf(I);if(a)addO({stats:archStats(a,D.lv)});}});
+  Object.values(equipped).forEach(I=>{if(!I)return;const D=EQ_DB[I.id];addO(D);addO(refBonus(I));if(isRed(I,D))addO(redBonus(I));if(I.bonus)addO({stats:I.bonus});I.cards.forEach(t=>{const C=cardOf(t);if(C){const e=Object.assign({},C.eff);EQF.atk+=(e.atk||0)*ATK_M;EQF.matk+=(e.matk||0)*ATK_M;delete e.atk;delete e.matk;addO(e);}});if(I.stones)I.stones.forEach(x=>{if(x)addO({stats:{[x.s]:x.v}});});{const a=archOf(I);if(a)addO({stats:archStats(a,D.lv)});}});
   {const c=setCounts();for(const k in c){const S_=CRAFT_SET[k];if(!S_)continue;const ns=b=>{const o=Object.assign({},b);delete o.stats;return o;};if(c[k]>=3)addO(ns(S_.b3));}}
   {const ac=archCounts();for(const a in ac){const x=ac[a];if(x.n>=3)addO({stats:{[ARCH[a].st[0]]:Math.round(x.lv/20)}});}}
   cardSetsActive().forEach(cs=>addO(cs[3]));{const rt=typeof refTotBonus==='function'?refTotBonus():null;if(rt)addO(rt[1]);}}
 function eqStatLine(D,I){const p=[];const rb=I?refBonus(I):{};if(D.atk)p.push(`ATK +${eqA(D.atk)}${rb.atk?` (+${eqA(rb.atk)})`:''}`);if(D.matk)p.push(`TAL +${eqA(D.matk)}${rb.matk?` (+${eqA(rb.matk)})`:''}`);
   if(D.def)p.push(`DEF ${D.def}${rb.def?` (+${rb.def})`:''}`);if(D.hpP)p.push(`MaxHP +${D.hpP}%`);if(D.aspdP)p.push(`ASPD ${D.aspdP>0?'+':''}${D.aspdP}%`);if(D.stats)for(const k in D.stats)p.push(`${k} +${D.stats[k]}`);
-  if(I&&I.bonus)p.push('โบนัส '+Object.entries(I.bonus).map(([k,v])=>k+' +'+v).join(' '));if(D.set)p.push('['+CRAFT_SET[D.set].n+']');
+  if(I&&isRed(I,D)){const rb2=redBonus(I);p.push('🔴 ดาวแดง: '+[rb2.atk?`ATK +${eqA(rb2.atk)}`:'',rb2.matk?`TAL +${eqA(rb2.matk)}`:'',rb2.def?`DEF +${rb2.def}`:'',...Object.entries(rb2.stats||{}).map(([k,v])=>k+' +'+v)].filter(Boolean).join(' ')+' · รู 4 รู');}if(I&&I.bonus)p.push('โบนัส '+Object.entries(I.bonus).map(([k,v])=>k+' +'+v).join(' '));if(D.set)p.push('['+CRAFT_SET[D.set].n+']');
   if(I&&I.cards.length)p.push('การ์ด: '+I.cards.map(t=>cardOf(t).label).join(', '));return p.join(' · ');}
 function canWear(D){if(D.line&&D.line!==LINE)return'อาวุธนี้สำหรับ'+LINES[D.line].label;if(D.lv>lvl&&!reborn)return`ต้อง Base Lv ${D.lv}`;
   if(D.slot==='shield'&&(LINE==='bison'||LINE==='lizard'))return'อาวุธสองมือใช้โล่ไม่ได้';return null;}
@@ -22067,7 +22067,7 @@ let cardPick=null;
 function invClick(n,I){if(I){if(stonePick){socketStone(I);return;}if(cardPick){insertCard(I);return;}equipItem(I);return;}
   if(STN[n]){if(typeof openStoneWin==='function'){openStoneWin(n);return;}stonePickStart(n);return;}
   const C=CARD_BY_NAME(n);if(C){if(typeof openCardWin==='function'){openCardWin(n);return;}cardPick=C;say(`เลือก ${C.name} (${C.label}) แล้ว — คลิกอุปกรณ์ที่มีช่องการ์ดในกระเป๋าหรือในหน้าอุปกรณ์เพื่อเสียบ`,'sys');document.body.classList.add('picking');return;}
-  useItem(n);}
+  if(!USE[n]&&!playerDown&&matCanShow(n)){openMatWhere(n);return;}useItem(n);}
 function insertCard(I){const C=cardPick;cardPick=null;document.body.classList.remove('picking');const D=EQ_DB[I.id];
   if(!D.slots||I.cards.length>=D.slots){say(`${eqName(I)} ไม่มีช่องการ์ดว่าง`,'sys');return;}if(!inv[C.name]){return;}
   if(!cardSlotOK(C,D.slot)){say(`${C.name} ใส่ได้เฉพาะ${CSLOT_N[C.slot]}เท่านั้น`,'sys');return;}
@@ -22121,7 +22121,7 @@ function swPut(I,k){const n=swSel,D=EQ_DB[I.id];if(!n||!inv[n])return;I.stones=I
 function renderStoneWin(){const B=document.getElementById('swBody');if(!B||document.getElementById('stoneWin').hidden)return;const st=swStones();if(swSel&&!inv[swSel])swSel=null;if(!swSel&&st[0])swSel=st[0];
   const G=swGear();B.innerHTML=`<div class="cwl"><h4>1. เลือกหินพลัง <small>(${st.reduce((a,n)=>a+inv[n],0)} ก้อน)</small></h4><div class="cwcards">${st.map(n=>{const S_=STN[n];return `<button class="cwc ${n===swSel?'sel':''}" data-sws="${n}"><img alt="" src="${ICON_URL[n]||''}"><span><b>${n}</b><small style="color:${STONE_COL[S_.s]||'#2a6a3a'}">สุ่ม ${S_.s} +${STONE_G[S_.g][1]}~${STONE_G[S_.g][2]}</small></span>${inv[n]>1?`<u>×${inv[n]}</u>`:''}</button>`;}).join('')||'<p class="cwempty">ยังไม่มีหินพลัง — ดรอปจากบอส/อีลิท ซื้อที่ร้าน (หมวดหินพลัง) หรือหลอมที่ช่างคราฟ (แท็บ Material)</p>'}</div></div>
   <div class="cwr"><h4>2. แตะรูของอุปกรณ์คราฟ ⭐</h4>${swSel?`<p class="cwsel"><img alt="" src="${ICON_URL[swSel]||''}"> <b>${swSel}</b> · แตะรูว่าง ◯ เพื่อยัด · แตะรูที่มีหินแล้ว 2 ครั้งเพื่อสุ่มใหม่ทับ</p>`:''}
-   <div class="cwgear">${G.map(({I,on})=>{const D=EQ_DB[I.id],n=sockN(I,D);return `<div class="cwg fit" data-eqc="uid:${I.uid}"><img alt="" src="${D.icon}"><span class="cwgn"><b>${eqName(I)}</b><small>${D.star==='r'?'<em style="color:#e0303a">★แดง</em>':'<em style="color:#c89a10">★เหลือง</em>'} · ${n} รู${on?' · <em>สวมอยู่</em>':''}</small></span>
+   <div class="cwgear">${G.map(({I,on})=>{const D=EQ_DB[I.id],n=sockN(I,D);return `<div class="cwg fit" data-eqc="uid:${I.uid}"><img alt="" src="${D.icon}"><span class="cwgn"><b>${eqName(I)}</b><small>${isRed(I,D)?'<em style="color:#e0303a">★แดง</em>':'<em style="color:#c89a10">★เหลือง</em>'} · ${n} รู${on?' · <em>สวมอยู่</em>':''}</small></span>
      <span class="cwsl">${Array.from({length:n},(_,k)=>{const x=I.stones&&I.stones[k];return x?`<button class="cws on swh" style="--sc:${STONE_COL[x.s]||'#ffd24a'}" data-swput="${I.uid}:${k}" ${swSel?'':'disabled'} title="${x.s} +${x.v}"><b>${x.s}</b><i>+${x.v}</i></button>`:`<button class="cws ${swSel?'go':''}" data-swput="${I.uid}:${k}" ${swSel?'':'disabled'}>◯</button>`;}).join('')}</span></div>`;}).join('')||'<p class="cwempty">ยังไม่มีอุปกรณ์คราฟ ⭐ — คราฟได้ที่ช่างคราฟ ราซาน (ของ ★เหลืองมีรู 1–3 รู · ★แดงมี 4 รู)</p>'}</div></div>`;}
 function openStoneWin(n){if(n)swSel=n;toggleWin('stoneWin',true);renderStoneWin();}
 (function(){const w=document.createElement('section');w.id='stoneWin';w.className='pw drag';w.hidden=true;w.setAttribute('aria-label','ยัดหินพลัง');
@@ -22161,7 +22161,7 @@ const STONE_G=[['Ⅰ',1,2,800],['Ⅱ',1,4,3000],['Ⅲ',2,6,9000]];
 const STN={};const stoneName=(s,g)=>`หินพลัง ${s} ${STONE_G[g][0]}`;
 STONE_STATS.forEach(s=>STONE_G.forEach((G,g)=>{STN[stoneName(s,g)]={s,g};}));
 const STONE_SOCKETS=4;
-function sockN(I,D){D=D||(I&&EQ_DB[I.id]);if(!D||!D.craft)return 0;if(I&&I.sock!=null)return I.sock;return D.star==='r'?4:STONE_SOCKETS;}
+function sockN(I,D){D=D||(I&&EQ_DB[I.id]);if(!D||!D.craft)return 0;if(I&&I.red)return 4;if(I&&I.sock!=null)return I.sock;return D.star==='r'?4:STONE_SOCKETS;}
 function stoneRoll(g){const G=STONE_G[g];return G[1]+Math.floor(Math.random()*(G[2]-G[1]+1));}
 let stonePick=null;
 function stonePickStart(n){stonePick=n;cardPick=null;document.body.classList.add('picking');const S_=STN[n];say(`เลือก ${n} (สุ่ม ${S_.s} +${STONE_G[S_.g][1]}~${STONE_G[S_.g][2]}) — คลิกอุปกรณ์คราฟ ⭐ ในกระเป๋าหรือหน้าอุปกรณ์เพื่อยัดใส่รู`,'sys');}
@@ -22321,14 +22321,14 @@ PRICE['ผงนำโชค']=5000;PRICE['คัมภีร์คุ้มค�
 ORE_SRC.push('c12golem','c12clay','c12general','c12turtle','w2sentinel','w2scrapgolem','w2colossus','w2guardian','w2obsidian','w2meteor','w3coreknight','w3brinkguard','w3godbone');
 function openShop(){toggleWin('shopWin',true);shopTab='buy';renderShop();}
 /* ===================== BLACKSMITH (compound window) ===================== */
-const BS_TABS=[['weapon','Weapon','อาวุธ','#f0b8a8'],['armor','Armor','ชุดเกราะ','#e8d080'],['acc','Accessory','เครื่องประดับ','#88d0a8'],['mat','Material','หินพลัง','#b8a8e0']];
+const BS_TABS=[['weapon','Weapon','อาวุธ','#f0b8a8'],['armor','Armor','ชุดเกราะ','#e8d080'],['acc','Accessory','เครื่องประดับ','#88d0a8'],['mat','Material','หินพลัง','#b8a8e0'],['red','★Red','อัปดาวแดง','#ff9a9a']];
 let bsTab='mat',bsSel=null,bsPage=0,bsCare=0,bsResult=null,bsArch=null;
-function bsRecipes(){if(bsTab==='mat'){const R=[];[1,2].forEach(g=>STONE_STATS.forEach(s=>R.push({kind:'stone',id:`stone:${s}:${g}`,s,g,n:stoneName(s,g),lv:g===1?20:50,
+function bsRecipes(){if(bsTab==='red')return redRecipes();if(bsTab==='mat'){const R=[];[1,2].forEach(g=>STONE_STATS.forEach(s=>R.push({kind:'stone',id:`stone:${s}:${g}`,s,g,n:stoneName(s,g),lv:g===1?20:50,
     mats:[[stoneName(s,g-1),3]],z:g===1?500:2000,icon:ICON_URL[stoneName(s,g)]})));return R;}
   const L=[];CRAFT_SETS.filter(s=>['tomb','frost','pirate'].includes(s[0])).forEach(([sid])=>{if(bsTab==='weapon')L.push(EQ_DB[`cw_${sid}_${LINE}`]);if(bsTab==='armor')['ch','ca','cs'].forEach(p=>L.push(EQ_DB[`${p}_${sid}`]));if(bsTab==='acc')L.push(EQ_DB[`cr_${sid}`]);});
-  RC_SETS.forEach(([px,race,sid])=>{if(race!==LINE)return;if(bsTab==='weapon')L.push(EQ_DB[`${px}_${sid}_w`]);if(bsTab==='armor'){L.push(EQ_DB[`${px}_${sid}_a`]);L.push(EQ_DB[`${px}_${sid}_h`]);}});
+  RC_SETS.forEach(([px,race,sid,lv,star])=>{if(race!==LINE||star==='r')return;if(bsTab==='weapon')L.push(EQ_DB[`${px}_${sid}_w`]);if(bsTab==='armor'){L.push(EQ_DB[`${px}_${sid}_a`]);L.push(EQ_DB[`${px}_${sid}_h`]);}});
   return L.filter(Boolean).map(D=>{const c=craftCost(D);return{kind:'eq',id:D.id,D,n:D.n,lv:D.lv,mats:c.mats,z:c.z,icon:D.icon};});}
-function bsRate(R){if(R.kind==='stone')return R.g===1?80:60;return R.lv<=20?100:Math.max(45,100-Math.floor((R.lv-20)*0.7));}
+function bsRate(R){if(R.kind==='red')return redRate(R.D);if(R.kind==='stone')return R.g===1?80:60;return R.lv<=20?100:Math.max(45,100-Math.floor((R.lv-20)*0.7));}
 function bsCareStep(R){return Math.max(50,Math.round(R.lv*15));}
 function bsRateNow(R){return Math.min(100,bsRate(R)+bsCare);}
 function bsStatHtml(R){if(!R||R.kind!=='eq')return '';const D=R.D,st=Object.assign({},D.stats||{});if(D.craft){const as=archStats(bsArch||archDefault(),D.lv);for(const k in as)st[k]=(st[k]||0)+as[k];}const v=k=>{let n=k==='ATK'?eqA(D.atk)+(st.ATK||0):k==='TAL'?eqA(D.matk)+(st.TAL||0):k==='DEF'?(D.def||0)+(st.DEF||0):(st[k]||0);return n?`<b>${n}</b>`:'<i>-</i>';};
@@ -22337,40 +22337,40 @@ function renderCraft(){const w=document.getElementById('craftWin');if(w.hidden)r
   const L=bsRecipes(),per=24,pages=Math.max(1,Math.ceil(L.length/per));bsPage=Math.min(bsPage,pages-1);
   if(!L.length){document.getElementById('bsGold').textContent=gold.toLocaleString();document.getElementById('bsTabs').innerHTML=BS_TABS.map(([k,en,th,c])=>`<button data-bstab="${k}" style="--c:${c}" aria-selected="${k===bsTab}" title="${th}">${en}</button>`).join('');
     document.getElementById('bsList').innerHTML=Array.from({length:per},()=>'<i class="bsc empty"></i>').join('');document.getElementById('bsPage').textContent='1/1';
-    document.getElementById('bsInfo').innerHTML='<h3>ชุดคราฟจากดันเจี้ยน</h3><p class="bsd">ชุดคราฟจะมี 3 เซ็ต วัตถุดิบหาได้จากดันเจี้ยน (กำลังสร้าง) ระหว่างนี้ซื้อชุดอุปกรณ์ Lv 16 / 32 / 48 ได้ที่ร้านค้า</p>';
-    document.getElementById('bsGo').disabled=true;document.getElementById('bsStat').innerHTML='';document.getElementById('bsRes').innerHTML='';document.getElementById('bsInv').innerHTML=spInvHtml(null);return;}
+    document.getElementById('bsInfo').innerHTML=bsTab==='red'?`<h3>🔴 อัปดาวแดง</h3><p class="bsd">ยังไม่มีอุปกรณ์คราฟ ★เหลือง — ของทุกชิ้นที่คราฟจะออกมาเป็น ★เหลือง แล้วนำมาอัปเป็น ★แดงที่หน้านี้ได้ด้วย <b data-mw="${RED_MAT}" style="cursor:pointer;text-decoration:underline">${RED_MAT}</b> (แตะดูแหล่งที่หา)</p>`:'<h3>ชุดคราฟจากดันเจี้ยน</h3><p class="bsd">ชุดคราฟจะมี 3 เซ็ต วัตถุดิบหาได้จากดันเจี้ยน (กำลังสร้าง) ระหว่างนี้ซื้อชุดอุปกรณ์ Lv 16 / 32 / 48 ได้ที่ร้านค้า</p>';
+    document.getElementById('bsGo').disabled=true;document.getElementById('bsStat').innerHTML='';document.getElementById('bsRes').innerHTML='';document.getElementById('bsInv').innerHTML=typeof spInvHtml==='function'?spInvHtml(null):'';return;}
   if(!bsSel||!L.some(r=>r.id===bsSel)){const ok=L.filter(r=>r.lv<=lvl+8);bsSel=(ok[ok.length-1]||L[0]).id;bsCare=0;}
   const R=L.find(r=>r.id===bsSel);
   document.getElementById('bsGold').textContent=gold.toLocaleString();
   document.getElementById('bsTabs').innerHTML=BS_TABS.map(([k,en,th,c])=>`<button data-bstab="${k}" style="--c:${c}" aria-selected="${k===bsTab}" title="${th}">${en}</button>`).join('');
   const cells=L.slice(bsPage*per,bsPage*per+per);
   document.getElementById('bsList').innerHTML=Array.from({length:per},(_,i)=>{const r=cells[i];if(!r)return '<i class="bsc empty"></i>';const lock=r.lv>lvl+10;
-    return `<button class="bsc ${r.id===bsSel?'sel':''} ${lock?'lock':''}" data-bsr="${r.id}" ${r.kind==='eq'?`data-eqc="id:${r.id}"`:`title="${r.n}"`}><img alt="" src="${r.icon}"><em>★</em></button>`;}).join('');
+    return `<button class="bsc ${r.id===bsSel?'sel':''} ${lock?'lock':''}" data-bsr="${r.id}" ${r.kind==='eq'?`data-eqc="id:${r.id}"`:r.kind==='red'?`data-eqc="uid:${r.I.uid}"`:`title="${r.n}"`}><img alt="" src="${r.icon}"><em ${r.kind==='red'?'style="color:#c89a10"':''}>★</em></button>`;}).join('');
   document.getElementById('bsPage').textContent=`${bsPage+1}/${pages}`;
   const have=n=>bsHave(n),ok=R.mats.every(([n,q])=>have(n)>=q)&&gold>=R.z+bsCare*bsCareStep(R);
-  const slots=Array.from({length:8},(_,i)=>{const m=R.mats[i];return m?`<span class="bsm ${have(m[0])>=m[1]?'ok':'no'}" title="${bsMatName(m[0])} (มี ${have(m[0])})"><img alt="" src="${bsMatIcon(m[0])}"><u>x${m[1]}</u></span>`:'<span class="bsm empty"></span>';});
-  document.getElementById('bsInfo').innerHTML=`<h3>${R.n}</h3><p class="bsd">${R.kind==='eq'?eqcDesc(R.D):`หลอมหินพลัง ${R.s} ระดับ ${STONE_G[R.g-1][0]} 3 ก้อน ให้เป็นระดับ ${STONE_G[R.g][0]} (สุ่ม +${STONE_G[R.g][1]}~${STONE_G[R.g][2]})`}</p>
-    <small class="bslv">Lv ${R.lv}${R.kind==='eq'&&R.D.set?` · ${CRAFT_SET[R.D.set].n}`:''}${R.lv>lvl+10?' · <em>เลเวลยังไม่ถึง</em>':''}</small>
+  const slots=Array.from({length:8},(_,i)=>{const m=R.mats[i];return m?`<span class="bsm ${have(m[0])>=m[1]?'ok':'no'}" ${m[0].startsWith('@eq:')?'':`data-mw="${m[0]}"`} title="${bsMatName(m[0])} (มี ${have(m[0])}) — แตะดูแหล่งที่หา"><img alt="" src="${bsMatIcon(m[0])}"><u>x${m[1]}</u></span>`:'<span class="bsm empty"></span>';});
+  document.getElementById('bsInfo').innerHTML=`<h3>${R.n}</h3><p class="bsd">${R.kind==='red'?redDesc(R):R.kind==='eq'?eqcDesc(R.D):`หลอมหินพลัง ${R.s} ระดับ ${STONE_G[R.g-1][0]} 3 ก้อน ให้เป็นระดับ ${STONE_G[R.g][0]} (สุ่ม +${STONE_G[R.g][1]}~${STONE_G[R.g][2]})`}</p>
+    <small class="bslv">Lv ${R.lv}${R.kind==='red'?' · ★เหลือง → <b style="color:#e0303a">★แดง</b>':''}${R.kind==='eq'&&R.D.set?` · ${CRAFT_SET[R.D.set].n}`:''}${R.lv>lvl+10?' · <em>เลเวลยังไม่ถึง</em>':''}</small>
     <div class="bsrec">${slots.slice(0,4).join('<b>+</b>')}</div><div class="bsrec">${slots.slice(4).join('<b>+</b>')}</div>
     ${R.kind==='eq'?`<div class="bsarch"><span>สายสเตตัส</span>${Object.entries(ARCH).map(([k,A])=>`<button data-bsarch="${k}" style="--ac:${A.col}" aria-selected="${k===bsArch}" title="${A.st.join(' / ')}">${(BUILDS[LINE]||[]).includes(k)?'★':''}${A.n}</button>`).join('')}<small>${ARCH[bsArch].st.join(' / ')} · แนะนำสำหรับเผ่าคุณ: ${(BUILDS[LINE]||[]).map(k=>ARCH[k].n).join(', ')}</small></div>`:''}
     <div class="bsrate"><span>Success Rate :</span><b>${bsRateNow(R)} %</b><small>ค่าคราฟ ${R.z.toLocaleString()} z</small></div>`;
   document.getElementById('bsCare').value=(bsCare*bsCareStep(R)).toLocaleString();document.getElementById('bsCareTxt').textContent=bsCare?`+${bsCare}% (${bsCareStep(R).toLocaleString()} z / 1%)`:`${bsCareStep(R).toLocaleString()} z = +1%`;
-  const go=document.getElementById('bsGo');go.disabled=!ok||R.lv>lvl+10;
+  const go=document.getElementById('bsGo');go.disabled=!ok||(R.kind!=='red'&&R.lv>lvl+10);go.textContent=R.kind==='red'?'🔴 อัปดาวแดง':'⚒ Compound';
   const res=document.getElementById('bsRes');res.className='bsres '+(bsResult?bsResult.ok?'win':'lose':'');res.innerHTML=bsResult?(bsResult.ok?`<img alt="" src="${bsResult.icon}">`:'<span>💥</span>'):'';
   document.getElementById('bsStat').innerHTML=bsStatHtml(R);
   const names=Object.keys(inv);document.getElementById('bsInv').innerHTML=Array.from({length:Math.max(30,Math.ceil(names.length/6)*6)},(_,i)=>{const n=names[i];if(!n)return '<i class="bsi empty"></i>';const need=R.mats.some(m=>m[0]===n);
-    return `<span class="bsi ${need?'need':''}" title="${n}"><img alt="" src="${ICON_URL[n]||''}">${inv[n]>1?`<u>${inv[n]}</u>`:''}</span>`;}).join('');}
+    return `<span class="bsi ${need?'need':''}" title="${n} — แตะดูแหล่งที่หา" data-mw="${n}"><img alt="" src="${ICON_URL[n]||''}">${inv[n]>1?`<u>${inv[n]}</u>`:''}</span>`;}).join('');}
 function bsEqFree(id){return equipBag.filter(I=>I.id===id&&!Object.values(equipped).includes(I)).sort((a,b)=>(a.ref||0)-(b.ref||0)||((a.stones||[]).length-(b.stones||[]).length));}
 function bsHave(n){return n.startsWith('@eq:')?bsEqFree(n.slice(4)).length:(inv[n]||0);}
 function bsMatName(n){return n.startsWith('@eq:')?(EQ_DB[n.slice(4)]||{}).n||n:n;}
 function bsMatIcon(n){return n.startsWith('@eq:')?(EQ_DB[n.slice(4)]||{}).icon||'':(ICON_URL[n]||'');}
 function bsTake(n,q){if(n.startsWith('@eq:')){bsEqFree(n.slice(4)).slice(0,q).forEach(I=>equipBag.splice(equipBag.indexOf(I),1));return;}inv[n]-=q;if(inv[n]<=0)delete inv[n];}
-function bsCompound(){const R=bsRecipes().find(r=>r.id===bsSel);if(!R)return;const care=bsCare*bsCareStep(R);
-  if(!R.mats.every(([n,q])=>bsHave(n)>=q)){say('วัตถุดิบไม่พอ (ของ ★แดง ต้องมีชิ้น ★เหลืองแบบเดียวกัน 2 ชิ้นในกระเป๋า ห้ามสวมอยู่)','sys');return;}if(gold<R.z+care){say('เงินไม่พอ','sys');return;}
+function bsCompound(){const R=bsRecipes().find(r=>r.id===bsSel);if(!R)return;const care=bsCare*bsCareStep(R);if(R.kind==='red'){redCompound(R,care);return;}
+  if(!R.mats.every(([n,q])=>bsHave(n)>=q)){say('วัตถุดิบไม่พอ — แตะไอคอนวัตถุดิบเพื่อดูว่าหาได้จากไหน','sys');return;}if(gold<R.z+care){say('เงินไม่พอ','sys');return;}
   R.mats.forEach(([n,q])=>bsTake(n,q));gold-=R.z+care;const rate=bsRateNow(R);bsCare=0;
   if(Math.random()*100>=rate){bsResult={ok:false};sfx('refineFail');popText(player.x,player.z,'COMPOUND FAILED','hurt',4.4);say(`⚒ คราฟ ${R.n} ล้มเหลว... วัตถุดิบหายไป (โอกาส ${rate}%)`,'sys');updateInv();renderCraft();return;}
   if(R.kind==='stone'){inv[R.n]=(inv[R.n]||0)+1;bsResult={ok:true,icon:R.icon};sfx('refineOk');say(`⚒ หลอม ${R.n} สำเร็จ!`,'sys');popText(player.x,player.z,'COMPOUND SUCCESS','gain',4.6);updateInv();renderCraft();return;}
-  const D=R.D,I=newEq(D.id),q=rollQuality();if(D.craft){I.sock=D.star==='r'?4:1+Math.floor(Math.random()*3);say(`${D.star==='r'?'🔴':'⭐'} ได้รูใส่หิน ${I.sock} รู`,'sys');}I.arch=bsArch||archDefault();if(q){I.q=q;I.bonus={};const keys=STAT_KEYS.slice();for(let k=0;k<QUAL[q][1];k++){const s=keys[Math.floor(Math.random()*keys.length)];I.bonus[s]=(I.bonus[s]||0)+1+Math.floor(D.lv/30);}}
+  const D=R.D,I=newEq(D.id),q=rollQuality();if(D.craft){I.sock=D.star==='r'?4:1+Math.floor(Math.random()*3);say(`${D.star==='r'?'🔴':'⭐'} ได้รูใส่หิน ${I.sock} รู${D.star==='r'?'':' — นำไปอัปเป็น ★แดง (4 รู) ได้ที่แท็บ ★Red ด้วยผลึกดาวแดง'}`,'sys');}I.arch=bsArch||archDefault();if(q){I.q=q;I.bonus={};const keys=STAT_KEYS.slice();for(let k=0;k<QUAL[q][1];k++){const s=keys[Math.floor(Math.random()*keys.length)];I.bonus[s]=(I.bonus[s]||0)+1+Math.floor(D.lv/30);}}
   equipBag.push(I);bsResult={ok:true,icon:D.icon};sfx(q>=2?'levelup':'refineOk');levelFx(q>=2?'#ffd24a':'#9ad8ff','#ffffff',false);
   popText(player.x,player.z,q?`${QUAL[q][0]}! ${D.n}`:'COMPOUND SUCCESS',q>=2?'crit':'gain',4.6);
   say(`⚒ คราฟ ${eqName(I)} สำเร็จ!${q?` คุณภาพ "${QUAL[q][0]}" ได้โบนัส ${Object.entries(I.bonus).map(([k,v])=>k+' +'+v).join(', ')}`:''}`,'sys');updateInv();renderCraft();}
@@ -22388,6 +22388,78 @@ function bsCompound(){const R=bsRecipes().find(r=>r.id===bsSel);if(!R)return;con
     else if(t.dataset.bspg){bsPage=Math.max(0,bsPage+Number(t.dataset.bspg));renderCraft();}
     else if(t.dataset.bscare){const R=bsRecipes().find(r=>r.id===bsSel);bsCare=Math.max(0,Math.min(100-bsRate(R),bsCare+Number(t.dataset.bscare)*5));renderCraft();}
     else if(t.id==='bsGo')bsCompound();});})();
+/* ===================== v179 · ★แดง UPGRADE + MATERIAL SOURCES ===================== */
+const RED_MAT='ผลึกดาวแดง',RED_RATE_BOSS=0.3,RED_RATE_ELITE=0.05,RED_RATE_MOB=0.0015;
+ITEM_KINDS.push({name:RED_MAT,w:0,draw(g){g.fillStyle='#2b1f1a';g.beginPath();g.moveTo(16,2);g.lineTo(27,13);g.lineTo(16,30);g.lineTo(5,13);g.closePath();g.fill();
+  g.fillStyle='#e0303a';g.beginPath();g.moveTo(16,4);g.lineTo(25,13);g.lineTo(16,27);g.lineTo(7,13);g.closePath();g.fill();
+  g.fillStyle='#ff8a8a';g.beginPath();g.moveTo(16,4);g.lineTo(25,13);g.lineTo(16,13);g.closePath();g.fill();g.fillStyle='#8a0c18';g.beginPath();g.moveTo(16,13);g.lineTo(16,27);g.lineTo(7,13);g.closePath();g.fill();
+  g.fillStyle='#fff6c8';g.fillRect(12,8,2,2);g.fillRect(20,18,2,2);g.fillStyle='#ffd24a';g.fillRect(25,4,2,2);g.fillRect(4,22,2,2);}});
+{const ik=ITEM_KINDS[ITEM_KINDS.length-1],c=document.createElement('canvas');c.width=c.height=32;ik.draw(c.getContext('2d'));ik.tex=new THREE.CanvasTexture(c);ik.tex.magFilter=THREE.NearestFilter;ik.tex.minFilter=THREE.NearestFilter;ik.tex.generateMipmaps=false;ICON_URL[RED_MAT]=c.toDataURL();}
+PRICE[RED_MAT]=8000;
+function rollRedDrop(m){if(!m||!m.T)return;const r=m.T.boss?RED_RATE_BOSS:m.elite?RED_RATE_ELITE:(m.T.lv||1)>=30?RED_RATE_MOB:0;if(!r||Math.random()>r*gDropMul())return;
+  const ik=ITEM_KINDS.find(k=>k.name===RED_MAT);if(!ik)return;createItem(m.x-0.4,m.z+0.4,ik,true,m.map.scene);say(`🔴 ${m.T.name} ดรอป ${RED_MAT}!`,'sys');}
+/* yellow → red */
+const RED_OF={};RC_SETS.forEach(([px,race,sid,lv,star,sn,mats,th,en,wt,from])=>{if(star==='r'&&from)['w','a','h'].forEach(k=>{if(EQ_DB[`${px}_${from}_${k}`]&&EQ_DB[`${px}_${sid}_${k}`])RED_OF[`${px}_${from}_${k}`]=`${px}_${sid}_${k}`;});});
+function isRed(I,D){D=D||(I&&EQ_DB[I.id]);return !!((I&&I.red)||(D&&D.star==='r'));}
+function redBonus(I){const D=EQ_DB[I.id],o={};if(!D)return o;if(D.atk)o.atk=Math.round(D.atk*0.15);if(D.matk)o.matk=Math.round(D.matk*0.15);if(D.def)o.def=Math.max(1,Math.round(D.def*0.15));
+  if(D.stats){o.stats={};for(const k in D.stats)if(D.stats[k]>0)o.stats[k]=Math.ceil(D.stats[k]*0.2);}return o;}
+function redNeed(D){return 1+Math.floor((D.lv||1)/50);}
+function redZ(D){return Math.round((D.lv||1)*(D.lv||1)*6+2000);}
+function redRate(D){return Math.max(55,95-Math.floor((D.lv||1)/6));}
+function redRecipes(){const on=new Set(Object.values(equipped).filter(Boolean));
+  return [...Object.values(equipped).filter(Boolean),...equipBag].filter(I=>{const D=EQ_DB[I.id];return D&&D.craft&&!isRed(I,D);}).sort((a,b)=>EQ_DB[a.id].lv-EQ_DB[b.id].lv)
+    .map(I=>{const D=EQ_DB[I.id],to=RED_OF[I.id]?EQ_DB[RED_OF[I.id]]:null;return{kind:'red',id:'red:'+I.uid,I,D,to,on:on.has(I),n:eqName(I),lv:D.lv,mats:[[RED_MAT,redNeed(D)]],z:redZ(D),icon:D.icon};});}
+function redDesc(R){const D=R.D;return `นำ <b>${eqName(R.I)}</b>${R.on?' (สวมอยู่)':''} ★เหลือง (${sockN(R.I,D)} รู) มาคราฟซ้ำด้วย ${RED_MAT} ให้เป็น <b style="color:#e0303a">★แดง</b>: `+
+  (R.to?`กลายเป็น <b>${R.to.n}</b> · `:'')+`ค่าพลังพื้นฐาน +15% และสเตตัสของชิ้น +20%`+` · รูใส่หินเป็น 4 รูแน่นอน · หินพลัง การ์ด ขั้นตีบวก และคุณภาพเดิมยังอยู่ครบ · ถ้าล้มเหลวเสียแค่ผลึกกับเงิน ของไม่หาย`;}
+function redCompound(R,care){const I=R.I;if(!equipBag.includes(I)&&!Object.values(equipped).includes(I)){say('ไม่พบอุปกรณ์ชิ้นนี้แล้ว','sys');bsSel=null;renderCraft();return;}
+  if((inv[RED_MAT]||0)<R.mats[0][1]){say(`${RED_MAT} ไม่พอ (ต้องใช้ ${R.mats[0][1]}) — แตะไอคอนเพื่อดูว่าหาได้จากไหน`,'sys');return;}if(gold<R.z+care){say('เงินไม่พอ','sys');return;}
+  bsTake(RED_MAT,R.mats[0][1]);gold-=R.z+care;const rate=bsRateNow(R);bsCare=0;
+  if(Math.random()*100>=rate){bsResult={ok:false};sfx('refineFail');popText(player.x,player.z,'UPGRADE FAILED','hurt',4.4);say(`🔴 อัปดาวแดง ${eqName(I)} ล้มเหลว... เสีย${RED_MAT} (ของยังอยู่ · โอกาส ${rate}%)`,'sys');updateInv();renderCraft();saveSoon();return;}
+  if(R.to){I.id=R.to.id;delete I.red;}else I.red=true;I.sock=4;
+  bsResult={ok:true,icon:EQ_DB[I.id].icon};bsSel=null;sfx('levelup');levelFx('#ff4a5a','#ffe0e0',false);popText(player.x,player.z,'★ RED STAR!','crit',4.8);
+  say(`🔴 อัป ${eqName(I)} เป็น ★แดง สำเร็จ! รูใส่หิน 4 รู`,'sys');afterEq();renderCraft();}
+/* where to get a material */
+const MW_DUN=[['dg_','ดันเจี้ยน สุสานมาโอห์'],['di_','ดันเจี้ยน หอคอยเยือกแข็ง'],['pc_','ดันเจี้ยน ถ้ำโจรสลัดก้ามแดง']];
+let MW_HOME=null;
+function mwHome(){if(MW_HOME)return MW_HOME;const h={};const add=(t,k)=>{(h[t]=h[t]||[]).includes(k)||h[t].push(k);};
+  [['pink','farm1'],['green','farm1'],['shroom','farm1'],['green','farm2'],['shroom','farm2'],['bee','farm2']].forEach(([t,k])=>add(t,k));
+  Object.keys(GEN).forEach(k=>{if(/^xd\d/.test(k))return;(GEN[k].mons||[]).forEach(e=>add(Array.isArray(e)?e[0]:e,(GEN[k].name)||k));});
+  Object.values(h).forEach(L=>L.forEach((k,i)=>{if(MAPS[k]&&MAPS[k].name)L[i]=MAPS[k].name;else if(GEN[k]&&GEN[k].name)L[i]=GEN[k].name;}));
+  if(typeof XD_DEF!=='undefined')Object.values(XD_DEF).forEach(D=>D.rooms.forEach(rm=>{(rm.mobs||[]).forEach(([t])=>add(t,'ดันเจี้ยน '+D.name));if(rm.boss)add(rm.boss,'ดันเจี้ยน '+D.name);if(rm.adds)add(rm.adds,'ดันเจี้ยน '+D.name);}));
+  return MW_HOME=h;}
+function mwMaps(t){const T=MON_TYPES[t],h=mwHome()[t];if(h&&h.length)return h;const d=MW_DUN.find(([p])=>t.startsWith(p));if(d)return [d[1]];return T&&T.boss?['บอสภาคสนาม / ล่าบอส']:[];}
+function matUses(n){const out=[];CRAFT_SETS.forEach(c=>{if(c[4].includes(n))out.push(c[1]);});RC_SETS.forEach(([px,race,sid,lv,star,sn,mats])=>{if(race===LINE&&star!=='r'&&mats.some(([m])=>m===n))out.push(`${sn} Lv${lv}`);});
+  if(n===RED_MAT)out.push('อัปของคราฟ ★เหลือง → ★แดง (ช่างตีเหล็ก แท็บ ★Red)');if(STN[n])out.push('ยัดลงรูอุปกรณ์คราฟ / หลอมเป็นหินขั้นสูง');if(n==='แร่เพิ่มพลัง')out.push('ตีบวกอุปกรณ์');return [...new Set(out)];}
+function matInfo(n){const types=new Set();if(MATS[n])MATS[n][3].split(' ').forEach(t=>t&&types.add(t));
+  Object.keys(MON_TYPES).forEach(t=>{const T=MON_TYPES[t];if((T.drops||[]).includes(n))types.add(t);});if(n==='แร่เพิ่มพลัง')ORE_SRC.forEach(t=>types.add(t));
+  const mons=[...types].filter(t=>MON_TYPES[t]).map(t=>{const T=MON_TYPES[t];return{t,name:T.name.replace('★ ',''),lv:T.lv||1,boss:!!T.boss,maps:mwMaps(t)};}).sort((a,b)=>a.lv-b.lv);
+  const other=[];
+  if(n===RED_MAT){other.push(`บอสทุกตัว (โอกาส ${RED_RATE_BOSS*100}%) · มอนเอลีท (${RED_RATE_ELITE*100}%) · มอน Lv30+ ทั่วไป (โอกาสต่ำมาก)`);if(typeof XD_DEF!=='undefined')other.push('รางวัลพิชิตดันเจี้ยนอีกฟากของแผลโลก ×2: '+Object.values(XD_DEF).map(D=>D.name).join(' · '));}
+  if(n==='แร่เพิ่มพลัง')other.push(`บอสทุกตัว (${ORE_RATE_BOSS*100}%) · มอนเอลีทสายหิน/จักรกล (${ORE_RATE_ELITE*100}%)`);
+  if(typeof XD_DEF!=='undefined'&&n!==RED_MAT)Object.values(XD_DEF).forEach(D=>{const L=D.loot.find(([x])=>x===n);if(L)other.push(`รางวัลพิชิต ${D.name} (Lv${D.lv}+) ×${L[1]}`);});
+  if(STN[n]&&STN[n].g>0)other.push(`หลอมจากหินขั้นต่ำกว่า 3 ก้อน ที่ช่างตีเหล็ก (แท็บ Material)`);
+  try{const st=shopStock();if(st&&st.items&&st.items.includes(n))other.push(`ซื้อได้ที่ร้านค้า ${(PRICE[n]||0).toLocaleString()} z`);}catch(e){}
+  let rate='';if(MATS[n])rate=`โอกาสดรอปต่อตัว ~${Math.round(MAT_RATE*100)}% · มอนเอลีท ${Math.round(MAT_RATE_ELITE*100)}% · บอสดรอปแน่นอน (LCK ช่วยเพิ่มโอกาส)`;
+  return{mons,other,rate,uses:matUses(n)};}
+function matCanShow(n){if(STN[n]||(typeof CARD_BY_NAME==='function'&&CARD_BY_NAME(n)))return false;const M=matInfo(n);return !!(M.mons.length||M.other.length||M.uses.length);}
+function openMatWhere(n){let ov=document.getElementById('mwOv');if(!ov){ov=document.createElement('div');ov.id='mwOv';document.body.appendChild(ov);
+    ov.addEventListener('click',e=>{if(e.target===ov||e.target.closest('[data-mwx]'))ov.hidden=true;});}
+  const M=matInfo(n),mons=M.mons.slice(0,14);
+  ov.innerHTML=`<div class="mwbox"><div class="mwhd"><img alt="" src="${ICON_URL[n]||''}"><span><b>${n}</b><small>มีอยู่ ${inv[n]||0} ชิ้น</small></span><button data-mwx aria-label="ปิด">✕</button></div>
+   <div class="mwbd">${M.uses.length?`<h5>ใช้ทำ</h5><p class="mwuse">${M.uses.join(' · ')}</p>`:''}
+   <h5>📍 หาได้จาก</h5>${mons.length?`<ul class="mwl">${mons.map(o=>`<li><b>${o.boss?'👑 ':''}${o.name}</b> <i>Lv${o.lv}</i><small>${o.maps.length?o.maps.slice(0,3).join(' · ')+(o.maps.length>3?` +${o.maps.length-3}`:''):'พบแบบสุ่ม / มอนพิเศษ'}</small></li>`).join('')}</ul>${M.mons.length>mons.length?`<p class="mwmore">และอีก ${M.mons.length-mons.length} ชนิด</p>`:''}`:''}
+   ${M.other.length?`<ul class="mwo">${M.other.map(x=>`<li>${x}</li>`).join('')}</ul>`:''}${!mons.length&&!M.other.length?'<p class="mwmore">ยังไม่พบแหล่งดรอปที่แน่นอน</p>':''}
+   ${M.rate?`<p class="mwrate">${M.rate}</p>`:''}</div></div>`;ov.hidden=false;}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-mw]');if(!t||t.closest('#mwOv'))return;e.stopPropagation();openMatWhere(t.dataset.mw);},true);
+{const st=document.createElement('style');st.textContent=`#mwOv{position:fixed;inset:0;z-index:9000;background:rgba(20,12,6,.45);display:flex;align-items:center;justify-content:center;padding:12px}#mwOv[hidden]{display:none}
+.mwbox{width:min(420px,100%);max-height:82vh;display:flex;flex-direction:column;background:#fbf3e0;border:2px solid #8a5a32;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.4);color:#3a2414;font-size:13px}
+.mwhd{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid #d8b888;background:#f0dfb8;border-radius:10px 10px 0 0}.mwhd img{width:36px;height:36px;image-rendering:pixelated}.mwhd span{flex:1;display:flex;flex-direction:column}.mwhd small{opacity:.7}
+.mwhd button{border:0;background:#c8342a;color:#fff;border-radius:6px;width:30px;height:30px;font-size:15px;cursor:pointer}
+.mwbd{overflow:auto;padding:6px 12px 12px}.mwbd h5{margin:8px 0 4px;color:#7a3a10;font-size:13px}.mwuse{margin:0;font-size:12px}
+.mwl,.mwo{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}.mwl li{padding:5px 8px;background:#fff8ea;border:1px solid #e0c8a0;border-radius:7px}.mwl i{font-style:normal;color:#2a6ad8;font-size:11.5px;margin-left:4px}
+.mwl small{display:block;font-size:11.5px;opacity:.8}.mwo{margin-top:6px}.mwo li{padding:5px 8px;background:#fff0f0;border:1px solid #e8b0b0;border-radius:7px;font-size:12px}
+.mwrate{margin:8px 0 0;font-size:11.5px;opacity:.8}.mwmore{font-size:12px;opacity:.75;margin:4px 0}.bsm[data-mw],.bsi[data-mw]{cursor:pointer}`;document.head.appendChild(st);}
+
 /* ===================== ITEM SHOP v2: scroll list, inline buy/sell, sell-all ===================== */
 let spMode='buy',spSel=null,spQty=1,spUse=false,spArch=null,spCat='eq',spSellCat='all',spConfirm=null,spMats=false;
 const SP_CATS=[['eq','อุปกรณ์'],['use','ของใช้'],['stone','หินพลัง']];
@@ -22951,7 +23023,7 @@ function killMon(m){if(AUTO.on)AUTO.kills++;if(typeof advKill==='function')advKi
     if(ik&&!skipD){if(!ik.icon)ik.icon=ik.tex.image.toDataURL();const ic=ik.icon,mx2=m.x,mz2=m.z;setTimeout(()=>popText(mx2,mz2,`<img alt="" src="${ic}">ดรอป ${name}`,'drop',1.6,{html:true,life:2.2,rise:0.9}),420);say(`${m.T.name} ดรอป ${name}`,'sys');}}
   {const D=rollEqDrop(m);if(D){createItem(m.x-0.5,m.z+0.4,D.kind,true,m.map.scene);setTimeout(()=>popText(m.x,m.z,`<img alt="" src="${D.icon}">ดรอป ${D.n}!`,'drop',1.3,{html:true,life:2.6,rise:1}),650);say(`★ ${m.T.name} ดรอปอุปกรณ์ ${D.n}!`,'sys');}
    const C=rollCardDrop(m);if(C){ITEM_KINDS.includes(C.kind)||ITEM_KINDS.push(C.kind);createItem(m.x+0.6,m.z-0.4,C.kind,true,m.map.scene);setTimeout(()=>popText(m.x,m.z,`<img alt="" src="${C.icon}">${C.name}!!`,'drop',1.0,{html:true,life:3,rise:1.2}),900);say(`★★ ${m.T.name} ดรอป ${C.name}! (${C.label})`,'sys');sfx('levelup');}}
-  rollMatDrop(m);rollOreDrop(m);rollStoneDrop(m);eliteLoot(m);sfx('kill');
+  rollMatDrop(m);rollOreDrop(m);rollRedDrop(m);rollStoneDrop(m);eliteLoot(m);sfx('kill');
   if((m.dg||m.di||m.dp)&&!m.T.boss&&!m.box&&!m.cannon&&!m.crys)rpTick(m.dg?2:m.di?2.5:3);if(m.dg&&typeof dgKill==='function')dgKill(m);if(m.xd&&typeof xdKill==='function')xdKill(m);if(m.di&&typeof diKill==='function')diKill(m);if(m.dp&&typeof dpKill==='function')dpKill(m);if(m.gb&&typeof gbKill==='function')gbKill(m);if(m.hunt){huntLoot(m);}else{if(!m.sq&&!m.summ&&!m.dg&&!m.di&&!m.dp&&!m.gb)setTimeout(()=>spawnMon(m.type,m.map,m.reg),m.T.boss?60000:6000);if(m.T.boss)say(`ปราบบอส ${m.T.name} สำเร็จ!`,'sys');}
 }
 function monStep(m,tx,tz,spd,dt){const dx=tx-m.x,dz=tz-m.z,d=Math.hypot(dx,dz);if(d<0.05)return false;const st=Math.min(d,spd*dt),nx=m.x+dx/d*st,nz=m.z+dz/d*st;
@@ -24923,6 +24995,7 @@ const XD_DEF={
      {t:'arena',boss:'w2xd_warden',adds:'w2mind',n:'ห้องผู้คุม'},{t:'rest',n:'ลานแสงสุดท้าย'},{t:'throne',boss:'w2xd_sargoth',adds:'w2crystal',n:'ยอดหอคอย'}],
    skills:{w2xd_warden:['ring','nova','summon'],w2xd_sargoth:['ring','rain','line','nova','summon']},loot:[['เถ้าเทพปีศาจ',3],['ผลึกความว่างเปล่า',2],['แร่เทพตีบวก',2]],
    lore:['หอคอยนี้เคยเป็นที่ที่เทพปีศาจใช้มองลงมายังอีกฟากของโลก มันพังลงพร้อมกับวันที่ผนึกถูกสร้าง','บนยอดหอคอยยังมี "เงาเทพปีศาจ ซาร์โกธ" ร่างแยกที่ไม่ยอมสลายไปพร้อมเจ้าของ']}};
+Object.values(XD_DEF).forEach(D=>D.loot.push(['ผลึกดาวแดง',2]));
 const XD_ROOM={hall:{type:(x,z)=>Math.abs(x)<26&&Math.abs(z)<30?null:'wall',enter:[0,25],door:[0,-28.5],reg:{x0:-22,x1:22,z0:-25,z1:14}},
  corr:{type:(x,z)=>Math.abs(x)<8&&Math.abs(z)<62?null:'wall',enter:[0,57],door:[0,-60.5],reg:{x0:-6,x1:6,z0:-56,z1:42}},
  arena:{type:(x,z)=>Math.hypot(x,z)<28?null:'wall',enter:[0,22],door:[0,-26.5],reg:{x0:-16,x1:16,z0:-16,z1:8},bp:[0,-8]},
