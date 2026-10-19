@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>Build a Golem — Prototype</title>
+<title>Build a Golem V2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
@@ -40,7 +40,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0}
 .slot .sl-l{font-size:11px;color:var(--muted)}
 .slot .sl-n{font-size:13px;font-weight:600;line-height:1.15}
 .slot .sl-v{font-size:11px;color:var(--muted)}
-.navbar{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:12px}
+.navbar{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px}
 .nbtn{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:10px 4px;font-weight:600;font-size:14px;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:62px;justify-content:center}
 .nbtn .e{font-size:22px}
 .nbtn:hover{border-color:var(--cyan);background:#22335a}
@@ -160,7 +160,7 @@ table.t td:last-child,table.t th:last-child{text-align:right}
 .picons{display:flex;gap:4px;flex-wrap:wrap}
 .picons img{width:36px;height:36px;border-radius:7px;background:#0e1527}
 .picons .miss{width:36px;height:36px;border-radius:7px;background:#3a1220;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--red)}
-@media (max-width:1100px){.ws{grid-template-columns:1fr}.navbar{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:1100px){.ws{grid-template-columns:1fr}}
 @media (max-width:760px){
   .ws{padding:8px;gap:10px}
   .stage{grid-template-columns:1fr 1fr;grid-template-areas:"cv cv" "l r";padding:8px}
@@ -188,15 +188,57 @@ table.t td:last-child,table.t th:last-child{text-align:right}
   .cmp{font-size:12px}
   .mbody{padding:10px}
 }
+/* ===== V2 ===== */
+.res.sm{min-width:0;font-size:13px;padding:4px 9px}
+.navgrp{margin-top:10px}.ngl{font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--muted);margin:0 0 5px 4px}
+.nbtn .hint{font-size:10px}
+.bd{margin-top:4px;border-top:1px dashed var(--line);padding-top:6px}.bdrow{font-size:11.5px;color:var(--muted);margin-bottom:2px}.bdrow b{color:var(--text)}
+.synrow{display:flex;gap:8px;align-items:flex-start;margin-bottom:6px;font-size:12.5px;background:#111a31;border:1px solid var(--line);border-radius:10px;padding:6px 8px}
+.synrow .ic{width:30px;height:30px;border-radius:9px;background:#0e1527;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;border:1px solid}
+#synBan{position:fixed;left:50%;top:16%;transform:translate(-50%,-20px) scale(.9);opacity:0;pointer-events:none;z-index:120;transition:all .35s cubic-bezier(.2,1.4,.4,1);width:max-content;max-width:92vw}
+#synBan.show{opacity:1;transform:translate(-50%,0) scale(1)}
+.sbx{background:radial-gradient(ellipse at 50% 0%,#3a2a6a,#121a2e 70%);border:2px solid #ff9df0;border-radius:18px;padding:16px 22px;text-align:center;box-shadow:0 0 40px rgba(255,157,240,.45),0 20px 60px rgba(0,0,0,.6)}
+.sbt{font-weight:800;font-size:20px;letter-spacing:2px;background:linear-gradient(90deg,#3fe0ff,#ff9df0,#ffc94a);-webkit-background-clip:text;background-clip:text;color:transparent;animation:sbg .9s ease-in-out infinite alternate}
+@keyframes sbg{to{filter:brightness(1.6)}}
+.sbn{font-size:22px;font-weight:800;margin-top:6px}.sbd{font-size:13px;color:var(--muted);max-width:420px;margin:0 auto}.sbr{font-size:12px;color:var(--gold);margin-top:8px}
+.cdxprog{margin-bottom:10px}.cdxprog .bar{height:9px}.cdxg{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:9px}
+.cdx{display:flex;gap:10px;background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:9px;font-size:13px}
+.cdx.lock{opacity:.8;border-style:dashed}.cdxi{width:58px;height:58px;flex-shrink:0;border-radius:14px;background:#0e1527;display:flex;align-items:center;justify-content:center;font-size:30px}
+.cdx.lock .cdxi{filter:grayscale(1) brightness(0) drop-shadow(0 0 2px #556)}
+.cdx:not(.lock) .cdxi{animation:cdxg 2.4s ease-in-out infinite}@keyframes cdxg{50%{transform:scale(1.08) rotate(4deg);filter:brightness(1.3)}}
+.cdxp{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin:5px 0}.tag img{width:18px;height:18px;vertical-align:middle;margin-right:3px;border-radius:4px}
+.evob{margin-top:10px;padding:10px}.evocmp{display:flex;align-items:center;justify-content:center;gap:10px;margin:6px 0}.evocmp>div{display:flex;flex-direction:column;align-items:center;font-size:11px;color:var(--muted);gap:3px}
+.evocmp img{width:96px!important;height:96px!important;border-radius:12px;background:#0e1527}.evoaf img{box-shadow:0 0 18px rgba(255,201,74,.45);animation:evop 1.6s ease-in-out infinite}
+@keyframes evop{50%{box-shadow:0 0 32px rgba(255,201,74,.8)}}.evoar{font-size:26px;color:var(--gold)}
+.evobr{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:6px 0}.evobr .btn{text-align:left;line-height:1.3;font-weight:500}.evobr .btn span{font-size:11px;opacity:.85}.evomat{margin:6px 0;font-size:13px}
+.mbox.evoflash{animation:evof .8s ease-out}@keyframes evof{0%{box-shadow:0 0 0 0 rgba(255,216,74,.9)}40%{box-shadow:0 0 60px 20px rgba(255,216,74,.6)}100%{box-shadow:0 20px 60px rgba(0,0,0,.6)}}
+.rtree{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.rcol h4{margin:0 0 8px;text-align:center}
+.rnode{background:var(--panel);border:2px solid var(--line);border-radius:13px;padding:8px;font-size:12px;display:flex;flex-direction:column;gap:3px}
+.rnode.av{border-color:var(--c)}.rnode.max{border-color:var(--c);box-shadow:0 0 14px rgba(255,201,74,.25)}.rnode.lock{opacity:.5}
+.rn-h{display:flex;gap:6px;align-items:center}.rn-i{font-size:18px}.rn-l{margin-left:auto;color:var(--c);font-weight:700}
+.rpips{display:flex;gap:3px}.rpips i{flex:1;height:5px;border-radius:3px;background:#0d1426}.rpips i.on{background:var(--c)}
+.rlink{width:4px;height:16px;margin:0 auto;background:#2b3b62;border-radius:2px}.rlink.on{background:var(--c)}
+.ctg{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-bottom:10px}
+.ctboard h4{margin:12px 0 8px;color:var(--gold)}
+.ctc{background:linear-gradient(170deg,#3a2c1c,#1d2238);border:2px solid #7a5c34;border-radius:13px;padding:10px;display:flex;flex-direction:column;gap:5px;font-size:13px;position:relative;box-shadow:inset 0 0 0 1px rgba(255,220,150,.08)}
+.ctc::before{content:'';position:absolute;top:-6px;left:50%;width:12px;height:12px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ff8a7a,#a0201a);box-shadow:0 2px 3px rgba(0,0,0,.5);transform:translateX(-50%)}
+.ctc.done{border-color:var(--green);box-shadow:0 0 14px rgba(82,224,138,.3)}.ctt{display:flex;gap:8px}.cti{font-size:26px}
+.modbox{background:rgba(0,0,0,.3);border:1px solid;border-radius:10px;padding:6px 8px;display:flex;flex-direction:column;gap:1px}
+.bossbar{display:flex;align-items:center;gap:6px;background:rgba(40,10,20,.92);border:1px solid #ff5d6c;border-radius:10px;padding:4px 10px;font-size:12px;flex:1 1 300px}
+.bossbar .bar{flex:1;height:11px;margin:0;min-width:70px}.bossbar .bar i{background:linear-gradient(90deg,#ff5d6c,#ffc94a);transition:width .2s}
+.bprev{width:100%;height:150px;border-radius:10px;background:rgba(0,0,0,.25)}
+.mstab td.ok{color:var(--green)}
+@media (max-width:760px){.rtree{grid-template-columns:1fr}.evobr{grid-template-columns:1fr}.cdxg,.ctg{grid-template-columns:1fr}.bossbar{flex-basis:100%}.res.sm{padding:3px 7px;font-size:12px}}
+
 </style>
 </head>
 <body>
 <div id="app">
   <div class="topbar">
-    <div class="logo">⛏ BUILD A GOLEM</div>
+    <div class="logo">⛏ BUILD A GOLEM <small style="font-size:11px;-webkit-text-fill-color:var(--gold)">V2.0</small></div>
     <div class="res" title="Golem Coins">🪙 <span id="rCoins">0</span></div>
     <div class="res" title="Part Tickets">🎫 <span id="rTix">0</span></div>
-    <div class="res" title="Ancient Scrap">⚙️ <span id="rScrap">0</span></div>
+    <div class="res" title="Ancient Scrap">⚙️ <span id="rScrap">0</span></div><div class="res sm" title="Evolution Shards">💠 <span id="rShard">0</span></div><div class="res sm" title="Guardian Cores">🔶 <span id="rCore">0</span></div><div class="res sm" title="Research Data">📘 <span id="rData">0</span></div>
     <button class="ibtn" data-act="toggleSound" id="bSound" title="เสียง">🔊</button>
     <button class="ibtn" data-act="openSettings" title="ตั้งค่า">⚙</button>
     <button class="ibtn dbg-btn hidden" id="bDebug" data-act="openDebug">DEBUG</button>
@@ -210,14 +252,25 @@ table.t td:last-child,table.t th:last-child{text-align:right}
           <div class="cv-wrap"><canvas id="wcv"></canvas><div class="stage-tag" id="stageTag">Workshop</div></div>
           <div class="slots right" id="slotsR"></div>
         </div>
-        <div class="navbar">
+        <div class="navgrp"><div class="ngl">▶ PLAY</div><div class="navbar">
           <button class="nbtn main" data-act="openDungeons"><span class="e">⛏</span>Dungeon</button>
+          <button class="nbtn" data-act="openBoss"><span class="e">👹</span>Boss Challenge</button>
+          <button class="nbtn" data-act="openEndless"><span class="e">🕳</span>Endless Mine</button>
+          <button class="nbtn" data-act="openContracts"><span class="e">📋</span>Contracts <span class="badge hidden" id="ctBadge"></span></button>
+        </div></div>
+        <div class="navgrp"><div class="ngl">🤖 GOLEM</div><div class="navbar">
           <button class="nbtn" data-act="openSummon"><span class="e">🔥</span>Summon <span class="badge hidden" id="tixBadge"></span></button>
           <button class="nbtn" data-act="openInventory"><span class="e">🎒</span>Inventory</button>
           <button class="nbtn" data-act="openUpgrade"><span class="e">⬆️</span>Upgrade</button>
+          <button class="nbtn" data-act="openEvolution"><span class="e">🧬</span>Evolution</button>
           <button class="nbtn" data-act="openCraft"><span class="e">🛠</span>Craft</button>
-          <button class="nbtn" data-act="openPresets"><span class="e">💾</span>Build Presets</button>
-        </div>
+          <button class="nbtn" data-act="openPresets"><span class="e">💾</span>Presets</button>
+        </div></div>
+        <div class="navgrp"><div class="ngl">📈 PROGRESSION</div><div class="navbar">
+          <button class="nbtn" data-act="openCodex"><span class="e">📖</span>Codex <span class="hint" id="cdxBadge">0/12</span></button>
+          <button class="nbtn" data-act="openResearch"><span class="e">🔬</span>Research</button>
+          <button class="nbtn" data-act="openRecords"><span class="e">🏆</span>Records</button>
+        </div></div>
       </div>
       <aside class="side">
         <div class="card" id="statsCard"></div>
@@ -236,6 +289,7 @@ table.t td:last-child,table.t th:last-child{text-align:right}
       <div class="hp" id="hValue">🪙 0</div>
       <div class="hp" id="hCount">⛏ 0</div>
       <div class="hp" id="hStats">P 0</div>
+      <div class="bossbar hidden" id="hBoss"><b id="hBossN">Boss</b><div class="bar"><i id="hBossF" style="width:100%"></i></div><span id="hBossP"></span></div>
     </div>
     <div class="dbgbar hidden" id="dDbg">
       <button class="btn sm red" data-act="dbgSpeed">x1</button>
@@ -247,6 +301,7 @@ table.t td:last-child,table.t th:last-child{text-align:right}
         <button class="hbtn on" id="bAuto" data-act="toggleAuto">🤖 Auto: ON</button>
         <button class="hbtn" id="bMode" data-act="toggleMode">🎯 ใกล้สุด</button>
         <button class="hbtn ext" id="bExtract" data-act="extract">⇪ Extract</button>
+        <button class="hbtn ext pulse hidden" id="bDescend" data-act="descend">⬇ Descend</button>
       </div>
       <div class="hud-s">
         <button class="skill" id="sk0" data-act="skill" data-arg="0"><kbd>1</kbd><span class="ic">✋</span><span class="nm">-</span><span class="cdv"></span></button>
@@ -437,12 +492,13 @@ const SAVE_KEY='buildAGolem_save_v1';
 let S;
 function addPart(s,pid,lvl=1){const uid='p'+(s.nextUid++);s.inv.push({uid,pid,lvl});return uid;}
 function newState(){
- const s={v:1,coins:200,tickets:5,scrap:0,inv:[],nextUid:1,equip:{head:null,core:null,armL:null,armR:null,legs:null,back:null},
+ const s={v:2,coins:200,tickets:5,scrap:0,inv:[],nextUid:1,equip:{head:null,core:null,armL:null,armR:null,legs:null,back:null},
   presets:[{name:'Fast Mining',equip:null},{name:'Heavy Breaker',equip:null},{name:'Rare Ore Hunter',equip:null},{name:'Build 4',equip:null}],
   unlocked:{quarry:true,depths:false,rift:false},cleared:{},
   pity:{total:0,sinceRare:0,sinceLeg:0,sinceMyth:0,first5Rare:false},
-  stats:{mined:0,summons:0,upgrades:0,extracts:0,earned:0,dismantles:0,crafts:0,runs:0,tier:[0,0,0,0,0,0,0],bestRar:0,maxLvl:1,maxP:0},
-  quests:{active:[],ptr:0,cycle:0,done:[]},ach:[],settings:{sound:true,mode:'nearest',debug:false,runTime:150}};
+  stats:{mined:0,summons:0,upgrades:0,extracts:0,earned:0,dismantles:0,crafts:0,runs:0,tier:[0,0,0,0,0,0,0],bestRar:0,maxLvl:1,maxP:0,hidden:0,bossWins:0,evolves:0},
+  quests:{active:[],ptr:0,cycle:0,done:[]},ach:[],settings:{sound:true,mode:'nearest',debug:false,runTime:150},
+  shards:0,cores:0,data:0,codex:[],research:{},contracts:{active:[],claimed:{},types:[],master:false},bossClears:{},endless:{best:0,ms:[]},recs:{deepest:0,fast10:0,bestCoins:0,mostOres:0,bestEff:0},dbgMod:{},titles:[],skin:''};
  s.equip.head=addPart(s,'scrap_head');s.equip.core=addPart(s,'scrap_core');
  s.equip.armL=addPart(s,'scrap_arm');s.equip.armR=addPart(s,'scrap_arm');
  s.equip.legs=addPart(s,'scrap_legs');s.equip.back=addPart(s,'scrap_back');
@@ -452,7 +508,7 @@ function newState(){
 function load(){
  try{const raw=localStorage.getItem(SAVE_KEY);if(raw){const d=JSON.parse(raw);const base=newState();
    const m=(a,b)=>{for(const k in a){if(b[k]===undefined)b[k]=a[k];else if(a[k]&&typeof a[k]==='object'&&!Array.isArray(a[k]))m(a[k],b[k]);}return b;};
-   S=m(base,d);S.inv=S.inv.filter(i=>PART[i.pid]);for(const sl of SLOTS)if(S.equip[sl]&&!invGet(S.equip[sl]))S.equip[sl]=null;return;}}catch(e){console.warn('load failed',e);}
+   S=m(base,d);S.v=2;S.inv=S.inv.filter(i=>PART[i.pid]);for(const sl of SLOTS)if(S.equip[sl]&&!invGet(S.equip[sl]))S.equip[sl]=null;return;}}catch(e){console.warn('load failed',e);}
  S=newState();
 }
 let saveT=0;
@@ -461,23 +517,33 @@ function saveSoon(){clearTimeout(saveT);saveT=setTimeout(save,250);}
 
 /* ========================= STATS ========================= */
 function invGet(uid){return S.inv.find(i=>i.uid===uid)||null;}
-function partStats(inst){const d=PART[inst.pid];const o={};for(const k in d.stats){const v=d.stats[k];o[k]=v>0?v*(1+0.02*(inst.lvl-1)):v;}return o;}
+function partStats(inst){const d=PART[inst.pid];const o={};const ev=inst.evo||0;const eb=ev>=2?.10:ev>=1?.05:0;
+ for(const k in d.stats){const v=d.stats[k];if(v>0){let e=eb;if(ev>=2&&(inst.br||'A')==='A'&&d.type==='core'&&k==='P')e+=.05;o[k]=v*(1+0.02*(inst.lvl-1))*(1+e);}else o[k]=v;}return o;}
 function fmtStat(k,v,sign){const s=sign&&v>=0?'+':'';if(k==='P'||k==='C')return s+Math.round(v);return s+(Math.round(v*10)/10).toFixed(1)+'%';}
 function statLine(st,html=true){const n={P:'P',S:'S',M:'M',C:'C'};const parts=[];for(const k of['P','S','M','C'])if(st[k]!==undefined){const v=st[k];parts.push(html?`<span class="${v<0?'neg':''}">${n[k]} ${fmtStat(k,v,true)}</span>`:`${n[k]} ${fmtStat(k,v,true)}`);}return parts.join(' · ');}
 function famCount(eq){const f=new Set();for(const sl of SLOTS){const i=eq[sl]&&invGet(eq[sl]);if(i)f.add(PART[i.pid].fam);}return f.size;}
+/* ลำดับคำนวณ: Base Part → Level → Evolution (partStats) → รวมทุกชิ้น + Branch → Research → Synergy (passive) → Clamp → Derived */
 function calcStats(eq){
- let P=10,Sp=100,M=100,C=20;const fx=new Set(),look={},parts={};
- for(const sl of SLOTS){const inst=eq[sl]?invGet(eq[sl]):null;if(!inst){look[sl]=null;continue;}
-  look[sl]=inst.pid;parts[sl]=inst;const st=partStats(inst);P+=st.P||0;Sp+=st.S||0;M+=st.M||0;C+=st.C||0;fx.add(inst.pid);}
- const o={raw:{P,S:Sp,M,C},fx,look,parts};
+ let P=10,Sp=100,M=100,C=20;const fx=new Set(),look={},parts={},evo={},br={};
+ for(const sl of SLOTS){const inst=eq[sl]?invGet(eq[sl]):null;if(!inst){look[sl]=null;evo[sl]=0;br[sl]=null;continue;}
+  look[sl]=inst.pid;parts[sl]=inst;evo[sl]=inst.evo||0;br[sl]=evo[sl]>=2?(inst.br||'A'):null;const st=partStats(inst);P+=st.P||0;Sp+=st.S||0;M+=st.M||0;C+=st.C||0;fx.add(inst.pid);}
+ if(br.core==='B')Sp+=6;if(br.legs==='A')M+=10;if(br.back==='A')C+=25;
+ const pS=Sp-100,pM=M-100,pC=C-20;const rb=researchBonus();Sp+=rb.S;M+=rb.M;C+=rb.C;
+ const syn=synOf(look);const yM=syn.has('storm')?15:0;M+=yM;
+ const o={raw:{P,S:Sp,M,C},fx,look,parts,evo,br,syn,bd:{S:[pS,rb.S,0],M:[pM,rb.M,yM],C:[pC,rb.C,0]}};
  o.rawP=Math.max(10,P);o.P=Math.max(10,Math.round(P));
  o.S=Math.round(clamp(Sp,30,250)*10)/10;o.M=Math.round(clamp(M,40,200)*10)/10;o.C=clamp(Math.round(C),10,300);
  o.interval=clamp(1.2/(o.S/100),.35,2.5);o.move=2.4*o.M/100;
  o.maxTier=0;for(let t=1;t<=6;t++)if(o.P>=TIERS[t].req)o.maxTier=t;
- o.skills=['armL','armR'].map(sl=>{const pid=look[sl];if(!pid||!SKILLS[pid])return null;const sk=Object.assign({pid,fam:PART[pid].fam},SKILLS[pid]);
-   let cd=sk.cd;if(sk.fam==='magma'&&fx.has('magma_back'))cd*=.9;if(sk.fam==='thunder'&&fx.has('thunder_back'))cd*=.9;sk.cdEff=Math.round(cd*10)/10;return sk;});
+ o.skills=['armL','armR'].map(sl=>{const pid=look[sl];if(!pid||!SKILLS[pid])return null;const sk=Object.assign({pid,fam:PART[pid].fam,slot:sl},SKILLS[pid]);
+   let cd=sk.cd;if(sk.fam==='magma'&&fx.has('magma_back'))cd*=.9;if(sk.fam==='thunder'&&fx.has('thunder_back'))cd*=.9;
+   cd*=1-.02*rl('A2');const b=br[sl];if(b==='B')cd*=.88;
+   if(b==='A'){if(sk.mult)sk.mult*=1.15;if(sk.type==='buff')sk.amount=Math.round(sk.amount*1.1);if(sk.type==='dash')sk.tiles=Math.round(sk.tiles*1.1);if(sk.type==='pull')sk.radius=Math.round(sk.radius*1.1*10)/10;}
+   if(pid==='frostbound_arm'&&syn.has('frozen'))sk.radius+=1;if(pid==='void_arm'&&syn.has('dimension'))sk.len+=1;
+   sk.cdEff=Math.round(cd*10)/10;sk.br=b;return sk;});
  return o;
 }
+
 function curStats(){const st=calcStats(S.equip);if(st.P>S.stats.maxP){S.stats.maxP=st.P;}return st;}
 
 /* ========================= GACHA ========================= */
@@ -509,7 +575,7 @@ function doUpgrade(uid){const inst=invGet(uid);if(!inst)return;if(inst.lvl>=10){
 function doDismantle(uid){const inst=invGet(uid);if(!inst)return false;if(equippedSlot(uid)){toast('ถอดชิ้นส่วนออกก่อนจึงจะย่อยได้','err');sfx('err');return false;}
  const v=RAR[PART[inst.pid].ri].dis;S.inv=S.inv.filter(i=>i.uid!==uid);S.scrap+=v;S.stats.dismantles++;toast(`♻ ย่อย ${PART[inst.pid].name} +${v} Scrap`,'ok');sfx('coin');afterChange();return true;}
 function doCraft(pid){const c=RAR[PART[pid].ri].craft;if(S.scrap<c){toast('Ancient Scrap ไม่พอ','err');sfx('err');return;}S.scrap-=c;addPart(S,pid);S.stats.crafts++;S.stats.bestRar=Math.max(S.stats.bestRar,PART[pid].ri);toast(`🛠 คราฟต์ ${PART[pid].name} สำเร็จ`,'ok');sfx('upgrade');afterChange();}
-function afterChange(){curStats();saveSoon();renderWorkshop();if(modalRefresh)modalRefresh();}
+function afterChange(){curStats();checkSynergy();saveSoon();renderWorkshop();if(modalRefresh)modalRefresh();}
 
 /* ========================= QUESTS ========================= */
 function nextQuest(s){
@@ -520,7 +586,7 @@ function nextQuest(s){
 }
 function questInfo(a){const q=QUESTS.find(x=>x.id===a.id);if(!q)return null;const n=q.once?q.n:Math.round(q.n*(1+a.cycle*.6));
  const prog=q.abs?q.abs(S):S.stats[q.stat]-a.start;return{q,n,prog:Math.min(n,prog),done:prog>=n,text:q.text.replace('{n}',fmt(n))};}
-function rwText(rw){const o=[];if(rw.tickets)o.push(`🎫${rw.tickets}`);if(rw.coins)o.push(`🪙${rw.coins}`);if(rw.scrap)o.push(`⚙️${rw.scrap}`);return o.join(' ');}
+function rwText(rw){const o=[];if(rw.tickets)o.push(`🎫${rw.tickets}`);if(rw.coins)o.push(`🪙${fmt(rw.coins)}`);if(rw.scrap)o.push(`⚙️${rw.scrap}`);if(rw.shards)o.push(`💠${rw.shards}`);if(rw.cores)o.push(`🔶${rw.cores}`);if(rw.data)o.push(`📘${rw.data}`);return o.join(' ');}
 function claimQuest(i){const a=S.quests.active[i];const qi=a&&questInfo(a);if(!qi||!qi.done)return;const rw=qi.q.rw;
  S.tickets+=rw.tickets||0;S.coins+=rw.coins||0;S.scrap+=rw.scrap||0;if(qi.q.once)S.quests.done.push(qi.q.id);
  S.quests.active.splice(i,1);nextQuest(S);toast(`✅ รับรางวัล ${rwText(rw)}`,'gold');sfx('coin');afterChange();}
@@ -712,7 +778,7 @@ const BARE={
  leg(c){rr(c,-5,-2,10,28,4);fs(c,lg(c,-2,26,'#6d7488','#454b5c'));rr(c,-8,25,16,8,3);fs(c,'#3a3f4d',1.8);},
  back(){},
 };
-function drawPart(c,type,pid,t,side){const fn=type==='legs'?'leg':type;if(pid){const p=PART[pid];SH[p.fam][fn](c,FAMS[p.fam],t,side);}else BARE[fn](c,t,side);}
+function drawPart(c,type,pid,t,side,ev){const fn=type==='legs'?'leg':type;if(pid){const p=PART[pid];SH[p.fam][fn](c,FAMS[p.fam],t,side);if(ev)evoFx(c,fn,FAMS[p.fam],ev,t);}else BARE[fn](c,t,side);}
 
 /* ===== Golem rig ===== */
 function armAngle(a,side,t,walk,ph){
@@ -723,29 +789,30 @@ function armAngle(a,side,t,walk,ph){
  return out*(.12+Math.sin(t*2.2+side)*.04);
 }
 function drawGolem(c,x,y,s,look,a){
- const t=a.t||0;c.save();c.translate(x,y);
+ const t=a.t||0,EV=a.evo||{};c.save();c.translate(x,y);
  c.fillStyle='rgba(0,0,0,.30)';ell(c,0,0,36*s,9.5*s);c.fill();
  c.scale(s*(a.face||1),s);
  const walk=!!a.walk,ph=a.walkPh||0;const bob=walk?-Math.abs(Math.sin(ph))*3:Math.sin(t*2.2)*1.3;
  const hov=(look.legs==='zephyr_legs'||look.legs==='void_legs')?-5+Math.sin(t*3)*1.5:0;c.translate(0,hov);
  if(a.skill>0)glow(c,0,-58,85,a.skillCol||'#ffffff',.55*Math.min(1,a.skill/.3));
  if(a.charge)glow(c,0,-58,60,'#9ef0ff',.15+Math.random()*.1);
+ if(a.skin==='deep'){glow(c,0,-58,100,'#ffd84a',.2+.08*Math.sin(t*3));for(let i=0;i<3;i++){const k=(t*.5+i/3)%1;sprk(c,-40+i*40,-20-k*90,4,rgba('#ffe14a',1-k));}}
  const pop=1+(a.pop||0)*.14;
- c.save();c.translate(0,-56+bob);c.scale(pop,pop);drawPart(c,'back',look.back,t);c.restore();
- for(const side of[-1,1]){const lift=walk?Math.max(0,Math.sin(ph+(side<0?0:Math.PI)))*6:0;c.save();c.translate(13*side,-34+bob*.4-lift);if(side<0)c.scale(-1,1);drawPart(c,'legs',look.legs,t+(side<0?0:.37),side);c.restore();}
- c.save();c.translate(0,-56+bob);c.scale(pop,pop);drawPart(c,'core',look.core,t);c.restore();
- for(const side of[-1,1]){const sl=side<0?'armL':'armR';c.save();c.translate(30*side*pop,-67+bob);c.rotate(armAngle(a,side,t,walk,ph));if(side<0)c.scale(-1,1);drawPart(c,'arm',look[sl],t+(side<0?0:.5),side);c.restore();}
- c.save();c.translate(0,-93+bob*1.25);c.rotate(Math.sin(t*1.3)*.03);c.scale(pop,pop);drawPart(c,'head',look.head,t);c.restore();
+ c.save();c.translate(0,-56+bob);c.scale(pop,pop);drawPart(c,'back',look.back,t,0,EV.back);c.restore();
+ for(const side of[-1,1]){const lift=walk?Math.max(0,Math.sin(ph+(side<0?0:Math.PI)))*6:0;c.save();c.translate(13*side,-34+bob*.4-lift);if(side<0)c.scale(-1,1);drawPart(c,'legs',look.legs,t+(side<0?0:.37),side,EV.legs);c.restore();}
+ c.save();c.translate(0,-56+bob);c.scale(pop,pop);drawPart(c,'core',look.core,t,0,EV.core);c.restore();
+ for(const side of[-1,1]){const sl=side<0?'armL':'armR';c.save();c.translate(30*side*pop,-67+bob);c.rotate(armAngle(a,side,t,walk,ph));if(side<0)c.scale(-1,1);drawPart(c,'arm',look[sl],t+(side<0?0:.5),side,EV[sl]);c.restore();}
+ c.save();c.translate(0,-93+bob*1.25);c.rotate(Math.sin(t*1.3)*.03);c.scale(pop,pop);drawPart(c,'head',look.head,t,0,EV.head);c.restore();
  c.restore();
 }
 /* ===== part icons ===== */
 const ICON={};
-function partIcon(pid){if(ICON[pid])return ICON[pid];const cv=document.createElement('canvas');cv.width=cv.height=112;const c=cv.getContext('2d');const p=PART[pid];const f=FAMS[p.fam];
- const g=c.createRadialGradient(56,56,8,56,56,70);g.addColorStop(0,rgba(RAR[p.ri].color,.35));g.addColorStop(1,'rgba(10,15,30,0)');c.fillStyle=g;c.fillRect(0,0,112,112);c.save();
+function partIcon(pid,ev=0){const key=pid+'|'+ev;if(ICON[key])return ICON[key];const cv=document.createElement('canvas');cv.width=cv.height=112;const c=cv.getContext('2d');const p=PART[pid];const f=FAMS[p.fam];
+ const g=c.createRadialGradient(56,56,8,56,56,70);g.addColorStop(0,rgba(ev>=2?f.c3:RAR[p.ri].color,ev>=2?.5:.35));g.addColorStop(1,'rgba(10,15,30,0)');c.fillStyle=g;c.fillRect(0,0,112,112);c.save();
  if(p.type==='head'){c.translate(56,62);c.scale(1.85,1.85);}else if(p.type==='core'){c.translate(56,56);c.scale(1.65,1.65);}
  else if(p.type==='arm'){c.translate(56,10);c.scale(1.45,1.45);}else if(p.type==='legs'){c.translate(56,26);c.scale(1.5,1.5);}else{c.translate(56,96);c.scale(1.18,1.18);}
- if(p.type==='legs'){for(const s of[-1,1]){c.save();c.translate(13*s,0);if(s<0)c.scale(-1,1);SH[p.fam].leg(c,f,.4,s);c.restore();}}else SH[p.fam][p.type](c,f,.4,1);
- c.restore();ICON[pid]=cv.toDataURL();return ICON[pid];}
+ if(p.type==='legs'){for(const s of[-1,1]){c.save();c.translate(13*s,0);if(s<0)c.scale(-1,1);SH[p.fam].leg(c,f,.4,s);evoFx(c,'leg',f,ev,.4);c.restore();}}else{SH[p.fam][p.type](c,f,.4,1);evoFx(c,p.type,f,ev,.4);}
+ c.restore();if(ev){c.font='bold 17px sans-serif';c.textAlign='right';c.fillStyle=ev>=2?'#ffd84a':'#7fe6ff';c.fillText(ev>=2?'✦✦':'✦',106,20);}ICON[key]=cv.toDataURL();return ICON[key];}
 
 /* ========================= UI HELPERS ========================= */
 function toast(msg,type=''){const d=document.createElement('div');d.className='toast '+type;d.textContent=msg;$('#toasts').appendChild(d);setTimeout(()=>{d.style.transition='opacity .3s';d.style.opacity=0;setTimeout(()=>d.remove(),300);},2200);while($('#toasts').children.length>4)$('#toasts').firstChild.remove();}
@@ -757,7 +824,7 @@ function confirmBox(text,cb,yes='ยืนยัน',title='ยืนยัน')
 function rarCol(ri){return RAR[ri].color;}
 function partCard(inst,opts={}){const p=PART[inst.pid];const eq=equippedSlot(inst.uid);const cnt=S.inv.filter(i=>i.pid===inst.pid).length;
  return`<button class="pc" style="border-color:${rarCol(p.ri)}" data-act="${opts.act||'openPart'}" data-arg="${inst.uid}">${eq?`<span class="eq">${eq==='armL'?'L':eq==='armR'?'R':'ใส่อยู่'}</span>`:''}
- <div class="top"><img src="${partIcon(p.id)}" alt=""><div><div class="rr" style="color:${rarCol(p.ri)}">${RAR[p.ri].name}</div><div class="nm">${esc(p.name)}</div><div class="sline">${FAMS[p.fam].name} · ${TYPE_NAME[p.type]} · Lv.${inst.lvl}</div></div></div>
+ <div class="top"><img src="${partIcon(p.id,inst.evo||0)}" alt=""><div><div class="rr" style="color:${rarCol(p.ri)}">${RAR[p.ri].name}</div><div class="nm">${esc(p.name)}</div><div class="sline">${FAMS[p.fam].name} · ${TYPE_NAME[p.type]} · Lv.${inst.lvl}${inst.evo?` · <span style="color:${EVO_COL[inst.evo]}">${EVO_NAME[inst.evo]}</span>`:''}</div></div></div>
  <div>${statLine(partStats(inst))}</div><span class="cnt">มี x${cnt}</span></button>`;}
 function diffBlock(eqA,eqB){const a=calcStats(eqA),b=calcStats(eqB);const rows=[['P','Mining Power'],['S','Mining Speed'],['M','Movement'],['C','Capacity']];
  return`<div class="cmp">${rows.map(([k,n])=>{const d=b[k]-a[k];const cls=Math.abs(d)<.05?'':d>0?'pos':'neg';return`<span>${n}</span><span>${fmtStat(k,a[k])} → <b class="${cls}">${fmtStat(k,b[k])}</b> ${Math.abs(d)>=.05?`<span class="${cls}">(${fmtStat(k,d,true)})</span>`:''}</span>`;}).join('')}
@@ -769,10 +836,10 @@ const wsAnim={pop:0,mine:-1,demoT:3,skill:0};
 let qTab='q';
 function slotHtml(sl){const inst=S.equip[sl]?invGet(S.equip[sl]):null;const p=inst&&PART[inst.pid];
  return`<button class="slot" style="border-color:${p?rarCol(p.ri):'var(--line)'}" data-act="openSlot" data-arg="${sl}" id="slot_${sl}">
- ${p?`<img src="${partIcon(p.id)}" alt="">`:`<div class="noimg">${SLOT_EMO[sl]}</div>`}<div style="min-width:0"><div class="sl-l">${SLOT_NAME[sl]}</div>
- <div class="sl-n" style="color:${p?rarCol(p.ri):'var(--muted)'}">${p?esc(p.name):'— ว่าง —'}</div><div class="sl-v">${p?`Lv.${inst.lvl} · ${statLine(partStats(inst),false)}`:'แตะเพื่อติดตั้ง'}</div></div></button>`;}
+ ${p?`<img src="${partIcon(p.id,inst.evo||0)}" alt="">`:`<div class="noimg">${SLOT_EMO[sl]}</div>`}<div style="min-width:0"><div class="sl-l">${SLOT_NAME[sl]}</div>
+ <div class="sl-n" style="color:${p?rarCol(p.ri):'var(--muted)'}">${p?esc(p.name):'— ว่าง —'}</div><div class="sl-v">${p?`Lv.${inst.lvl}${inst.evo?' '+(inst.evo>=2?'✦✦':'✦'):''} · ${statLine(partStats(inst),false)}`:'แตะเพื่อติดตั้ง'}</div></div></button>`;}
 function renderWorkshop(){
- if(!S)return;$('#rCoins').textContent=fmt(S.coins);$('#rTix').textContent=fmt(S.tickets);$('#rScrap').textContent=fmt(S.scrap);
+ if(!S)return;$('#rCoins').textContent=fmt(S.coins);$('#rTix').textContent=fmt(S.tickets);$('#rScrap').textContent=fmt(S.scrap);v2Workshop();
  const tb=$('#tixBadge');tb.classList.toggle('hidden',S.tickets<=0);tb.textContent=S.tickets;
  $('#bSound').textContent=S.settings.sound?'🔊':'🔇';$('#bDebug').classList.toggle('hidden',!S.settings.debug);
  $('#slotsL').innerHTML=['head','armL','legs'].map(slotHtml).join('');$('#slotsR').innerHTML=['core','armR','back'].map(slotHtml).join('');
@@ -784,9 +851,9 @@ function renderWorkshop(){
   <div class="hint">ขุดได้ถึง <b style="color:var(--text)">Tier ${st.maxTier}</b> (${TIERS[st.maxTier].ores.map(o=>o[0]).join(', ')})${nt?` · Tier ${st.maxTier+1} ต้องการ P ${nt.req}`:' · สูงสุดแล้ว!'}</div></div>
  <div class="stat"><div class="row"><span>⚡ Mining Speed</span><b>${fmtStat('S',st.S)}</b></div>${bar(st.S,250,'#3fe0ff')}<div class="hint">ขุดทุก ${st.interval.toFixed(2)} วิ${st.raw.S!==st.S&&(st.raw.S<30||st.raw.S>250)?' (ชนเพดาน 30–250%)':''}</div></div>
  <div class="stat"><div class="row"><span>🦿 Movement</span><b>${fmtStat('M',st.M)}</b></div>${bar(st.M,200,'#52e08a')}<div class="hint">เดิน ${st.move.toFixed(2)} ช่อง/วิ</div></div>
- <div class="stat"><div class="row"><span>🎒 Ore Capacity</span><b>${st.C}</b></div>${bar(st.C,300,'#b05cff')}<div class="hint">${st.fx.has('prism_back')?'+8 ช่องสำรองแร่ Tier 5+ · ':''}ตระกูลที่ใช้: ${famCount(S.equip)}</div></div>`;
+ <div class="stat"><div class="row"><span>🎒 Ore Capacity</span><b>${st.C}</b></div>${bar(st.C,300,'#b05cff')}<div class="hint">${st.fx.has('prism_back')?'+8 ช่องสำรองแร่ Tier 5+ · ':''}ตระกูลที่ใช้: ${famCount(S.equip)}</div></div>`+bdHtml(st);
  const pas=['head','core','legs','back'].map(sl=>st.look[sl]).filter(Boolean).map(pid=>`<div class="hint">• <b style="color:${rarCol(PART[pid].ri)}">${PART[pid].name}</b>: ${PART[pid].desc}</div>`).join('');
- $('#skillsCard').innerHTML=`<h3>✨ สกิล & Passive</h3>${st.skills.map((sk,i)=>sk?`<div class="skrow"><div class="ic">${sk.icon}</div><div><b>[${i+1}] ${sk.name}</b> <span class="hint">CD ${sk.cdEff}s</span><div class="hint">${sk.desc}</div></div></div>`:`<div class="skrow"><div class="ic">✋</div><div class="hint">[${i+1}] ไม่มีแขน — ไม่มีสกิล</div></div>`).join('')}${pas||'<div class="hint">ไม่มี Passive</div>'}`;
+ $('#skillsCard').innerHTML=`<h3>✨ สกิล & Passive</h3>${st.skills.map((sk,i)=>sk?`<div class="skrow"><div class="ic">${sk.icon}</div><div><b>[${i+1}] ${sk.name}</b> <span class="hint">CD ${sk.cdEff}s</span><div class="hint">${sk.desc}</div></div></div>`:`<div class="skrow"><div class="ic">✋</div><div class="hint">[${i+1}] ไม่มีแขน — ไม่มีสกิล</div></div>`).join('')}${pas||'<div class="hint">ไม่มี Passive</div>'}${synHtml(st)}`;
  renderQuests();
  $('#stageTag').textContent=`${famCount(S.equip)} ตระกูล · P ${st.P} · S ${fmtStat('S',st.S)} · M ${fmtStat('M',st.M)} · C ${st.C}`;
 }
@@ -831,14 +898,15 @@ function openPart(uid){
  const render=()=>{const inst=invGet(uid);if(!inst){closeModal();return;}const p=PART[inst.pid];const eq=equippedSlot(uid);const sk=SKILLS[p.id];const st=partStats(inst);
   const nxt=inst.lvl<10?partStats({pid:inst.pid,lvl:inst.lvl+1}):null;const cost=inst.lvl<10?upCost(inst):null;
   const exact=o=>Object.keys(o).map(k=>`${k} ${o[k]>=0?'+':''}${(Math.round(o[k]*100)/100)}${k==='S'||k==='M'?'%':''}`).join(' · ');
-  let h=`<div class="detail"><div><img src="${partIcon(p.id)}"></div><div>
+  let h=`<div class="detail"><div><img src="${partIcon(p.id,inst.evo||0)}"></div><div>
   <div class="rr" style="color:${rarCol(p.ri)};font-weight:800">${RAR[p.ri].name}</div><h3 style="margin:2px 0 6px;font-size:22px">${esc(p.name)}</h3>
-  <div><span class="tag">${FAMS[p.fam].name}</span><span class="tag">${TYPE_NAME[p.type]}</span><span class="tag">Lv.${inst.lvl}/10</span>${eq?`<span class="tag" style="color:var(--cyan)">ใส่อยู่: ${SLOT_NAME[eq]}</span>`:''}</div>
+  <div><span class="tag">${FAMS[p.fam].name}</span><span class="tag">${TYPE_NAME[p.type]}</span><span class="tag">Lv.${inst.lvl}/10</span><span class="tag" style="color:${EVO_COL[inst.evo||0]}">${EVO_NAME[inst.evo||0]}${(inst.evo||0)>=2?' · '+(inst.br||'A'):''}</span>${eq?`<span class="tag" style="color:var(--cyan)">ใส่อยู่: ${SLOT_NAME[eq]}</span>`:''}</div>
   <div style="margin:8px 0;font-size:15px">${statLine(st)}</div><div class="hint">ค่าจริง: ${exact(st)}</div>
   ${sk?`<div class="skrow" style="margin-top:8px"><div class="ic">${sk.icon}</div><div><b>${sk.name}</b> · CD ${sk.cd}s<div class="hint">${sk.desc}</div></div></div>`:`<div class="hint" style="margin-top:8px">✨ ${p.desc}</div>`}
   ${nxt?`<div class="card" style="margin-top:10px;padding:9px"><b>⬆ Upgrade → Lv.${inst.lvl+1}</b><div class="hint">ค่าบวก +2% ต่อเลเวล (ค่าลบคงเดิม)</div><div>${exact(st)} → <span class="pos">${exact(nxt)}</span></div>
    <div style="margin:5px 0">ราคา: <b style="color:${S.coins>=cost.coins?'var(--gold)':'var(--red)'}">🪙 ${fmt(cost.coins)}</b> + <b style="color:${S.scrap>=cost.scrap?'var(--text)':'var(--red)'}">⚙️ ${cost.scrap} Scrap</b> <span class="hint">(มี 🪙${fmt(S.coins)} ⚙️${fmt(S.scrap)}) · อัปเกรดไม่มีล้มเหลว</span></div>
    <button class="btn gold" data-act="upgrade" data-arg="${uid}" ${S.coins>=cost.coins&&S.scrap>=cost.scrap?'':'disabled'}>⬆ Upgrade</button></div>`:`<div class="hint" style="margin-top:8px">⭐ เลเวลสูงสุดแล้ว</div>`}
+  ${evoBlock(inst)}
   <div class="row2" style="margin-top:10px">${p.type==='arm'?`<button class="btn pri" data-act="equipTo" data-arg="armL|${uid}">Equip แขนซ้าย</button><button class="btn pri" data-act="equipTo" data-arg="armR|${uid}">Equip แขนขวา</button>`:`<button class="btn pri" data-act="equipTo" data-arg="${p.type}|${uid}" ${eq?'disabled':''}>Equip</button>`}
    ${eq?`<button class="btn" data-act="unequip" data-arg="${eq}">Unequip</button>`:''}<button class="btn" data-act="toggleCmp">Compare</button>
    <button class="btn red" data-act="dismantle" data-arg="${uid}" ${eq?'disabled title="ถอดก่อน"':''}>♻ Dismantle (+${RAR[p.ri].dis})</button></div>
@@ -928,10 +996,10 @@ function renderSummon(dt){const cv=$('#scv');if(!cv)return;const c=cv.getContext
 function openDungeons(){
  const render=()=>{const st=curStats();let h=`<div class="dgrid">`;
   for(const d of DUNGEONS){const un=S.unlocked[d.id];const canP=st.P>=d.reqP;const canC=S.coins>=d.cost;const th=d.th1;
-   h+=`<div class="dcard" style="background:linear-gradient(160deg,${th.wall},${th.bg});border-color:${th.acc}"><h4 style="color:${th.acc}">${d.name}</h4><div class="hint" style="color:#cfd8ee">${d.th}</div>
+   h+=`<div class="dcard" style="background:linear-gradient(160deg,${th.wall},${th.bg});border-color:${th.acc}"><h4 style="color:${th.acc}">${d.name}</h4><div class="hint" style="color:#cfd8ee">${d.th}</div>${modHtml(d)}
    <div><b>แร่:</b> Tier ${d.tiers[0]}–${d.tiers[d.tiers.length-1]}</div><div class="ores">${d.tiers.map(ti=>TIERS[ti].ores.map(o=>`<span class="tag" style="color:${o[1]}">T${ti} ${o[0]} 🪙${TIERS[ti].price}</span>`).join('')).join('')}</div>
    <div><b>Power ขั้นต่ำ:</b> ${TIERS[d.tiers[0]].req} · ของคุณ <b style="color:${st.P>=TIERS[d.tiers[0]].req?'var(--green)':'var(--red)'}">${st.P}</b> (ขุดได้ถึง T${st.maxTier})</div>
-   <div><b>รางวัล:</b> ขายแร่ 100% เมื่อ Extract (หมดเวลา 70%) · 🎫1 เมื่อ Extract โดยขุด ≥5 ก้อน${S.cleared[d.id]?'':' · ครั้งแรก +🎫2'}</div><div class="hint">เวลา ${S.settings.runTime} วิ · แผนที่ 22×14 สุ่ม Seed ทุกรอบ</div><div class="sp"></div>
+   <div><b>รางวัล:</b> ขายแร่ 100%${MODS[dungeonMod(d.id)].coin!==1?` (x${MODS[dungeonMod(d.id)].coin.toFixed(2)})`:''} เมื่อ Extract (หมดเวลา 70%) · 🎫1 เมื่อ Extract โดยขุด ≥5 ก้อน${S.cleared[d.id]?'':' · ครั้งแรก +🎫2'}</div><div class="hint">เวลา ${S.settings.runTime} วิ · แผนที่ 22×14 สุ่ม Seed ทุกรอบ</div><div class="sp"></div>
    ${un?`<button class="btn gold" data-act="enterDungeon" data-arg="${d.id}">⛏ Enter Dungeon</button>`:`<div class="hint">🔒 ปลดล็อก: Power ≥ ${d.reqP} ${canP?'✅':'❌'} · 🪙 ${fmt(d.cost)} ${canC?'✅':'❌'}</div><button class="btn pri" data-act="unlockDungeon" data-arg="${d.id}" ${canP&&canC?'':'disabled'}>🔓 Unlock (🪙${fmt(d.cost)})</button>`}</div>`;}
   h+=`</div><div class="hint" style="margin-top:10px">💡 Crystal Quarry เปิดตลอด เล่นได้แม้ไม่มีชิ้นส่วนเลย (P ขั้นต่ำ 10 ขุด Tier 1 ได้เสมอ)</div>`;$('#mbody').innerHTML=h;};
  openModal('⛏ เลือกดันเจี้ยน','',render);render();
@@ -955,13 +1023,14 @@ function openDebug(){
  <div class="row2" style="margin-bottom:8px"><button class="btn" data-act="dbg" data-arg="allParts">🧩 ปลดล็อกชิ้นส่วนทั้งหมด (x2)</button><button class="btn" data-act="dbg" data-arg="allDung">🔓 ปลดล็อกดันเจี้ยนทั้งหมด</button>
  <button class="btn" data-act="dbg" data-arg="builds">🧪 สร้าง Build ตัวอย่าง A/B/C → Presets 1–3</button><button class="btn" data-act="dbg" data-arg="maxlvl">⭐ ชิ้นที่ใส่อยู่ Lv.10</button></div>
  <div class="row2"><span class="hint">เวลารอบดันเจี้ยน:</span>${[30,60,150,300].map(v=>`<button class="btn sm ${S.settings.runTime===v?'pri':''}" data-act="dbg" data-arg="rt${v}">${v}s</button>`).join('')}</div>
+ ${dbgV2Html()}
  <div class="hint" style="margin-top:8px">ในดันเจี้ยน Debug Mode จะมีปุ่มเร่งความเร็ว x1/x3/x6, +60s และจบรอบทันที</div>`;};
  openModal('🐞 Debug Mode','',render,true);render();
 }
 const SAMPLE={A:{head:'zephyr_head',core:'coppergear_core',armL:'drilltech_arm',armR:'drilltech_arm',legs:'zephyr_legs',back:'coppergear_back'},
  B:{head:'titanstone_head',core:'titanstone_core',armL:'titanstone_arm',armR:'titanstone_arm',legs:'titanstone_legs',back:'titanstone_back'},
  C:{head:'prism_head',core:'drilltech_core',armL:'titanstone_arm',armR:'drilltech_arm',legs:'thunder_legs',back:'magnetite_back'}};
-function debugAct(k){
+function debugAct(k){if(dbgV2(k))return;
  if(k==='t10')S.tickets+=10;if(k==='t100')S.tickets+=100;if(k==='c1k')S.coins+=1000;if(k==='c50k')S.coins+=50000;if(k==='s500')S.scrap+=500;if(k==='s5k')S.scrap+=5000;
  if(k==='allParts'){PART_LIST.forEach(p=>{addPart(S,p.id);addPart(S,p.id);});S.stats.bestRar=5;toast('เพิ่มชิ้นส่วนทั้ง 60 แบบ x2','ok');}
  if(k==='allDung'){S.unlocked={quarry:true,depths:true,rift:true};toast('ปลดล็อกดันเจี้ยนทั้งหมด','ok');}
@@ -973,55 +1042,60 @@ function debugAct(k){
 /* ========================= DUNGEON ========================= */
 const W=22,H=14;const T_FLOOR=0,T_WALL=1,T_RUBBLE=2,T_SLOW=3,T_LAVA=4,T_SECRET=5;
 let R=null;
-function genDungeon(d,seed){
+function genDungeon(d,seed,opt){
+ opt=opt||{};const mods=opt.mods||[];const has=k=>mods.includes(k);
  const rng=mulberry32(seed);const ri=(a,b)=>a+Math.floor(rng()*(b-a+1));
  const g=new Uint8Array(W*H),deco=new Uint8Array(W*H),room=new Uint8Array(W*H);const I=(x,y)=>y*W+x;
  for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(x===0||y===0||x===W-1||y===H-1)g[I(x,y)]=T_WALL;
  const ent={x:1,y:ri(3,H-4)};const prot=(x,y)=>Math.abs(x-ent.x)<=2&&Math.abs(y-ent.y)<=2;
- let rm=null,secretIdx=-1;
- if(d.room&&(d.room==='bonus'||rng()<.65)){const top=rng()<.5;const rx0=W-7,ry0=top?1:H-6;rm={x0:rx0+1,y0:ry0+1,x1:W-2,y1:ry0+4};
+ let rm=null,secretIdx=-1;const rtype=d.room||(has('hidden')?'secret':null);
+ if(rtype&&(rtype==='bonus'||rng()<(has('hidden')?.95:.65))){const top=rng()<.5;const rx0=W-7,ry0=top?1:H-6;rm={x0:rx0+1,y0:ry0+1,x1:W-2,y1:ry0+4,type:rtype};
   for(let y=ry0;y<=ry0+5;y++)for(let x=rx0;x<=W-1;x++){if(y<0||y>=H)continue;const inner=x>rx0&&x<W-1&&y>ry0&&y<ry0+5;room[I(x,y)]=inner?2:1;g[I(x,y)]=inner?T_FLOOR:T_WALL;}
   const sx=rx0,sy=ri(rm.y0,rm.y1);secretIdx=I(sx,sy);g[secretIdx]=T_SECRET;}
  const free=(x,y)=>x>0&&y>0&&x<W-1&&y<H-1&&!prot(x,y)&&!room[I(x,y)];
  const walk=(n,len,tile,onlyFloor)=>{for(let k=0;k<n;k++){let x=ri(3,W-4),y=ri(1,H-2);for(let s=0;s<len;s++){if(free(x,y)&&(!onlyFloor||g[I(x,y)]===T_FLOOR))g[I(x,y)]=tile;const dir=ri(0,3);x+=[1,-1,0,0][dir];y+=[0,0,1,-1][dir];x=clamp(x,1,W-2);y=clamp(y,1,H-2);}}};
  walk(ri(8,11),ri(4,7),T_WALL);
+ if(has('shift'))walk(ri(5,7),ri(5,8),T_WALL);if(opt.extraWalls)walk(ri(3,4),ri(4,6),T_WALL);
  for(let k=0;k<ri(5,9);k++){const x=ri(3,W-3),y=ri(1,H-2);if(free(x,y)&&g[I(x,y)]===T_FLOOR)g[I(x,y)]=T_RUBBLE;}
- if(d.hz.slow)walk(ri(2,3),ri(6,9),T_SLOW,true);if(d.hz.lava)walk(3,ri(7,11),T_LAVA,true);
+ if(d.hz.slow)walk(ri(2,3),ri(6,9),T_SLOW,true);if(d.hz.lava)walk(3,ri(7,11),T_LAVA,true);if(has('heat'))walk(ri(2,3),ri(5,8),T_LAVA,true);
  if(d.hz.rails){const ry=ri(2,H-3);for(let x=1;x<W-1;x++)if(g[I(x,ry)]===T_FLOOR&&!room[I(x,ry)])deco[I(x,ry)]=1;}
- // connectivity
+ // connectivity: ทุกพื้นที่เดินได้ต้องเชื่อมกับทางเข้า (ที่เหลือกลายเป็นกำแพง) → AI หาทางได้เสมอ
  const seen=new Uint8Array(W*H);const q=[I(ent.x,ent.y)];seen[q[0]]=1;
  while(q.length){const i=q.shift();const x=i%W,y=(i/W)|0;for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){const j=I(x+dx,y+dy);if(seen[j])continue;const tt=g[j];if(tt===T_WALL||tt===T_RUBBLE)continue;seen[j]=1;q.push(j);}}
  for(let i=0;i<W*H;i++)if(!seen[i]&&(g[i]===T_FLOOR||g[i]===T_SLOW||g[i]===T_LAVA)&&!room[i])g[i]=T_WALL;
  const ores=[];const oreAt=new Array(W*H).fill(null);
- const pickTier=()=>{let tot=d.wts.reduce((a,b)=>a+b,0),x=rng()*tot;for(let k=0;k<d.tiers.length;k++){x-=d.wts[k];if(x<0)return d.tiers[k];}return d.tiers[0];};
+ const wts=d.wts.slice();if(has('heat'))wts[wts.length-1]*=1.8;const hpMul=(opt.hpMul||1)*(has('heavy')?1.4:1);
+ const pickTier=()=>{let tot=wts.reduce((a,b)=>a+b,0),x=rng()*tot;for(let k=0;k<d.tiers.length;k++){x-=wts[k];if(x<0)return d.tiers[k];}return d.tiers[0];};
  const nearLava=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const j=I(x+dx,y+dy);if(g[j]===T_LAVA)return true;}return false;};
- const mk=(x,y,tier,extra={})=>{const T=TIERS[tier];const o=Object.assign({id:ores.length,x,y,tier,hp:T.hp,maxHp:T.hp,name:T.ores[Math.floor(rng()*2)][0],hidden:false,hot:nearLava(x,y),seed:rng(),hitT:0},extra);ores.push(o);oreAt[I(x,y)]=o;return o;};
+ const mk=(x,y,tier,extra={})=>{const T=TIERS[tier];const hp=Math.round(T.hp*hpMul);const o=Object.assign({id:ores.length,x,y,tier,hp,maxHp:hp,name:T.ores[Math.floor(rng()*2)][0],hidden:false,hot:nearLava(x,y),seed:rng(),hitT:0},extra);ores.push(o);oreAt[I(x,y)]=o;return o;};
  const cand=[];for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){const i=I(x,y);if(seen[i]&&!room[i]&&(g[i]===T_FLOOR||g[i]===T_SLOW)&&!prot(x,y))cand.push(i);}
+ const candSet=new Set(cand);
  for(let i=cand.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[cand[i],cand[j]]=[cand[j],cand[i]];}
  const n=Math.min(50,Math.floor(cand.length*.27));const top=d.tiers[d.tiers.length-1];
  for(let k=0;k<n;k++){const i=cand[k];mk(i%W,(i/W)|0,pickTier());}
+ if(has('rush')){const extra=Math.round(n*.3);let placed=0;for(let a=0;a<extra*8&&placed<extra;a++){const b=ores[Math.floor(rng()*ores.length)];if(!b)break;const x=b.x+ri(-1,1),y=b.y+ri(-1,1);const i=I(x,y);if(!candSet.has(i)||oreAt[i])continue;mk(x,y,pickTier());placed++;}}
  // hidden rare ores
- let hc=0;for(let k=n;k<cand.length&&hc<3;k++){const i=cand[k];const x=i%W,y=(i/W)|0;let adjWall=0;for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]])if(g[I(x+dx,y+dy)]===T_WALL)adjWall++;if(adjWall>=1){mk(x,y,top,{hidden:true});hc++;}}
+ let hc=0;const hmax=has('hidden')?4+(rng()<.4?1:0):3;for(let k=n;k<cand.length&&hc<hmax;k++){const i=cand[k];if(oreAt[i])continue;const x=i%W,y=(i/W)|0;let adjWall=0;for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]])if(g[I(x+dx,y+dy)]===T_WALL)adjWall++;if(adjWall>=1){mk(x,y,top,{hidden:true});hc++;}}
  if(rm){for(let y=rm.y0;y<=rm.y1;y++)for(let x=rm.x0;x<=rm.x1;x++)if(rng()<.62)mk(x,y,rng()<.5?top:d.tiers[Math.max(0,d.tiers.length-2)]);
-  const sx=secretIdx%W,sy=(secretIdx/W)|0;const o={id:ores.length,x:sx,y:sy,tier:0,hp:160,maxHp:160,name:d.room==='bonus'?'ผนังร้าว':'ผนังลับ',secret:true,revealed:d.room==='bonus',hidden:false,seed:rng(),hitT:0};ores.push(o);oreAt[secretIdx]=o;}
- return{g,deco,ent,ores,oreAt,room:rm,seed};
+  const sx=secretIdx%W,sy=(secretIdx/W)|0;const o={id:ores.length,x:sx,y:sy,tier:0,hp:160,maxHp:160,name:rm.type==='bonus'?'ผนังร้าว':'ผนังลับ',secret:true,revealed:rm.type==='bonus',hidden:false,seed:rng(),hitT:0};ores.push(o);oreAt[secretIdx]=o;}
+ // รับประกันแร่ที่ขุดได้ตาม Mining Power
+ if(opt.maxTier){const need=opt.need||6;let mineN=ores.filter(o=>!o.secret&&!o.hidden&&o.tier<=opt.maxTier).length;
+  for(const o of ores){if(mineN>=need)break;if(o.secret||o.hidden||o.tier<=opt.maxTier)continue;const nt=Math.max(1,opt.maxTier);const T=TIERS[nt];o.tier=nt;o.name=T.ores[Math.floor(rng()*2)][0];o.hp=o.maxHp=Math.round(T.hp*hpMul);mineN++;}}
+ return{g,deco,ent,ores,oreAt,room:rm,seed,mods};
 }
 function startRun(did,seed){
  const d=DMAP[did];if(!S.unlocked[did]){toast('ยังไม่ปลดล็อก','err');return;}
- const st=calcStats(S.equip);seed=seed||Math.floor(Math.random()*1e9);const m=genDungeon(d,seed);
- R={d,seed,map:m,ores:m.ores,oreAt:m.oreAt,drops:[],st,fx:st.fx,skills:st.skills,
-  g:{x:m.ent.x+.5,y:m.ent.y+.5,path:[],tgt:null,state:'idle',mineT:0,settle:0,face:1,walkPh:0,hits:0,stun:0,skill:0,skillCol:'#fff',mineArm:1,manual:false,idleWait:0,wasWalking:false,pathGoal:-1},
-  bag:{items:{},w:0,res:0},time:S.settings.runTime,elapsed:0,mined:0,cds:[0,0],over:0,auto:true,mode:S.settings.mode,extracting:false,ended:false,
-  parts:[],floats:[],efx:[],timers:[],rock:{next:14+Math.random()*8,warn:null},shield:st.fx.has('stoneguard_back'),lavaT:0,combo:{id:-1,n:0},capHits:0,blinkCd:0,flashCd:0,dashTiles:0,boost:0,msg:{},shake:0,speed:1,cam:{x:0,y:0},collectedCount:0,melted:0};
- closeModal();$('#workshop').classList.add('hidden');$('#dungeon').classList.remove('hidden');$('#hName').textContent='⛏ '+d.name;
- $('#dDbg').classList.toggle('hidden',!S.settings.debug);
- updateSkillButtons();updateHudButtons();resizeDungeon();sfx('equip');
- toast(`เข้าสู่ ${d.name}! ขุดได้ถึง Tier ${st.maxTier}`,'ok');
+ const st=calcStats(S.equip);seed=seed||Math.floor(Math.random()*1e9);const mod=dungeonMod(did);const mods=mod==='normal'?[]:[mod];
+ const m=genChecked(d,seed,{mods,maxTier:st.maxTier,need:8});
+ initRun('normal',d,m,st,{seed,mods,valMul:MODS[mod].coin,time:S.settings.runTime});R.modId=mod;
+ enterView('⛏ '+d.name+(mod!=='normal'?` · ${MODS[mod].icon} ${MODS[mod].name}`:''));
+ toast(`เข้าสู่ ${d.name}! ขุดได้ถึง Tier ${st.maxTier}${mod!=='normal'?` · ${MODS[mod].name}`:''}`,'ok');
  return R;
 }
+
 function ix(x,y){return y*W+x;}
-function lavaF(){return R.fx.has('frostbound_legs')?1:R.fx.has('frostbound_core')?.75:.5;}
-function slowF(){return R.fx.has('zephyr_back')?.8:.55;}
+function lavaF(){return terr(R.fx.has('frostbound_legs')?1:R.fx.has('frostbound_core')?.75:.5);}
+function slowF(){return terr(R.fx.has('zephyr_back')?.8:.55);}
 function tileF(i){const t=R.map.g[i];return t===T_SLOW?slowF():t===T_LAVA?lavaF():1;}
 function hasBlink(){return R.fx.has('void_legs');}
 function walkable(i){if(i<0||i>=W*H)return false;if(R.oreAt[i])return false;const t=R.map.g[i];return t===T_FLOOR||t===T_SLOW||t===T_LAVA||(t===T_RUBBLE&&hasBlink());}
@@ -1035,13 +1109,13 @@ function dijkstra(src){const N=W*H;const dist=new Float32Array(N).fill(Infinity)
 function pathTo(D,goal){const p=[];let c=goal;while(c!==-1&&D.prev[c]!==-1){p.push(c);c=D.prev[c];}return p.reverse();}
 function gTile(){return ix(clamp(Math.floor(R.g.x),0,W-1),clamp(Math.floor(R.g.y),0,H-1));}
 function gDist(x,y){return Math.hypot(R.g.x-(x+.5),R.g.y-(y+.5));}
-function oreVisible(o){return !o.hidden&&(!o.secret||o.revealed);}
+function oreVisible(o){return !o.hidden&&!o.closed&&(!o.secret||o.revealed);}
 function canMine(o){return o.secret?true:R.st.P>=TIERS[o.tier].req;}
-function oreW(o){return o.secret?0:TIERS[o.tier].w;}
-function bagFits(tier){if(!tier)return true;const w=TIERS[tier].w;if(R.bag.w+w<=R.st.C)return true;if(R.fx.has('prism_back')&&tier>=5&&R.bag.res+w<=8)return true;return false;}
-function bagAdd(name,tier){const w=TIERS[tier].w;if(R.bag.w+w<=R.st.C)R.bag.w+=w;else R.bag.res+=w;const it=R.bag.items[name]||(R.bag.items[name]={tier,count:0});it.count++;R.collectedCount++;}
-function bagValue(){let v=0;for(const k in R.bag.items){const it=R.bag.items[k];v+=TIERS[it.tier].price*it.count;}return v;}
-function oreValue(o){return o.secret?250:TIERS[o.tier].price;}
+function oreW(o){return o.secret||o.boss?0:TIERS[o.tier].w;}
+function bagFits(tier){if(!tier)return true;const w=TIERS[tier].w;if(R.bag.w+w<=R.st.C)return true;if(tier>=5&&R.bag.res+w<=resCap())return true;return false;}
+function bagAdd(name,tier){const w=TIERS[tier].w;if(R.bag.w+w<=R.st.C)R.bag.w+=w;else R.bag.res+=w;const it=R.bag.items[name]||(R.bag.items[name]={tier,count:0});it.count++;R.collectedCount++;R.bag.val+=TIERS[tier].price*R.valMul;}
+function bagValue(){return Math.round(R.bag.val+(R.exp?R.exp.val:0));}
+function oreValue(o){return o.secret?250:o.boss?999:Math.round(TIERS[o.tier].price*(R.valMul||1));}
 function notify(key,msg,type='',cd=3){const now=R.elapsed;if(R.msg[key]!==undefined&&now-R.msg[key]<cd)return;R.msg[key]=now;toast(msg,type);}
 function bestStand(D,o){let best=-1,bd=Infinity;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dy)continue;const x=o.x+dx,y=o.y+dy;if(x<0||y<0||x>=W||y>=H)continue;const i=ix(x,y);
   if(dx&&dy){/* diagonal mining needs no corner rule */}if(!stand(i)&&i!==gTile())continue;if(D.dist[i]<bd){bd=D.dist[i];best=i;}}return{i:best,d:bd};}
@@ -1053,38 +1127,41 @@ function setTarget(tgt,manual){
  const path=pathTo(D,goal);g.tgt=tgt;g.path=path;g.pathGoal=goal;g.manual=manual;g.state=path.length?'walk':(tgt.kind==='ore'?'mine':'idle');g.settle=settleTime();
  if(path.length&&tgt.kind==='ore'&&R.fx.has('thunder_legs')&&R.flashCd<=0){R.boost=.6;R.flashCd=10;for(let k=0;k<10;k++)part(g.x,g.y,'#9ef0ff',3,2);}
  return true;}
-function settleTime(){return R.fx.has('drilltech_legs')?0:R.fx.has('scrap_legs')?.1:.3;}
+function settleTime(){return(R.fx.has('drilltech_legs')?0:R.fx.has('scrap_legs')?.1:.3)*(1-.05*rl('A4'));}
 function chooseTarget(){
  const g=R.g;const D=dijkstra(gTile());const spd=R.st.move;let best=null,bs=-Infinity;let anyMineable=false,fullBlock=false;
  for(const dr of R.drops){if(dr.fly)continue;if(!bagFits(dr.tier)){fullBlock=true;continue;}const i=ix(Math.floor(dr.x),Math.floor(dr.y));let dd=D.dist[i];if(dd===Infinity){const b=bestStand(D,{x:Math.floor(dr.x),y:Math.floor(dr.y)});dd=b.d;}if(dd===Infinity)continue;
-  const sc=R.mode==='nearest'?-dd+.5:TIERS[dr.tier].price/(dd/spd+.3);if(sc>bs){bs=sc;best={kind:'drop',d:dr};}}
- for(const o of R.ores){if(!oreVisible(o)||!canMine(o))continue;anyMineable=true;if(!bagFits(o.tier)&&!o.secret){fullBlock=true;continue;}
+  const sc=R.mode==='nearest'?-dd+.5:TIERS[dr.tier].price*R.valMul/(dd/spd+.3);if(sc>bs){bs=sc;best={kind:'drop',d:dr};}}
+ for(const o of R.ores){if(!oreVisible(o)||!canMine(o))continue;anyMineable=true;if(!bagFits(o.tier)&&!o.secret&&!o.boss){fullBlock=true;continue;}
   const near=gDist(o.x,o.y)<=1.55;const dd=near?0:bestStand(D,o).d;if(dd===Infinity)continue;
   const mineT=Math.ceil(o.hp/R.st.rawP)*R.st.interval;const sc=R.mode==='nearest'?-dd:oreValue(o)/(dd/spd+mineT+.5);if(sc>bs){bs=sc;best={kind:'ore',o};}}
  if(best){setTarget(best,false);return true;}
  if(fullBlock){notify('full','🎒 กระเป๋าเต็ม! กด Extract เพื่อกลับฐานขายแร่','err',6);$('#bExtract').classList.add('pulse');}
- else if(!anyMineable)notify('none','ไม่มีแร่ที่ขุดได้เหลือแล้ว — กด Extract','',8);
+ else if(!anyMineable&&R.type!=='boss')notify('none','ไม่มีแร่ที่ขุดได้เหลือแล้ว — กด Extract','',8);
  g.idleWait=.6;return false;}
 function damageOre(o,amt,src){
- if(!o||R.ores.indexOf(o)<0)return 0;
- if(o.hidden){o.hidden=false;floatTxt(o.x+.5,o.y+.2,'พบแร่ซ่อน!','#fff6a8');return 0;}
+ if(!o||R.ores.indexOf(o)<0||o.closed)return 0;
+ if(o.hidden){revealHidden(o);return 0;}
  if(o.secret&&!o.revealed){o.revealed=true;floatTxt(o.x+.5,o.y+.2,'พบผนังลับ!','#ff9df0');}
  if(!canMine(o)){floatTxt(o.x+.5,o.y+.3,'Power ไม่พอ','#ff8a95');return 0;}
  let m=1;const t=o.tier;
  if(!o.secret){if(R.fx.has('stoneguard_head')&&t<=2)m*=1.1;if(R.fx.has('titanstone_head')&&t>=3)m*=1.1;if(o.hot&&R.fx.has('frostbound_head'))m*=1.15;if(o.hot&&R.fx.has('magma_head'))m*=1.2;}
  let crit=false;if(R.fx.has('drilltech_head')&&Math.random()<.15){m*=1.5;crit=true;}
+ m*=1+.02*rl('A3');
+ if(R.syn.has('thermal')&&o.hot&&!o.secret){if(R.elapsed<(o.brit||0))m*=1.2;else if(R.elapsed>=(o.britCd||0)){o.brit=R.elapsed+5;o.britCd=R.elapsed+12;floatTxt(o.x+.5,o.y-.3,'♨️ Brittle!','#bfe8ff',.9);for(let k=0;k<10;k++)part(o.x+.5,o.y+.3,'#e9fbff',3,3);}}
  const dmg=amt*m;o.hp-=dmg;o.hitT=.15;const ti=o.secret?null:ORE_INFO[o.name];
  floatTxt(o.x+.5+(Math.random()-.5)*.3,o.y+.1,(crit?'💥':'')+Math.round(dmg),crit?'#ffd84a':'#ffffff',crit?1.25:1);
  for(let k=0;k<5;k++)part(o.x+.5,o.y+.5,ti?ti.c1:'#bbb',2.5,3);
  if(o.hp<=0)breakOre(o);return dmg;}
 function breakOre(o){
  const i=ix(o.x,o.y);R.ores.splice(R.ores.indexOf(o),1);R.oreAt[i]=null;
+ if(o.boss){if(R.g.tgt&&R.g.tgt.o===o){R.g.tgt=null;R.g.state='idle';R.g.idleWait=.05;}bossBreak(o);return;}
  if(o.secret){R.map.g[i]=T_FLOOR;toast(o.name==='ผนังร้าว'?'🧱 ทะลวงเข้าห้องแร่โบนัส!':'✨ พบห้องลับ!','gold');for(let k=0;k<30;k++)part(o.x+.5,o.y+.5,'#ff9df0',5,4);sfx('break',4);R.shake=.3;return;}
- R.mined++;S.stats.mined++;S.stats.tier[o.tier]++;const info=ORE_INFO[o.name];
+ R.mined++;S.stats.mined++;S.stats.tier[o.tier]++;const info=ORE_INFO[o.name];if(R.inSkill){R.skillBreaks++;ctEvent('skill');}ctEvent('mine',o.tier);if(R.type==='endless')endlessBreak();
  for(let k=0;k<16+o.tier*3;k++)part(o.x+.5,o.y+.5,k%2?info.c1:info.c2,4+o.tier*.4,5);R.efx.push({type:'ring',x:o.x+.5,y:o.y+.5,r:1,t:0,dur:.35,col:info.c1});
  sfx('break',o.tier);R.drops.push({x:o.x+.5,y:o.y+.5,tier:o.tier,name:o.name,t:0,fly:false,vy:-2});
  if(R.g.tgt&&R.g.tgt.o===o){R.g.tgt=null;R.g.state='idle';R.g.idleWait=.05;}}
-function pickupR(){let r=1.6;if(R.fx.has('coppergear_back'))r+=1.5;if(R.fx.has('magnetite_core'))r+=.6;if(R.fx.has('magnetite_legs')&&R.g.state==='walk')r+=1;return r;}
+function pickupR(){let r=1.6;if(R.fx.has('coppergear_back'))r+=1.5;if(R.fx.has('magnetite_core'))r+=.6;if(R.fx.has('magnetite_legs')&&R.g.state==='walk')r+=1;r+=.25*rl('B2');if(R.st.br.back==='B')r+=1.5;if(R.syn.has('electro'))r+=2;if(R.syn.has('gravity'))r+=1.5;if(R.syn.has('treasure'))r+=1;return r;}
 function updDrops(dt){const g=R.g;const pr=pickupR();
  for(let k=R.drops.length-1;k>=0;k--){const d=R.drops[k];d.t+=dt;
   if(d.fly){const dx=g.x-d.x,dy=g.y-d.y,l=Math.hypot(dx,dy);if(l<.35){if(bagFits(d.tier)){bagAdd(d.name,d.tier);floatTxt(g.x,g.y-1.2,'+'+d.name,ORE_INFO[d.name].c1,.9);sfx('pick');R.drops.splice(k,1);}else{d.fly=false;}continue;}
@@ -1094,20 +1171,20 @@ function useSkill(i){
  if(!R||R.ended)return;const sk=R.skills[i];if(!sk){notify('nosk'+i,`ไม่มีแขนในช่องสกิล ${i+1}`,'err');sfx('err');return;}
  if(R.cds[i]>0){notify('cd'+i,`${sk.name} ยังติดคูลดาวน์ (${Math.ceil(R.cds[i])} วิ)`,'err',1);sfx('err');return;}
  if(R.g.stun>0){notify('stun','โกเลมมึนงงอยู่!','err',1);return;}
- const ok=SKILL_FX[sk.type](sk);if(ok===false){sfx('err');return;}
- R.cds[i]=sk.cdEff;R.g.skill=.6;R.g.skillCol=FAMS[sk.fam].c3;sfx('skill');floatTxt(R.g.x,R.g.y-1.6,sk.icon+' '+sk.name,FAMS[sk.fam].c3,1.1);}
+ R.inSkill=true;R.cdCut=0;let ok;try{ok=SKILL_FX[sk.type](sk);}finally{R.inSkill=false;}if(ok===false){sfx('err');return;}
+ R.cds[i]=Math.max(0,sk.cdEff-(R.cdCut||0));R.g.skill=.6;R.g.skillCol=FAMS[sk.fam].c3;sfx('skill');floatTxt(R.g.x,R.g.y-1.6,sk.icon+' '+sk.name,FAMS[sk.fam].c3,1.1);}
 function skillTarget(range){const g=R.g;if(g.tgt&&g.tgt.kind==='ore'&&R.ores.includes(g.tgt.o)&&gDist(g.tgt.o.x,g.tgt.o.y)<=range)return g.tgt.o;
  let best=null,bd=1e9;for(const o of R.ores){if(!oreVisible(o))continue;const d=gDist(o.x,o.y)-(canMine(o)?100:0);if(gDist(o.x,o.y)<=range&&d<bd){bd=d;best=o;}}return best;}
 function oresIn(cx,cy,r){const out=[];for(const o of R.ores){if(Math.hypot(o.x+.5-cx,o.y+.5-cy)<=r+.3)out.push(o);}return out;}
-function hitList(list,amt){let hit=0;for(const o of list.slice()){if(o.hidden){o.hidden=false;floatTxt(o.x+.5,o.y+.2,'พบแร่ซ่อน!','#fff6a8');continue;}if(o.secret&&!o.revealed){o.revealed=true;floatTxt(o.x+.5,o.y+.2,'พบผนังลับ!','#ff9df0');}if(damageOre(o,amt)>0)hit++;}return hit;}
+function hitList(list,amt){let hit=0;for(const o of list.slice()){if(o.hidden){revealHidden(o);continue;}if(o.secret&&!o.revealed){o.revealed=true;floatTxt(o.x+.5,o.y+.2,'พบผนังลับ!','#ff9df0');}if(damageOre(o,amt)>0)hit++;}return hit;}
 const SKILL_FX={
  hit(sk){const o=skillTarget(1.6);if(!o){notify('nt','ไม่มีแร่ในระยะ — เข้าใกล้แร่ก่อน','err',1);return false;}damageOre(o,R.st.rawP*sk.mult);R.efx.push({type:'burst',x:o.x+.5,y:o.y+.5,t:0,dur:.45,col:FAMS[sk.fam].c3,r:1.1});if(sk.mult>2)R.shake=.25;},
- multi(sk){const o=skillTarget(1.6);if(!o){notify('nt','ไม่มีแร่ในระยะ — เข้าใกล้แร่ก่อน','err',1);return false;}for(let k=0;k<sk.hits;k++)R.timers.push({t:k*.16,fn:()=>{damageOre(o,R.st.rawP*sk.mult);R.efx.push({type:'spin',x:o.x+.5,y:o.y+.5,t:0,dur:.2,col:FAMS[sk.fam].c3});}});},
+ multi(sk){const o=skillTarget(1.6);if(!o){notify('nt','ไม่มีแร่ในระยะ — เข้าใกล้แร่ก่อน','err',1);return false;}for(let k=0;k<sk.hits;k++)R.timers.push({t:k*.16,fn:()=>{R.inSkill=true;damageOre(o,R.st.rawP*sk.mult);R.inSkill=false;R.efx.push({type:'spin',x:o.x+.5,y:o.y+.5,t:0,dur:.2,col:FAMS[sk.fam].c3});}});},
  aoe_target(sk){const o=skillTarget(1.6);const cx=o?o.x+.5:R.g.x,cy=o?o.y+.5:R.g.y;const list=oresIn(cx,cy,sk.radius);if(!list.length){notify('nt','ไม่มีแร่ในรัศมี','err',1);return false;}
-  R.efx.push({type:'ring',x:cx,y:cy,r:sk.radius+.5,t:0,dur:.5,col:FAMS[sk.fam].c3,fill:true});if(sk.fam==='frostbound')for(let k=0;k<30;k++)part(cx,cy,'#e9fbff',6,3);hitList(list,R.st.rawP*sk.mult);R.shake=.2;},
+  R.efx.push({type:'ring',x:cx,y:cy,r:sk.radius+.5,t:0,dur:.5,col:FAMS[sk.fam].c3,fill:true});if(sk.fam==='frostbound')for(let k=0;k<30;k++)part(cx,cy,'#e9fbff',6,3);if(sk.fam==='frostbound'&&R.syn.has('frozen')){R.efx.push({type:'ring',x:cx,y:cy,r:sk.radius+.6,t:0,dur:.8,col:'#ffffff',fill:true});for(let k=0;k<26;k++)part(cx,cy,k%2?'#ffffff':'#ff9a5a',8,4);floatTxt(cx,cy-.6,'💥 Steam Explosion','#ffffff',1);}hitList(list,R.st.rawP*sk.mult);R.shake=.2;},
  aoe_self(sk){const list=oresIn(R.g.x,R.g.y,sk.radius);R.efx.push({type:'ring',x:R.g.x,y:R.g.y,r:sk.radius+.5,t:0,dur:.6,col:'#ff6a1a',fill:true});for(let k=0;k<40;k++)part(R.g.x,R.g.y,k%2?'#ff6a1a':'#ffd23f',7,4);R.shake=.4;
   if(!list.length){notify('nt','ระเบิดแล้ว แต่ไม่มีแร่ในรัศมี','',1);}hitList(list,R.st.rawP*sk.mult);},
- buff(sk){R.over=sk.dur;for(let k=0;k<16;k++)part(R.g.x,R.g.y-.5,'#ffd08a',3,3);},
+ buff(sk){R.over=sk.dur;R.overAmt=sk.amount;for(let k=0;k<16;k++)part(R.g.x,R.g.y-.5,'#ffd08a',3,3);},
  dash(sk){const g=R.g;if(!g.tgt||g.state!=='walk'){if(!chooseTarget()&&!(g.tgt&&g.state==='walk')){notify('nt','ไม่มีเป้าหมายให้พุ่งไป','err',1);return false;}}
   if(g.state!=='walk'||!g.path.length){notify('nt','อยู่ติดแร่แล้ว ไม่ต้องพุ่ง','',1);return false;}R.dashTiles=sk.tiles;for(let k=0;k<14;k++)part(g.x,g.y,'#e8fffb',4,3);},
  pull(sk){const list=R.drops.filter(d=>Math.hypot(d.x-R.g.x,d.y-R.g.y)<=sk.radius&&!d.fly);R.efx.push({type:'ring',x:R.g.x,y:R.g.y,r:sk.radius,t:0,dur:.6,col:'#ff4d6d',inward:true});
@@ -1116,10 +1193,12 @@ const SKILL_FX={
   const list=[o,...others];for(const x of list)R.efx.push({type:'beam',x0:R.g.x,y0:R.g.y-.6,x1:x.x+.5,y1:x.y+.5,t:0,dur:.4,col:['#ff9df0','#b9f3ff','#fff6a8'][list.indexOf(x)%3]});hitList(list,R.st.rawP*sk.mult);},
  chain(sk){let cur=skillTarget(sk.range);if(!cur){notify('nt','ไม่มีแร่ในระยะ 3 ช่อง','err',1);return false;}const hit=[cur];let px=R.g.x,py=R.g.y-.6;
   while(hit.length<sk.count){const nx=R.ores.filter(x=>!hit.includes(x)&&oreVisible(x)&&Math.hypot(x.x-cur.x,x.y-cur.y)<=sk.range).sort((a,b)=>(canMine(b)-canMine(a))||Math.hypot(a.x-cur.x,a.y-cur.y)-Math.hypot(b.x-cur.x,b.y-cur.y))[0];if(!nx)break;hit.push(nx);cur=nx;}
-  for(const o of hit){R.efx.push({type:'bolt',x0:px,y0:py,x1:o.x+.5,y1:o.y+.5,t:0,dur:.45,col:'#9ef0ff'});px=o.x+.5;py=o.y+.5;}hitList(hit,R.st.rawP*sk.mult);},
+  for(const o of hit){R.efx.push({type:'bolt',x0:px,y0:py,x1:o.x+.5,y1:o.y+.5,t:0,dur:.45,col:'#9ef0ff'});px=o.x+.5;py=o.y+.5;}hitList(hit,R.st.rawP*sk.mult);
+  if(R.syn.has('overload')&&Math.random()<.25){const last=hit[hit.length-1];const ex=R.ores.filter(x=>!hit.includes(x)&&oreVisible(x)&&Math.hypot(x.x-last.x,x.y-last.y)<=sk.range).sort((a,b)=>Math.hypot(a.x-last.x,a.y-last.y)-Math.hypot(b.x-last.x,b.y-last.y))[0];
+   if(ex){R.efx.push({type:'bolt',x0:last.x+.5,y0:last.y+.5,x1:ex.x+.5,y1:ex.y+.5,t:0,dur:.5,col:'#ffffff'});floatTxt(ex.x+.5,ex.y-.2,'⚡ Overload!','#9ef0ff',.9);hitList([ex],R.st.rawP*.6);}}},
  line(sk){const o=skillTarget(sk.len);if(!o){notify('nt','ไม่มีแร่ในแนว 4 ช่อง','err',1);return false;}let dx=o.x+.5-R.g.x,dy=o.y+.5-R.g.y;const l=Math.hypot(dx,dy)||1;dx/=l;dy/=l;const set=new Set();
   for(let s=.4;s<=sk.len+.5;s+=.25){const x=Math.floor(R.g.x+dx*s),y=Math.floor(R.g.y+dy*s);if(x<0||y<0||x>=W||y>=H)break;const t=R.map.g[ix(x,y)];if(t===T_WALL)break;const oo=R.oreAt[ix(x,y)];if(oo)set.add(oo);}
-  R.efx.push({type:'slice',x0:R.g.x,y0:R.g.y-.3,x1:R.g.x+dx*(sk.len+.5),y1:R.g.y+dy*(sk.len+.5)-.3,t:0,dur:.5,col:'#ff4fd8'});R.shake=.3;if(!set.size)return;hitList([...set],R.st.rawP*sk.mult);},
+  R.efx.push({type:'slice',x0:R.g.x,y0:R.g.y-.3,x1:R.g.x+dx*(sk.len+.5),y1:R.g.y+dy*(sk.len+.5)-.3,t:0,dur:.5,col:'#ff4fd8'});R.shake=.3;if(!set.size)return;hitList([...set],R.st.rawP*sk.mult);if(R.syn.has('dimension')&&set.size>=2){R.cdCut=3;floatTxt(R.g.x,R.g.y-2,'🕳 Cooldown -3s','#ff4fd8',.9);}},
 };
 function part(x,y,col,sp=3,sz=3){const a=Math.random()*Math.PI*2,v=Math.random()*sp;R.parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-sp*.4,life:.5+Math.random()*.5,max:1,col,sz:sz*(.5+Math.random()*.7)});}
 function floatTxt(x,y,txt,col,sc=1){R.floats.push({x,y,txt,col,life:1,sc});}
@@ -1128,85 +1207,92 @@ function stepGolem(dt){
  if(g.stun>0){g.stun-=dt;g.state='stun';if(g.stun<=0){g.state='idle';g.idleWait=0;}return;}
  if(R.extracting){const ei=ix(R.map.ent.x,R.map.ent.y);if(gTile()===ei&&g.state!=="walk"||gDist(R.map.ent.x,R.map.ent.y)<.25){endRun(true);return;}
   if(!g.tgt||g.tgt.kind!=='exit'||(g.state==='idle')){if(!setTarget({kind:'exit',i:ei},true)){notify('noexit','ทางออกถูกปิดกั้น!','err');}}}
- if(g.state==='idle'){g.idleWait-=dt;if(R.extracting)return;if(g.idleWait<=0&&R.auto)chooseTarget();else if(g.idleWait<=0)g.idleWait=.3;}
+ if(g.state==='idle'){g.idleWait-=dt;if(R.extracting)return;if(R.type==='boss'&&g.dodge){const wp=R.ores.find(o=>o.boss&&!o.closed);if(R.boss.tele.length&&(!wp||R.boss.tele.some(w=>Math.hypot(wp.x+.5-w.x,wp.y+.5-w.y)<=w.r+1.3)))return;g.dodge=false;}if(g.idleWait<=0&&R.auto)chooseTarget();else if(g.idleWait<=0)g.idleWait=.3;}
  if(g.state==='walk'){
   if(!g.path.length){arrive();return;}
   let ni=g.path[0];const nt=R.map.g[ni];
   if(R.oreAt[ni]&&!(g.tgt&&g.tgt.kind==='exit'&&false)){g.state='idle';g.idleWait=0;if(g.tgt&&g.tgt.kind!=='move'){const t=g.tgt;if(!setTarget(t,g.manual)){g.tgt=null;}}return;}
-  if(nt===T_RUBBLE){if(R.blinkCd>0)return;if(g.path.length>=2){R.blinkCd=5;for(let k=0;k<14;k++)part(g.x,g.y,'#ff4fd8',3,3);const j=g.path[1];g.x=j%W+.5;g.y=((j/W)|0)+.5;g.path.splice(0,2);for(let k=0;k<14;k++)part(g.x,g.y,'#8b3dff',3,3);floatTxt(g.x,g.y-1.4,'Blink!','#ff4fd8',.8);return;}}
+  if(nt===T_RUBBLE){if(R.blinkCd>0)return;if(g.path.length>=2){R.blinkCd=R.syn.has('phantom')?4.25:5;for(let k=0;k<14;k++)part(g.x,g.y,'#ff4fd8',3,3);const j=g.path[1];g.x=j%W+.5;g.y=((j/W)|0)+.5;g.path.splice(0,2);for(let k=0;k<14;k++)part(g.x,g.y,'#8b3dff',3,3);floatTxt(g.x,g.y-1.4,'Blink!','#ff4fd8',.8);return;}}
   const tx=ni%W+.5,ty=((ni/W)|0)+.5;let sp=R.st.move*tileF(gTile());if(R.boost>0)sp*=2.4;if(R.dashTiles>0)sp*=6;
   const dx=tx-g.x,dy=ty-g.y,l=Math.hypot(dx,dy);const step=sp*dt;g.walkPh+=dt*sp*5.2;if(Math.abs(dx)>.01)g.face=dx>0?1:-1;
   if(R.dashTiles>0&&Math.random()<.6)part(g.x,g.y,'#e8fffb',1,2.5);else if(Math.random()<dt*6)part(g.x,g.y+.35,'#8a8f9c',.6,2);
+  {const dd=Math.min(l,step);R.walkAcc+=dd;R.contWalk+=dd;if(R.syn.has('meteor')&&!R.meteor&&R.walkAcc>=8){R.meteor=true;floatTxt(g.x,g.y-1.5,'☄️ Meteor พร้อม!','#ffb347',.8);}}
   if(l<=step){g.x=tx;g.y=ty;g.path.shift();if(R.dashTiles>0)R.dashTiles--;if(!g.path.length)arrive();}else{g.x+=dx/l*step;g.y+=dy/l*step;}
   g.wasWalking=true;return;}
  if(g.state==='mine'){
   const o=g.tgt&&g.tgt.o;if(!o||!R.ores.includes(o)){g.state='idle';g.tgt=null;g.idleWait=0;return;}
   if(gDist(o.x,o.y)>1.6){if(!setTarget(g.tgt,g.manual)){g.state='idle';g.tgt=null;}return;}
   if(!o.secret&&!bagFits(o.tier)){notify('fullo','🎒 กระเป๋าเต็ม — เก็บแร่ก้อนนี้ไม่ได้ (ไม่เริ่มขุด)','err',4);g.state='idle';g.tgt=null;g.idleWait=.5;return;}
-  if(o.hidden){g.state='idle';g.tgt=null;return;}
+  if(o.hidden||o.closed){g.state='idle';g.tgt=null;g.idleWait=.2;return;}
   g.face=(o.x+.5)>=g.x?1:-1;
   if(g.settle>0){g.settle-=dt;return;}
-  let Sx=R.st.S+(R.over>0?30:0);Sx=clamp(Sx,30,250);const interval=clamp(1.2/(Sx/100),.35,2.5);
+  let Sx=R.st.S+(R.over>0?(R.overAmt||30):0)+(R.turbo>0?25:0);Sx=clamp(Sx,30,250);const interval=clamp(1.2/(Sx/100),.35,2.5);
   g.mineT+=dt;g.minePh=clamp(g.mineT/interval,0,1);
   if(g.mineT>=interval){g.mineT=0;g.hits++;g.mineArm=R.skills[0]&&R.skills[1]?(g.hits%2?-1:1):R.skills[0]?-1:R.skills[1]?1:(g.hits%2?-1:1);
    let m=1;if(R.fx.has('coppergear_head')){if(R.combo.id===o.id)R.combo.n=Math.min(5,R.combo.n+1);else{R.combo.id=o.id;R.combo.n=0;}m*=1+.05*R.combo.n;}
    if(R.fx.has('thunder_core')){R.capHits++;if(R.capHits%8===0){m*=2;R.efx.push({type:'bolt',x0:g.x,y0:g.y-1.2,x1:o.x+.5,y1:o.y+.5,t:0,dur:.3,col:'#9ef0ff'});floatTxt(g.x,g.y-1.5,'⚡ Overcharge','#9ef0ff',.8);}}
    if(!canMine(o)){floatTxt(o.x+.5,o.y+.3,'Mining Power ไม่เพียงพอ','#ff8a95');g.state='idle';g.tgt=null;g.idleWait=.5;return;}
-   sfx('hit',o.tier||1);damageOre(o,R.st.rawP*m);R.shake=Math.max(R.shake,.06);}
+   m*=mineBonus(o);sfx('hit',o.tier||1);damageOre(o,R.st.rawP*m);afterMineHit(o);R.shake=Math.max(R.shake,.06);}
   return;}
 }
 function arrive(){const g=R.g;
  if(g.wasWalking&&R.fx.has('magma_legs')){const list=oresIn(g.x,g.y,1.2).filter(o=>oreVisible(o));R.efx.push({type:'ring',x:g.x,y:g.y,r:1.3,t:0,dur:.35,col:'#ff6a1a'});R.shake=.12;for(const o of list)damageOre(o,R.st.rawP*.15);}
- g.wasWalking=false;
+ if(R.syn.has('storm')&&R.contWalk>=6)R.stormReady=true;R.contWalk=0;g.wasWalking=false;
  if(g.tgt&&g.tgt.kind==='exit'){g.state='idle';return;}
- if(g.tgt&&g.tgt.kind==='ore'&&R.ores.includes(g.tgt.o)){g.state='mine';g.mineT=0;g.settle=settleTime();return;}
+ if(g.tgt&&g.tgt.kind==='ore'&&R.ores.includes(g.tgt.o)){g.state='mine';if(g.mineFor!==g.tgt.o){g.mineT=0;g.mineFor=g.tgt.o;}g.settle=settleTime();if(R.stormReady){g.settle*=.5;R.stormReady=false;floatTxt(g.x,g.y-1.5,'🌩 Storm Runner','#7fe6ff',.7);}return;}
  g.state='idle';g.tgt=null;g.idleWait=.05;}
 function stepHazards(dt){
  const g=R.g;
- if(R.d.hz.rock){const rk=R.rock;rk.next-=dt;if(rk.next<=0&&!rk.warn){rk.warn={x:g.x,y:g.y,t:1.6,dur:1.6};rk.next=15+Math.random()*10;notify('rockw','⚠ หินกำลังถล่ม! แตะพื้นเพื่อหลบ','err',2);}
+ if(R.d.hz.rock){const rk=R.rock;rk.next-=dt;if(rk.next<=0&&!rk.warn){const wd=1.6+.15*rl('C3');rk.warn={x:g.x,y:g.y,t:wd,dur:wd};rk.next=15+Math.random()*10;notify('rockw','⚠ หินกำลังถล่ม! แตะพื้นเพื่อหลบ','err',2);}
   if(rk.warn){rk.warn.t-=dt;if(rk.warn.t<=0){const w=rk.warn;rk.warn=null;sfx('rock');R.shake=.5;for(let k=0;k<26;k++)part(w.x,w.y,k%2?'#8d755a':'#5b4a3a',5,4);
-   if(Math.hypot(g.x-w.x,g.y-w.y)<=1.2){if(R.shield){R.shield=false;toast('🛡 Shieldstone ป้องกันหินถล่ม!','ok');R.efx.push({type:'ring',x:g.x,y:g.y,r:1.2,t:0,dur:.5,col:'#8fd3ff',fill:true});}
-    else{let s=1.5;if(R.fx.has('stoneguard_core'))s*=.5;if(R.fx.has('drilltech_legs')&&g.state==='mine')s*=.5;g.stun=s;g.state='stun';floatTxt(g.x,g.y-1.5,'💫 มึนงง','#ffb347');
+   if(Math.hypot(g.x-w.x,g.y-w.y)<=1.2){if(R.fort){R.fort=false;toast('🏰 Ancient Fortress ป้องกันหินถล่ม!','ok');R.efx.push({type:'ring',x:g.x,y:g.y,r:1.2,t:0,dur:.5,col:'#8fd3ff',fill:true});}else if(R.shield){R.shield=false;toast('🛡 Shieldstone ป้องกันหินถล่ม!','ok');R.efx.push({type:'ring',x:g.x,y:g.y,r:1.2,t:0,dur:.5,col:'#8fd3ff',fill:true});}
+    else{let s=1.5;if(R.fx.has('stoneguard_core'))s*=.5;if(R.syn.has('fortress'))s*=.65;if(R.fx.has('drilltech_legs')&&g.state==='mine')s*=.5;g.stun=s;g.state='stun';floatTxt(g.x,g.y-1.5,'💫 มึนงง','#ffb347');
      if(!R.fx.has('stoneguard_legs')){const ns=[[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dy])=>ix(Math.floor(g.x)+dx,Math.floor(g.y)+dy)).filter(stand);if(ns.length){const j=ns[Math.floor(Math.random()*ns.length)];g.x=j%W+.5;g.y=((j/W)|0)+.5;floatTxt(g.x,g.y-1,'กระเด็น!','#ffb347',.8);}}
      else floatTxt(g.x,g.y-1,'Anchor: ไม่กระเด็น','#8fd3ff',.8);g.path=[];}}}}}
  if(R.map.g[gTile()]===T_LAVA){R.lavaT+=dt;if(Math.random()<dt*10)part(g.x,g.y+.3,'#ff6a1a',2,2.5);const iv=R.fx.has('frostbound_core')?8:4;
   if(R.lavaT>=iv){R.lavaT=0;if(R.fx.has('frostbound_back')){notify('cryo','❄ Cryo Cargo ปกป้องแร่จากความร้อน','ok',6);}
    else{let k=null;for(const n in R.bag.items){const it=R.bag.items[n];if(it.count>0&&it.tier>=4&&(!k||it.tier>R.bag.items[k].tier))k=n;}
-    if(k){const it=R.bag.items[k];it.count--;const w=TIERS[it.tier].w;if(R.bag.res>=w&&it.tier>=5)R.bag.res-=w;else R.bag.w=Math.max(0,R.bag.w-w);R.melted++;if(!it.count)delete R.bag.items[k];toast(`🔥 ความร้อนทำ ${k} ละลาย 1 ก้อน!`,'err');}}}}
+    if(k&&Math.random()>=.05*rl('B4')){const it=R.bag.items[k];it.count--;R.bag.val=Math.max(0,R.bag.val-TIERS[it.tier].price*R.valMul);const w=TIERS[it.tier].w;if(R.bag.res>=w&&it.tier>=5)R.bag.res-=w;else R.bag.w=Math.max(0,R.bag.w-w);R.melted++;if(!it.count)delete R.bag.items[k];toast(`🔥 ความร้อนทำ ${k} ละลาย 1 ก้อน!`,'err');}}}}
  else R.lavaT=0;
  // reveal
  const rev=R.fx.has('prism_head')||R.fx.has('void_head');const revS=R.fx.has('prism_legs')||R.fx.has('void_head');
- for(const o of R.ores){if(o.hidden&&(rev||(o.hot&&R.fx.has('magma_head'))||gDist(o.x,o.y)<1.6)){o.hidden=false;floatTxt(o.x+.5,o.y+.2,'✨ พบแร่ซ่อน!','#fff6a8');}
-  if(o.secret&&!o.revealed&&revS){o.revealed=true;floatTxt(o.x+.5,o.y+.2,'✨ ทางเข้าห้องลับ!','#ff9df0');}}
+ for(const o of R.ores){if(o.hidden&&(rev||(o.hot&&R.fx.has('magma_head'))||gDist(o.x,o.y)<1.6+hidDet())){revealHidden(o);}
+  if(o.secret&&!o.revealed&&(revS||(secDet()>0&&gDist(o.x,o.y)<=1.2+secDet()))){o.revealed=true;floatTxt(o.x+.5,o.y+.2,'✨ ทางเข้าห้องลับ!','#ff9df0');}}
 }
 function runTick(dt){
  if(!R||R.ended)return;R.time-=dt;R.elapsed+=dt;if(R.time<=0){R.time=0;endRun(false);return;}
- for(let i=0;i<2;i++)R.cds[i]=Math.max(0,R.cds[i]-dt);R.over=Math.max(0,R.over-dt);R.blinkCd=Math.max(0,R.blinkCd-dt);R.flashCd=Math.max(0,R.flashCd-dt);R.boost=Math.max(0,R.boost-dt);R.shake=Math.max(0,R.shake-dt);
+ for(let i=0;i<2;i++)R.cds[i]=Math.max(0,R.cds[i]-dt);R.over=Math.max(0,R.over-dt);R.blinkCd=Math.max(0,R.blinkCd-dt);R.flashCd=Math.max(0,R.flashCd-dt);R.boost=Math.max(0,R.boost-dt);R.turbo=Math.max(0,R.turbo-dt);R.turboCd=Math.max(0,R.turboCd-dt);R.shake=Math.max(0,R.shake-dt);
  for(let k=R.timers.length-1;k>=0;k--){const tm=R.timers[k];tm.t-=dt;if(tm.t<=0){R.timers.splice(k,1);tm.fn();}}
- stepHazards(dt);if(R.ended)return;stepGolem(dt);if(R.ended)return;updDrops(dt);
+ stepHazards(dt);if(R.ended)return;if(R.type==='boss'){stepBoss(dt);if(R.ended)return;}stepGolem(dt);if(R.ended)return;updDrops(dt);
  for(const o of R.ores)o.hitT=Math.max(0,o.hitT-dt);
  for(let k=R.parts.length-1;k>=0;k--){const p=R.parts[k];p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=6*dt;if(p.life<=0)R.parts.splice(k,1);}
  for(let k=R.floats.length-1;k>=0;k--){const f=R.floats[k];f.life-=dt*.9;f.y-=dt*.9;if(f.life<=0)R.floats.splice(k,1);}
  for(let k=R.efx.length-1;k>=0;k--){const e=R.efx[k];e.t+=dt;if(e.t>=e.dur)R.efx.splice(k,1);}
 }
 function endRun(extracted){
- if(!R||R.ended)return;R.ended=true;const value=bagValue();const mult=extracted?1:.7;const coins=Math.floor(value*mult);
+ if(!R||R.ended)return;
+ if(R.type==='boss'){endBoss(false,extracted?'retreat':'time');return;}
+ if(R.type==='endless'){endEndless(extracted);return;}
+ R.ended=true;const value=bagValue();const mult=extracted?1:.7;const coins=Math.floor(value*mult);
  const success=extracted&&R.mined>=5;let tix=0,first=false;if(success){tix=1;if(!S.cleared[R.d.id]){S.cleared[R.d.id]=true;tix+=2;first=true;}}
  S.coins+=coins;S.tickets+=tix;S.stats.earned+=coins;S.stats.runs++;if(extracted&&R.collectedCount>0)S.stats.extracts++;S.settings.mode=R.mode;
- const res={d:R.d,items:JSON.parse(JSON.stringify(R.bag.items)),value,mult,coins,tix,first,mined:R.mined,time:R.elapsed,extracted,success,melted:R.melted};
+ ctEvent('runEnd',{extracted,success,fill:R.bag.w/R.st.C});recordRun(coins,value);
+ const res={d:R.d,items:JSON.parse(JSON.stringify(R.bag.items)),value,mult,coins,tix,first,mined:R.mined,time:R.elapsed,extracted,success,melted:R.melted,valMul:R.valMul,mod:R.modId||'normal'};
  save();sfx(extracted?'coin':'err');toast(extracted?'✅ กลับถึงฐานพร้อมแร่!':'⏰ หมดเวลา! ได้มูลค่าแร่ 70%',extracted?'ok':'err');
  setTimeout(()=>{exitDungeon();showResult(res);},extracted?500:900);
 }
-function exitDungeon(){R=null;$('#dungeon').classList.add('hidden');$('#workshop').classList.remove('hidden');renderWorkshop();resizeWorkshop();}
-function showResult(r){
- const rows=Object.entries(r.items).sort((a,b)=>b[1].tier-a[1].tier).map(([n,it])=>`<tr><td><span style="color:${ORE_INFO[n].c1}">◆</span> ${n} <span class="hint">T${it.tier}</span></td><td>x${it.count}</td><td>🪙 ${fmt(TIERS[it.tier].price*it.count)}</td></tr>`).join('');
- openModal(r.extracted?'✅ ผลการขุด — กลับฐานสำเร็จ':'⏰ ผลการขุด — หมดเวลา',`<div class="hint" style="text-align:center">${r.d.name}</div><div class="result-big">+🪙 ${fmt(r.coins)}</div>
+function exitDungeon(){R=null;$('#dungeon').classList.add('hidden');$('#workshop').classList.remove('hidden');$('#hBoss').classList.add('hidden');$('#bDescend').classList.add('hidden');renderWorkshop();resizeWorkshop();}
+function showResult(r){const vm=r.valMul||1;
+ const rows=Object.entries(r.items).sort((a,b)=>b[1].tier-a[1].tier).map(([n,it])=>`<tr><td><span style="color:${ORE_INFO[n].c1}">◆</span> ${n} <span class="hint">T${it.tier}</span></td><td>x${it.count}</td><td>🪙 ${fmt(TIERS[it.tier].price*it.count*vm)}</td></tr>`).join('');
+ const M=MODS[r.mod]||MODS.normal;
+ openModal(r.extracted?'✅ ผลการขุด — กลับฐานสำเร็จ':'⏰ ผลการขุด — หมดเวลา',`<div class="hint" style="text-align:center">${r.d.name}${r.mod!=='normal'?` · <span style="color:${M.col}">${M.icon} ${M.name}</span>`:''}</div><div class="result-big">+🪙 ${fmt(r.coins)}</div>
  <div style="text-align:center;margin-bottom:10px">${r.tix?`<b style="color:var(--gold)">+🎫 ${r.tix} Part Ticket${r.tix>1?'s':''}</b>${r.first?' <span class="tag">First Clear +2</span>':''}`:`<span class="hint">${r.extracted?'ขุดไม่ถึง 5 ก้อน — ไม่ได้ตั๋ว':'ไม่ได้ตั๋ว (ต้อง Extract ก่อนหมดเวลา)'}</span>`}</div>
  <table class="t"><tr><th>แร่ที่เก็บมา</th><th>จำนวน</th><th>มูลค่า</th></tr>${rows||'<tr><td colspan=3 class="hint">ไม่มีแร่</td></tr>'}
- <tr><td>มูลค่ารวม</td><td></td><td>🪙 ${fmt(r.value)}</td></tr><tr><td>ตัวคูณ</td><td></td><td>${r.extracted?'100% (Extract)':'70% (หมดเวลา)'}</td></tr>
+ <tr><td>มูลค่ารวม${vm!==1?` (รวม Modifier x${vm.toFixed(2)})`:''}</td><td></td><td>🪙 ${fmt(r.value)}</td></tr><tr><td>ตัวคูณ</td><td></td><td>${r.extracted?'100% (Extract)':'70% (หมดเวลา)'}</td></tr>
  <tr><td>ก้อนแร่ที่ขุดแตก</td><td></td><td>${r.mined}</td></tr><tr><td>เวลาที่ใช้</td><td></td><td>${Math.floor(r.time/60)}:${String(Math.floor(r.time%60)).padStart(2,'0')}</td></tr>${r.melted?`<tr><td>แร่ละลายจากลาวา</td><td></td><td class="neg">${r.melted}</td></tr>`:''}</table>
  <div class="row2" style="justify-content:center;margin-top:12px"><button class="btn gold" data-act="closeModal">🏠 Return Workshop</button><button class="btn" data-act="enterDungeon" data-arg="${r.d.id}">🔁 ลงอีกรอบ</button></div>`,null,true);
 }
+
 /* ===== dungeon input ===== */
 let DV={T:40,ox:0,oy:0,w:0,h:0,top:0,bot:0};
 function resizeDungeon(){const cv=$('#dcv');const dpr=Math.min(2,window.devicePixelRatio||1);const w=window.innerWidth,h=window.innerHeight;cv.width=w*dpr;cv.height=h*dpr;
@@ -1223,7 +1309,7 @@ function dungeonClick(ev){
  let o=null,bo=.85;for(const x of R.ores){if(!oreVisible(x))continue;const dd=Math.hypot(x.x+.5-wx,x.y+.35-wy);if(dd<bo){bo=dd;o=x;}}
  if(R.extracting){R.extracting=false;$('#bExtract').classList.remove('going');toast('ยกเลิกการกลับฐาน');}
  if(o){if(!canMine(o)){toast('Mining Power ไม่เพียงพอ','err');sfx('err');floatTxt(o.x+.5,o.y,`ต้องการ P ${TIERS[o.tier].req}`,'#ff8a95');return;}
-  if(!o.secret&&!bagFits(o.tier)){toast('🎒 กระเป๋าเต็ม — เก็บแร่ก้อนนี้ไม่ได้','err');sfx('err');return;}
+  if(!o.secret&&!o.boss&&!bagFits(o.tier)){toast('🎒 กระเป๋าเต็ม — เก็บแร่ก้อนนี้ไม่ได้','err');sfx('err');return;}
   if(R.g.stun>0){toast('โกเลมมึนงงอยู่','err');return;}
   if(setTarget({kind:'ore',o},true)){R.efx.push({type:'ring',x:o.x+.5,y:o.y+.5,r:.7,t:0,dur:.3,col:'#3fe0ff'});sfx('click');}else{toast('เดินไปไม่ถึงแร่ก้อนนี้','err');}return;}
  if(bestD){setTarget({kind:'drop',d:bestD},true);sfx('click');return;}
@@ -1232,41 +1318,42 @@ function dungeonClick(ev){
 }
 function updateSkillButtons(){for(let i=0;i<2;i++){const b=$('#sk'+i);const sk=R&&R.skills[i];b.classList.toggle('none',!sk);b.querySelector('.ic').textContent=sk?sk.icon:'✋';b.querySelector('.nm').textContent=sk?sk.name:'ไม่มีแขน';}}
 function updateHudButtons(){if(!R)return;const sm=window.innerWidth<520;$('#bAuto').textContent=R.auto?(sm?'🤖 ON':'🤖 Auto: ON'):(sm?'🕹 OFF':'🕹 Auto: OFF');$('#bAuto').classList.toggle('on',R.auto);$('#bMode').textContent=R.mode==='nearest'?(sm?'🎯 ใกล้':'🎯 ใกล้สุด'):(sm?'💎 แพง':'💎 มูลค่าสูง');
- const be=$('#bExtract');be.textContent=R.extracting?(sm?'↩ ยกเลิก':'↩ กำลังกลับ… (ยกเลิก)'):'⇪ Extract';be.classList.toggle('going',R.extracting);}
+ const be=$('#bExtract');be.textContent=R.extracting?(sm?'↩ ยกเลิก':'↩ กำลังกลับ… (ยกเลิก)'):'⇪ Extract';be.classList.toggle('going',R.extracting);if(R.type==='boss')be.textContent=sm?'🏳 ถอย':'🏳 ถอยออก';$('#bDescend').classList.toggle('hidden',!(R.type==='endless'&&R.floorDone));}
 function updateHud(){
  const m=Math.floor(R.time/60),s=Math.floor(R.time%60);const te=$('#hTimer');te.textContent=`⏱ ${m}:${String(s).padStart(2,'0')}`;te.classList.toggle('low',R.time<20);
  const cap=R.st.C;const pct=R.bag.w/cap;$('#hBagFill').style.width=clamp(pct*100,0,100)+'%';$('#hBagFill').style.background=pct>=.95?'var(--red)':pct>.75?'var(--gold)':'var(--cyan)';
- $('#hBag').textContent=`${R.bag.w}/${cap}${R.fx.has('prism_back')?` +${R.bag.res}/8`:''}`;$('#hValue').textContent='🪙 '+fmt(bagValue());$('#hCount').textContent=`⛏ ${R.mined} · 🎒${R.collectedCount}`;
- $('#hStats').textContent=`P ${R.st.P} · S ${fmtStat('S',clamp(R.st.S+(R.over>0?30:0),30,250))}${R.over>0?' ⚙️':''}${R.shield?' 🛡':''}`;
+ $('#hBag').textContent=`${R.bag.w}/${cap}${resCap()?` +${R.bag.res}/${resCap()}`:''}`;$('#hValue').textContent='🪙 '+fmt(bagValue());$('#hCount').textContent=`⛏ ${R.mined} · 🎒${R.collectedCount}`;
+ $('#hStats').textContent=`P ${R.st.P} · S ${fmtStat('S',clamp(R.st.S+(R.over>0?(R.overAmt||30):0)+(R.turbo>0?25:0),30,250))}${R.over>0?' ⚙️':''}${R.turbo>0?' 🌀':''}${R.meteor?' ☄️':''}${R.shield?' 🛡':''}${R.fort?' 🏰':''}`;
  for(let i=0;i<2;i++){const b=$('#sk'+i);const sk=R.skills[i];if(!sk)continue;const cd=R.cds[i];b.querySelector('.cdv').style.setProperty('--p',cd>0?cd/sk.cdEff:0);b.querySelector('.cdv').textContent=cd>0?Math.ceil(cd):'';b.classList.toggle('ready',cd<=0);}
- if(pct<.95)$('#bExtract').classList.remove('pulse');}
+ if(pct<.95)$('#bExtract').classList.remove('pulse');hudV2();}
 /* ===== dungeon render ===== */
 function renderDungeon(){
  const cv=$('#dcv');const c=cv.getContext('2d');const T=DV.T;c.setTransform(DV.dpr,0,0,DV.dpr,0,0);const th=R.d.th1;c.fillStyle=th.bg;c.fillRect(0,0,DV.w,DV.h);
  camUpdate();c.save();let sx=0,sy=0;if(R.shake>0){sx=(Math.random()-.5)*R.shake*16;sy=(Math.random()-.5)*R.shake*16;}c.translate(R.cam.x+sx,R.cam.y+sy);
  const t=GT;const g=R.map.g;const wh=T*.42;
  // floors
- for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=ix(x,y);const tt=g[i];if(tt===T_WALL||tt===T_SECRET)continue;const X=x*T,Y=y*T;
+ for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=ix(x,y);const tt=g[i];if((tt===T_WALL&&!isBT(i))||tt===T_SECRET)continue;const X=x*T,Y=y*T;
   c.fillStyle=(x+y)%2?th.floor:th.floor2;c.fillRect(X,Y,T+.5,T+.5);
   if(tt===T_SLOW){c.fillStyle=R.d.id==='rift'?'rgba(150,60,220,.38)':'rgba(70,120,60,.45)';rr(c,X+2,Y+2,T-4,T-4,T*.3);c.fill();c.fillStyle='rgba(255,255,255,.12)';circ(c,X+T*.3+Math.sin(t*2+x)*2,Y+T*.4,T*.08);c.fill();}
   if(tt===T_LAVA){const k=.5+.5*Math.sin(t*2.5+x*.7+y);c.fillStyle=`rgb(${200+k*55|0},${70+k*50|0},20)`;c.fillRect(X,Y,T+.5,T+.5);c.fillStyle='rgba(255,230,120,.5)';circ(c,X+T*(.3+.4*((x*7+y*3)%5)/5),Y+T*.5+Math.sin(t*3+x)*T*.1,T*.09);c.fill();}
   if(R.map.deco[i]){c.strokeStyle='rgba(160,140,110,.55)';c.lineWidth=2;c.beginPath();c.moveTo(X,Y+T*.35);c.lineTo(X+T,Y+T*.35);c.moveTo(X,Y+T*.65);c.lineTo(X+T,Y+T*.65);c.stroke();c.fillStyle='rgba(110,80,50,.7)';for(let k=0;k<3;k++)c.fillRect(X+k*T/3+2,Y+T*.28,3,T*.44);}
   if(R.map.room&&x>=R.map.room.x0&&x<=R.map.room.x1&&y>=R.map.room.y0&&y<=R.map.room.y1){c.fillStyle=rgba(th.acc,.08);c.fillRect(X,Y,T,T);}}
  // exit portal
- const ex=(R.map.ent.x+.5)*T,ey=(R.map.ent.y+.5)*T;glow(c,ex,ey,T*1.1,th.acc,.5+.15*Math.sin(t*3));c.strokeStyle=th.acc;c.lineWidth=3;ell(c,ex,ey,T*.42,T*.24);c.stroke();ell(c,ex,ey,T*.28+Math.sin(t*4)*2,T*.15);c.stroke();
- c.fillStyle='#fff';c.font=`bold ${Math.max(9,T*.22)}px Kanit,sans-serif`;c.textAlign='center';c.fillText('EXIT',ex,ey-T*.35);
+ if(R.type!=='boss'){const ex=(R.map.ent.x+.5)*T,ey=(R.map.ent.y+.5)*T;glow(c,ex,ey,T*1.1,th.acc,.5+.15*Math.sin(t*3));c.strokeStyle=th.acc;c.lineWidth=3;ell(c,ex,ey,T*.42,T*.24);c.stroke();ell(c,ex,ey,T*.28+Math.sin(t*4)*2,T*.15);c.stroke();
+ c.fillStyle='#fff';c.font=`bold ${Math.max(9,T*.22)}px Kanit,sans-serif`;c.textAlign='center';c.fillText('EXIT',ex,ey-T*.35);}
  // rockfall warning
  if(R.rock.warn){const w=R.rock.warn;const k=1-w.t/w.dur;c.fillStyle=`rgba(255,60,60,${.18+.25*Math.abs(Math.sin(t*12))})`;circ(c,w.x*T,w.y*T,T*1.2);c.fill();c.strokeStyle='rgba(255,90,90,.9)';c.lineWidth=2;circ(c,w.x*T,w.y*T,T*1.2*(1-k*.3));c.stroke();
   for(let n=0;n<3;n++){c.fillStyle='#6b5a48';circ(c,w.x*T+(n-1)*T*.4,w.y*T-T*3*(1-k)-n*T*.3,T*.16);c.fill();}}
+ if(R.type==='boss')drawTele(c,T,t);
  // target path / arrow
  const gx=R.g.x*T,gy=R.g.y*T;
  if(R.g.tgt&&R.g.path.length){if(R.fx.has('thunder_head')){c.strokeStyle='rgba(158,240,255,.75)';c.setLineDash([6,6]);c.lineDashOffset=-t*30;c.lineWidth=2.5;c.beginPath();c.moveTo(gx,gy);for(const p of R.g.path)c.lineTo((p%W+.5)*T,(((p/W)|0)+.5)*T);c.stroke();c.setLineDash([]);}}
  // depth-sorted rows
- const ents=[];for(const o of R.ores)ents.push({y:o.y+.5,k:'o',o});for(const d of R.drops)ents.push({y:d.y,k:'d',d});ents.push({y:R.g.y,k:'g'});ents.sort((a,b)=>a.y-b.y);let ei=0;
+ const ents=[];for(const o of R.ores)ents.push({y:o.y+.5,k:'o',o});for(const d of R.drops)ents.push({y:d.y,k:'d',d});ents.push({y:R.g.y,k:'g'});if(R.type==='boss')ents.push({y:9.95,k:'b'});ents.sort((a,b)=>a.y-b.y);let ei=0;
  for(let y=0;y<H;y++){
   while(ei<ents.length&&ents[ei].y<y){drawEnt(c,ents[ei],T,t);ei++;}
   for(let x=0;x<W;x++){const i=ix(x,y);const tt=g[i];const X=x*T,Y=y*T;
-   if(tt===T_WALL||(tt===T_SECRET&&!(R.oreAt[i]&&R.oreAt[i].revealed))){const below=y<H-1?g[ix(x,y+1)]:T_WALL;const fb=below===T_WALL||below===T_SECRET;
+   if((tt===T_WALL&&!isBT(i))||(tt===T_SECRET&&!(R.oreAt[i]&&R.oreAt[i].revealed))){const below=y<H-1?g[ix(x,y+1)]:T_WALL;const fb=below===T_WALL||below===T_SECRET;
     if(!fb){c.fillStyle='rgba(0,0,0,.35)';c.fillRect(X,Y+T,T+.5,T*.18);}
     c.fillStyle=fb?th.top:th.wall;c.fillRect(X,Y+T-wh,T+.5,wh+.5);if(!fb){c.fillStyle='rgba(0,0,0,.18)';c.fillRect(X,Y+T-wh*.35,T+.5,wh*.35);}
     c.fillStyle=th.top;c.fillRect(X,Y-wh,T+.5,T+.5);
@@ -1293,23 +1380,26 @@ function renderDungeon(){
   if(R.fx.has('zephyr_head')){const a=Math.atan2(ty-gy,tx-gx);c.save();c.translate(gx+Math.cos(a)*T*.9,gy-T*.5+Math.sin(a)*T*.9);c.rotate(a);poly(c,[T*.25,0,-T*.12,-T*.15,-T*.05,0,-T*.12,T*.15]);c.fillStyle='#5ad1c6';c.fill();c.strokeStyle=OL;c.lineWidth=1.5;c.stroke();c.restore();}}
  // floats
  c.textAlign='center';for(const f of R.floats){c.globalAlpha=clamp(f.life*1.5,0,1);c.font=`800 ${Math.max(11,T*.3)*f.sc}px Kanit,sans-serif`;c.lineWidth=3;c.strokeStyle='rgba(0,0,0,.7)';c.strokeText(f.txt,f.x*T,f.y*T);c.fillStyle=f.col;c.fillText(f.txt,f.x*T,f.y*T);}c.globalAlpha=1;
+ drawV2Overlay(c,T,t,gx,gy);
  c.restore();
  // darkness / light
- const lr=(4.8+(R.fx.has('scrap_head')?2.5:0))*T;const sxg=R.cam.x+gx,syg=R.cam.y+gy-T*.4;const gr=c.createRadialGradient(sxg,syg,lr*.45,sxg,syg,lr*1.25);gr.addColorStop(0,'rgba(0,0,0,0)');gr.addColorStop(1,`rgba(2,4,10,${th.dark})`);c.fillStyle=gr;c.fillRect(0,0,DV.w,DV.h);
+ const lr=(4.8+(R.fx.has('scrap_head')?2.5:0)+.5*rl('C2'))*T;const sxg=R.cam.x+gx,syg=R.cam.y+gy-T*.4;const gr=c.createRadialGradient(sxg,syg,lr*.45,sxg,syg,lr*1.25);gr.addColorStop(0,'rgba(0,0,0,0)');gr.addColorStop(1,`rgba(2,4,10,${th.dark})`);c.fillStyle=gr;c.fillRect(0,0,DV.w,DV.h);
  if(R.fx.has('scrap_head')){glow(c,sxg,syg-T*.5,T*1.5,'#ffd36b',.12);}
  if(R.g.stun>0){c.fillStyle='rgba(255,180,70,.08)';c.fillRect(0,0,DV.w,DV.h);}
 }
 function hpBar(c,o,x,y,T){if(o.hp>=o.maxHp&&!(R.g.tgt&&R.g.tgt.o===o))return;const w=T*.8;c.fillStyle='rgba(0,0,0,.65)';rr(c,x-w/2-1,y-1,w+2,6,3);c.fill();const k=clamp(o.hp/o.maxHp,0,1);c.fillStyle=k>.5?'#52e08a':k>.25?'#ffc94a':'#ff5d6c';rr(c,x-w/2,y,w*k,4,2);c.fill();}
+function isBT(i){return !!(R.map.bossTiles&&R.map.bossTiles.has(i));}
 function drawEnt(c,e,T,t){
+ if(e.k==='b'){drawBoss(c,T,t);return;}
  if(e.k==='g'){const g=R.g;const s=T*1.42/115;const mine=g.state==='mine'&&g.settle<=0?g.minePh||0:-1;const st=R.st;
   if(R.fx.has('magnetite_head')){for(const o of R.ores){if(oreVisible(o)&&o.tier>=R.d.tiers[R.d.tiers.length-1]-1&&!o.secret&&gDist(o.x,o.y)<6){c.strokeStyle=`rgba(255,77,109,${.4+.3*Math.sin(t*5)})`;c.lineWidth=2;circ(c,(o.x+.5)*T,(o.y+.5)*T,T*.5);c.stroke();}}}
   if(R.fx.has('magnetite_core')||R.fx.has('coppergear_back')){c.strokeStyle='rgba(180,140,255,.18)';c.lineWidth=1.5;circ(c,g.x*T,g.y*T,pickupR()*T);c.stroke();}
-  drawGolem(c,g.x*T,g.y*T+T*.32,s,st.look,{t,walk:g.state==='walk',walkPh:g.walkPh,face:g.face,mine,mineArm:g.mineArm,skill:g.skill,skillCol:g.skillCol,charge:R.fx.has('thunder_core')&&(R.capHits%8)>=6});
+  drawGolem(c,g.x*T,g.y*T+T*.32,s,st.look,{t,evo:st.evo,skin:S.skin,walk:g.state==='walk',walkPh:g.walkPh,face:g.face,mine,mineArm:g.mineArm,skill:g.skill,skillCol:g.skillCol,charge:R.fx.has('thunder_core')&&(R.capHits%8)>=6});
   if(g.stun>0){for(let k=0;k<3;k++){const a=t*4+k*2.1;sprk(c,g.x*T+Math.cos(a)*T*.35,g.y*T-T*1.15+Math.sin(a)*T*.1,T*.09,'#ffd84a');}}
   if(R.over>0)glow(c,g.x*T,g.y*T-T*.5,T*.9,'#ffd08a',.25);
   return;}
  if(e.k==='d'){const d=e.d;const info=ORE_INFO[d.name];const b=Math.sin(d.t*5)*T*.05;glow(c,d.x*T,d.y*T,T*.4,info.c1,.45);c.save();c.translate(d.x*T,d.y*T-T*.1+b);const r=T*(.12+d.tier*.015);poly(c,[0,-r*1.4,r,0,0,r*1.1,-r,0]);c.fillStyle=info.c1;c.fill();c.strokeStyle=info.c2;c.lineWidth=1.5;c.stroke();c.restore();return;}
- const o=e.o;if(o.secret)return;const X=(o.x+.5)*T,Y=(o.y+.5)*T;
+ const o=e.o;if(o.secret||o.boss)return;const X=(o.x+.5)*T,Y=(o.y+.5)*T;
  if(o.hidden){for(let k=0;k<3;k++){c.fillStyle=mix(R.d.th1.wall,k*.1-.15);ell(c,X+(k-1)*T*.18,Y+T*.12-(k===1?T*.08:0),T*.2,T*.15);c.fill();}c.fillStyle=`rgba(255,246,168,${.15+.15*Math.sin(t*3+o.seed*9)})`;circ(c,X+T*.15,Y-T*.05,T*.05);c.fill();return;}
  const info=ORE_INFO[o.name];const sc=.55+o.tier*.07;const sh=o.hitT>0?(Math.random()-.5)*T*.08:0;
  c.fillStyle='rgba(0,0,0,.3)';ell(c,X,Y+T*.3,T*.38*sc+T*.05,T*.12);c.fill();
@@ -1346,7 +1436,7 @@ function renderWorkshopCanvas(dt){
  if(wsAnim.mine>=0){wsAnim.mine+=dt*1.4;if(wsAnim.mine>=1){wsAnim.mine=-1;wsAnim.demoT=3+Math.random()*3;for(let k=0;k<8;k++)wsParts.push({x:cx+wsAnim.mineArm*h*.25,y:cy-6,vx:(Math.random()-.5)*120,vy:-Math.random()*120,l:.6});}}
  wsAnim.pop=Math.max(0,wsAnim.pop-dt*3);
  const s=Math.min(h*.7/130,w*.8/110);const st=calcStats(S.equip);
- drawGolem(c,cx,cy,s,st.look,{t,mine:wsAnim.mine,mineArm:wsAnim.mineArm||1,pop:wsAnim.pop,face:1});
+ drawGolem(c,cx,cy,s,st.look,{t,evo:st.evo,skin:S.skin,mine:wsAnim.mine,mineArm:wsAnim.mineArm||1,pop:wsAnim.pop,face:1});
  for(let k=wsParts.length-1;k>=0;k--){const p=wsParts[k];p.l-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=300*dt;if(p.l<=0){wsParts.splice(k,1);continue;}c.fillStyle=rgba('#ffd36b',p.l/.6);c.fillRect(p.x,p.y,4,4);}
 }
 const wsParts=[];
@@ -1388,15 +1478,474 @@ document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;
 window.addEventListener('resize',()=>{resizeWorkshop();if(R){resizeDungeon();updateHudButtons();}});
 new ResizeObserver(()=>resizeWorkshop()).observe($('#wcv').parentElement);
 
+/* =====================================================================
+   V2.0 SYSTEMS — Synergy/Codex · Evolution · Dynamic Dungeon · Contracts
+                  Mining Boss · Endless Mine · Workshop Research
+   ===================================================================== */
+function give(rw){const o=[];if(!rw)return'';if(rw.coins){S.coins+=rw.coins;o.push('🪙'+fmt(rw.coins));}if(rw.tickets){S.tickets+=rw.tickets;o.push('🎫'+rw.tickets);}if(rw.scrap){S.scrap+=rw.scrap;o.push('⚙️'+rw.scrap);}
+ if(rw.shards){S.shards+=rw.shards;o.push('💠'+rw.shards);}if(rw.cores){S.cores+=rw.cores;o.push('🔶'+rw.cores);}if(rw.data){S.data+=rw.data;o.push('📘'+rw.data);}return o.join(' ');}
+function dayKey(){const d=new Date();return Math.floor((d.getTime()-d.getTimezoneOffset()*60000)/86400000);}
+function weekKey(){return Math.floor((dayKey()+3)/7);}/* สัปดาห์เริ่มวันจันทร์ */
+
+/* ========================= SYSTEM 7 · RESEARCH (ใช้ในการคำนวณค่าสถานะ) ========================= */
+const RES_TREE=[
+ {id:'A',name:'Mining Technology',icon:'⛏',col:'#ffc94a',nodes:[
+  {id:'A1',name:'Efficient Machinery',icon:'⚙️',per:'Mining Speed +3%',fmt:l=>`Speed +${3*l}%`},
+  {id:'A2',name:'Precision Calibration',icon:'🎯',per:'Cooldown สกิล -2%',fmt:l=>`Cooldown -${2*l}%`},
+  {id:'A3',name:'Ore Analysis',icon:'🔬',per:'ดาเมจต่อแร่ที่ขุดได้ +2% (ไม่เพิ่ม Power)',fmt:l=>`ดาเมจ +${2*l}%`},
+  {id:'A4',name:'Rapid Startup',icon:'⏱',per:'เวลาหน่วงก่อนขุด -5%',fmt:l=>`หน่วง -${5*l}%`}]},
+ {id:'B',name:'Logistics Technology',icon:'🎒',col:'#52e08a',nodes:[
+  {id:'B1',name:'Expanded Ore Bag',icon:'🎒',per:'Ore Capacity +5',fmt:l=>`Capacity +${5*l}`},
+  {id:'B2',name:'Magnetic Collector',icon:'🧲',per:'ระยะเก็บแร่ +0.25 ช่อง',fmt:l=>`ระยะเก็บ +${.25*l}`},
+  {id:'B3',name:'Efficient Transport',icon:'🦿',per:'Movement Speed +2%',fmt:l=>`Movement +${2*l}%`},
+  {id:'B4',name:'Storage Stabilizer',icon:'🛡',per:'ลดโอกาสเสียแร่จากอันตราย 5%',fmt:l=>`ลดการเสียแร่ ${5*l}%`}]},
+ {id:'C',name:'Exploration Technology',icon:'🧭',col:'#3fe0ff',nodes:[
+  {id:'C1',name:'Advanced Radar',icon:'📡',per:'ระยะตรวจจับแร่ลับ +1 ช่อง',fmt:l=>`ตรวจจับ +${l} ช่อง`},
+  {id:'C2',name:'Map Scanner',icon:'🗺',per:'ระยะแสงรอบตัว +0.5 ช่อง',fmt:l=>`แสง +${.5*l} ช่อง`},
+  {id:'C3',name:'Hazard Analysis',icon:'⚠️',per:'เวลาเตือนหินถล่ม +0.15 วิ',fmt:l=>`เตือน +${(.15*l).toFixed(2)} วิ`},
+  {id:'C4',name:'Hidden Chamber Detector',icon:'🚪',per:'ระยะตรวจจับห้องลับ +1 ช่อง',fmt:l=>`ห้องลับ +${l} ช่อง`}]}];
+function rl(k){return(S&&S.research&&S.research[k])||0;}
+function researchBonus(){return{S:3*rl('A1'),M:2*rl('B3'),C:5*rl('B1')};}
+function resCost(n){return{coins:200*n*n,data:n*2};}
+function doResearch(id){let tr=null,ni=-1;RES_TREE.forEach(t=>t.nodes.forEach((n,i)=>{if(n.id===id){tr=t;ni=i;}}));if(!tr)return;const lv=rl(id);if(lv>=4)return;
+ if(ni>0&&rl(tr.nodes[ni-1].id)<2){toast('ต้องวิจัย Node ก่อนหน้าถึง Lv.2','err');return;}const c=resCost(lv+1);
+ if(S.coins<c.coins||S.data<c.data){toast('Coins หรือ Research Data ไม่พอ','err');sfx('err');return;}
+ S.coins-=c.coins;S.data-=c.data;S.research[id]=lv+1;toast(`🔬 ${tr.nodes[ni].name} → Lv.${lv+1}`,'ok');sfx('upgrade');afterChange();}
+function openResearch(){const render=()=>{let h=`<div class="hint" style="margin-bottom:8px">📘 Research Data: <b style="color:var(--text)">${S.data}</b> · 🪙 ${fmt(S.coins)} · ราคา Lv.n = 🪙200×n² + 📘2n · Node ถัดไปต้องการ Node ก่อนหน้า Lv.2 · มีผลกับการขุดจริงทันที</div><div class="rtree">`;
+ RES_TREE.forEach(tr=>{h+=`<div class="rcol"><h4 style="color:${tr.col}">${tr.icon} ${tr.name}</h4>`;tr.nodes.forEach((nd,ni)=>{const lv=rl(nd.id);const pre=ni===0||rl(tr.nodes[ni-1].id)>=2;const max=lv>=4;const c=max?null:resCost(lv+1);const ok=pre&&!max&&S.coins>=c.coins&&S.data>=c.data;
+   if(ni>0)h+=`<div class="rlink ${pre?'on':''}" style="--c:${tr.col}"></div>`;
+   h+=`<div class="rnode ${max?'max':pre?'av':'lock'}" style="--c:${tr.col}"><div class="rn-h"><span class="rn-i">${nd.icon}</span><b>${nd.name}</b><span class="rn-l">${lv}/4</span></div><div class="rpips">${[1,2,3,4].map(k=>`<i class="${k<=lv?'on':''}"></i>`).join('')}</div>
+   <div class="hint">ต่อเลเวล: ${nd.per}</div><div class="hint">ตอนนี้: <b style="color:var(--text)">${nd.fmt(lv)}</b>${max?'':` → <span class="pos">${nd.fmt(lv+1)}</span>`}</div>
+   ${max?'<div class="hint" style="color:var(--gold)">⭐ MAX LEVEL</div>':pre?`<button class="btn sm ${ok?'gold':''}" data-act="research" data-arg="${nd.id}" ${ok?'':'disabled'}>🔬 Research · 🪙${fmt(c.coins)} · 📘${c.data}</button>`:`<div class="hint">🔒 Locked — ต้องการ ${tr.nodes[ni-1].name} Lv.2</div>`}</div>`;});h+='</div>';});
+ $('#mbody').innerHTML=h+'</div>';};openModal('🔬 Workshop Research','',render);render();}
+
+/* ========================= SYSTEM 1 · SECRET SYNERGY + CODEX ========================= */
+const SYN=[
+ {id:'thermal',name:'Thermal Shock',req:['magma_arm','frostbound_core'],hint:'พลังไฟปะทะความเย็น',col:'#bfe8ff',icon:'♨️',desc:'ตีแร่ร้อนครั้งแรกทำให้แร่ Brittle 5 วิ: รับดาเมจ +20% (ไม่ซ้อน · CD ต่อก้อน 12 วิ)'},
+ {id:'electro',name:'Electro Magnet',req:['thunder_core','magnetite_back'],hint:'สายฟ้าปลุกพลังแม่เหล็ก',col:'#c9a6ff',icon:'🧲',desc:'ระยะดูดแร่ +2 ช่อง · ทุกการขุด 10 ครั้ง ปล่อยสนามแม่เหล็กดูดแร่ที่ตกในระยะ 5 ช่อง (ไม่เพิ่มความจุ)'},
+ {id:'meteor',name:'Meteor Breaker',req:['titanstone_arm','zephyr_legs'],hint:'หินยักษ์ที่พุ่งมากับสายลม',col:'#ffb347',icon:'☄️',desc:'เดินสะสมครบ 8 ช่อง → การขุดครั้งถัดไปดาเมจ +50% แล้วรีเซ็ตระยะ'},
+ {id:'phantom',name:'Phantom Seeker',req:['prism_head','void_legs'],hint:'แสงหักเหในมิติว่างเปล่า',col:'#ff9df0',icon:'👁',desc:'ระยะตรวจจับห้องลับ +4 ช่อง · ลูกศรชี้ห้องลับที่พบ · Blink ของ Void Legs CD -15%'},
+ {id:'turbo',name:'Turbo Drill',req:['drilltech_arm','coppergear_core'],hint:'สว่านหมุนด้วยเฟืองทองแดง',col:'#ffd84a',icon:'🌀',desc:'ขุดก้อนเดิมต่อเนื่อง 5 ครั้ง → Mining Speed +25% นาน 6 วิ (CD 15 วิ · ไม่ซ้อน)'},
+ {id:'gravity',name:'Gravity Collector',req:['magnetite_core','prism_back'],hint:'แรงดึงดูดของผลึกล้ำค่า',col:'#b58cff',icon:'🌌',desc:'ระยะดูดแร่ +1.5 ช่อง · ช่องสำรองสำหรับแร่ Tier 5–6 เพิ่มอีก 8 หน่วย'},
+ {id:'frozen',name:'Frozen Inferno',req:['frostbound_arm','magma_core'],hint:'น้ำแข็งที่ถูกเผาด้วยแกนลาวา',col:'#9ff0ff',icon:'💥',desc:'Shatter Chill รัศมี +1 ช่อง และเกิด Steam Explosion (Cooldown เท่าเดิม)'},
+ {id:'fortress',name:'Ancient Fortress',req:['stoneguard_core','titanstone_back'],hint:'ป้อมหินแห่งยุคโบราณ',col:'#8fd3ff',icon:'🏰',desc:'ป้องกันหินถล่ม/การโจมตีครั้งแรกในแต่ละรอบ · มึนงงหลังจากนั้น -35%'},
+ {id:'overload',name:'Lightning Overload',req:['thunder_arm','coppergear_back'],hint:'สายฟ้าไหลผ่านสายพานทองแดง',col:'#9ef0ff',icon:'⚡',desc:'Chain Spark มีโอกาส 25% กระโดดไปหาแร่เพิ่มอีก 1 ก้อน (60% Power)'},
+ {id:'dimension',name:'Dimensional Drill',req:['void_arm','drilltech_core'],hint:'สว่านที่เจาะทะลุมิติ',col:'#ff4fd8',icon:'🕳',desc:'Phase Slice ระยะ +1 ช่อง · ถ้าโดนแร่ ≥2 ก้อน ลด Cooldown สกิลนั้น 3 วิ (ครั้งเดียวต่อการใช้)'},
+ {id:'treasure',name:'Treasure Hunter',req:['prism_head','magnetite_legs'],hint:'ดวงตาผลึกบนรางแม่เหล็ก',col:'#ffe14a',icon:'💰',desc:'ไฮไลต์แร่มูลค่าสูงสุดในระยะ 6 ช่อง · แสดงมูลค่าแร่ที่เลือก · ระยะเก็บแร่ +1 ช่อง'},
+ {id:'storm',name:'Storm Runner',req:['thunder_legs','zephyr_core'],hint:'พายุที่วิ่งไปกับสายลม',col:'#7fe6ff',icon:'🌩',desc:'Movement +15% · เดินต่อเนื่อง 6 ช่อง ลดเวลาหน่วงก่อนขุดเป้าหมายถัดไป 50% (ไม่เพิ่ม Power)'}];
+const SYNM={};SYN.forEach(y=>SYNM[y.id]=y);
+function synOf(look){const have=new Set(Object.values(look).filter(Boolean));const s=new Set();for(const y of SYN)if(y.req.every(p=>have.has(p)))s.add(y.id);return s;}
+function checkSynergy(){if(!S)return;const st=calcStats(S.equip);const nw=[];for(const id of st.syn)if(!S.codex.includes(id)){S.codex.push(id);S.scrap+=10;nw.push(SYNM[id]);}
+ if(nw.length){synBanner(nw);sfx('summon',4);save();}}
+function synBanner(list){let d=$('#synBan');if(!d){d=document.createElement('div');d.id='synBan';document.body.appendChild(d);}
+ d.innerHTML=`<div class="sbx"><div class="sbt">NEW SYNERGY DISCOVERED!</div>${list.map(y=>`<div class="sbn" style="color:${y.col}">${y.icon} ${y.name}</div><div class="sbd">${y.desc}</div>`).join('')}<div class="sbr">+${10*list.length} ⚙️ Ancient Scrap · บันทึกลง Golem Codex แล้ว (${S.codex.length}/12)</div></div>`;
+ d.classList.remove('show');void d.offsetWidth;d.classList.add('show');clearTimeout(d._t);d._t=setTimeout(()=>d.classList.remove('show'),3800);}
+function synHtml(st){const a=[...st.syn].map(id=>SYNM[id]);
+ return `<h3 style="margin-top:10px">🔗 Secret Synergy <span class="hint">Codex ${S.codex.length}/12</span></h3>${a.length?a.map(y=>`<div class="synrow" style="border-color:${y.col}"><div class="ic" style="border-color:${y.col}">${y.icon}</div><div><b style="color:${y.col}">${y.name}</b><div class="hint">${y.desc}</div></div></div>`).join(''):'<div class="hint">ยังไม่มี Synergy ทำงาน — ลองผสมชิ้นส่วนข้ามตระกูล (ดูคำใบ้ใน 📖 Codex)</div>'}`;}
+function openCodex(){const render=()=>{const n=S.codex.length;const active=curStats().syn;
+ let h=`<div class="cdxprog"><b>Synergy Discovered: ${n}/12</b><div class="bar"><i style="width:${n/12*100}%;background:linear-gradient(90deg,#3fe0ff,#ff9df0)"></i></div><div class="hint">ประกอบชิ้นส่วนจากต่างตระกูลให้ครบเงื่อนไขเพื่อค้นพบสูตรลับ · ค้นพบครั้งแรก +10 ⚙️ · ชิ้นส่วนแขนใส่ซ้ายหรือขวาก็ได้ · Codex บันทึกถาวร</div></div><div class="cdxg">`;
+ SYN.forEach((y,i)=>{const got=S.codex.includes(y.id);const no=`#${String(i+1).padStart(2,'0')}`;
+  if(!got){h+=`<div class="cdx lock"><div class="cdxi">${y.icon}</div><div><div class="hint">${no} · ยังไม่ค้นพบ</div><b>? ? ?</b><div class="hint">คำใบ้: “${y.hint}”</div><div class="hint">ใช้ชิ้นส่วน 2 ชิ้นจาก 2 ตระกูล</div></div></div>`;return;}
+  const own=y.req.map(p=>S.inv.some(x=>x.pid===p));
+  h+=`<div class="cdx" style="border-color:${y.col}"><div class="cdxi" style="background:radial-gradient(circle,${rgba(y.col,.5)},transparent 70%)">${y.icon}</div><div style="min-width:0"><div class="hint">${no}${active.has(y.id)?' · <b style="color:var(--green)">● ทำงานอยู่</b>':''}</div><b style="color:${y.col}">${y.name}</b>
+  <div class="cdxp">${y.req.map((p,k)=>`<span class="tag" style="border-color:${rarCol(PART[p].ri)}"><img src="${partIcon(p)}" alt="">${PART[p].name}${own[k]?'':' <i class="neg">(ยังไม่มี)</i>'}</span>`).join('<b>+</b>')}</div><div class="hint">${y.desc}</div>
+  <button class="btn sm pri" style="margin-top:5px" data-act="codexEquip" data-arg="${y.id}" ${own.every(Boolean)?'':'disabled'}>🔧 ใช้ Build นี้</button></div></div>`;});
+ $('#mbody').innerHTML=h+'</div>';};openModal('📖 Golem Codex','',render);render();}
+function codexEquip(id){const y=SYNM[id];if(!y||!S.codex.includes(id))return;const pick={};
+ for(const pid of y.req){const inst=S.inv.filter(i=>i.pid===pid&&!Object.values(pick).includes(i.uid)).sort((a,b)=>(b.evo||0)-(a.evo||0)||b.lvl-a.lvl)[0];if(!inst){toast(`ยังไม่มี ${PART[pid].name}`,'err');return;}pick[pid]=inst.uid;}
+ for(const pid of y.req){const uid=pick[pid];const ty=PART[pid].type;if(equippedSlot(uid))continue;const sl=ty==='arm'?'armL':ty;S.equip[sl]=uid;}
+ wsAnim.pop=1;sfx('equip');toast(`🔧 ติดตั้ง Build “${y.name}” แล้ว`,'ok');closeModal();afterChange();}
+
+/* ========================= SYSTEM 2 · PART EVOLUTION ========================= */
+const EVO_NAME=['Base','Awakened','Ascended'],EVO_COL=['var(--muted)','#7fe6ff','#ffd84a'];
+const EVO_BR={head:{A:['Deep Scanner','ระยะตรวจจับแร่ลับและห้องลับ +2 ช่อง'],B:['Precision Sensor','ดาเมจการขุดปกติ +5% ต่อแร่ที่ขุดได้']},
+ core:{A:['Power Reactor','Mining Power ของ Core ชิ้นนี้ +5%'],B:['Speed Reactor','Mining Speed รวม +6%']},
+ arm:{A:['Heavy Modification','ดาเมจสกิลแขนนี้ +15% (สกิล Buff/Utility ผล +10%)'],B:['Rapid Modification','Cooldown สกิลแขนนี้ -12%']},
+ legs:{A:['Speed Runner','Movement Speed +10%'],B:['Terrain Master','ลดผลหน่วงจากพื้นอันตราย 40%']},
+ back:{A:['Expanded Storage','Ore Capacity +25'],B:['Mining Support','ระยะเก็บแร่ +1.5 ช่อง']}};
+let evoSel={};
+function evoReq(inst){const st=inst.evo||0;if(st>=2)return null;return st===0?{lvl:5,shards:3,coins:500,cores:0}:{lvl:10,shards:12,coins:2500,cores:1};}
+function evoMissing(inst){const r=evoReq(inst);if(!r)return[];const m=[];if(inst.lvl<r.lvl)m.push(`Part Lv.${r.lvl} (ตอนนี้ ${inst.lvl})`);if(S.shards<r.shards)m.push(`💠 ${S.shards}/${r.shards}`);if(S.coins<r.coins)m.push(`🪙 ${fmt(S.coins)}/${fmt(r.coins)}`);if(S.cores<r.cores)m.push(`🔶 ${S.cores}/${r.cores}`);return m;}
+function doEvolve(uid){const inst=invGet(uid);if(!inst)return;const st=inst.evo||0;if(st>=2)return;const miss=evoMissing(inst);if(miss.length){toast('ยังไม่เข้าเงื่อนไข: '+miss[0],'err');sfx('err');return;}
+ const r=evoReq(inst);S.shards-=r.shards;S.coins-=r.coins;S.cores-=r.cores;inst.evo=st+1;if(inst.evo===2)inst.br=evoSel[uid]||'A';S.stats.evolves=(S.stats.evolves||0)+1;
+ toast(`🧬 ${PART[inst.pid].name} → ${EVO_NAME[inst.evo]}!${inst.evo===2?` (${EVO_BR[PART[inst.pid].type][inst.br][0]})`:''}`,'gold');sfx('summon',inst.evo+2);
+ const mb=$('#mbox');mb.classList.remove('evoflash');void mb.offsetWidth;mb.classList.add('evoflash');if(equippedSlot(uid))wsAnim.pop=1;afterChange();}
+function doRebranch(uid,b){const inst=invGet(uid);if(!inst||(inst.evo||0)<2||inst.br===b)return;if(S.scrap<100){toast('Ancient Scrap ไม่พอ (ต้องใช้ 100)','err');sfx('err');return;}
+ S.scrap-=100;inst.br=b;toast(`🔀 เปลี่ยน Branch → ${b}: ${EVO_BR[PART[inst.pid].type][b][0]}`,'ok');sfx('upgrade');afterChange();}
+function evoBlock(inst){const p=PART[inst.pid];const st=inst.evo||0;const B=EVO_BR[p.type];
+ let h=`<div class="card evob"><h3>🧬 Evolution · <span style="color:${EVO_COL[st]}">${EVO_NAME[st]}</span></h3>`;
+ if(st<2){const r=evoReq(inst);const nx=st+1;const miss=evoMissing(inst);const sel=evoSel[inst.uid]||'A';const after=partStats(Object.assign({},inst,{evo:nx,br:sel}));
+  h+=`<div class="evocmp"><div><img src="${partIcon(p.id,st)}" alt=""><span>Before · ${EVO_NAME[st]}</span></div><div class="evoar">➜</div><div class="evoaf"><img src="${partIcon(p.id,nx)}" alt=""><span>After · ${EVO_NAME[nx]}</span></div></div>
+  <div class="hint">${nx===1?'ค่าบวก +5% จากค่าหลังคำนวณ Level · ได้รอยเรืองแสงใหม่':'ค่าบวก +10% รวม (ไม่ทบ) · เลือก Branch 1 สาย · โครงสร้างใหม่ + Particles + Aura'} · ค่าติดลบคงเดิม</div><div style="margin:4px 0">${statLine(partStats(inst))} ➜ <span class="pos">${statLine(after,false)}</span></div>`;
+  if(nx===2)h+=`<div class="hint">เลือก Evolution Branch:</div><div class="evobr">${['A','B'].map(b=>`<button class="btn sm ${sel===b?'pri':''}" data-act="evoPick" data-arg="${inst.uid}|${b}"><b>${b}: ${B[b][0]}</b><br><span>${B[b][1]}</span></button>`).join('')}</div>`;
+  h+=`<div class="evomat">ต้องใช้: <span class="${inst.lvl>=r.lvl?'pos':'neg'}">Part Lv.${r.lvl}</span> · <span class="${S.shards>=r.shards?'pos':'neg'}">💠 ${r.shards} Shards</span> · <span class="${S.coins>=r.coins?'pos':'neg'}">🪙 ${fmt(r.coins)}</span>${r.cores?` · <span class="${S.cores>=r.cores?'pos':'neg'}">🔶 ${r.cores} Guardian Core</span>`:''} <span class="hint">(มี 💠${S.shards} 🔶${S.cores})</span></div>
+  ${miss.length?`<div class="hint neg">ยังขาด: ${miss.join(' · ')}</div>`:''}<button class="btn gold" data-act="evolve" data-arg="${inst.uid}" ${miss.length?'disabled':''}>🧬 EVOLVE → ${EVO_NAME[nx]}</button> <span class="hint">ไม่มีโอกาสล้มเหลว</span>`;}
+ else{const cur=inst.br||'A';h+=`<div class="evocmp"><div class="evoaf"><img src="${partIcon(p.id,2)}" alt=""><span>Ascended · Branch ${cur}</span></div></div><div class="hint">Branch ปัจจุบัน: <b style="color:var(--gold)">${cur}: ${B[cur][0]}</b> — ${B[cur][1]}</div>
+  <div class="evobr">${['A','B'].map(b=>`<button class="btn sm ${cur===b?'pri':''}" data-act="rebranch" data-arg="${inst.uid}|${b}" ${cur===b||S.scrap<100?'disabled':''}><b>${b}: ${B[b][0]}</b><br><span>${B[b][1]}</span></button>`).join('')}</div><div class="hint">เปลี่ยน Branch ใช้ ⚙️ 100 Ancient Scrap · ไม่เสีย Level หรือ Stage</div>`;}
+ return h+'</div>';}
+function openEvolution(){const render=()=>{const list=S.inv.slice().sort((a,b)=>(equippedSlot(b.uid)?1:0)-(equippedSlot(a.uid)?1:0)||(b.evo||0)-(a.evo||0)||b.lvl-a.lvl||PART[b.pid].ri-PART[a.pid].ri);
+ let h=`<div class="hint" style="margin-bottom:8px">✦ Awakened: Part Lv.5 + 💠3 + 🪙500 · ✦✦ Ascended: Lv.10 + 💠12 + 🪙2,500 + 🔶1 · ทุก Rarity วิวัฒนาการได้ · มี 💠<b style="color:var(--text)">${S.shards}</b> 🔶<b style="color:var(--text)">${S.cores}</b><br>💠 Evolution Shard: Mining Boss / Contracts / Endless Mine · 🔶 Guardian Core: Mining Boss / Endless B30</div><div class="list">`;
+ for(const inst of list.slice(0,120)){const p=PART[inst.pid];const st=inst.evo||0;const miss=st<2?evoMissing(inst):[];const eq=equippedSlot(inst.uid);
+  h+=`<div class="li" style="border-color:${rarCol(p.ri)}"><img src="${partIcon(p.id,st)}" alt=""><div class="mid"><b>${esc(p.name)}</b> Lv.${inst.lvl} ${eq?'<span class="tag" style="color:var(--cyan)">ใส่อยู่</span>':''}<span class="tag" style="color:${EVO_COL[st]}">${EVO_NAME[st]}${st===2?' · '+(inst.br||'A'):''}</span>
+  <div class="hint">${st>=2?EVO_BR[p.type][inst.br||'A'][0]+' — '+EVO_BR[p.type][inst.br||'A'][1]:miss.length?'ขาด: '+miss.join(' · '):'✅ พร้อม Evolve!'}</div></div><div class="acts"><button class="btn sm ${st<2&&!miss.length?'gold':''}" data-act="openPart" data-arg="${inst.uid}">🧬 ${st<2?'Evolve':'Branch'}</button></div></div>`;}
+ $('#mbody').innerHTML=h+'</div>';};openModal('🧬 Part Evolution','',render);render();}
+/* evolution visual layers (local part coords, same as SH shapes) */
+function evoFx(c,type,f,st,t){if(!st)return;const a=.55+.35*Math.sin(t*3);const col=f.c3;c.save();
+ if(type==='head'){c.strokeStyle=rgba(col,a);c.lineWidth=2.2;c.beginPath();c.arc(0,-2,21,Math.PI*1.15,Math.PI*1.85);c.stroke();for(const x of[-10,10]){circ(c,x,-14,1.9);c.fillStyle=rgba(col,a);c.fill();}
+  if(st>=2){for(const[x,h]of[[-11,9],[0,15],[11,9]]){poly(c,[x-3.5,-22,x+3.5,-22,x,-22-h]);fs(c,lg(c,-22-h,-22,'#ffffff',col),1.4);}glow(c,0,-32,20,col,.45*a);
+   for(let i=0;i<3;i++){const k=(t*.8+i/3)%1;circ(c,-12+i*12,-30-k*14,1.5);c.fillStyle=rgba(col,1-k);c.fill();}}}
+ else if(type==='core'){c.strokeStyle=rgba(col,a);c.lineWidth=1.8;c.setLineDash([4,3]);c.lineDashOffset=-t*10;circ(c,0,0,17);c.stroke();c.setLineDash([]);
+  if(st>=2){for(const s of[-1,1]){poly(c,[s*24,-14,s*38,-24,s*33,-4,s*38,12,s*24,6]);fs(c,lg(c,-24,12,col,f.D1),1.6);}
+   c.save();c.rotate(t*1.4);for(let i=0;i<4;i++){c.rotate(Math.PI/2);circ(c,28,0,2.3);c.fillStyle=rgba(col,.95);c.fill();}c.restore();glow(c,0,0,34,col,.3*a);}}
+ else if(type==='arm'){c.strokeStyle=rgba(col,a);c.lineWidth=2;c.beginPath();c.moveTo(-2,0);c.lineTo(2,7);c.lineTo(-2,14);c.lineTo(1,24);c.stroke();
+  if(st>=2){poly(c,[-11,-9,11,-9,14,4,0,0,-14,4]);fs(c,lg(c,-9,4,col,f.D1),1.6);
+   for(const[x,y,h]of[[-8,38,8],[8,40,7],[0,44,10]]){poly(c,[x-2.5,y,x+2.5,y,x,y+h]);fs(c,lg(c,y,y+h,'#ffffff',col),1.1);}glow(c,0,44,17,col,.4*a);}}
+ else if(type==='leg'){c.strokeStyle=rgba(col,a);c.lineWidth=2;c.beginPath();c.moveTo(0,2);c.lineTo(0,19);c.stroke();
+  if(st>=2){rr(c,-9,5,18,7,3);fs(c,lg(c,5,12,col,f.D1),1.4);glow(c,0,34,13,col,.5*a);}}
+ else if(type==='back'){for(const x of[-14,0,14]){circ(c,x,-30,2.1);c.fillStyle=rgba(col,a);c.fill();}
+  if(st>=2){for(const s of[-1,1]){c.save();c.scale(s,1);c.rotate(Math.sin(t*2)*.06);poly(c,[20,-30,52,-64,46,-38,60,-28,24,-18]);fs(c,lg(c,-64,-18,'#ffffff',col),1.6);c.restore();}glow(c,0,-34,42,col,.25*a);}}
+ c.restore();}
+
+/* ========================= SYSTEM 3 · DYNAMIC DUNGEON ========================= */
+const MODS={normal:{name:'NORMAL',icon:'⛏',coin:1,desc:['แร่เกิดตามปกติ','ไม่มีโบนัสพิเศษ'],rec:'Build ใดก็ได้',col:'#9aa3b2'},
+ heavy:{name:'HEAVY STRATA',icon:'🪨',coin:1.3,desc:['Ore HP +40%','Ore Value +30%'],rec:'Titanstone / Heavy Breaker (Power สูง)',col:'#d0a070'},
+ rush:{name:'CRYSTAL RUSH',icon:'💎',coin:1,desc:['จำนวนแร่ +30%','แร่กระจายเป็นกลุ่มเล็ก'],rec:'Drilltech / Zephyr (ขุดเร็ว เดินเร็ว) + สกิล AoE',col:'#7fe0ff'},
+ hidden:{name:'HIDDEN VEINS',icon:'🔍',coin:1.1,desc:['แร่ซ่อน +40%','มีห้องลับเพิ่มเมื่อพื้นที่รองรับ'],rec:'Prism / Void (ตรวจจับแร่ลับ)',col:'#ff9df0'},
+ heat:{name:'HEAT SURGE',icon:'🔥',coin:1.2,desc:['พื้นลาวาและพื้นที่ร้อนเพิ่มขึ้น','โอกาสแร่มูลค่าสูงเพิ่มขึ้น'],rec:'Frostbound / Magma (ทนความร้อน)',col:'#ff8a4a'},
+ shift:{name:'SHIFTING TUNNELS',icon:'🌀',coin:1.15,desc:['ทางตันและทางเชื่อมเพิ่มขึ้น','เส้นทางไปหาแร่ซับซ้อนขึ้น'],rec:'Zephyr / Thunder / Void (เดินเร็ว สำรวจ)',col:'#b0a0ff'}};
+const MOD_IDS=Object.keys(MODS);
+function dungeonMod(did){if(S.dbgMod&&S.dbgMod[did])return S.dbgMod[did];const base=Math.floor(mulberry32(weekKey()*7919+11)()*6);const i=DUNGEONS.findIndex(d=>d.id===did);return MOD_IDS[(base+i*2)%6];}
+function modHtml(d){const id=dungeonMod(d.id);const M=MODS[id];const diff='★'.repeat(DUNGEONS.indexOf(d)+1)+(id==='heavy'||id==='shift'?'+':'');
+ return `<div class="modbox" style="border-color:${M.col}"><b style="color:${M.col}">${M.icon} ${d.name.toUpperCase()} — ${M.name}</b>${S.dbgMod[d.id]?' <span class="tag">DEBUG</span>':''}${M.desc.map(x=>`<div class="hint" style="color:#e9effc">• ${x}</div>`).join('')}<div class="hint">ความยาก ${diff} · โบนัส Coins x${M.coin.toFixed(2)}</div><div class="hint">Recommended: ${M.rec}</div><div class="hint">🗓 Modifier ประจำสัปดาห์ (เปลี่ยนทุกวันจันทร์)</div></div>`;}
+function validMap(m,opt){const need=opt.need||6,mt=opt.maxTier||1;const seen=new Uint8Array(W*H);const q=[ix(m.ent.x,m.ent.y)];seen[q[0]]=1;let cnt=0;
+ while(q.length){const i=q.shift();const x=i%W,y=(i/W)|0;for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){const j=ix(x+dx,y+dy);if(seen[j])continue;const t=m.g[j];if(t===T_WALL||t===T_RUBBLE||t===T_SECRET)continue;const o=m.oreAt[j];
+   seen[j]=1;if(o){if(!o.hidden&&!o.secret&&o.tier<=mt)cnt++;if(o.tier>mt&&!o.hidden)continue;}q.push(j);}}
+ return cnt>=need;}
+function genChecked(d,seed,opt){let m=null;for(let a=0;a<6;a++){m=genDungeon(d,seed+a*1013,opt);if(validMap(m,opt))return m;}return m;}
+
+/* ========================= SYSTEM 5 · MINING CONTRACTS ========================= */
+const CT=[
+ {id:'A',name:'Speed Miner',icon:'⚡',desc:'ขุดแร่ 12 ก้อนภายใน 90 วินาทีแรกของรอบ ในดันเจี้ยนที่กำหนด',need:12,rw:{coins:300,tickets:1},rec:'Mining Speed + Movement สูง (Drilltech / Zephyr)'},
+ {id:'B',name:'Heavy Breaker',icon:'🪨',desc:'ขุดแร่ Tier 4 ขึ้นไป 5 ก้อน',need:5,rw:{coins:500,shards:2},rec:'Mining Power ≥190 (Titanstone / Magma) · Iron Depths หรือ Ancient Rift'},
+ {id:'C',name:'Rare Hunter',icon:'🔍',desc:'ค้นพบแร่ที่ซ่อนอยู่ 3 จุด',need:3,rw:{tickets:1,data:2},rec:'Prism / Void Head หรือวิจัย Advanced Radar'},
+ {id:'D',name:'Efficient Miner',icon:'🎒',desc:'Extract กลับฐานพร้อมแร่ โดยใช้ Ore Capacity อย่างน้อย 90%',need:1,rw:{coins:400,data:2},rec:'ขุดเร็ว + Capacity ที่พอดีกับเวลา'},
+ {id:'E',name:'No Legendary Challenge',icon:'🚫',desc:'จบ Iron Depths สำเร็จ (Extract + ขุด ≥5 ก้อน) โดยใช้ชิ้นส่วนไม่เกิน Rare',need:1,rw:{tickets:2,shards:3},rec:'Common–Rare: Coppergear / Zephyr / Drilltech / Titanstone / Magnetite'},
+ {id:'F',name:'Mixed Golem',icon:'🧩',desc:'จบดันเจี้ยนสำเร็จ (Extract + ขุด ≥5 ก้อน) ด้วยชิ้นส่วนจาก 4 ตระกูลขึ้นไป',need:1,rw:{coins:300,data:2},rec:'ผสมข้ามตระกูล — ลองหา Secret Synergy ไปด้วย'},
+ {id:'G',name:'Skill Master',icon:'✨',desc:'ใช้สกิลขุดแร่จนแตก 5 ก้อน ภายในรอบเดียว',need:5,rw:{tickets:1,shards:2},rec:'สกิล AoE: Stone Slam / Shatter Chill / Volcanic Burst / Chain Spark'},
+ {id:'H',name:'Deep Explorer',icon:'🕳',desc:'ไปถึง Endless Mine ชั้น 10 (ผ่านเป้าหมายชั้น 10)',need:10,rw:{coins:500,data:3},rec:'Build สมดุล + Capacity สูง'}];
+const CTM={};CT.forEach(c=>CTM[c.id]=c);
+function ctOffers(day){const r=mulberry32(day*7919+17);const ids=CT.map(c=>c.id);for(let i=ids.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[ids[i],ids[j]]=[ids[j],ids[i]];}return ids.slice(0,3);}
+function buildSnap(st){let mr=-1;for(const sl in st.parts)mr=Math.max(mr,PART[st.parts[sl].pid].ri);return{maxRar:mr,fams:famCount(S.equip)};}
+function ctBuildCheck(id){const st=curStats();const sn=buildSnap(st);
+ if(id==='E'&&sn.maxRar>2)return `มีชิ้นส่วน ${RAR[sn.maxRar].name} ติดตั้งอยู่ (ต้องไม่เกิน Rare)`;if(id==='E'&&!S.unlocked.depths)return 'ยังไม่ปลดล็อก Iron Depths';
+ if(id==='F'&&sn.fams<4)return `ตอนนี้ใช้ชิ้นส่วน ${sn.fams} ตระกูล (ต้อง 4 ขึ้นไป)`;if(id==='B'&&st.maxTier<4)return 'Mining Power ยังไม่ถึง 190 (ขุด Tier 4 ไม่ได้)';
+ if(id==='H'&&!endlessUnlocked(st))return 'ยังไม่ปลดล็อก Endless Mine';return null;}
+function ctAccept(id){const day=dayKey();const C=S.contracts;if(!ctOffers(day).includes(id))return;if(C.active.length>=3){toast('รับงานได้สูงสุด 3 งาน','err');return;}
+ if(C.active.some(a=>a.id===id)){toast('รับงานนี้ไว้แล้ว','err');return;}if(C.claimed[id+'@'+day]){toast('รับรางวัลงานนี้ไปแล้วในรอบนี้','err');return;}
+ const a={id,day,prog:0,done:false};if(id==='A'){const un=DUNGEONS.filter(d=>S.unlocked[d.id]);a.dg=un[(day*3+1)%un.length].id;}
+ C.active.push(a);toast(`📋 รับงาน ${CTM[id].name}`,'ok');sfx('equip');afterChange();}
+function ctClaim(i){const C=S.contracts;const a=C.active[i];if(!a||!a.done)return;const key=a.id+'@'+a.day;C.active.splice(i,1);
+ if(C.claimed[key]){toast('รางวัลนี้ถูกรับไปแล้ว','err');afterChange();return;}C.claimed[key]=true;const t=give(CTM[a.id].rw);if(!C.types.includes(a.id))C.types.push(a.id);
+ toast(`🎁 ${CTM[a.id].name}: ${t}`,'gold');sfx('coin');
+ if(!C.master&&C.types.length>=5){C.master=true;const t2=give({shards:3,data:5});setTimeout(()=>toast(`🏅 Master Contracts! ${t2}`,'gold'),600);}
+ const keep=dayKey()-14;for(const k in C.claimed)if(+k.split('@')[1]<keep)delete C.claimed[k];afterChange();}
+function ctEvent(kind,v){if(!S||!S.contracts)return;let ch=false;for(const a of S.contracts.active){if(a.done)continue;const c=CTM[a.id];const p0=a.prog||0;
+  if(kind==='mine'){if(a.id==='A'&&R&&R.type==='normal'&&R.d.id===a.dg&&R.elapsed<=90){R.ctA=(R.ctA||0)+1;a.prog=Math.max(p0,R.ctA);}if(a.id==='B'&&v>=4)a.prog=p0+1;}
+  else if(kind==='hidden'&&a.id==='C')a.prog=p0+1;
+  else if(kind==='skill'&&a.id==='G')a.prog=Math.max(p0,R.skillBreaks);
+  else if(kind==='floor'&&a.id==='H')a.prog=Math.max(p0,v);
+  else if(kind==='runEnd'&&R&&R.type==='normal'){
+   if(a.id==='D'&&v.extracted&&R.collectedCount>0&&v.fill>=.9)a.prog=1;
+   if(a.id==='E'&&R.d.id==='depths'&&v.success){if(R.snap.maxRar<=2)a.prog=1;else toast(`📋 ${c.name}: ไม่ผ่าน — มีชิ้นส่วน ${RAR[R.snap.maxRar].name} ติดตั้งอยู่`,'err');}
+   if(a.id==='F'&&v.success){if(R.snap.fams>=4)a.prog=1;else toast(`📋 ${c.name}: ไม่ผ่าน — ใช้ชิ้นส่วนเพียง ${R.snap.fams} ตระกูล`,'err');}}
+  if(a.prog!==p0)ch=true;if(a.prog>=c.need){a.done=true;a.prog=c.need;ch=true;toast(`📋 Contract สำเร็จ: ${c.name} — ไปกด Claim ที่ Workshop`,'gold');}}
+ if(ch)saveSoon();}
+function ctCard(a,i,active,day){const c=CTM[a.id];const prog=Math.min(c.need,a.prog||0);const chk=a.done?null:ctBuildCheck(a.id);let btn;
+ if(active)btn=a.done?`<button class="btn sm gold" data-act="ctClaim" data-arg="${i}">🎁 Claim</button>`:`<button class="btn sm red" data-act="ctDrop" data-arg="${i}">ยกเลิกงาน</button>`;
+ else{const taken=S.contracts.active.some(x=>x.id===a.id);const cl=S.contracts.claimed[a.id+'@'+day];btn=cl?'<span class="hint">✅ รับรางวัลแล้วในรอบนี้</span>':taken?'<span class="hint">📌 รับไว้แล้ว</span>':`<button class="btn sm pri" data-act="ctAccept" data-arg="${a.id}" ${S.contracts.active.length>=3?'disabled':''}>Accept</button>`;}
+ return `<div class="ctc ${a.done?'done':''}"><div class="ctt"><span class="cti">${c.icon}</span><div><b>${c.name}</b><div class="hint">${c.desc}${a.dg?` — <b style="color:var(--text)">${DMAP[a.dg].name}</b>`:''}</div></div></div>
+ <div class="hint">💡 Build แนะนำ: ${c.rec}</div>${chk?`<div class="hint neg">⚠ ${chk}</div>`:''}<div class="hint" style="color:var(--gold)">รางวัล: ${rwText(c.rw)}</div>
+ ${active?`<div class="row2"><div class="bar" style="flex:1;margin:0"><i style="width:${prog/c.need*100}%;background:${a.done?'var(--green)':'var(--cyan)'}"></i></div><span class="hint">${prog}/${c.need}</span></div>`:''}<div class="row2" style="justify-content:flex-end">${btn}</div></div>`;}
+function openContracts(){const render=()=>{const day=dayKey();const C=S.contracts;
+ let h=`<div class="ctboard"><div class="hint">🪧 กระดานภารกิจเหมือง · งานใหม่ทุกวัน (ตามเวลาเครื่อง) · รับได้สูงสุด 3 งาน · งานที่รับแล้วไม่หายเมื่อเปลี่ยนวัน · ไม่มีบทลงโทษ<br>สำเร็จแล้ว <b style="color:var(--text)">${C.types.length}</b> แบบ ${C.master?'· ✅ Master Bonus รับแล้ว':'· ครบ 5 แบบที่ต่างกัน → Master Bonus 💠3 📘5'}</div>`;
+ h+=`<h4>📌 งานที่รับไว้ (${C.active.length}/3)</h4><div class="ctg">${C.active.map((a,i)=>ctCard(a,i,true)).join('')||'<div class="hint">ยังไม่ได้รับงาน — เลือกจากงานของวันนี้ด้านล่าง</div>'}</div>`;
+ h+=`<h4>🗓 งานของวันนี้</h4><div class="ctg">${ctOffers(day).map(id=>ctCard({id,prog:0},-1,false,day)).join('')}</div></div>`;$('#mbody').innerHTML=h;};openModal('📋 Mining Contracts','',render);render();}
+
+/* ========================= SHARED RUN INIT ========================= */
+function initRun(type,d,m,st,o){
+ R={type,d,seed:o.seed||1,map:m,ores:m.ores,oreAt:m.oreAt,drops:[],st,fx:st.fx,syn:st.syn,skills:st.skills,
+  g:{x:m.ent.x+.5,y:m.ent.y+.5,path:[],tgt:null,state:'idle',mineT:0,settle:0,face:1,walkPh:0,hits:0,stun:0,skill:0,skillCol:'#fff',mineArm:1,manual:false,idleWait:0,wasWalking:false,pathGoal:-1},
+  bag:{items:{},w:0,res:0,val:0},exp:null,time:o.time||150,elapsed:0,mined:0,cds:[0,0],over:0,overAmt:30,auto:true,mode:S.settings.mode,extracting:false,ended:false,
+  parts:[],floats:[],efx:[],timers:[],rock:{next:14+Math.random()*8,warn:null},shield:st.fx.has('stoneguard_back'),fort:st.syn.has('fortress'),lavaT:0,combo:{id:-1,n:0},capHits:0,blinkCd:0,flashCd:0,dashTiles:0,boost:0,msg:{},shake:0,speed:1,cam:{x:0,y:0},collectedCount:0,melted:0,
+  mods:o.mods||[],valMul:o.valMul||1,walkAcc:0,contWalk:0,meteor:false,stormReady:false,turbo:0,turboCd:0,tId:-1,tN:0,emN:0,hiddenFound:0,skillBreaks:0,ctA:0,inSkill:false,cdCut:0,rewarded:false,snap:buildSnap(st),temps:[]};
+ return R;}
+function enterView(name){closeModal();$('#workshop').classList.add('hidden');$('#dungeon').classList.remove('hidden');$('#hName').textContent=name;
+ $('#dDbg').classList.toggle('hidden',!S.settings.debug);$('#bExtract').classList.remove('pulse','going');updateSkillButtons();updateHudButtons();resizeDungeon();sfx('equip');}
+function recordRun(coins,value){const r=S.recs;r.mostOres=Math.max(r.mostOres||0,R.mined);r.bestCoins=Math.max(r.bestCoins||0,coins);if(R.elapsed>=20&&value>0)r.bestEff=Math.max(r.bestEff||0,Math.round(value/(R.elapsed/60)));}
+
+/* ===== in-run synergy / evolution / research helpers ===== */
+function resCap(){return(R.fx.has('prism_back')?8:0)+(R.syn.has('gravity')?8:0);}
+function hidDet(){return rl('C1')+(R.st.br.head==='A'?2:0);}
+function secDet(){return rl('C4')+(R.syn.has('phantom')?4:0)+(R.st.br.head==='A'?2:0);}
+function terr(f){return R.st.br.legs==='B'?1-(1-f)*.6:f;}
+function revealHidden(o){if(!o.hidden)return;o.hidden=false;floatTxt(o.x+.5,o.y+.2,'✨ พบแร่ซ่อน!','#fff6a8');R.hiddenFound++;S.stats.hidden=(S.stats.hidden||0)+1;ctEvent('hidden');}
+function mineBonus(o){let m=1;if(R.st.br.head==='B')m*=1.05;
+ if(R.syn.has('meteor')&&R.meteor){m*=1.5;R.meteor=false;R.walkAcc=0;R.shake=.25;R.efx.push({type:'burst',x:o.x+.5,y:o.y+.5,t:0,dur:.45,col:'#ffb347',r:1.2});floatTxt(o.x+.5,o.y-.4,'☄️ Meteor +50%','#ffb347',1);}return m;}
+function afterMineHit(o){
+ if(R.syn.has('turbo')){if(R.tId===o.id)R.tN++;else{R.tId=o.id;R.tN=1;}if(R.tN>=5&&R.turboCd<=0){R.turbo=6;R.turboCd=15;R.tN=0;floatTxt(R.g.x,R.g.y-1.6,'🌀 Turbo Drill! Speed +25%','#ffd84a',1);for(let k=0;k<12;k++)part(R.g.x,R.g.y-.5,'#ffd84a',3,3);}}
+ if(R.syn.has('electro')){R.emN++;if(R.emN%10===0)electroPulse();}}
+function electroPulse(){let n=0;for(const d of R.drops){if(!d.fly&&Math.hypot(d.x-R.g.x,d.y-R.g.y)<=5&&bagFits(d.tier)){d.fly=true;n++;}}
+ R.efx.push({type:'ring',x:R.g.x,y:R.g.y,r:5,t:0,dur:.6,col:'#b07aff',inward:true});for(let k=0;k<12;k++)part(R.g.x,R.g.y-.4,k%2?'#b07aff':'#9ef0ff',4,2.5);floatTxt(R.g.x,R.g.y-1.6,`🧲 Electro Field${n?' +'+n:''}`,'#c9a6ff',.8);}
+function drawV2Overlay(c,T,t,gx,gy){
+ if(R.syn.has('treasure')){let best=null,bv=-1;for(const o of R.ores){if(!oreVisible(o)||o.secret||o.boss||!canMine(o)||gDist(o.x,o.y)>6)continue;const v=oreValue(o);if(v>bv){bv=v;best=o;}}
+  if(best){const X=(best.x+.5)*T,Y=(best.y+.5)*T;c.strokeStyle=`rgba(255,225,74,${.6+.3*Math.sin(t*6)})`;c.lineWidth=3;circ(c,X,Y,T*.62);c.stroke();c.font=`700 ${Math.max(10,T*.26)}px Kanit,sans-serif`;c.textAlign='center';c.fillText('💰',X+T*.45,Y-T*.45);}
+  const tg=R.g.tgt;if(tg&&tg.kind==='ore'&&!tg.o.secret&&!tg.o.boss&&R.ores.includes(tg.o)){const X=(tg.o.x+.5)*T,Y=(tg.o.y+.5)*T;const s=`🪙${fmt(oreValue(tg.o))}`;c.font=`800 ${Math.max(10,T*.26)}px Kanit,sans-serif`;c.textAlign='center';c.lineWidth=3;c.strokeStyle='rgba(0,0,0,.8)';c.strokeText(s,X,Y+T*.78);c.fillStyle='#ffe14a';c.fillText(s,X,Y+T*.78);}}
+ if(R.syn.has('phantom')){const s=R.ores.find(o=>o.secret&&o.revealed);if(s){const a=Math.atan2((s.y+.5)*T-gy,(s.x+.5)*T-gx);c.save();c.translate(gx+Math.cos(a)*T*1.1,gy-T*.4+Math.sin(a)*T*1.1);c.rotate(a);poly(c,[T*.28,0,-T*.14,-T*.17,-T*.06,0,-T*.14,T*.17]);c.fillStyle='#ff9df0';c.fill();c.strokeStyle=OL;c.lineWidth=1.5;c.stroke();c.restore();}}
+ if(R.syn.has('thermal'))for(const o of R.ores){if(o.brit&&R.elapsed<o.brit){const X=(o.x+.5)*T,Y=(o.y+.5)*T;c.strokeStyle=`rgba(230,250,255,${.7+.3*Math.sin(t*10)})`;c.lineWidth=2;c.beginPath();c.moveTo(X-T*.2,Y-T*.3);c.lineTo(X-T*.05,Y-T*.05);c.lineTo(X-T*.18,Y+T*.15);c.moveTo(X-T*.05,Y-T*.05);c.lineTo(X+T*.18,Y-T*.12);c.stroke();glow(c,X,Y-T*.2,T*.4,'#e9fbff',.2);}}}
+
+/* ========================= SYSTEM 4 · MINING BOSS ========================= */
+const PH_NAME=['Break Armor','Expose Crystal','Final Break'];
+const BOSSES=[
+ {id:'guardian',name:'Ancient Ore Guardian',th:'โกเลมหินโบราณ เกราะแร่บนไหล่ แกนคริสตัลกลางอก ดวงตาสีฟ้า',dg:'depths',reqP:50,tier:2,hp:{arm:500,core:900,fin:800},atk:[8,7,4.2],
+  first:{shards:5,cores:1,coins:500,tickets:2,data:2},rep:{shards:2,coins:150,data:1},col:'#6fd8ff',
+  pal:{body:'#8d8f99',dark:'#4b4f5c',acc:'#6fd8ff',eye:'#6fd8ff',vein:'#7fc8a0'},th1:{floor:'#2d2721',floor2:'#342d25',wall:'#5b4a3a',top:'#8d755a',acc:'#6fd8ff',dark:.32,bg:'#0d0a07'}},
+ {id:'colossus',name:'Magma Colossus',th:'บอสหินลาวา เกราะร้อน แขนมหึมา หัวใจแมกมา · สร้างพื้นลาวา',dg:'rift',reqP:190,tier:4,hp:{arm:1600,core:2800,fin:2400},atk:[6,5,3.2],
+  first:{shards:5,cores:1,coins:1000,data:3,tickets:3},rep:{shards:5,cores:1,coins:1000,data:3},col:'#ff6a1a',
+  pal:{body:'#4a3a36',dark:'#1e1412',acc:'#ff6a1a',eye:'#ffd23f',vein:'#ff6a1a'},th1:{floor:'#2a1a16',floor2:'#321e18',wall:'#4a2a22',top:'#7a4030',acc:'#ff6a1a',dark:.42,bg:'#0f0605'}},
+ {id:'excavator',name:'Void Excavator',th:'เครื่องจักรโบราณพลังมิติ วาร์ปจุดอ่อน สร้างสิ่งกีดขวาง · Final Core จำกัดเวลา',dg:'rift',reqP:440,tier:6,hp:{arm:3200,core:5000,fin:4000},atk:[5.5,4.6,2.9],
+  first:{shards:10,cores:2,coins:2500,data:5,tickets:5},rep:{shards:10,cores:2,coins:2500,data:5},col:'#c066ff',
+  pal:{body:'#3a2a52',dark:'#120a1e',acc:'#c066ff',eye:'#ff4fd8',vein:'#8b3dff'},th1:{floor:'#1a1428',floor2:'#201830',wall:'#3a2a52',top:'#5a4280',acc:'#c066ff',dark:.46,bg:'#06030c'}}];
+const BMAP={};BOSSES.forEach(b=>BMAP[b.id]=b);
+function genArena(B,seed){const rng=mulberry32(seed);const g=new Uint8Array(W*H),deco=new Uint8Array(W*H);const I=(x,y)=>y*W+x;
+ for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(x===0||y===0||x===W-1||y===H-1)g[I(x,y)]=T_WALL;
+ const bt=new Set();for(let y=4;y<=9;y++)for(let x=15;x<=18;x++){g[I(x,y)]=T_WALL;bt.add(I(x,y));}
+ for(const[x,y]of[[6,2],[6,11],[10,1],[10,12]])g[I(x,y)]=T_WALL;
+ if(B.id==='colossus')for(const[x,y]of[[8,2],[9,2],[8,11],[9,11],[4,4]])g[I(x,y)]=T_LAVA;
+ const ent={x:2,y:7};const ores=[];const oreAt=new Array(W*H).fill(null);
+ const mk=(x,y,wp,hp,name)=>{const o={id:ores.length,x,y,tier:B.tier,hp,maxHp:hp,name,boss:true,wp,hidden:false,closed:true,hot:B.id==='colossus',seed:rng(),hitT:0};ores.push(o);oreAt[I(x,y)]=o;return o;};
+ mk(14,5,'armL',B.hp.arm,'เกราะไหล่ซ้าย');mk(14,8,'armR',B.hp.arm,'เกราะไหล่ขวา');mk(14,6,'core',B.hp.core,'แกนคริสตัล');mk(14,7,'fin',B.hp.fin,'แกนสุดท้าย');
+ return{g,deco,ent,ores,oreAt,room:null,seed,bossTiles:bt};}
+function bossUnlocked(B,st){return S.unlocked[B.dg]&&st.P>=B.reqP;}
+function startBoss(id,force){const def=BMAP[id];if(!def)return;const st=calcStats(S.equip);
+ if(!force){if(!S.unlocked[def.dg]){toast(`ต้องปลดล็อก ${DMAP[def.dg].name} ก่อน`,'err');return;}if(st.P<def.reqP){toast(`ต้องการ Mining Power ${def.reqP}`,'err');return;}}
+ const seed=Math.floor(Math.random()*1e9);const m=genArena(def,seed);const d={id:'boss_'+id,name:def.name,th1:def.th1,hz:{},tiers:[def.tier],wts:[1]};
+ initRun('boss',d,m,st,{seed,time:180});
+ R.boss={def,phase:1,t:0,anim:0,tele:[],next:5,coreOpen:false,ct:0,sw:6,ft:25,obs:7,warp:0,total:def.hp.arm*2+def.hp.core+def.hp.fin,dead:0};
+ R.ores.forEach(o=>{if(o.wp==='armL'||o.wp==='armR')o.closed=false;});
+ enterView(`👹 ${def.name}`);toast('⚔ Phase 1 — Break Armor! ขุดเกราะไหล่ทั้งสองข้าง','gold');}
+function stepBoss(dt){const B=R.boss,def=B.def;B.t+=dt;B.anim=Math.max(0,B.anim-dt*1.3);B.warp=Math.max(0,B.warp-dt);
+ for(let k=R.temps.length-1;k>=0;k--){const tp=R.temps[k];tp.t-=dt;if(tp.t<=0){if(R.map.g[tp.i]===tp.tile)R.map.g[tp.i]=tp.prev;R.temps.splice(k,1);}}
+ const core=R.ores.find(o=>o.wp==='core'),fin=R.ores.find(o=>o.wp==='fin');
+ if(B.phase===2&&core){B.ct-=dt;
+  if(B.coreOpen){if(def.id==='excavator'){B.sw-=dt;if(B.sw<=0){B.sw=6;bossSwap(core);}}if(B.ct<=0){B.coreOpen=false;core.closed=true;B.ct=5;bossRoar();}}
+  else if(B.ct<=0){B.coreOpen=true;core.closed=false;B.ct=12;toast('🔓 แกนคริสตัลเปิดออก! รีบขุดภายใน 12 วิ','gold');sfx('skill');}}
+ if(B.phase===3&&fin&&def.id==='excavator'){B.ft-=dt;if(B.ft<=0){B.ft=25;fin.hp=fin.maxHp;toast('🌌 Final Core ฟื้นฟูพลัง! ทำลายให้ทันใน 25 วิ','err');R.efx.push({type:'ring',x:fin.x+.5,y:fin.y+.5,r:1.5,t:0,dur:.6,col:'#c066ff',fill:true});}}
+ B.next-=dt;if(B.next<=0){bossAttack();B.next=def.atk[B.phase-1]*(.85+Math.random()*.3);}
+ if(def.id==='excavator'){B.obs-=dt;if(B.obs<=0){B.obs=9;bossObstacles();}}
+ for(let k=B.tele.length-1;k>=0;k--){const w=B.tele[k];w.t-=dt;if(w.t<=0){B.tele.splice(k,1);bossResolve(w);}}}
+function bossSwap(core){const ny=core.y===5?8:5;const ti=ix(14,ny);if(R.oreAt[ti]||gTile()===ti)return;R.oreAt[ix(core.x,core.y)]=null;for(let k=0;k<14;k++)part(core.x+.5,core.y+.5,'#ff4fd8',4,3);
+ core.y=ny;R.oreAt[ti]=core;R.boss.warp=.6;for(let k=0;k<14;k++)part(core.x+.5,core.y+.5,'#c066ff',4,3);floatTxt(core.x+.5,core.y-.3,'🌌 จุดอ่อนวาร์ป!','#ff9df0',.9);
+ if(R.g.tgt&&R.g.tgt.o===core&&R.g.state!=='stun'){R.g.state='idle';R.g.idleWait=.05;}}
+function inTele(x,y,pad=0){return R.boss.tele.some(w=>Math.hypot(x-w.x,y-w.y)<=w.r+pad);}
+function bossAttack(){const B=R.boss,def=B.def,g=R.g;B.anim=1;sfx('rock');const wd=(def.id==='excavator'?1.35:1.5)+.15*rl('C3');
+ const n=B.phase===3?(def.id==='guardian'?2:3):(def.id==='colossus'&&B.phase===2?2:1);
+ for(let k=0;k<n;k++){let x=g.x,y=g.y;if(k>0){const a=Math.random()*6.28,d=1.3+Math.random()*1.6;x=clamp(g.x+Math.cos(a)*d,1.5,13.5);y=clamp(g.y+Math.sin(a)*d,1.5,H-1.5);}B.tele.push({x,y,r:1.25,t:wd+k*.15,dur:wd+k*.15});}
+ if(R.auto)bossDodgeCheck();}
+function bossRoar(){const B=R.boss,g=R.g;B.anim=1;toast('🔒 แกนปิด! บอสคำราม — หลบวงสีแดง!','err');const wd=1.6+.15*rl('C3');
+ for(let k=0;k<4;k++){const a=k/4*6.28+Math.random();B.tele.push({x:clamp(g.x+Math.cos(a)*1.9,1.5,13.5),y:clamp(g.y+Math.sin(a)*1.9,1.5,H-1.5),r:1.15,t:wd+k*.2,dur:wd+k*.2});}
+ B.tele.push({x:g.x,y:g.y,r:1.25,t:wd+.5,dur:wd+.5});if(R.auto)bossDodgeCheck();}
+function bossDodgeCheck(){const g=R.g;if(g.stun>0||!inTele(g.x,g.y,.25))return;const D=dijkstra(gTile());let best=-1,bd=Infinity;
+ for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){const i=ix(x,y);if(!stand(i)||D.dist[i]===Infinity)continue;if(inTele(x+.5,y+.5,.45))continue;if(D.dist[i]<bd){bd=D.dist[i];best=i;}}
+ if(best>=0&&best!==gTile()){setTarget({kind:'move',i:best},false);g.dodge=true;floatTxt(g.x,g.y-1.6,'💨 หลบ!','#52e08a',.8);}}
+function golemImpact(){const g=R.g;
+ if(R.fort){R.fort=false;toast('🏰 Ancient Fortress ป้องกันการโจมตี!','ok');R.efx.push({type:'ring',x:g.x,y:g.y,r:1.2,t:0,dur:.5,col:'#8fd3ff',fill:true});return;}
+ if(R.shield){R.shield=false;toast('🛡 Shieldstone ป้องกันการโจมตี!','ok');R.efx.push({type:'ring',x:g.x,y:g.y,r:1.2,t:0,dur:.5,col:'#8fd3ff',fill:true});return;}
+ let s=1.4;if(R.fx.has('stoneguard_core'))s*=.5;if(R.syn.has('fortress'))s*=.65;g.stun=s;g.state='stun';g.path=[];floatTxt(g.x,g.y-1.5,'💫 มึนงง','#ffb347');
+ if(!R.fx.has('stoneguard_legs')){const ns=[[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dy])=>ix(Math.floor(g.x)+dx,Math.floor(g.y)+dy)).filter(stand);if(ns.length){const j=ns[Math.floor(Math.random()*ns.length)];g.x=j%W+.5;g.y=((j/W)|0)+.5;}}}
+function bossResolve(w){const g=R.g,def=R.boss.def;R.shake=Math.max(R.shake,.35);sfx('rock');for(let k=0;k<18;k++)part(w.x,w.y,k%2?def.pal.body:def.pal.acc,5,4);
+ R.efx.push({type:'ring',x:w.x,y:w.y,r:w.r,t:0,dur:.4,col:def.pal.acc,fill:true});if(Math.hypot(g.x-w.x,g.y-w.y)<=w.r)golemImpact();
+ if(def.id==='colossus'){const cx=Math.floor(w.x),cy=Math.floor(w.y);for(const[dx,dy]of[[0,0],[1,0],[-1,0],[0,1],[0,-1]])tempTile(cx+dx,cy+dy,T_LAVA,10);}}
+function tempTile(x,y,tile,dur){if(x<1||y<1||x>=W-1||y>=H-1)return false;const i=ix(x,y);const cur=R.map.g[i];if(cur!==T_FLOOR||R.oreAt[i]||(R.map.bossTiles&&R.map.bossTiles.has(i)))return false;
+ if(tile===T_RUBBLE&&(i===gTile()||i===ix(R.map.ent.x,R.map.ent.y)))return false;R.map.g[i]=tile;R.temps.push({i,prev:cur,tile,t:dur});return true;}
+function bossObstacles(){const g=R.g;let n=0;for(let k=0;k<40&&n<3;k++){const x=Math.floor(g.x+(Math.random()-.5)*8),y=Math.floor(g.y+(Math.random()-.5)*6);if(x>12||x<1)continue;if(Math.hypot(x+.5-g.x,y+.5-g.y)<1.5)continue;
+  if(tempTile(x,y,T_RUBBLE,8)){n++;for(let j=0;j<8;j++)part(x+.5,y+.5,'#c066ff',3,3);}}
+ if(n){floatTxt(g.x,g.y-1.8,'🌌 สิ่งกีดขวางมิติ','#c066ff',.8);if(g.state==='walk'&&g.tgt)setTarget(g.tgt,g.manual);}}
+function bossBreak(o){const B=R.boss,def=B.def;R.shake=.5;sfx('break',5);for(let k=0;k<26;k++)part(o.x+.5,o.y+.5,k%2?def.pal.acc:'#ffffff',6,4);R.efx.push({type:'ring',x:o.x+.5,y:o.y+.5,r:1.6,t:0,dur:.5,col:def.pal.acc,fill:true});
+ if(o.wp==='armL'||o.wp==='armR'){floatTxt(o.x+.5,o.y-.3,'💥 เกราะแตก!','#ffd84a',1.2);
+  if(!R.ores.some(x=>x.wp==='armL'||x.wp==='armR')){B.phase=2;const core=R.ores.find(x=>x.wp==='core');if(def.id==='excavator'){R.oreAt[ix(core.x,core.y)]=null;core.y=5;R.oreAt[ix(14,5)]=core;}
+   core.closed=false;B.coreOpen=true;B.ct=12;B.next=Math.max(B.next,3);toast('⚔ Phase 2 — Expose Crystal! แกนเปิด 12 วิ (ดาเมจสะสม)','gold');}}
+ else if(o.wp==='core'){B.phase=3;const fin=R.ores.find(x=>x.wp==='fin');fin.closed=false;B.ft=25;B.next=Math.max(B.next,2.5);toast(`🔥 Phase 3 — Final Break!${def.id==='excavator'?' ทำลายภายใน 25 วิ':''}`,'gold');}
+ else if(o.wp==='fin'){B.dead=GT;R.shake=1;for(let k=0;k<60;k++)part(16.9,7,k%3?def.pal.acc:'#ffffff',9,5);endBoss(true);}}
+function endBoss(win,why){if(!R||R.ended)return;R.ended=true;const def=R.boss.def;let rw=null,first=false,txt='';
+ if(win&&!R.rewarded){R.rewarded=true;first=!S.bossClears[def.id];rw=first?def.first:def.rep;txt=give(rw);S.bossClears[def.id]=(S.bossClears[def.id]||0)+1;S.stats.bossWins=(S.stats.bossWins||0)+1;}
+ S.stats.runs++;R.boss.tele=[];save();sfx(win?'upgrade':'err');
+ toast(win?`🏆 ปราบ ${def.name} สำเร็จ!`:why==='retreat'?'🏳 ถอยออกจากการต่อสู้':'⏰ หมดเวลา — บอสยังไม่ล้ม',win?'gold':'err');
+ const res={def,win,rw,txt,first,time:R.elapsed,phase:R.boss.phase,why};setTimeout(()=>{exitDungeon();showBossResult(res);},win?1500:800);}
+function showBossResult(r){openModal(r.win?'🏆 Boss Clear!':'💀 Boss Challenge — ไม่สำเร็จ',`<div class="hint" style="text-align:center">${r.def.name}</div>
+ ${r.win?`<div class="result-big">${r.txt}</div><div style="text-align:center">${r.first?'<span class="tag" style="color:var(--gold)">⭐ First Clear Bonus</span>':''}</div>`:`<div class="result-big" style="color:var(--muted)">Phase ${r.phase}/3</div><div class="hint" style="text-align:center">${r.why==='retreat'?'ถอยออกมา':'หมดเวลา'} — ไม่เสียชิ้นส่วนหรือเงิน แต่ไม่ได้รับรางวัลบอส</div>`}
+ <table class="t" style="margin-top:10px"><tr><td>เวลาที่ใช้</td><td>${Math.floor(r.time/60)}:${String(Math.floor(r.time%60)).padStart(2,'0')}</td></tr><tr><td>ชนะทั้งหมด</td><td>${S.bossClears[r.def.id]||0} ครั้ง</td></tr></table>
+ <div class="row2" style="justify-content:center;margin-top:12px"><button class="btn gold" data-act="closeModal">🏠 Return Workshop</button><button class="btn" data-act="startBoss" data-arg="${r.def.id}">🔁 สู้อีกครั้ง</button></div>`,null,true);}
+function bossArm(c,P,id,t,s,rot){c.save();c.translate(s*94,-205);c.rotate(rot);rr(c,-19,-6,38,104,15);fs(c,lg(c,0,100,P.body,P.dark),3);
+ if(id==='colossus'){c.strokeStyle=P.vein;c.lineWidth=2.5;c.beginPath();c.moveTo(-6,10);c.lineTo(4,40);c.lineTo(-4,70);c.stroke();glow(c,0,40,26,P.acc,.25+.1*Math.sin(t*5));}
+ c.translate(0,104);if(id==='excavator'){rr(c,-24,-10,48,22,8);fs(c,P.dark,2.5);c.save();poly(c,[-20,10,20,10,0,64]);fs(c,lg(c,10,64,'#d9c6ff',P.acc),2.6);poly(c,[-20,10,20,10,0,64]);c.clip();c.strokeStyle=rgba(OL,.55);c.lineWidth=3;const of=(t*60)%12;for(let y=4+of;y<70;y+=12){c.beginPath();c.moveTo(-24,y);c.lineTo(24,y+6);c.stroke();}c.restore();}
+ else{rr(c,-27,-6,54,46,14);fs(c,lg(c,-6,40,P.body,P.dark),3);for(const x of[-14,0,14]){rr(c,x-6,30,12,12,4);fs(c,P.dark,2);}}c.restore();}
+function drawBossBody(c,def,t,o){const P=def.pal,id=def.id;const br=Math.sin(t*1.6)*3,atk=o.atk||0;
+ c.fillStyle='rgba(0,0,0,.35)';ell(c,0,4,112,24);c.fill();if(o.warp)c.globalAlpha=.45+.5*Math.abs(Math.sin(t*25));
+ for(const s of[-1,1]){rr(c,s*40-24,-86,48,88,14);fs(c,lg(c,-86,2,P.body,P.dark),3);rr(c,s*40-32,-16,64,20,8);fs(c,P.dark,2.5);}
+ c.save();c.translate(0,br-atk*8);bossArm(c,P,id,t,1,-.25+atk*.2);
+ poly(c,[-86,-80,-100,-190,-60,-250,60,-250,100,-190,86,-80,40,-60,-40,-60]);fs(c,lg(c,-250,-60,P.body,P.dark),3.5);
+ if(id==='guardian'){c.strokeStyle=rgba(OL,.5);c.lineWidth=2;c.beginPath();c.moveTo(-60,-110);c.lineTo(-30,-95);c.lineTo(-40,-75);c.moveTo(50,-200);c.lineTo(70,-170);c.stroke();c.fillStyle=P.vein;for(const[x,y]of[[-70,-228],[-50,-238],[60,-236],[78,-222]]){ell(c,x,y,10,5);c.fill();}}
+ if(id==='colossus'){c.strokeStyle=P.vein;c.lineWidth=3;c.beginPath();c.moveTo(-70,-200);c.lineTo(-40,-170);c.lineTo(-56,-120);c.moveTo(40,-230);c.lineTo(60,-180);c.lineTo(40,-140);c.lineTo(62,-100);c.stroke();glow(c,-50,-150,40,P.acc,.25+.12*Math.sin(t*4));
+  for(let i=0;i<3;i++){const k=(t*.6+i/3)%1;circ(c,-30+i*30,-250-k*40,4+k*6);c.fillStyle=`rgba(90,70,70,${.5*(1-k)})`;c.fill();}}
+ if(id==='excavator'){c.fillStyle=P.vein;for(const y of[-210,-170,-130,-95])c.fillRect(-90,y,180,5);c.fillStyle='#c9b8e8';for(const[x,y]of[[-76,-200],[76,-200],[-70,-100],[70,-100]]){circ(c,x,y,4);c.fill();}}
+ for(const s of[-1,1]){const has=s<0?o.armL:o.armR;circ(c,s*92,-212,34);fs(c,lg(c,-246,-178,P.body,P.dark),3);
+  if(has){const oc=TIERS[def.tier].ores[0];poly(c,[s*70,-236,s*100,-250,s*122,-222,s*114,-190,s*80,-188]);fs(c,lg(c,-250,-188,oc[1],oc[2]),2.6);for(let k=0;k<3;k++){const x=s*(84+k*12);poly(c,[x-5,-232,x,-262-(k===1?10:0),x+5,-232]);fs(c,lg(c,-262,-232,'#ffffff',oc[1]),1.4);}}}
+ const cx=-28,cy=-150;
+ if(o.core==='open'){glow(c,cx,cy,64,P.acc,.55+.2*Math.sin(t*5));poly(c,[cx,cy-34,cx+24,cy-8,cx+16,cy+30,cx-16,cy+30,cx-24,cy-8]);fs(c,lg(c,cy-34,cy+30,'#ffffff',P.acc),3);}
+ else if(o.core==='closed'){for(const s of[-1,1]){poly(c,[cx,cy-38,cx+s*34,cy-16,cx+s*30,cy+30,cx,cy+34]);fs(c,lg(c,cy-38,cy+34,P.body,P.dark),2.6);}glow(c,cx,cy,22,P.acc,.15+.1*Math.sin(t*3));}
+ else{circ(c,cx,cy,26);fs(c,'#0b0810',2.6);if(o.fin)glow(c,cx,cy,40,P.eye,.35+.2*Math.sin(t*8));}
+ c.save();c.translate(-12,-272);rr(c,-46,-40,92,66,18);fs(c,lg(c,-40,26,P.body,P.dark),3);
+ if(id==='colossus')for(const s of[-1,1]){poly(c,[s*30,-34,s*52,-70,s*42,-30]);fs(c,P.dark,2.4);flame(c,s*48,-62,10,t+s,'#ff6a1a','#ffd23f');}
+ if(id==='excavator'){rr(c,-38,-10,76,18,8);fs(c,'#0b0614',2);line(c,0,-40,0,-62,3,OL);circ(c,0,-64,5);fs(c,P.eye,1.6);glow(c,0,-64,14,P.eye,.6);}
+ const ey=id==='excavator'?-1:-6;for(const x of[-18,6]){glow(c,x,ey,16,P.eye,.6);rr(c,x-9,ey-4,18,8,4);c.fillStyle=P.eye;c.fill();}
+ c.restore();bossArm(c,P,id,t,-1,.25+atk*2.1);c.restore();c.globalAlpha=1;}
+function drawBoss(c,T,t){const B=R.boss;const core=R.ores.find(o=>o.wp==='core');const sink=B.dead?Math.min(1,(GT-B.dead)/1.3):0;
+ c.save();c.translate(17*T,10*T+sink*T*1.5);c.scale(T/40,T/40);c.globalAlpha=1-sink*.8;
+ drawBossBody(c,B.def,t,{atk:B.anim>0?Math.sin((1-B.anim)*Math.PI):0,armL:R.ores.some(o=>o.wp==='armL'),armR:R.ores.some(o=>o.wp==='armR'),core:core?(core.closed?'closed':'open'):'broken',fin:B.phase>=3&&!B.dead,warp:B.warp>0});
+ c.restore();c.globalAlpha=1;for(const o of R.ores)if(o.boss)drawWP(c,o,T,t,B.def);}
+function drawWP(c,o,T,t,def){const X=(o.x+.5)*T,Y=(o.y+.5)*T;const P=def.pal;
+ c.strokeStyle=rgba(P.dark,.95);c.lineWidth=T*.14;c.beginPath();c.moveTo(X+T*.2,Y);c.quadraticCurveTo(X+T*.6,Y-T*.25,15*T+T*.1,Y-T*.1);c.stroke();
+ if(o.closed){c.fillStyle=mix(P.body,-.25);rr(c,X-T*.36,Y-T*.36,T*.72,T*.72,T*.12);c.fill();c.strokeStyle=OL;c.lineWidth=2;c.stroke();line(c,X-T*.28,Y,X+T*.28,Y,2,'rgba(0,0,0,.5)');
+  if(o.wp==='core'&&R.boss.phase===2){c.font=`${Math.max(10,T*.3)}px sans-serif`;c.textAlign='center';c.fillText('🔒',X,Y+T*.1);}return;}
+ const armor=o.wp==='armL'||o.wp==='armR';const oc=TIERS[o.tier].ores[0];const sh=o.hitT>0?(Math.random()-.5)*T*.08:0;const pulse=.5+.5*Math.sin(t*6);
+ c.save();c.translate(X+sh,Y);c.strokeStyle=`rgba(255,220,80,${.5+.4*pulse})`;c.lineWidth=2.5;c.setLineDash([5,4]);c.lineDashOffset=-t*20;circ(c,0,0,T*(.62+.05*pulse));c.stroke();c.setLineDash([]);
+ if(armor){poly(c,[-T*.42,-T*.2,-T*.2,-T*.42,T*.3,-T*.38,T*.44,-T*.05,T*.3,T*.38,-T*.25,T*.4,-T*.44,T*.15]);fs(c,lg(c,-T*.42,T*.4,oc[1],oc[2]),2.2);
+  for(let k=0;k<3;k++){const ox=(k-1)*T*.2;poly(c,[ox-T*.07,-T*.05,ox,-T*.32-(k===1?T*.08:0),ox+T*.07,-T*.05]);fs(c,lg(c,-T*.4,0,'#ffffff',oc[1]),1.2);}}
+ else{glow(c,0,0,T*(.8+.1*pulse),o.wp==='fin'?P.eye:P.acc,.55);poly(c,[0,-T*.46,T*.3,-T*.1,T*.2,T*.36,-T*.2,T*.36,-T*.3,-T*.1]);fs(c,lg(c,-T*.46,T*.36,'#ffffff',o.wp==='fin'?P.eye:P.acc),2.2);if(o.wp==='fin'){circ(c,0,0,T*.1);c.fillStyle='#fff';c.fill();}}
+ c.restore();const w=T*.9;c.fillStyle='rgba(0,0,0,.7)';rr(c,X-w/2-1,Y-T*.66,w+2,7,3);c.fill();const k=clamp(o.hp/o.maxHp,0,1);c.fillStyle=k>.5?'#ffc94a':'#ff5d6c';rr(c,X-w/2,Y-T*.66+1,w*k,5,2);c.fill();}
+function drawTele(c,T,t){for(const w of R.boss.tele){const k=1-w.t/w.dur;c.fillStyle=`rgba(255,60,60,${.16+.22*Math.abs(Math.sin(t*12))})`;circ(c,w.x*T,w.y*T,w.r*T);c.fill();c.strokeStyle='rgba(255,90,90,.95)';c.lineWidth=2.5;circ(c,w.x*T,w.y*T,w.r*T);c.stroke();
+ c.strokeStyle='rgba(255,220,120,.9)';c.lineWidth=2;circ(c,w.x*T,w.y*T,Math.max(1,w.r*T*k));c.stroke();c.fillStyle=R.boss.def.pal.body;circ(c,w.x*T,w.y*T-T*2.6*(1-k),T*.2);c.fill();}}
+function bossPreview(cv,def){const c=cv.getContext('2d');c.clearRect(0,0,cv.width,cv.height);const g=c.createRadialGradient(150,120,10,150,120,150);g.addColorStop(0,rgba(def.col,.35));g.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=g;c.fillRect(0,0,300,200);
+ c.save();c.translate(150,192);c.scale(.6,.6);drawBossBody(c,def,GT,{armL:true,armR:true,core:'closed'});c.restore();}
+function openBoss(){const render=()=>{const st=curStats();let h='<div class="dgrid">';
+ BOSSES.forEach(B=>{const cl=S.bossClears[B.id]||0;const un=S.unlocked[B.dg];const okP=st.P>=B.reqP;
+  h+=`<div class="dcard" style="background:linear-gradient(160deg,${B.th1.wall},${B.th1.bg});border-color:${B.col}"><canvas class="bprev" data-boss="${B.id}" width="300" height="200"></canvas><h4 style="color:${B.col}">${B.name}</h4><div class="hint" style="color:#cfd8ee">${B.th}</div>
+  <div><b>สถานที่:</b> ${DMAP[B.dg].name} ${un?'✅':'🔒 ยังไม่ปลดล็อก'}</div><div><b>Power Requirement:</b> ≥${B.reqP} <b style="color:${okP?'var(--green)':'var(--red)'}">(ของคุณ ${st.P})</b> · เกราะ Tier ${B.tier}</div>
+  <div class="hint">3 Phase: Break Armor → Expose Crystal → Final Break · 180 วิ · แพ้ไม่เสียอะไร · แตะพื้นเพื่อหลบวงแดง</div>
+  <div><b>รางวัล${cl?'':' (ครั้งแรก)'}:</b> <span style="color:var(--gold)">${rwText(cl?B.rep:B.first)}</span></div><div class="hint">${cl?`✅ ชนะแล้ว ${cl} ครั้ง`:'⭐ First Clear ยังไม่ผ่าน'}</div><div class="sp"></div>
+  <button class="btn gold" data-act="startBoss" data-arg="${B.id}" ${un&&okP?'':'disabled'}>⚔ Boss Challenge</button></div>`;});
+ $('#mbody').innerHTML=h+'</div>';$('#mbody').querySelectorAll('canvas[data-boss]').forEach(cv=>bossPreview(cv,BMAP[cv.dataset.boss]));};openModal('👹 Mining Boss','',render);render();}
+
+/* ========================= SYSTEM 6 · ENDLESS MINE ========================= */
+const EMS={5:{tickets:2},10:{shards:3},20:{data:5},30:{cores:1},50:{shards:10},75:{data:10},100:{title:'Deep Miner'}};
+function endlessUnlocked(st){return !!S.cleared.rift&&(st||curStats()).P>=190;}
+function endlessDef(f){const band=f<=10?0:f<=25?1:f<=50?2:f<=100?3:4;const tiers=band===0?[2,3,4]:band===1?[3,4,5]:[4,5,6];const wts=band===0?[50,35,15]:[45,35,20];
+ const pal=[DMAP.quarry.th1,DMAP.depths.th1,DMAP.rift.th1][Math.min(2,band)];
+ return{id:'endless',name:'Endless Mine',tiers,wts,th1:Object.assign({},pal,{dark:Math.min(.62,pal.dark+band*.04)}),hz:{rock:band>=2,slow:band>=2,lava:band>=4||(band===3&&f%2===0),rails:band===0&&f%3===0},room:band>=1?'secret':null,band};}
+function endlessMods(f,rng){const pool=['heavy','rush','hidden','heat','shift'];if(f<=10)return[];const pick=()=>pool.splice(Math.floor(rng()*pool.length),1)[0];
+ if(f<=50)return[pick()];const a=[pick(),pick()];if(f>100&&!a.includes('shift'))a.push('shift');return a;}
+function endlessGoal(f){if(f<=10)return 5+Math.round((f-1)/3);if(f<=25)return 8+Math.round((f-10)*2/15);if(f<=50)return 10+Math.round((f-25)*2/25);return 12;}
+function endlessHp(f){return Math.min(3.5,1+.025*(f-1));}
+function startEndless(floor,force){floor=Math.max(1,+floor||1);const st=calcStats(S.equip);if(!force&&!endlessUnlocked(st)){toast('ยังไม่ปลดล็อก Endless Mine','err');return;}
+ const seed=Math.floor(Math.random()*1e9);const d=endlessDef(floor);const m=genDungeon(d,seed,{maxTier:st.maxTier,need:6});
+ initRun('endless',d,m,st,{seed,time:90});R.floor=floor;R.startFloor=floor;R.exp={items:{},val:0};R.pendShards=0;loadEndlessFloor();
+ enterView(`🕳 Endless Mine B${floor}`);toast(`🕳 Expedition เริ่ม! ชั้น B${floor} — ขุด ${R.goal} ก้อนเพื่อผ่านชั้น`,'ok');}
+function loadEndlessFloor(){const f=R.floor;const d=endlessDef(f);const rng=mulberry32((R.seed+f*7919)>>>0);const mods=endlessMods(f,rng);const seed=Math.floor(rng()*1e9);const goal=endlessGoal(f);
+ const m=genChecked(d,seed,{mods,hpMul:endlessHp(f),maxTier:R.st.maxTier,need:goal+3,extraWalls:f>10||f>100});
+ Object.assign(R,{d,map:m,ores:m.ores,oreAt:m.oreAt,drops:[],mods,valMul:mods.reduce((a,k)=>a*MODS[k].coin,1),time:90,goal,floorMined:0,floorDone:false,extracting:false,rock:{next:14+Math.random()*8,warn:null},timers:[],efx:[],parts:[],floats:[],lavaT:0});
+ Object.assign(R.g,{x:m.ent.x+.5,y:m.ent.y+.5,path:[],tgt:null,state:'idle',idleWait:.3,stun:0,manual:false,mineT:0});R.cam.init=false;R.walkAcc=0;R.contWalk=0;
+ $('#bExtract').classList.remove('going','pulse');updateHudButtons();}
+function endlessBreak(){R.floorMined++;if(!R.floorDone&&R.floorMined>=R.goal)floorComplete();}
+function floorComplete(){R.floorDone=true;const f=R.floor;sfx('upgrade');toast(`✅ ผ่านชั้น B${f}! ⬇ Descend เพื่อลงต่อ หรือ ⇪ Extract กลับฐาน`,'gold');
+ if(f%3===0)R.pendShards++;if(f>S.endless.best)S.endless.best=f;if(f>(S.recs.deepest||0))S.recs.deepest=f;
+ if(f===10&&R.startFloor===1&&(!S.recs.fast10||R.elapsed<S.recs.fast10))S.recs.fast10=Math.round(R.elapsed*10)/10;
+ const ms=EMS[f];if(ms&&!S.endless.ms.includes(f)){S.endless.ms.push(f);const t=give(ms);if(ms.title){if(!S.titles.includes(ms.title))S.titles.push(ms.title);S.skin='deep';}
+  setTimeout(()=>toast(`🏅 Milestone B${f}: ${t}${ms.title?` ฉายา “${ms.title}” + สกินทองคำ`:''}`,'gold'),500);}
+ ctEvent('floor',f);save();updateHudButtons();}
+function descend(){if(!R||R.type!=='endless'||!R.floorDone||R.ended)return;
+ for(const k in R.bag.items){const it=R.bag.items[k];const e=R.exp.items[k]||(R.exp.items[k]={tier:it.tier,count:0});e.count+=it.count;}R.exp.val+=R.bag.val;R.bag={items:{},w:0,res:0,val:0};
+ R.floor++;loadEndlessFloor();$('#hName').textContent=`🕳 Endless Mine B${R.floor}`;toast(`⬇ ลงสู่ชั้น B${R.floor}${R.mods.length?' · '+R.mods.map(k=>MODS[k].name).join(' + '):''} — ขุด ${R.goal} ก้อน`,'ok');sfx('upgrade');}
+function endEndless(extracted){R.ended=true;const value=bagValue();const coins=Math.floor(value*(extracted?1:.7));const sh=extracted?R.pendShards:0;
+ S.coins+=coins;S.shards+=sh;S.stats.earned+=coins;S.stats.runs++;if(R.floor>(S.recs.deepest||0)&&R.floorDone)S.recs.deepest=R.floor;recordRun(coins,value);
+ const items={};for(const src of[R.exp.items,R.bag.items])for(const k in src){const e=items[k]||(items[k]={tier:src[k].tier,count:0});e.count+=src[k].count;}
+ const res={extracted,coins,value,sh,floor:R.floor,done:R.floorDone,items,time:R.elapsed,mined:R.mined};save();sfx(extracted?'coin':'err');
+ toast(extracted?'✅ Expedition กลับถึงฐาน!':'⏰ หมดเวลา! ได้มูลค่าแร่ 70%',extracted?'ok':'err');setTimeout(()=>{exitDungeon();showEndlessResult(res);},extracted?500:900);}
+function showEndlessResult(r){const rows=Object.entries(r.items).sort((a,b)=>b[1].tier-a[1].tier).map(([n,it])=>`<tr><td><span style="color:${ORE_INFO[n].c1}">◆</span> ${n} <span class="hint">T${it.tier}</span></td><td>x${it.count}</td></tr>`).join('');
+ openModal(r.extracted?'✅ Endless Expedition — กลับฐานสำเร็จ':'⏰ Endless Expedition — หมดเวลา',`<div class="hint" style="text-align:center">ลึกสุดรอบนี้ B${r.floor}${r.done?' (ผ่าน)':''} · สถิติ B${S.endless.best}</div><div class="result-big">+🪙 ${fmt(r.coins)}</div>
+ <div style="text-align:center">${r.sh?`<b style="color:var(--gold)">+💠 ${r.sh} Evolution Shards</b>`:'<span class="hint">ไม่มี Shard (ต้องผ่านชั้นที่หาร 3 ลงตัว และ Extract)</span>'}</div>
+ <table class="t" style="margin-top:8px"><tr><th>แร่ (Bag + Expedition Storage)</th><th>จำนวน</th></tr>${rows||'<tr><td colspan=2 class="hint">ไม่มีแร่</td></tr>'}<tr><td>มูลค่ารวม</td><td>🪙 ${fmt(r.value)}</td></tr><tr><td>ตัวคูณ</td><td>${r.extracted?'100%':'70%'}</td></tr><tr><td>แร่ที่ขุดแตก</td><td>${r.mined}</td></tr><tr><td>เวลาที่ใช้</td><td>${Math.floor(r.time/60)}:${String(Math.floor(r.time%60)).padStart(2,'0')}</td></tr></table>
+ <div class="row2" style="justify-content:center;margin-top:12px"><button class="btn gold" data-act="closeModal">🏠 Return Workshop</button><button class="btn" data-act="startEndless" data-arg="1">🔁 Expedition ใหม่</button></div>`,null,true);}
+function openEndless(){const render=()=>{const st=curStats();const un=endlessUnlocked(st);const E=S.endless;
+ $('#mbody').innerHTML=`<div class="dcard" style="background:linear-gradient(160deg,#2a2142,#05070d);border-color:#c070ff;min-height:0"><h4 style="color:#c070ff">🕳 Endless Mine</h4>
+ <div class="hint" style="color:#cfd8ee">ชั้นละ 90 วิ · ขุดครบเป้าหมายแล้วเลือก ⬇ Descend หรือ ⇪ Extract · Descend: แร่ในกระเป๋าย้ายไป Expedition Storage (ยังไม่ขาย) · หมดเวลา = ได้ 70% · ไม่มีค่าเข้า · 💠+1 ทุกชั้นที่หาร 3 ลงตัว (เมื่อ Extract)</div>
+ <div><b>ปลดล็อก:</b> จบ Ancient Rift สำเร็จ ${S.cleared.rift?'✅':'❌'} · Power ≥ 190 <b style="color:${st.P>=190?'var(--green)':'var(--red)'}">(${st.P})</b></div><div><b>ชั้นลึกสุด:</b> B${E.best}</div>
+ <table class="t" style="margin:4px 0"><tr><th>ชั้น</th><th>ลักษณะ</th></tr><tr><td>B1–10</td><td>แร่ T2–4 · เหมืองพื้นฐาน · เป้าหมาย 5–8</td></tr><tr><td>B11–25</td><td>T3–5 · HP สูงขึ้น · ทางตัน · Modifier 1 แบบ</td></tr><tr><td>B26–50</td><td>T4–6 · หินถล่ม · พื้นหน่วง · ห้องลับ</td></tr><tr><td>B51–100</td><td>T4–6 · Modifier 2 แบบ · เป้าหมาย 12</td></tr><tr><td>B101+</td><td>โหมดสถิติ · ลาวา + ทางวกวน (HP ไม่เพิ่มเกิน x3.5)</td></tr></table>
+ <h4 style="margin:6px 0">🏅 Milestone (รับครั้งแรกเท่านั้น)</h4><table class="t mstab">${Object.entries(EMS).map(([f,rw])=>`<tr><td>B${f}</td><td>${rw.title?`ฉายา “${rw.title}” + สกินทองคำ`:rwText(rw)}</td><td class="${E.ms.includes(+f)?'ok':''}">${E.ms.includes(+f)?'✅':'—'}</td></tr>`).join('')}</table>
+ <button class="btn gold" data-act="startEndless" data-arg="1" ${un?'':'disabled'}>🕳 เริ่ม Expedition (B1)</button></div>`;};openModal('🕳 Endless Mine','',render,true);render();}
+function openRecords(){const r=S.recs;const tm=s=>`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
+ const rows=[['🕳 Deepest Floor',r.deepest?`B${r.deepest}`:'-'],['⏱ Fastest Floor 10 Clear',r.fast10?tm(r.fast10):'-'],['🪙 Most Coins in One Expedition',fmt(r.bestCoins||0)],['⛏ Most Ores Mined in One Run',fmt(r.mostOres||0)],['📈 Highest Mining Efficiency',r.bestEff?`${fmt(r.bestEff)} 🪙/นาที`:'-']];
+ const other=[['📖 Synergy Discovered',`${S.codex.length}/12`],['👹 Boss Clears',BOSSES.map(b=>`${b.name} x${S.bossClears[b.id]||0}`).join('<br>')],['🧬 Awakened / Ascended',`${S.inv.filter(i=>(i.evo||0)===1).length} / ${S.inv.filter(i=>(i.evo||0)>=2).length}`],['🔬 Research Levels',Object.values(S.research).reduce((a,b)=>a+b,0)+'/48'],['📋 Contract Types',S.contracts.types.length+'/8'],['🏅 Titles',S.titles.join(', ')||'-']];
+ openModal('🏆 Mining Records',`<div class="hint" style="margin-bottom:8px">Personal Records — บันทึกในเครื่องนี้ (ยังไม่มี Online Leaderboard)</div><table class="t">${rows.map(([a,b])=>`<tr><td>${a}</td><td>${b}</td></tr>`).join('')}</table>
+ <h4 style="margin:14px 0 6px">ความก้าวหน้า</h4><table class="t">${other.map(([a,b])=>`<tr><td>${a}</td><td>${b}</td></tr>`).join('')}</table>
+ ${S.titles.includes('Deep Miner')?`<div class="row2" style="margin-top:10px"><button class="btn ${S.skin==='deep'?'gold':''}" data-act="toggleSkin">✨ สกินทองคำ Deep Miner: ${S.skin==='deep'?'ON':'OFF'}</button></div>`:''}`,null,true);}
+
+/* ========================= HUD / WORKSHOP HOOKS ========================= */
+function hudV2(){const hb=$('#hBoss');
+ if(R.type==='boss'){hb.classList.remove('hidden');const B=R.boss;let rem=0;for(const o of R.ores)if(o.boss)rem+=Math.max(0,o.hp);$('#hBossF').style.width=(rem/B.total*100)+'%';$('#hBossN').textContent=`👹 ${B.def.name}`;
+  let ph=`Phase ${B.phase}/3 · ${PH_NAME[B.phase-1]}`;if(B.phase===2&&R.ores.some(o=>o.wp==='core'))ph+=B.coreOpen?` · 🔓 ${Math.ceil(B.ct)}s`:` · 🔒 ${Math.ceil(B.ct)}s`;if(B.phase===3&&B.def.id==='excavator'&&!R.ended)ph+=` · ⏳ ${Math.ceil(B.ft)}s`;$('#hBossP').textContent=ph;}
+ else if(!hb.classList.contains('hidden'))hb.classList.add('hidden');
+ if(R.type==='endless'){$('#hName').textContent=`🕳 B${R.floor} · ⛏ ${Math.min(R.floorMined,R.goal)}/${R.goal}${R.floorDone?' ✅':''}${R.mods.length?' · '+R.mods.map(k=>MODS[k].icon).join(''):''}`;$('#hValue').textContent=`🪙 ${fmt(R.bag.val)} · 📦 ${fmt(R.exp.val)}`;}
+ const bd=$('#bDescend');const show=R.type==='endless'&&R.floorDone&&!R.ended;if(bd.classList.contains('hidden')===show)bd.classList.toggle('hidden',!show);}
+function bdHtml(st){const row=(k,n,base)=>{const b=st.bd[k];const u=k==='C'?'':'%';const tot=k==='C'?st.C:fmtStat(k,st[k]);const sg=v=>(v>=0?'+':'')+(Math.round(v*10)/10);
+  return `<div class="bdrow">${n}: Base ${base}${u} · Parts ${sg(b[0])}${u}${b[1]?` · Research +${b[1]}${u}`:''}${b[2]?` · Synergy +${b[2]}${u}`:''} = <b>${tot}</b></div>`;};
+ return `<div class="bd">${row('S','⚡ Speed',100)}${row('M','🦿 Move',100)}${row('C','🎒 Capacity',20)}</div>`;}
+function v2Workshop(){$('#rShard').textContent=fmt(S.shards);$('#rCore').textContent=fmt(S.cores);$('#rData').textContent=fmt(S.data);
+ const cb=$('#ctBadge');if(cb){const n=S.contracts.active.filter(a=>a.done).length;cb.classList.toggle('hidden',!n);cb.textContent=n;}const cx=$('#cdxBadge');if(cx)cx.textContent=`${S.codex.length}/12`;}
+
+/* ========================= ACHIEVEMENTS / DEBUG / ACTIONS ========================= */
+const V2ACH=['a_syn1','a_syn6','a_syn12','a_awk','a_asc','a_b1','a_b2','a_b3','a_e10','a_e50','a_ctm','a_res'];
+ACH.push({id:'a_syn1',text:'ค้นพบ Secret Synergy ครั้งแรก',ok:s=>s.codex.length>=1,rw:1},{id:'a_syn6',text:'ค้นพบ Synergy 6 สูตร',ok:s=>s.codex.length>=6,rw:3},{id:'a_syn12',text:'ค้นพบ Synergy ครบ 12 สูตร',ok:s=>s.codex.length>=12,rw:8},
+ {id:'a_awk',text:'วิวัฒนาการชิ้นส่วนเป็น Awakened',ok:s=>s.inv.some(i=>(i.evo||0)>=1),rw:1},{id:'a_asc',text:'วิวัฒนาการชิ้นส่วนเป็น Ascended',ok:s=>s.inv.some(i=>(i.evo||0)>=2),rw:3},
+ {id:'a_b1',text:'ปราบ Ancient Ore Guardian',ok:s=>!!s.bossClears.guardian,rw:2},{id:'a_b2',text:'ปราบ Magma Colossus',ok:s=>!!s.bossClears.colossus,rw:3},{id:'a_b3',text:'ปราบ Void Excavator',ok:s=>!!s.bossClears.excavator,rw:5},
+ {id:'a_e10',text:'Endless Mine ผ่านชั้น 10',ok:s=>s.endless.best>=10,rw:2},{id:'a_e50',text:'Endless Mine ผ่านชั้น 50',ok:s=>s.endless.best>=50,rw:5},
+ {id:'a_ctm',text:'Master Contracts (5 แบบ)',ok:s=>s.contracts.master,rw:2},{id:'a_res',text:'วิจัย Workshop ครบ 12 Node (Lv.1+)',ok:s=>RES_TREE.every(t=>t.nodes.every(n=>(s.research[n.id]||0)>=1)),rw:3});
+function dbgV2Html(){return `<h4 style="margin:12px 0 6px">🆕 V2 Systems</h4><div class="row2" style="margin-bottom:8px">
+ <button class="btn" data-act="dbg" data-arg="v2syn">📖 Unlock All Synergies</button><button class="btn" data-act="dbg" data-arg="v2sh">+20 💠 Shards</button><button class="btn" data-act="dbg" data-arg="v2co">+3 🔶 Cores</button><button class="btn" data-act="dbg" data-arg="v2da">+30 📘 Data</button>
+ <button class="btn" data-act="dbg" data-arg="v2evo">🧬 Max Evolution (ชิ้นที่ใส่อยู่)</button><button class="btn" data-act="dbg" data-arg="v2res">🔬 Unlock All Research</button></div>
+ <div class="row2" style="margin-bottom:8px"><span class="hint">Force Modifier (กดเพื่อวน):</span>${DUNGEONS.map(d=>`<button class="btn sm" data-act="dbg" data-arg="v2mod_${d.id}">${d.name}: ${MODS[dungeonMod(d.id)].name}</button>`).join('')}<button class="btn sm" data-act="dbg" data-arg="v2modclr">ล้าง Override</button></div>
+ <div class="row2" style="margin-bottom:8px"><span class="hint">Spawn Boss:</span>${BOSSES.map(b=>`<button class="btn sm red" data-act="dbg" data-arg="v2boss_${b.id}">${b.name}</button>`).join('')}</div>
+ <div class="row2" style="margin-bottom:8px"><span class="hint">Set Endless Floor:</span>${[1,9,10,25,50,100].map(f=>`<button class="btn sm" data-act="dbg" data-arg="v2end_${f}">B${f}</button>`).join('')}</div>
+ <div class="row2"><button class="btn red" data-act="dbg" data-arg="v2reset">♻ Reset New Systems Only</button></div>`;}
+function resetV2(){const b=newState();for(const k of['shards','cores','data','codex','research','contracts','bossClears','endless','recs','dbgMod','titles','skin'])S[k]=b[k];S.inv.forEach(i=>{delete i.evo;delete i.br;});S.ach=S.ach.filter(id=>!V2ACH.includes(id));}
+function dbgV2(k){if(!k.startsWith('v2'))return false;
+ if(k==='v2syn'){SYN.forEach(y=>{if(!S.codex.includes(y.id))S.codex.push(y.id);});toast('ปลดล็อก Synergy ทั้งหมดใน Codex','ok');}
+ else if(k==='v2sh')S.shards+=20;else if(k==='v2co')S.cores+=3;else if(k==='v2da')S.data+=30;
+ else if(k==='v2evo'){for(const sl of SLOTS){const i=S.equip[sl]&&invGet(S.equip[sl]);if(i){i.lvl=10;i.evo=2;i.br=i.br||'A';}}S.stats.maxLvl=10;toast('ชิ้นที่ใส่อยู่ → Lv.10 Ascended','ok');}
+ else if(k==='v2res'){RES_TREE.forEach(t=>t.nodes.forEach(n=>S.research[n.id]=4));toast('วิจัยครบทุก Node','ok');}
+ else if(k.startsWith('v2mod_')){const id=k.slice(6);const cur=dungeonMod(id);S.dbgMod[id]=MOD_IDS[(MOD_IDS.indexOf(cur)+1)%MOD_IDS.length];toast(`${DMAP[id].name}: ${MODS[S.dbgMod[id]].name}`,'ok');}
+ else if(k==='v2modclr'){S.dbgMod={};toast('ล้าง Modifier Override','ok');}
+ else if(k.startsWith('v2boss_')){closeModal();startBoss(k.slice(7),true);return true;}
+ else if(k.startsWith('v2end_')){closeModal();startEndless(+k.slice(6),true);return true;}
+ else if(k==='v2reset'){confirmBox('รีเซ็ตเฉพาะข้อมูลระบบใหม่ (Codex, Evolution, Shards/Cores/Data, Research, Contracts, Boss, Endless, Records)?<br><span class="hint">Coins, Tickets, Scrap, ชิ้นส่วน, Presets และเควสต์เดิมจะยังอยู่</span>',()=>{resetV2();afterChange();toast('รีเซ็ตเฉพาะระบบใหม่แล้ว','ok');},'♻ Reset V2','Reset New Systems');return true;}
+ afterChange();return true;}
+Object.assign(ACT,{openCodex,openContracts,openResearch,openBoss,openEndless,openRecords,openEvolution,
+ evolve:a=>doEvolve(a),evoPick:a=>{const[u,b]=a.split('|');evoSel[u]=b;if(modalRefresh)modalRefresh();},rebranch:a=>{const[u,b]=a.split('|');doRebranch(u,b);},
+ codexEquip:a=>codexEquip(a),research:a=>doResearch(a),ctAccept:a=>ctAccept(a),ctClaim:a=>ctClaim(+a),
+ ctDrop:a=>{const x=S.contracts.active[+a];if(!x)return;confirmBox(`ยกเลิกงาน <b>${CTM[x.id].name}</b>? ความคืบหน้าจะหายไป`,()=>{S.contracts.active.splice(+a,1);afterChange();},'ยกเลิกงาน');},
+ startBoss:a=>startBoss(a),startEndless:a=>startEndless(+a||1),descend:()=>descend(),toggleSkin:()=>{S.skin=S.skin==='deep'?'':'deep';saveSoon();openRecords();renderWorkshop();}});
+{const _ext=ACT.extract;ACT.extract=(...x)=>{if(R&&R.type==='boss'&&!R.ended){confirmBox('ถอยออกจาก Boss Challenge?<br><span class="hint">ไม่เสียชิ้นส่วนหรือเงิน แต่ไม่ได้รับรางวัลบอส</span>',()=>{if(R&&!R.ended)endBoss(false,'retreat');},'🏳 ถอย','Retreat');return;}_ext(...x);};}
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(R&&!R.ended&&(e.key==='d'||e.key==='D'))descend();});
+
 /* ========================= LOOP ========================= */
 let GT=0,lastT=performance.now();
 function frame(now){const dt=Math.min(.05,(now-lastT)/1000);lastT=now;GT+=dt;
  try{if(R){if(!R.ended){const n=R.speed||1;for(let k=0;k<n;k++)runTick(dt);}if(R){renderDungeon();updateHud();}}else renderWorkshopCanvas(dt);
   if(summonAnim&&!$('#modal').classList.contains('hidden'))renderSummon(dt);}catch(err){console.error(err);}
  requestAnimationFrame(frame);}
-load();curStats();renderWorkshop();resizeWorkshop();requestAnimationFrame(frame);
+load();curStats();checkSynergy();renderWorkshop();resizeWorkshop();requestAnimationFrame(frame);
 setInterval(()=>{if(!$('#modal').classList.contains('hidden'))return;renderQuests();},4000);
-window.addEventListener('beforeunload',save);
+window.addEventListener('beforeunload',()=>{if(S)save();});
+window.__V2={startBoss,startEndless,descend,endBoss,doEvolve,doRebranch,doResearch,ctAccept,ctClaim,ctEvent,dungeonMod,genDungeon,genChecked,validMap,codexEquip,checkSynergy,MODS,SYN,BOSSES,RES_TREE,CT,dayKey,ctOffers,get R(){return R},get S(){return S}};
 // test hooks
 window.__G={reset(){localStorage.removeItem(SAVE_KEY);S=newState();save();if(R)exitDungeon();closeModal();renderWorkshop();},get S(){return S},get R(){return R},calcStats,curStats,doEquip,doUnequip,doUpgrade,doDismantle,doCraft,doSummon,summonOne,startRun,runTick,endRun,useSkill,setTarget,chooseTarget,save,load,PART,TIERS,addPart:(pid)=>addPart(S,pid),upCost,genDungeon,DMAP,loadPreset,savePreset,ACT};
 </script>
