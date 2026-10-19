@@ -676,7 +676,7 @@ function newState(){
   pity:{total:0,sinceRare:0,sinceLeg:0,sinceMyth:0,first5Rare:false},
   stats:{mined:0,summons:0,upgrades:0,extracts:0,earned:0,dismantles:0,crafts:0,runs:0,tier:[0,0,0,0,0,0,0],bestRar:0,maxLvl:1,maxP:0,hidden:0,bossWins:0,evolves:0},seen:[],cos:{eye:'',aura:false,name:'',bname:''},photo:{bg:'workshop'},
   quests:{active:[],ptr:0,cycle:0,done:[]},ach:[],settings:{sound:true,mode:'nearest',debug:false,runTime:150,gfx:{q:2,part:2,glow:true,shadows:true,shake:true,rm:false,music:true,vol:.7,mvol:.4,ui:1,skip:false,ind:true}},
-  shards:0,cores:0,data:0,codex:[],research:{},contracts:{active:[],claimed:{},types:[],master:false},bossClears:{},endless:{best:0,ms:[]},recs:{deepest:0,fast10:0,bestCoins:0,mostOres:0,bestEff:0},dbgMod:{},titles:[],skin:'',...v4Defaults()};
+  shards:0,cores:0,data:0,codex:[],research:{},contracts:{active:[],claimed:{},types:[],master:false},bossClears:{},endless:{best:0,ms:[]},recs:{deepest:0,fast10:0,bestCoins:0,mostOres:0,bestEff:0},dbgMod:{},titles:[],skin:'',...v4Defaults(),...v5Defaults(),migrationVersion:5};
  s.equip.head=addPart(s,'scrap_head');s.equip.core=addPart(s,'scrap_core');
  s.equip.armL=addPart(s,'scrap_arm');s.equip.armR=addPart(s,'scrap_arm');
  s.equip.legs=addPart(s,'scrap_legs');s.equip.back=addPart(s,'scrap_back');
@@ -686,8 +686,8 @@ function newState(){
 function load(){
  try{const raw=localStorage.getItem(SAVE_KEY);if(raw){const d=JSON.parse(raw);const base=newState();
    const m=(a,b)=>{for(const k in a){if(b[k]===undefined)b[k]=a[k];else if(a[k]&&typeof a[k]==='object'&&!Array.isArray(a[k]))m(a[k],b[k]);}return b;};
-   S=m(base,d);S.v=3;S.inv=S.inv.filter(i=>PART[i.pid]);S.inv.forEach(i=>{if(i.quality==null)i.quality=1;if(!S.seen.includes(i.pid))S.seen.push(i.pid);});for(const sl of SLOTS)if(S.equip[sl]&&!invGet(S.equip[sl]))S.equip[sl]=null;v4Migrate(S);return;}}catch(e){console.warn('load failed',e);}
- S=newState();v4Migrate(S);
+   S=m(base,d);S.v=3;S.inv=S.inv.filter(i=>PART[i.pid]);S.inv.forEach(i=>{if(i.quality==null)i.quality=1;if(!S.seen.includes(i.pid))S.seen.push(i.pid);});for(const sl of SLOTS)if(S.equip[sl]&&!invGet(S.equip[sl]))S.equip[sl]=null;v4Migrate(S);v5Migrate(S,raw,d);v5EndlessRetro();return;}}catch(e){console.warn('load failed',e);}
+ S=newState();v4Migrate(S);v5Migrate(S);v5EndlessRetro();
 }
 let saveT=0;/* save() is defined in V3 CORE (adds auto-save indicator) */
 function saveSoon(){clearTimeout(saveT);saveT=setTimeout(save,250);}
@@ -1048,7 +1048,7 @@ function debugAct(k){if(dbgV2(k))return;
 const W=22,H=14;const T_FLOOR=0,T_WALL=1,T_RUBBLE=2,T_SLOW=3,T_LAVA=4,T_SECRET=5;
 let R=null;
 function genDungeon(d,seed,opt){
- opt=opt||{};const mods=opt.mods||[];const has=k=>mods.includes(k);
+ opt=opt||{};const mods=opt.mods||[];const has=k=>mods.includes(k)||mods.some(m=>(MOD_ALIAS[m]||[]).includes(k));
  const rng=mulberry32(seed);const ri=(a,b)=>a+Math.floor(rng()*(b-a+1));
  const g=new Uint8Array(W*H),deco=new Uint8Array(W*H),room=new Uint8Array(W*H);const I=(x,y)=>y*W+x;
  for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(x===0||y===0||x===W-1||y===H-1)g[I(x,y)]=T_WALL;
@@ -1069,7 +1069,7 @@ function genDungeon(d,seed,opt){
  while(q.length){const i=q.shift();const x=i%W,y=(i/W)|0;for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){const j=I(x+dx,y+dy);if(seen[j])continue;const tt=g[j];if(tt===T_WALL||tt===T_RUBBLE)continue;seen[j]=1;q.push(j);}}
  for(let i=0;i<W*H;i++)if(!seen[i]&&(g[i]===T_FLOOR||g[i]===T_SLOW||g[i]===T_LAVA)&&!room[i])g[i]=T_WALL;
  const ores=[];const oreAt=new Array(W*H).fill(null);
- const wts=d.wts.slice();if(has('heat'))wts[wts.length-1]*=1.8;const hpMul=(opt.hpMul||1)*(has('heavy')?1.4:1);
+ const wts=d.wts.slice();if(has('heat'))wts[wts.length-1]*=1.8;if(mods.includes('rare'))wts[wts.length-1]*=2.2;const hpMul=(opt.hpMul||1)*(has('heavy')?1.4:1);
  const pickTier=()=>{let tot=wts.reduce((a,b)=>a+b,0),x=rng()*tot;for(let k=0;k<d.tiers.length;k++){x-=wts[k];if(x<0)return d.tiers[k];}return d.tiers[0];};
  const nearLava=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const j=I(x+dx,y+dy);if(g[j]===T_LAVA)return true;}return false;};
  const mk=(x,y,tier,extra={})=>{const T=TIERS[tier];const hp=Math.round(T.hp*hpMul);const o=Object.assign({id:ores.length,x,y,tier,hp,maxHp:hp,name:T.ores[Math.floor(rng()*2)][0],hidden:false,hot:nearLava(x,y),seed:rng(),hitT:0},extra);ores.push(o);oreAt[I(x,y)]=o;return o;};
@@ -1230,7 +1230,7 @@ function stepGolem(dt){
   if(o.hidden||o.closed){g.state='idle';g.tgt=null;g.idleWait=.2;return;}
   g.face=(o.x+.5)>=g.x?1:-1;
   if(g.settle>0){g.settle-=dt;return;}
-  let Sx=R.st.S+(R.over>0?(R.overAmt||30):0)+(R.turbo>0?25:0);Sx=clamp(Sx,30,250);const interval=clamp(1.2/(Sx/100),.35,2.5);
+  let Sx=R.st.S+(R.over>0?(R.overAmt||30):0)+(R.turbo>0?25:0)+v5SpdAdd();Sx=clamp(Sx,30,250);const interval=clamp(1.2/(Sx/100),.35,2.5);
   g.mineT+=dt;g.minePh=clamp(g.mineT/interval,0,1);
   if(g.mineT>=interval){g.mineT=0;g.hits++;g.mineArm=R.skills[0]&&R.skills[1]?(g.hits%2?-1:1):R.skills[0]?-1:R.skills[1]?1:(g.hits%2?-1:1);
    let m=1;if(R.fx.has('coppergear_head')){if(R.combo.id===o.id)R.combo.n=Math.min(5,R.combo.n+1);else{R.combo.id=o.id;R.combo.n=0;}m*=1+.05*R.combo.n;}
@@ -1279,7 +1279,7 @@ function endRun(extracted){
  if(R.type==='endless'){endEndless(extracted);return;}
  R.ended=true;const value=bagValue();const mult=extracted?1:.7;const coins=Math.floor(value*mult);
  const success=extracted&&R.mined>=5;let tix=0,first=false;if(success){tix=1;if(!S.cleared[R.d.id]){S.cleared[R.d.id]=true;tix+=2;first=true;}}
- const bf=miningFragments(R.mined,R.bag.items,success);S.battleFragments+=bf;const pend=extracted?createPending('dungeon',R.bag.items,exValMul(R.bag.items,value),{d:R.d.id,title:R.d.name,tix,first,mined:R.mined,time:Math.round(R.elapsed),bf}):null;const paid=extracted?0:coins;S.coins+=paid;S.tickets+=tix;S.stats.earned+=paid;S.stats.runs++;if(extracted&&R.collectedCount>0)S.stats.extracts++;S.settings.mode=R.mode;
+ const bf=miningFragments(R.mined,R.bag.items,success);S.battleFragments+=bf;const pend=extracted?createPending('dungeon',R.bag.items,exValMul(R.bag.items,value),{d:R.d.id,title:R.d.name,tix,first,mined:R.mined,time:Math.round(R.elapsed),bf}):null;const paid=extracted?0:coins;S.coins+=paid;S.armorBlueprints.frag+=tix;S.stats.earned+=paid;S.stats.runs++;if(extracted&&R.collectedCount>0)S.stats.extracts++;S.settings.mode=R.mode;
  ctEvent('runEnd',{extracted,success,fill:R.bag.w/R.st.C});recordRun(coins,value);
  const res={pend:pend?pend.id:null,bf,d:R.d,items:JSON.parse(JSON.stringify(R.bag.items)),value,mult,coins,tix,first,mined:R.mined,time:R.elapsed,extracted,success,melted:R.melted,valMul:R.valMul,mod:R.modId||'normal'};
  save();sfx(extracted?'coin':'err');toast(extracted?'✅ กลับถึงฐานพร้อมแร่!':'⏰ หมดเวลา! ได้มูลค่าแร่ 70%',extracted?'ok':'err');
@@ -1290,7 +1290,7 @@ function showResult(r){if(r.pend&&S.pendingExtraction.some(p=>p.id===r.pend)){op
  const rows=Object.entries(r.items).sort((a,b)=>b[1].tier-a[1].tier).map(([n,it])=>`<tr><td><span style="color:${ORE_INFO[n].c1}">◆</span> ${n} <span class="hint">T${it.tier}</span></td><td>x${it.count}</td><td>🪙 ${fmt(TIERS[it.tier].price*it.count*vm)}</td></tr>`).join('');
  const M=MODS[r.mod]||MODS.normal;
  openModal(r.extracted?'✅ ผลการขุด — กลับฐานสำเร็จ':'⏰ ผลการขุด — หมดเวลา',`<div class="hint" style="text-align:center">${r.d.name}${r.mod!=='normal'?` · <span style="color:${M.col}">${M.icon} ${M.name}</span>`:''}</div><div class="result-big">+🪙 ${fmt(r.coins)}</div>
- <div style="text-align:center;margin-bottom:10px">${r.tix?`<b style="color:var(--gold)">+🎫 ${r.tix} Part Ticket${r.tix>1?'s':''}</b>${r.first?' <span class="tag">First Clear +2</span>':''}`:`<span class="hint">${r.extracted?'ขุดไม่ถึง 5 ก้อน — ไม่ได้ตั๋ว':'ไม่ได้ตั๋ว (ต้อง Extract ก่อนหมดเวลา)'}</span>`}</div>
+ <div style="text-align:center;margin-bottom:10px">${r.tix?`<b style="color:var(--gold)">+📄 ${r.tix} Blueprint Fragment</b>${r.first?' <span class="tag">First Clear +2</span>':''}`:`<span class="hint">${r.extracted?'ขุดไม่ถึง 5 ก้อน — ไม่ได้ตั๋ว':'ไม่ได้ตั๋ว (ต้อง Extract ก่อนหมดเวลา)'}</span>`}</div>
  <table class="t"><tr><th>แร่ที่เก็บมา</th><th>จำนวน</th><th>มูลค่า</th></tr>${rows||'<tr><td colspan=3 class="hint">ไม่มีแร่</td></tr>'}
  <tr><td>มูลค่ารวม${vm!==1?` (รวม Modifier x${vm.toFixed(2)})`:''}</td><td></td><td>🪙 ${fmt(r.value)}</td></tr><tr><td>ตัวคูณ</td><td></td><td>${r.extracted?'100% (Extract)':'70% (หมดเวลา)'}</td></tr>
  <tr><td>ก้อนแร่ที่ขุดแตก</td><td></td><td>${r.mined}</td></tr><tr><td>เวลาที่ใช้</td><td></td><td>${Math.floor(r.time/60)}:${String(Math.floor(r.time%60)).padStart(2,'0')}</td></tr>${r.melted?`<tr><td>แร่ละลายจากลาวา</td><td></td><td class="neg">${r.melted}</td></tr>`:''}</table>
@@ -1761,7 +1761,7 @@ function descend(){if(!R||R.type!=='endless'||!R.floorDone||R.ended)return;
  for(const k in R.bag.items){const it=R.bag.items[k];const e=R.exp.items[k]||(R.exp.items[k]={tier:it.tier,count:0});e.count+=it.count;}R.exp.val+=R.bag.val;R.bag={items:{},w:0,res:0,val:0};
  R.floor++;loadEndlessFloor();$('#hName').textContent=`🕳 Endless Mine B${R.floor}`;toast(`⬇ ลงสู่ชั้น B${R.floor}${R.mods.length?' · '+R.mods.map(k=>MODS[k].name).join(' + '):''} — ขุด ${R.goal} ก้อน`,'ok');sfx('upgrade');}
 function endEndless(extracted){R.ended=true;const value=bagValue();const coins=Math.floor(value*(extracted?1:.7));const sh=extracted?R.pendShards:0;
- const _it={};for(const src of[R.exp.items,R.bag.items])for(const k in src){_it[k]=(_it[k]||0)+src[k].count;}const bf=extracted?Math.min(6,Math.floor(R.floor/5)+(R.floorDone?1:0)):0;S.battleFragments+=bf;const pend=extracted?createPending('endless',_it,exValMul(_it,value),{title:'Endless Mine B'+R.floor,mined:R.mined,time:Math.round(R.elapsed),bf,shards:sh}):null;const paid=extracted?0:coins;S.coins+=paid;S.shards+=sh;S.stats.earned+=paid;S.stats.runs++;if(R.floor>(S.recs.deepest||0)&&R.floorDone)S.recs.deepest=R.floor;recordRun(coins,value);
+ const _it={};for(const src of[R.exp.items,R.bag.items])for(const k in src){_it[k]=(_it[k]||0)+src[k].count;}const bf=extracted?Math.min(6,Math.floor(R.floor/5)+(R.floorDone?1:0)):0;S.battleFragments+=bf;const pend=extracted?createPending('endless',_it,exValMul(_it,value),{title:R.deep?'Deep Expedition · '+DMAP[R.deep.did].name+' ('+(R.deep.cleared||0)+'/'+DEEP_FLOORS+')':'Endless Mine B'+R.floor,mined:R.mined,time:Math.round(R.elapsed),bf,shards:sh}):null;const paid=extracted?0:coins;S.coins+=paid;S.shards+=sh;S.stats.earned+=paid;S.stats.runs++;if(R.floor>(S.recs.deepest||0)&&R.floorDone)S.recs.deepest=R.floor;recordRun(coins,value);
  const items={};for(const src of[R.exp.items,R.bag.items])for(const k in src){const e=items[k]||(items[k]={tier:src[k].tier,count:0});e.count+=src[k].count;}
  const res={pend:pend?pend.id:null,extracted,coins,value,sh,floor:R.floor,done:R.floorDone,items,time:R.elapsed,mined:R.mined};save();sfx(extracted?'coin':'err');
  toast(extracted?'✅ Expedition กลับถึงฐาน!':'⏰ หมดเวลา! ได้มูลค่าแร่ 70%',extracted?'ok':'err');setTimeout(()=>{exitDungeon();showEndlessResult(res);},extracted?500:900);}
@@ -1897,7 +1897,7 @@ function calcStats(eq){
   if(inst.trait==='ore')tr.ore[inst.tt]=(tr.ore[inst.tt]||0)+inst.tv;else if(inst.trait==='collector')tr.col+=inst.tv;else if(inst.trait==='sense')tr.sense+=inst.tv;else if(inst.trait==='guard')tr.guard+=inst.tv;}
  tr.guard=Math.min(60,tr.guard);
  if(br.core==='B')Sp+=6;if(br.legs==='A')M+=10;if(br.back==='A')C+=25;
- const pS=Sp-100,pM=M-100,pC=C-20;const rb=researchBonus();Sp+=rb.S;M+=rb.M;C+=rb.C;
+ {const _a=v5MiningRaw(look);P+=_a.P;Sp+=_a.S;M+=_a.M;C+=_a.C;}const pS=Sp-100,pM=M-100,pC=C-20;const rb=researchBonus();Sp+=rb.S;M+=rb.M;C+=rb.C;
  const syn=synOf(look);const yM=syn.has('storm')?15:0;M+=yM;
  const o={raw:{P,S:Sp,M,C},fx,look,parts,evo,br,qual,syn,tr,cap:{S:[30,250],M:[40,200],C:[10,300]},bd:{S:[pS,rb.S,0],M:[pM,rb.M,yM],C:[pC,rb.C,0]}};
  o.rawP=Math.max(10,P);o.P=Math.max(10,Math.round(P));
@@ -1910,7 +1910,7 @@ function calcStats(eq){
    if(b==='A'){if(sk.mult)sk.mult*=1.15;if(sk.type==='buff')sk.amount=Math.round(sk.amount*1.1);if(sk.type==='dash')sk.tiles=Math.round(sk.tiles*1.1);if(sk.type==='pull')sk.radius=Math.round(sk.radius*1.1*10)/10;}
    if(pid==='frostbound_arm'&&syn.has('frozen'))sk.radius+=1;if(pid==='void_arm'&&syn.has('dimension'))sk.len+=1;
    sk.cdEff=Math.round(cd*10)/10;sk.br=b;return sk;});
- return o;}
+ v5MiningPost(o);return o;}
 /* trait hooks used by dungeon runtime (override V2 helpers) */
 function hidDet(){return rl('C1')+(R.st.br.head==='A'?2:0)+(R.st.tr?R.st.tr.sense:0);}
 function terr(f){if(R.st.br.legs==='B')f=1-(1-f)*.6;const gd=R.st.tr?R.st.tr.guard:0;return 1-(1-f)*(1-gd/100);}
@@ -2594,7 +2594,7 @@ function renderDungeon(){
  c.textAlign='center';for(const f of R.floats){c.globalAlpha=clamp(f.life*1.5,0,1);c.font=`800 ${Math.max(11,T*.3)*f.sc}px Kanit,sans-serif`;c.lineWidth=3;c.strokeStyle='rgba(0,0,0,.7)';c.strokeText(f.txt,f.x*T,f.y*T);c.fillStyle=f.col;c.fillText(f.txt,f.x*T,f.y*T);}c.globalAlpha=1;
  drawV2Overlay(c,T,t,gx,gy);
  c.restore();
- const lr=(4.8+(R.fx.has('scrap_head')?2.5:0)+.5*rl('C2'))*T;const sxg=R.cam.x+gx,syg=R.cam.y+gy-T*.4;const gr=c.createRadialGradient(sxg,syg,lr*.45,sxg,syg,lr*1.25);gr.addColorStop(0,'rgba(0,0,0,0)');gr.addColorStop(1,`rgba(2,4,10,${th.dark})`);c.fillStyle=gr;c.fillRect(0,0,DV.w,DV.h);
+ const lr=(4.8+(R.fx.has('scrap_head')?2.5:0)+.5*rl('C2'))*T*v5Light();const sxg=R.cam.x+gx,syg=R.cam.y+gy-T*.4;const gr=c.createRadialGradient(sxg,syg,lr*.45,sxg,syg,lr*1.25);gr.addColorStop(0,'rgba(0,0,0,0)');gr.addColorStop(1,`rgba(2,4,10,${th.dark})`);c.fillStyle=gr;c.fillRect(0,0,DV.w,DV.h);
  if(GLOW_ON&&effQ()>=1){c.save();c.globalCompositeOperation='lighter';for(const p of R.map.props){if(!LIGHTP[p.k])continue;const px=R.cam.x+(p.x+.5)*T,py=R.cam.y+(p.y+(p.wall?-.1:.5))*T;if(px<-T*2||px>DV.w+T*2||py<-T*2||py>DV.h+T*2)continue;const fl=p.k==='torch'||p.k.startsWith('brazier')?.8+.2*Math.sin(t*14+p.s*20):1;glow(c,px,py,T*1.6*fl,p.k==='torch'||p.k.startsWith('brazier')?'#ff9a40':p.k==='lavacrack'||p.k==='magmaRock'?'#ff6a1a':th.light,.13);}c.restore();}
  if(R.fx.has('scrap_head')){glow(c,sxg,syg-T*.5,T*1.5,'#ffd36b',.12);}
  if(R.g.stun>0){c.fillStyle='rgba(255,180,70,.08)';c.fillRect(0,0,DV.w,DV.h);}
@@ -2638,7 +2638,7 @@ function bdHtml(st){const row=(k,n,base)=>{const b=st.bd[k];const u=k==='C'?'':'
   return `<div class="bdrow">${n}: Base ${base}${u} · Parts ${sg(b[0])}${u}${b[1]?` · Research +${b[1]}${u}`:''}${b[2]?` · Synergy +${b[2]}${u}`:''} → Raw ${Math.round(raw*10)/10}${u} · Effective <b>${k==='C'?eff:fmtStat(k,eff)}</b> <span class="hint">(Cap ${cap[0]}–${cap[1]}${u})</span>${over?` <b class="neg">Overflow ${sg(over)}${u}</b>`:''}</div>`;};
  const tg=tierGuide(st);
  return `<div class="bd">${row('S','⚡ Speed',100)}${row('M','🦿 Move',100)}${row('C','🎒 Capacity',20)}</div>
- <div class="tguide">${tg.next?`<b>🏔 Tier ${tg.next}</b> ต้องการ P ${TIERS[tg.next].req} — ขาดอีก <b class="neg">${tg.need}</b>${tg.parts.length?`<div class="hint">ชิ้นในกระเป๋าที่ช่วยได้: ${tg.parts.map(x=>`${PART[x.i.pid].name} (+${Math.round(x.d)})`).join(', ')}</div>`:'<div class="hint">ยังไม่มีชิ้นในกระเป๋าที่เพิ่ม Power — ลอง Upgrade / Evolution / Quality หรือ Summon</div>'}${tg.sug.maxTier>=tg.next?`<div class="hint pos">💡 Power Build จากของที่มีปลดล็อก Tier ${tg.next} ได้ (P ${tg.sug.P})</div>`:''}`:'<b>🏔 ขุดได้ทุก Tier แล้ว!</b>'}</div>
+ <div class="tguide">${tg.next?`<b>🏔 Tier ${tg.next}</b> ต้องการ P ${TIERS[tg.next].req} — ขาดอีก <b class="neg">${tg.need}</b>${tg.parts.length?`<div class="hint">ชิ้นในกระเป๋าที่ช่วยได้: ${tg.parts.map(x=>`${PART[x.i.pid].name} (+${Math.round(x.d)})`).join(', ')}</div>`:'<div class="hint">ยังไม่มีชิ้นในกระเป๋าที่เพิ่ม Power — ลอง Upgrade / Evolution / Quality / Mastery หรือคราฟต์ที่ Forge</div>'}${tg.sug.maxTier>=tg.next?`<div class="hint pos">💡 Power Build จากของที่มีปลดล็อก Tier ${tg.next} ได้ (P ${tg.sug.P})</div>`:''}`:'<b>🏔 ขุดได้ทุก Tier แล้ว!</b>'}</div>
  <div class="row2" style="margin-top:6px"><span class="hint">📚 Collection ${S.seen.length}/60 แบบ · กระเป๋า ${S.inv.length} ชิ้น</span><button class="btn sm" data-act="openSuggest">💡 Build Suggestions</button></div>`;}
 function openSlot(sl){openGarage(sl);}
 /* ---------- PART 19 · BALANCE LAB (deterministic same-map simulation) ---------- */
@@ -2927,7 +2927,7 @@ const CBASE={hp:500,atk:20,def:10,as:0,cc:5,cd:150,ms:0,cdr:0,stg:10,res:0};
 function calcCombat(eq){eq=eq||S.combatEquip;const raw=Object.assign({},CBASE);const look={},enh={},qual={},pieces={},sets={};
  for(const sl of CSLOTS){const inst=eq[sl]?cinvGet(eq[sl]):null;if(!inst){look[sl]=null;enh[sl]=0;qual[sl]=1;continue;}const a=ARMOR[inst.aid];look[sl]=inst.aid;enh[sl]=inst.enh||0;qual[sl]=inst.quality==null?1:inst.quality;pieces[sl]=inst;
   const st=armorStats(inst);for(const k in st)raw[k]=(raw[k]||0)+st[k];sets[a.fam]=(sets[a.fam]||0)+1;}
- const setFx=new Set();for(const f in sets){if(sets[f]>=2)setFx.add(f+'2');if(sets[f]>=4)setFx.add(f+'4');if(sets[f]>=6)setFx.add(f+'6');}
+ v5CombatRaw(raw,pieces);const setFx=new Set();for(const f in sets){if(sets[f]>=2)setFx.add(f+'2');if(sets[f]>=4)setFx.add(f+'4');if(sets[f]>=6)setFx.add(f+'6');}
  /* set stat bonuses */
  if(setFx.has('scrap2')){raw.def*=1.06;raw.hp*=1.06;}if(setFx.has('stoneguard2'))raw.def*=1.08;if(setFx.has('coppergear2'))raw.as+=6;if(setFx.has('zephyr2'))raw.ms+=8;if(setFx.has('drilltech2'))raw.stg+=10;
  if(setFx.has('titanstone2'))raw.hp*=1.08;if(setFx.has('prism2'))raw.cd+=15;if(setFx.has('frostbound2'))raw.res+=10;if(setFx.has('thunder2'))raw.as+=6;
@@ -2944,7 +2944,7 @@ function calcCombat(eq){eq=eq||S.combatEquip;const raw=Object.assign({},CBASE);c
   atkType:rf?ASET[rf].atkType:'fist',handL:famOf('gL'),handR:famOf('gR')};
  o.at=ATK_TYPE[o.atkType];o.dr=Math.min(.7,o.dr);
  o.cp=Math.round(o.hp*.12+o.atk*3+o.def*2+o.as*2.2+o.cc*2.5+(o.cd-150)*.8+o.ms*1.5+o.cdr*2.5+o.stg*1.5+o.res*1.2+setFx.size*12);
- return o;}
+ v5CombatPost(o);return o;}
 function setSummary(st){return FAM_ORDER.filter(f=>st.sets[f]).map(f=>({fam:f,n:st.sets[f],tiers:[2,4,6].map((k,i)=>({k,on:st.sets[f]>=k,txt:SETB[f][i]}))}));}
 /* ---------- PART 6 · ORE STORAGE & PENDING EXTRACTION ---------- */
 function orePrice(n){return TIERS[ORE_INFO[n].tier].price;}
@@ -4640,6 +4640,1041 @@ ACT.cbalRun=a=>{$('#cbalOut').textContent='กำลังจำลอง…';se
 {const _or=ACT.openRecords;ACT.openRecords=()=>{_or();const s=S.combatStats,r=S.combatRecords;const bt=CBOSS_ORDER.map(b=>{const C=S.combatBossClears[b]||{};return `<tr><td>${CBOSS[b].name}</td><td>${C.wins||0}</td><td>${C.best?C.best+'s':'-'}</td></tr>`;}).join('');
  $('#mbody').insertAdjacentHTML('beforeend',`<h3 style="margin-top:12px">⚔ Combat Records</h3><table class="t"><tr><td>การต่อสู้ทั้งหมด</td><td>${s.fights}</td></tr><tr><td>ชนะ / แพ้</td><td>${s.wins} / ${s.losses}</td></tr><tr><td>DPS สูงสุด</td><td>${fmt(r.bestDps||0)}</td></tr><tr><td>ฮิตสูงสุด</td><td>${fmt(s.bestHit)}</td></tr><tr><td>Dodge สำเร็จ</td><td>${s.dodges}</td></tr><tr><td>Stagger</td><td>${s.staggers}</td></tr><tr><td>Ultimate</td><td>${s.ults}</td></tr><tr><td>ดาเมจรวม</td><td>${fmt(s.dmg)}</td></tr><tr><td>คราฟต์ / ตีบวก / สุ่มเกราะ</td><td>${s.crafts} / ${s.enhances} / ${s.summons}</td></tr><tr><td>Hybrid Raid ชนะ</td><td>${s.raidWins}</td></tr></table>
  <table class="t" style="margin-top:6px"><tr><th>Boss</th><th>ชนะ</th><th>เวลาดีที่สุด</th></tr>${bt}</table>`);};}
+
+
+/* =====================================================================
+   V5.0 THE MASTER CRAFTSMAN — DATA
+   equal-potential stat budgets · mining recipes · runes/modules · part mastery (120) ·
+   pets (14) · daily/weekly · endless biomes · boss ranks · activity mastery
+   ===================================================================== */
+/* ---------- PART 11/12 · EQUAL POTENTIAL: rarity = identity, not raw power ----------
+   Each family keeps its V3/V4 stat DISTRIBUTION (identity) but every piece is rescaled to a
+   point budget: TYPE budget × small rarity step (+6%/tier). Mastery compensates the rest:
+   Grandmaster bonus = 60% + 6% per rarity tier below Mythic → Common GM ≈ Mythic GM (±10%). */
+const RSTEP=[1,1.06,1.12,1.18,1.24,1.30];const NEG_REF=.25;/* negatives refund only 25%: at Grandmaster the positives grow ~6× while drawbacks stay flat, so a larger refund would let drawback-heavy designs outgrow the budget */
+/* per-family role correction found by the GM simulations (Coppergear fell short of its role) */
+const FAM_BUD={coppergear:1.25};
+/* armor role correction (combat GM sims: Common sets trailed their role peers) */
+const FAM_BUD_A={scrap:1.18,stoneguard:1.15};
+const MBUD={head:4,core:12,arm:14,legs:8,back:16};const MPTV={P:1,S:1,M:1,C:.8};
+function normMining(pid){const raw=V3_STATS[pid];const ty=PART[pid].type;let pos=0,neg=0;for(const k in raw){const v=raw[k]*MPTV[k];if(v>0)pos+=v;else neg-=v;}
+ const m=(MBUD[ty]*RSTEP[PART[pid].ri]*(FAM_BUD[PART[pid].fam]||1)+neg*NEG_REF)/pos;const o={};for(const k in raw){const v=raw[k];o[k]=v>0?Math.max(1,Math.round(v*m)):v;}return o;}
+for(const id in V3_STATS)if(PART[id])PART[id].stats=normMining(id);
+/* combat armor: same rule (overrides V4 RBUD 1.0–1.75 with 1.0–1.30) */
+for(const a of ARMOR_LIST){const raw=ARMOR_STATS[a.fam][a.type];let pos=0,neg=0;for(const k in raw){const v=raw[k]*PTV[k];if(v>0)pos+=v;else neg-=v;}const m=(TBUD[a.type]*RSTEP[a.ri]*(FAM_BUD_A[a.fam]||1)+neg*.8)/pos;const o={};
+ for(const k in raw){const v=raw[k];if(v<=0){o[k]=v;continue;}const x=v*m;o[k]=k==='hp'?Math.round(x/5)*5:(k==='atk'||k==='def'||k==='stg')?Math.max(1,Math.round(x)):Math.max(.5,Math.round(x*2)/2);}a.st=o;}
+/* development multipliers (shared by mining & combat, never multiplied by runes) */
+const LVL_STEP=.12;/* mining level 1–10: +12%/lvl → ×2.08 at Lv10 */
+const EVO_MUL=[1,1.15,1.30];
+function mastMul(lv,ri){return 1+(Math.min(30,lv||0)/30)*(.6+.08*(5-ri));}/* GM: Common ×2.00 · Uncommon ×1.92 · Rare ×1.84 · Epic ×1.76 · Legendary ×1.68 · Mythic ×1.60 */
+/* ---------- PART 8 · PART MASTERY ---------- */
+const MAST_MAX=30;const MAST_MS={5:'Basic',10:'Skilled',15:'Advanced',20:'Expert',25:'Elite',30:'Grandmaster'};
+function mastNeed(lv){return 40+20*lv;}/* EXP for lv→lv+1 */
+function mastTotal(lv){let t=0;for(let i=1;i<lv;i++)t+=mastNeed(i);return t;}
+/* slot keys: m:head m:core m:arm m:legs m:back · c:helm c:chest c:gaunt c:legs c:back */
+const MSLOT={head:'Head',core:'Core',arm:'Arm',legs:'Legs',back:'Back',helm:'Helmet',chest:'Chest Armor',gaunt:'Gauntlet',clegs:'Leg Armor',cback:'Back Armor'};
+/* Lv.20 specialization paths per slot role (named per family in UI) */
+const MPATH={
+ head:[{id:'A',n:'Deep Scanner',d:'ระยะตรวจจับแร่ซ่อน +2 · มูลค่าแร่ +4%',st:{},fx:{det:2,val:4}},{id:'B',n:'Focus Lens',d:'Mining Power +6%',st:{Pp:6},fx:{}}],
+ core:[{id:'A',n:'Power Reactor',d:'Mining Power +8%',st:{Pp:8},fx:{}},{id:'B',n:'Engine Tuning',d:'Mining Speed +10',st:{S:10},fx:{}}],
+ arm:[{id:'A',n:'Rapid Miner',d:'Mining Speed +12 · คูลดาวน์สกิล −8%',st:{S:12},fx:{cd:8}},{id:'B',n:'Heavy Breaker',d:'Mining Power +8% · ดาเมจแร่ Tier 4+ +10%',st:{Pp:8},fx:{hard:10}}],
+ legs:[{id:'A',n:'Sprinter',d:'Movement +14',st:{M:14},fx:{}},{id:'B',n:'Steady Strider',d:'ผลกระทบพื้นอันตราย −40% · Movement +5',st:{M:5},fx:{terr:40}}],
+ back:[{id:'A',n:'Hauler',d:'Capacity +18',st:{C:18},fx:{}},{id:'B',n:'Collector',d:'ระยะเก็บแร่ +1.5 · Capacity +6',st:{C:6},fx:{pick:1.5}}],
+ helm:[{id:'A',n:'Precision',d:'Crit Chance +5%',st:{cc:5},fx:{}},{id:'B',n:'Insight',d:'ดาเมจ Weak Point +15%',st:{},fx:{wp:15}}],
+ chest:[{id:'A',n:'Bulwark',d:'HP +8% · DEF +6',st:{hpp:8,def:6},fx:{}},{id:'B',n:'Reactor',d:'Ultimate ใช้พลังงานน้อยลง 15%',st:{},fx:{ult:15}}],
+ gaunt:[{id:'A',n:'Swift Fist',d:'Attack Speed +8%',st:{as:8},fx:{}},{id:'B',n:'Heavy Fist',d:'ATK +6% · Stagger +6',st:{atkp:6,stg:6},fx:{}}],
+ clegs:[{id:'A',n:'Evasion',d:'Dodge Cooldown −12%',st:{},fx:{dcd:12}},{id:'B',n:'Charge',d:'Movement +8% · DEF +4',st:{ms:8,def:4},fx:{}}],
+ cback:[{id:'A',n:'Barrier',d:'โล่ทุกชนิด +15%',st:{},fx:{shield:15}},{id:'B',n:'Support',d:'Cooldown Red. +6%',st:{cdr:6},fx:{}}]};
+/* Lv.30 GRANDMASTER effects — unique per design (key:param:name). Primitives are implemented in the mining / combat hooks */
+const GMX={
+ scrap:{head:'scan:12:Junk Radar',core:'timeup:10:Spare Boiler',arm:'echo:14:Junkyard Echo',legs:'stride:12:Tread Rhythm',back:'refund:8:Scavenger Sack',helm:'critdmg:20:Rusty Visor',chest:'regen:1:Patchwork Repair',gaunt:'combo:4:Scrap Barrage',clegs:'counter:1.5:Roll Strike',cback:'aegis:10:Iron Lid'},
+ stoneguard:{head:'hardval:15:Stone Sense',core:'hard:12:Bedrock Core',arm:'splash:30:Quake Slam',legs:'hazard:60:Stone Footing',back:'extracap:20:Rampart Hold',helm:'wpmark:10:Mason Eye',chest:'thorns:15:Living Wall',gaunt:'cleave:30:Boulder Fist',clegs:'dodgecd:15:Stomp Step',cback:'aegis:8:Warden Wall'},
+ coppergear:{head:'crit:10:Gauge Sight',core:'breakspd:20:Overclock Core',arm:'echo:18:Piston Repeat',legs:'stride:15:Spring Gait',back:'magnet:1.5:Gear Collector',helm:'critdmg:25:Gauge Lens',chest:'ultplus:15:Pressure Valve',gaunt:'combo:3:Piston Rush',clegs:'dodgecd:18:Spring Hop',cback:'cdr:8:Steam Cycle'},
+ zephyr:{head:'scan:14:Wind Scout',core:'breakspd:25:Tailwind Core',arm:'splash:20:Gale Cut',legs:'stride:22:Jetstream',back:'magnet:2:Updraft Pack',helm:'crit:6:Wind Sense',chest:'regen:1:Breath Weave',gaunt:'cleave:25:Wind Blade',clegs:'counter:2:Gale Counter',cback:'cdr:10:Wind Veil'},
+ drilltech:{head:'crit:14:Hazard Scanner',core:'hard:15:Hydraulic Core',arm:'echo:20:Twin Drill',legs:'hazard:50:Tread Grip',back:'refund:10:Ore Compactor',helm:'wpmark:8:Weak Point Scope',chest:'thorns:12:Spike Plate',gaunt:'combo:4:Drill Burst',clegs:'counter:1.6:Thruster Strike',cback:'aegis:12:Drone Shield'},
+ titanstone:{head:'hardval:20:Titan Sense',core:'hard:20:Colossus Core',arm:'splash:40:Titan Quake',legs:'hazard:70:Monolith Step',back:'extracap:25:Monolith Vault',helm:'critdmg:20:Titan Gaze',chest:'thorns:20:Fortress Body',gaunt:'cleave:40:Ground Breaker',clegs:'dodgecd:12:Heavy Roll',cback:'aegis:9:Monolith Ward'},
+ magnetite:{head:'scan:12:Field Sensor',core:'skillcd:12:Polar Core',arm:'splash:25:Magnetic Shatter',legs:'stride:12:Glide Field',back:'magnet:3:Grand Magnet',helm:'wpmark:9:Polarity Mark',chest:'regen:1.2:Field Mending',gaunt:'cleave:25:Repulse',clegs:'dodgecd:15:Mag Glide',cback:'aegis:7:Shield Generator'},
+ prism:{head:'value:8:Prism Appraisal',core:'skillcd:15:Refraction Core',arm:'crit:15:Prismatic Strike',legs:'stride:14:Light Step',back:'value:6:Crystal Case',helm:'critdmg:35:Prism Lens',chest:'ultplus:20:Crystal Heart',gaunt:'combo:5:Shard Volley',clegs:'counter:2.2:Mirror Step',cback:'cdr:10:Refract Shield'},
+ frostbound:{head:'scan:16:Frost Sight',core:'timeup:12:Cryo Core',arm:'splash:35:Shatter Wave',legs:'hazard:80:Ice Skates',back:'extracap:18:Glacier Pack',helm:'crit:6:Frost Crown',chest:'regen:1.4:Permafrost',gaunt:'cleave:30:Frost Arc',clegs:'dodgecd:16:Ice Slide',cback:'aegis:9:Glacial Ward'},
+ magma:{head:'hardval:18:Heat Sense',core:'breakspd:20:Furnace Core',arm:'echo:16:Eruption',legs:'hazard:100:Lava Walker',back:'refund:9:Forge Crucible',helm:'critdmg:25:Horned Fury',chest:'thorns:25:Molten Skin',gaunt:'cleave:35:Magma Wave',clegs:'counter:2:Flame Dash',cback:'cdr:8:Flame Vent'},
+ thunder:{head:'crit:12:Storm Eye',core:'skillcd:18:Tesla Core',arm:'echo:22:Chain Strike',legs:'stride:20:Bolt Step',back:'magnet:2.5:Ion Collector',helm:'crit:7:Storm Crown',chest:'ultplus:18:Tesla Reactor',gaunt:'combo:3:Lightning Rush',clegs:'counter:1.8:Bolt Counter',cback:'cdr:12:Storm Drone'},
+ void:{head:'value:10:Abyss Appraisal',core:'timeup:15:Rift Core',arm:'splash:30:Dimensional Cut',legs:'stride:18:Phase Walk',back:'extracap:22:Pocket Dimension',helm:'wpmark:7:Abyss Mark',chest:'ultplus:22:Abyss Heart',gaunt:'combo:4:Void Flurry',clegs:'counter:2.5:Phase Strike',cback:'aegis:8:Dimensional Shroud'}};
+const GM_DESC={scan:p=>`ตรวจพบแร่ซ่อนในระยะ ${p/4|0} ช่องอัตโนมัติทุก 10 วิ`,timeup:p=>`เวลาขุดต่อรอบ +${p} วิ`,echo:p=>`${p}% โอกาสที่การขุดจะตีซ้ำทันที`,stride:p=>`หลังทุบแร่แตก เดินเร็วขึ้น ${p}% 3 วิ`,refund:p=>`${p}% โอกาสได้แร่เพิ่ม 1 ก้อนเมื่อแตก`,
+ hardval:p=>`แร่ Tier 4+ มูลค่า +${p}%`,hard:p=>`ดาเมจขุดแร่ Tier 4+ +${p}%`,splash:p=>`การขุดกระแทกแร่ข้างเคียง ${p}% ของดาเมจ`,hazard:p=>`ผลกระทบพื้นอันตราย −${p}%`,extracap:p=>`Capacity +${p}`,crit:p=>`${p}% โอกาสขุดคริติคอล ×2`,
+ breakspd:p=>`ทุบแร่แตกแล้ว Mining Speed +${p} 3 วิ`,magnet:p=>`ระยะเก็บแร่ +${p} ช่อง`,skillcd:p=>`คูลดาวน์สกิลแขน −${p}%`,value:p=>`มูลค่าแร่ทั้งหมด +${p}%`,
+ critdmg:p=>`Crit Damage +${p}%`,regen:p=>`ฟื้น HP ${p}% ทุก 3 วิ ระหว่างต่อสู้`,combo:p=>`ทุกการโจมตีครั้งที่ ${p} ปล่อยคลื่นเพิ่ม 80% ATK`,counter:p=>`Dodge สำเร็จแล้วสวนกลับ ${Math.round(p*100)}% ATK`,aegis:p=>`ได้โล่ 8% HP ทุก ${p} วิ`,
+ wpmark:p=>`ทำเครื่องหมาย Weak Point ของบอส 2 วิ ทุก ${p} วิ`,thorns:p=>`สะท้อนดาเมจ ${p}% กลับใส่ผู้โจมตี`,cleave:p=>`การโจมตีปกติแรงขึ้น ${p}% ต่อบอสที่ติด Stagger/Freeze`,ultplus:p=>`พลัง Ultimate +${p}%`,dodgecd:p=>`Dodge Cooldown −${p}%`,cdr:p=>`Cooldown Red. +${p}%`};
+function gmOf(fam,slotKey){const s=GMX[fam][slotKey];const[k,p,n]=s.split(':');return{k,p:+p,n,desc:GM_DESC[k](+p)};}
+/* ---------- PART 15 · RUNES / MODULES (player-chosen; replaces random traits for new items) ---------- */
+const RUNES={
+ power:{n:'Power Rune',i:'⛏',line:'m',st:'P',v:[5,10,18]},rapid:{n:'Rapid Rune',i:'⚡',line:'m',st:'S',v:[6,12,20]},capacity:{n:'Capacity Module',i:'🎒',line:'m',st:'C',v:[8,16,28]},stride:{n:'Stride Rune',i:'🦿',line:'m',st:'M',v:[6,12,20]},
+ might:{n:'Might Rune',i:'⚔',line:'c',st:'atk',v:[3,6,10]},crit:{n:'Critical Rune',i:'🎯',line:'c',st:'cc',v:[2,4,7]},stagger:{n:'Stagger Rune',i:'🔨',line:'c',st:'stg',v:[3,6,10]},
+ shield:{n:'Shield Module',i:'🛡',line:'c',st:'def',v:[4,8,14]},vital:{n:'Vital Module',i:'❤',line:'c',st:'hp',v:[40,80,140]},elemental:{n:'Elemental Rune',i:'🌀',line:'c',st:'res',v:[4,8,14]},haste:{n:'Haste Rune',i:'⏳',line:'c',st:'cdr',v:[2,4,7]}};
+const RUNE_TIER=['I','II','III'];
+const RUNE_COST=[{coins:300,ores:{Iron:6,Silver:4}},{coins:1500,ores:{Gold:6,Diamond:4}},{coins:6000,ores:{Mythril:5,'Celestial Ore':3}}];
+/* ---------- mining part recipes (crafting-only) ---------- */
+const MRCP_TM={head:1,core:1.4,arm:1.2,legs:1.1,back:1.2};
+/* per-rarity recipe scale → farming runs per craft (measured yields): Common 1–2 · Uncommon 2–3 · Rare 3–5 · Epic 5–8 · Legendary 8–12 · Mythic 12–20 */
+const RRM_M=[1.6,1.8,1.15,2.4,2.6,3.3],RRM_A=[1.25,1.4,1,2,2.1,2.7];
+function mRecipe(pid,mode){const p=PART[pid];const b=RCP_BASE[p.fam];const m=MRCP_TM[p.type]*.8*RRM_M[p.ri];const r={coins:Math.round(b[1]*m/50)*50,ores:{}};for(const n in b[0])r.ores[n]=Math.max(1,Math.round(b[0][n]*m));
+ const mm=mode==='fine'?1.5:mode==='perfect'?2:1;r.coins=Math.round(r.coins*mm);for(const n in r.ores)r.ores[n]=Math.ceil(r.ores[n]*mm);if(mode==='fine')r.stones={b:1};if(mode==='perfect'){r.stones={a:1};r.ess=1;}return r;}
+/* blueprints (deterministic): mining Epic+ & armor Legendary+ need a blueprint; unlocked with Blueprint Fragments */
+const BP_COST=[0,0,0,6,10,15];
+/* ---------- PART 4/5 · PETS (14) ---------- */
+const PETS={
+ rockmole:{n:'Rockmole',type:'mine',ri:0,st:['Pebblemole','Rockmole','Crystal Rockmole'],c:['#8a7f74','#5a524a','#3fe0ff'],
+  pas:{n:'Ore Sniff',d:'ตรวจจับแร่ซ่อนได้ไกลขึ้น +1 ช่อง (+1 ที่ Stage 3)'},act:{n:'Burrow Ping',d:'มุดดินส่งคลื่น เปิดแร่ซ่อน/ห้องลับในระยะ 4 ช่อง',cd:22},bond:{n:'Deep Dig Friend',d:'แร่ซ่อนที่เจอมูลค่า +15%'},egg:{need:4,src:'ฟรีเมื่อเปิด Pet Sanctuary ครั้งแรก'},syn:'drilltech'},
+ magnetot:{n:'Magnetot',type:'mine',ri:1,st:['Mini Magnetot','Magnetot','Magnafang'],c:['#c0c6d0','#8e6ad8','#3fb8ff'],
+  pas:{n:'Magnetic Pickup',d:'ระยะเก็บแร่ +1.2'},act:{n:'Magnet Burst',d:'ดูดแร่ที่ตกอยู่ในรัศมี 6 ช่องเข้าหาโกเลม',cd:18},bond:{n:'Packed Haul',d:'Capacity +8'},egg:{need:6,src:'Mining Extract สำเร็จ (เลือกเป็นเป้าหมาย)'},syn:'magnetite'},
+ prismowl:{n:'Prismowl',type:'mine',ri:2,st:['Glintowl','Prismowl','Aurora Prismowl'],c:['#b9a8ff','#7fd8ff','#ff9df0'],
+  pas:{n:'Hidden Vein Sight',d:'ตรวจพบห้องลับ/แร่ซ่อน +2 ช่อง'},act:{n:'Prism Scan',d:'ทำเครื่องหมายแร่มูลค่าสูงสุด 3 ก้อน (+20% มูลค่า)',cd:25},bond:{n:'Treasure Instinct',d:'มูลค่าแร่ Tier 5+ +8%'},egg:{need:9,src:'Extract สำเร็จที่ Iron Depths ขึ้นไป · Endless Milestone'},syn:'prism'},
+ gearbeetle:{n:'Gearbeetle',type:'mine',ri:2,st:['Cogbug','Gearbeetle','Drillbeetle Prime'],c:['#cf7a3c','#7e4220','#3fe0ff'],
+  pas:{n:'Assist Chip',d:'Mining Speed +6'},act:{n:'Drill Tap',d:'บินไปเจาะแร่เป้าหมาย 150% Power',cd:10},bond:{n:'Efficient Mining',d:'เวลาตั้งท่าก่อนขุด −30%'},egg:{need:9,src:'Mining Contracts · Extract สำเร็จ'},syn:'coppergear'},
+ frostpup:{n:'Frostpup',type:'mine',ri:3,st:['Snowpup','Frostpup','Glacier Wolflet'],c:['#eafaff','#a8e6ff','#4fb8ff'],
+  pas:{n:'Chill Guard',d:'ผลกระทบลาวา/พื้นร้อน −40%'},act:{n:'Frost Trail',d:'แช่แข็งพื้นลาวารอบตัว 3 ช่อง ปลอดภัย 8 วิ',cd:24},bond:{n:'Calm Step',d:'หินถล่มทำให้มึนสั้นลง 40%'},egg:{need:12,src:'ปราบ Mining Boss · Extract ที่ Ancient Rift'},syn:'frostbound'},
+ lavasnail:{n:'Lavasnail',type:'mine',ri:4,st:['Ember Snail','Lavasnail','Volcanic Lavasnail'],c:['#2a1c18','#ff6a1a','#ffd23f'],
+  pas:{n:'Heat Fracture',d:'ดาเมจขุดแร่ Tier 4+ +8%'},act:{n:'Molten Crack',d:'แร่เป้าหมายเปราะ รับดาเมจ +50% 6 วิ',cd:20},bond:{n:'Rare Ore Crack',d:'5% โอกาสแร่ Tier 5+ แตกได้เพิ่ม 1 ก้อน'},egg:{need:15,src:'ปราบ Magma Colossus (Mining Boss) · Endless B30+'},syn:'magma'},
+ emberfox:{n:'Emberfox',type:'combat',ri:1,st:['Cindercub','Emberfox','Inferno Emberfox'],c:['#ff7a2a','#3a1a10','#ffd23f'],
+  pas:{n:'Burning Bite',d:'การโจมตี 12% ติด Burn'},act:{n:'Foxfire Shot',d:'ยิงลูกไฟ 120% ATK + Burn 2',cd:6},bond:{n:'Blaze Partner',d:'ดาเมจใส่ศัตรูที่ติด Burn +8%'},egg:{need:6,src:'ชนะ Combat Boss (เลือกเป็นเป้าหมาย) · Combat Contracts'},syn:'magma'},
+ boltcub:{n:'Boltcub',type:'combat',ri:2,st:['Sparkcub','Boltcub','Thunderfang Cub'],c:['#eaf4ff','#3f8cff','#f7d046'],
+  pas:{n:'Static Claw',d:'Shock สะสมเพิ่ม +1 ต่อครั้งที่ติด'},act:{n:'Chain Pounce',d:'กระโจน 150% ATK + Shock 2',cd:9},bond:{n:'Storm Pulse',d:'คอมโบ 10 ฮิต → Attack Speed +15% 4 วิ'},egg:{need:9,src:'ชนะ Combat Boss · Training (ดาเมจ 5,000+)'},syn:'thunder'},
+ aegishell:{n:'Aegishell',type:'combat',ri:2,st:['Shieldling','Aegishell','Fortress Aegishell'],c:['#4f88b0','#8fd3ff','#3fe0ff'],
+  pas:{n:'Guard Link',d:'DEF +8 · HP +5%'},act:{n:'Shell Barrier',d:'เมื่อ HP < 70% สร้างโล่ 15% HP',cd:14},bond:{n:'Steady Core',d:'ระหว่างมีโล่ ไม่ติดมึน'},egg:{need:9,src:'ชนะ Combat Boss · Combat Contracts'},syn:'stoneguard'},
+ voidbat:{n:'Voidbat',type:'combat',ri:3,st:['Riftbat','Voidbat','Abyss Voidbat'],c:['#2a1840','#8b3dff','#ff4fd8'],
+  pas:{n:'Weak Mark',d:'ดาเมจต่อบอสที่ถูกทำเครื่องหมาย +10%'},act:{n:'Abyss Tag',d:'ทำเครื่องหมายจุดอ่อนบอส 3 วิ',cd:12},bond:{n:'Dimensional Step',d:'Dodge สำเร็จ → การโจมตีถัดไป +30%'},egg:{need:12,src:'ชนะ Magma Warlord ขึ้นไป'},syn:'void'},
+ crystare:{n:'Crystare',type:'combat',ri:4,st:['Gemhare','Crystare','Aurora Crystare'],c:['#f4eaff','#c9a7ff','#7fd8ff'],
+  pas:{n:'Crystal Focus',d:'Crit Chance +4%'},act:{n:'Prism Lance',d:'ลำแสงคริสตัล 200% ATK คริติคอลแน่นอน',cd:8},bond:{n:'Sharp Vision',d:'ดาเมจ Weak Point +12%'},egg:{need:15,src:'ชนะ Magma Warlord / Void Tyrant'},syn:'prism'},
+ titanpup:{n:'Titanpup',type:'combat',ri:5,st:['Stonecub','Titanpup','Colossus Titanpup'],c:['#8b7a66','#5e5244','#ff9a3c'],
+  pas:{n:'Crushing Presence',d:'Stagger Power +8'},act:{n:'Titan Roar',d:'คำราม เพิ่ม Stagger Gauge บอส 25',cd:15},bond:{n:'Unshaken',d:'ดาเมจจากท่าหนัก (มึน/กระแทก) −20%'},egg:{need:20,src:'ชนะ Void Tyrant / Hybrid Raid'},syn:'titanstone'},
+ driftling:{n:'Driftling',type:'hybrid',ri:3,st:['Wisplet','Driftling','Aether Driftling'],c:['#7fffd4','#3a4a6e','#ffffff'],
+  pas:{n:'Adaptive Support',d:'Mining: Speed +5 · Combat: DEF +5'},act:{n:'Support Pulse',d:'Mining: ดูดแร่รอบตัว 3 ช่อง · Combat: โล่ 8% HP',cd:15},bond:{n:'Flexible Link',d:'Pet EXP +20% และ Utility เล็กน้อยทั้งสองสาย'},egg:{need:12,src:'Hybrid Quest: Extract + ชนะ Combat Boss'},syn:'zephyr'},
+ mechafinch:{n:'Mechafinch',type:'hybrid',ri:2,st:['Chirpbolt','Mechafinch','Skyforge Finch'],c:['#cfd8dc','#2f5aa8','#ffd84a'],
+  pas:{n:'Recon Flight',d:'Mining: ตรวจจับ +1 · Combat: เห็นท่าบอสถัดไป'},act:{n:'Signal Chirp',d:'Mining: เตือนแร่หายาก · Combat: เตือนท่าหนัก (+0.25 วิ)',cd:20},bond:{n:'Alert Partner',d:'Dodge Cooldown −8%'},egg:{need:9,src:'Hybrid Quest: Extract + Training'},syn:'scrap'}};
+const PET_ORDER=['rockmole','magnetot','prismowl','gearbeetle','frostpup','lavasnail','emberfox','boltcub','aegishell','voidbat','crystare','titanpup','driftling','mechafinch'];
+const PET_MAXLV=20;function petNeed(lv){return 50+lv*30;}
+const PET_STAGE_LV=[1,10,20];
+const PET_EVO_COST=[null,{ess:5,core:0,coins:2000},{ess:15,core:1,coins:8000}];
+const PET_FOOD={treat:{n:'Ore Treat',i:'🍪',bond:12,exp:30,cost:{coins:150,ores:{Stone:6,Copper:4}}},feast:{n:'Crystal Feast',i:'🍱',bond:30,exp:90,cost:{coins:900,ores:{Ruby:3,Diamond:2}}}};
+const BOND_NEED=[0,40,90,160,260];/* bond pts to reach level 2..5 */
+/* ---------- PART 20 · DAILY / WEEKLY ---------- */
+const DAILY_POOL=[{id:'d_mine40',n:'ขุดแร่ 40 ก้อน',k:'mine',goal:40,rw:{coins:400,bpf:1}},{id:'d_ext2',n:'Extract สำเร็จ 2 ครั้ง',k:'extract',goal:2,rw:{coins:300,petShard:2}},{id:'d_craft1',n:'คราฟต์ชิ้นส่วน 1 ชิ้น',k:'craft',goal:1,rw:{coins:300,bpf:1}},
+ {id:'d_mast',n:'ได้ Mastery EXP 300',k:'mastery',goal:300,rw:{coins:400,petTreat:1}},{id:'d_pet',n:'Pet ใช้สกิล 8 ครั้ง',k:'petskill',goal:8,rw:{coins:300,petTreat:1},need:'pet'},{id:'d_boss',n:'ชนะ Combat Boss 1 ครั้ง',k:'bosswin',goal:1,rw:{coins:600,coreFrag:1},need:'combat'},
+ {id:'d_store',n:'เก็บแร่เข้าคลัง 30 ก้อน',k:'store',goal:30,rw:{coins:300,bpf:1}},{id:'d_dodge',n:'Dodge สำเร็จ 8 ครั้ง',k:'dodge',goal:8,rw:{coins:350,coreFrag:1},need:'combat'},{id:'d_floor',n:'Endless ผ่าน 3 ชั้น',k:'floor',goal:3,rw:{coins:500,bpf:2},need:'endless'}];
+const WEEKLY_THEMES=[{id:'crystal',n:'Crystal Rush Week',i:'💎',mods:['rush','rare'],d:'แร่เกิดเยอะ + แร่หายากเพิ่ม',bonus:'Blueprint Fragment ×2 จาก Weekly Expedition'},{id:'iron',n:'Iron Fortress Week',i:'🏰',mods:['heavy','machine'],d:'แร่แข็ง + ซากเครื่องจักร',bonus:'Boss Core Fragment +2'},
+ {id:'volcanic',n:'Volcanic Week',i:'🌋',mods:['heat','rich'],d:'ลาวาเยอะ + สายแร่อุดม',bonus:'Pet Shard +3'},{id:'relic',n:'Ancient Relic Week',i:'🏺',mods:['vault','hidden'],d:'ห้องลับ + แร่ซ่อน',bonus:'Blueprint Fragment ×2'},{id:'void',n:'Void Anomaly Week',i:'🌀',mods:['distort','dark'],d:'มิติบิดเบี้ยว + ทัศนวิสัยต่ำ',bonus:'Masterwork Essence +1'}];
+/* new modifiers (PART 18) — aliases onto the V2 generator + runtime effects */
+Object.assign(MODS,{rich:{name:'RICH VEINS',icon:'💰',coin:1.25,desc:['สายแร่หนาแน่น','มูลค่าแร่ +25%'],rec:'Capacity สูง',col:'#ffd84a'},
+ rare:{name:'RARE DEPOSITS',icon:'🔶',coin:1.15,desc:['แร่ Tier สูงสุดเกิดบ่อยขึ้นมาก'],rec:'Mining Power สูง',col:'#ffb020'},
+ gravity:{name:'HEAVY GRAVITY',icon:'⬇',coin:1.35,desc:['เดินช้าลง 20%','แร่แข็ง +40% แต่มูลค่า +35%'],rec:'Legs Movement สูง',col:'#a08a70'},
+ vault:{name:'ANCIENT VAULT',icon:'🏺',coin:1.2,desc:['มีห้องลับแน่นอน','แร่ซ่อนเพิ่มขึ้น'],rec:'Head ตรวจจับ',col:'#e0c080'},
+ machine:{name:'MACHINE RUINS',icon:'⚙️',coin:1.15,desc:['ทางวกวน','ได้ Ancient Scrap เพิ่มเมื่อ Extract'],rec:'Movement',col:'#9fb0c3'},
+ distort:{name:'VOID DISTORTION',icon:'🌀',coin:1.3,desc:['ทุก 20 วิ มิติบิด วาร์ปโกเลม','แร่ซ่อนเพิ่มขึ้น'],rec:'Back Capacity / Pet',col:'#c066ff'},
+ dark:{name:'LOW VISIBILITY',icon:'🌑',coin:1.2,desc:['มองเห็นได้จำกัด','แร่ซ่อนเพิ่มขึ้น'],rec:'Head / Prismowl',col:'#5a6478'}});
+MODS.heat.name='VOLCANIC HEAT';MODS.hidden.name='HIDDEN CHAMBER';
+const MOD_ALIAS={rich:['rush'],rare:[],gravity:['heavy'],vault:['hidden'],machine:['shift'],distort:['shift','hidden'],dark:['hidden']};
+/* ---------- PART 18 · ENDLESS BIOMES ---------- */
+const BIOMES=[{to:20,n:'Crystal Cavern',th:'quarry',tiers:[1,2,3],wts:[45,35,20]},{to:40,n:'Iron Ruins',th:'e2',tiers:[2,3,4],wts:[40,35,25]},{to:60,n:'Magma Depths',th:'e3',tiers:[3,4,5],wts:[40,35,25]},
+ {to:80,n:'Ancient Abyss',th:'e4',tiers:[4,5,6],wts:[45,35,20]},{to:100,n:'Void Dimension',th:'e5',tiers:[4,5,6],wts:[35,35,30]},{to:1e9,n:'Endless Anomaly',th:'rift',tiers:[5,6,6],wts:[40,35,25]}];
+function biomeOf(f){return BIOMES.find(b=>f<=b.to);}
+const EMS5={};for(let f=10;f<=300;f+=10){const k=f/10;EMS5[f]={coins:500*k,bpf:2+Math.floor(k/3),coreFrag:k>=4?1+Math.floor(k/4):0,petShard:2,ess:f%50===0?1:0};}
+/* ---------- boss ranks (long-term) ---------- */
+const BRANK=[{n:'Normal',hp:1,dmg:1,rw:1,i:''},{n:'Hard',hp:2.2,dmg:1.4,rw:1.6,i:'🔥'},{n:'Nightmare',hp:4,dmg:1.9,rw:2.5,i:'💀'}];
+const CORE_FRAG_NEED=5;
+/* ---------- PART 21 · ACTIVITY MASTERY (small capped bonuses + unlocks) ---------- */
+const AMAST={
+ crystal:{g:'mine',n:'Crystal Mining',d:'มูลค่าแร่ Tier 1–3 +0.5%/Lv',k:'t13'},metal:{g:'mine',n:'Metal Mining',d:'ดาเมจขุดแร่ Tier 4–6 +0.5%/Lv',k:'t46'},deep:{g:'mine',n:'Deep Exploration',d:'Endless: เวลาต่อชั้น +0.5 วิ/Lv',k:'deep'},collect:{g:'mine',n:'Ore Collection',d:'Capacity +1/Lv',k:'col'},
+ weapon:{g:'combat',n:'Weapon Mastery',d:'ATK +0.5%/Lv',k:'atk'},defense:{g:'combat',n:'Defense Mastery',d:'DEF +0.5/Lv',k:'def'},dodge:{g:'combat',n:'Dodge Mastery',d:'Dodge Cooldown −0.5%/Lv',k:'dodge'},hunter:{g:'combat',n:'Boss Hunter',d:'ดาเมจใส่บอส +0.5%/Lv',k:'boss'},elemental:{g:'combat',n:'Elemental Mastery',d:'Res +0.5%/Lv',k:'res'},
+ mcraft:{g:'craft',n:'Mining Part Crafting',d:'Lv5 ปลดล็อก Fine · ค่าคราฟต์ −1%/Lv',k:'mcraft'},acraft:{g:'craft',n:'Combat Armor Crafting',d:'Lv5 ปลดล็อก Fine · ค่าคราฟต์ −1%/Lv',k:'acraft'},rune:{g:'craft',n:'Rune Crafting',d:'Lv5 ปลดล็อก Rune II · Lv12 Rune III',k:'rune'},
+ assembly:{g:'craft',n:'Mechanical Assembly',d:'Upgrade/Enhance ถูกลง 1%/Lv',k:'asm'},masterwork:{g:'craft',n:'Masterwork Crafting',d:'Lv8 ปลดล็อก Perfect Crafting',k:'mw'}};
+const AMAST_MAX=20;function amNeed(lv){return 60+lv*40;}
+
+/* =====================================================================
+   V5.0 STATE — migration · crafting-only economy · runes · part mastery · pets ·
+   wishlist · daily/weekly · activity mastery · boss fragments/ranks · export/import
+   ===================================================================== */
+function v5Defaults(){return{migrationVersion:0,petInventory:[],petNextUid:1,equippedMiningPet:null,equippedCombatPet:null,petShards:{},petTarget:'magnetot',petItems:{treat:0,feast:0,ess:0},petSanctuaryVisited:false,
+ partMastery:{},masterySpecializations:{},craftingMastery:{},activityMastery:{},blueprints:{unl:{}},craftingWishlist:[],bossFragments:{iron:0,magma:0,void:0},bossRank:{},
+ endlessCheckpoints:{max:1},endlessMs5:[],dailyProgress:{day:-1,picks:[],prog:{},claimed:[]},weeklyProgress:{week:-1,runs:0,claimed:false},runes:{},deep:null,notes:[],convLog:{tickets:0,ctix:0},
+ v5stats:{crafts:0,mastLv:0,petSkills:0}};}
+function v5Migrate(S_,raw,orig){/* read the version from the raw JSON: load() merges newState() defaults (migrationVersion:5) into the parsed object first */
+ let om=S_.migrationVersion||0;if(raw){try{om=JSON.parse(raw).migrationVersion||0;}catch(e){om=0;}}const first=om<5;const d=v5Defaults();for(const k in d){if(S_[k]===undefined||S_[k]===null)S_[k]=d[k];else if(typeof d[k]==='object'&&!Array.isArray(d[k])&&d[k]){for(const kk in d[k])if(S_[k][kk]===undefined)S_[k][kk]=d[k][kk];}}
+ for(const r in RUNES)if(!Array.isArray(S_.runes[r]))S_.runes[r]=[0,0,0];
+ if(first){
+  /* backup the pre-V5 save once (PART 30: export before a large data change) */
+  try{if(raw&&!localStorage.getItem('buildAGolem_backup_pre_v5'))localStorage.setItem('buildAGolem_backup_pre_v5',raw);}catch(e){}
+  /* veteran mastery: owned designs start at a mastery level earned from existing upgrades (one-time; never items) */
+  const best={};for(const i of S_.inv||[]){const lv=Math.min(25,2*(i.lvl||1)+5*(i.evo||0));best['m:'+i.pid]=Math.max(best['m:'+i.pid]||0,lv);}
+  for(const i of S_.combatInventory||[]){const lv=Math.min(25,2+2*(i.enh||0)+(i.quality>=3?3:0));best['c:'+i.aid]=Math.max(best['c:'+i.aid]||0,lv);}
+  for(const k in best){if(!S_.partMastery[k]){const lv=Math.max(1,best[k]);S_.partMastery[k]={lv,exp:0};}}
+  S_.migrationVersion=5;}
+ /* PART 3 · gacha removal: any remaining tickets convert at a fixed rate (balance → 0, so this is idempotent) */
+ if(S_.tickets>0){S_.armorBlueprints.frag+=S_.tickets*2;S_.coins+=S_.tickets*50;S_.convLog.tickets+=S_.tickets;S_.tickets=0;}
+ if(S_.combatTickets>0){S_.armorBlueprints.frag+=S_.combatTickets*2;S_.enhancementMaterials.b+=S_.combatTickets;S_.convLog.ctix+=S_.combatTickets;S_.combatTickets=0;}
+ /* pets sanity */
+ const ids=new Set();S_.petInventory=S_.petInventory.filter(p=>p&&PETS[p.pid]&&!ids.has(p.pid)&&ids.add(p.pid));
+ for(const p of S_.petInventory){p.lv=clamp(p.lv||1,1,PET_MAXLV);p.stage=clamp(p.stage||0,0,2);p.bond=clamp(p.bond||1,1,5);p.exp=p.exp||0;p.bondPts=p.bondPts||0;}
+ if(S_.equippedMiningPet&&!S_.petInventory.some(p=>p.uid===S_.equippedMiningPet))S_.equippedMiningPet=null;if(S_.equippedCombatPet&&!S_.petInventory.some(p=>p.uid===S_.equippedCombatPet))S_.equippedCombatPet=null;
+ S_.v=5;return S_;}
+/* ---------- mastery ---------- */
+function mKey(kind,id){return (kind==='c'?'c:':'m:')+id;}
+function mOf(key){return S.partMastery[key]||{lv:1,exp:0};}
+function mLv(key){return (S.partMastery[key]||{lv:0}).lv||0;}
+function mSlotKey(key){const[k,id]=key.split(':');if(k==='m')return PART[id].type;const t=ARMOR[id].type;return t==='legs'?'clegs':t==='back'?'cback':t;}
+function mFam(key){const[k,id]=key.split(':');return k==='m'?PART[id].fam:ARMOR[id].fam;}
+function mName(key){const[k,id]=key.split(':');return k==='m'?PART[id].name:ARMOR[id].name;}
+function mRi(key){const[k,id]=key.split(':');return k==='m'?PART[id].ri:ARMOR[id].ri;}
+function mPath(key){return mLv(key)>=20?S.masterySpecializations[key]||null:null;}
+function mGM(key){return mLv(key)>=30?gmOf(mFam(key),mSlotKey(key)):null;}
+function addMastExp(key,n){if(!(n>0))return 0;n=Math.round(n);const m=S.partMastery[key]||(S.partMastery[key]={lv:1,exp:0});if(m.lv>=MAST_MAX)return 0;m.exp+=n;let up=0;
+ while(m.lv<MAST_MAX&&m.exp>=mastNeed(m.lv)){m.exp-=mastNeed(m.lv);m.lv++;up++;if(MAST_MS[m.lv])S.notes.push({t:Date.now(),k:'mast',txt:`⭐ ${mName(key)} Mastery Lv.${m.lv} — ${MAST_MS[m.lv]}${m.lv===20?' (เลือก Specialization ได้)':m.lv===30?' · GRANDMASTER!':''}`});}
+ if(m.lv>=MAST_MAX)m.exp=0;if(up){S.v5stats.mastLv+=up;FXQ.push({k:'mast'});}dEvent('mastery',n);return up;}
+function setPath(key,p){if(mLv(key)<20)return false;const cur=S.masterySpecializations[key];if(cur===p)return false;if(cur){const c=respecCost(key);if(S.coins<c.coins||S.scrap<c.scrap){toast(`Respec ต้องใช้ 🪙${fmt(c.coins)} + ⚙️${c.scrap}`,'err');sfx('err');return false;}S.coins-=c.coins;S.scrap-=c.scrap;}
+ S.masterySpecializations[key]=p;save();sfx('upgrade');toast(`🎯 Specialization: ${MPATH[mSlotKey(key)].find(x=>x.id===p).n}`,'ok');renderWorkshop();if(modalRefresh)modalRefresh();return true;}
+function respecCost(key){const ri=mRi(key);return{coins:1500*(ri+1),scrap:20*(ri+1)};}
+/* ---------- activity mastery ---------- */
+function amLv(k){return (S.activityMastery[k]||{lv:1}).lv;}
+function addAM(k,n){if(!AMAST[k]||!(n>0))return;const m=S.activityMastery[k]||(S.activityMastery[k]={lv:1,exp:0});if(m.lv>=AMAST_MAX)return;m.exp+=Math.round(n);while(m.lv<AMAST_MAX&&m.exp>=amNeed(m.lv)){m.exp-=amNeed(m.lv);m.lv++;S.notes.push({t:Date.now(),k:'am',txt:`📘 ${AMAST[k].n} Lv.${m.lv}`});}}
+function amB(k){return Math.min(AMAST_MAX,amLv(k))-1;}/* 0..19 */
+/* ---------- stat formulas (override V3/V4) ---------- */
+function runeStat(inst,line){if(!inst.rune)return null;const R_=RUNES[inst.rune.id];if(!R_||R_.line!==line)return null;return{k:R_.st,v:R_.v[inst.rune.t||0]};}
+function partStats(inst){const d=PART[inst.pid];const o={};const ev=inst.evo||0;const qm=QUAL[qOf(inst)].mul;const key='m:'+inst.pid;const mm=mastMul(mLv(key),d.ri);const lvm=1+LVL_STEP*((inst.lvl||1)-1);
+ const path=mPath(key);const pst=path?MPATH[d.type].find(x=>x.id===path).st:{};
+ for(const k in d.stats){const v=d.stats[k];if(v>0){let e=EVO_MUL[ev];if(ev>=2&&(inst.br||'A')==='A'&&d.type==='core'&&k==='P')e+=.05;let x=v*lvm*e*qm*mm;if(k==='P'&&pst.Pp)x*=1+pst.Pp/100;o[k]=x;}else o[k]=v;}
+ for(const k of['S','M','C'])if(pst[k])o[k]=(o[k]||0)+pst[k];
+ const T=traitOf(inst);if(T&&T.stat)o[T.stat]=(o[T.stat]||0)+inst.tv;const rs=runeStat(inst,'m');if(rs)o[rs.k]=(o[rs.k]||0)+rs.v;return o;}
+function armorStats(inst){const a=ARMOR[inst.aid];const q=QUAL[clamp(inst.quality==null?1:inst.quality,0,3)].mul;const e=1+.04*(inst.enh||0);const key='c:'+inst.aid;const mm=mastMul(mLv(key),a.ri);const o={};
+ const path=mPath(key);const sk=a.type==='legs'?'clegs':a.type==='back'?'cback':a.type;const pst=path?MPATH[sk].find(x=>x.id===path).st:{};
+ for(const k in a.st){const v=a.st[k];let x=v>0?v*q*e*mm:v;if(k==='hp'&&pst.hpp)x*=1+pst.hpp/100;if(k==='atk'&&pst.atkp)x*=1+pst.atkp/100;o[k]=Math.round(x*10)/10;}
+ for(const k of['def','cc','as','stg','ms','cdr'])if(pst[k])o[k]=Math.round(((o[k]||0)+pst[k])*10)/10;
+ if(inst.trait&&CTRAITS[inst.trait]){const st=CTRAITS[inst.trait].st;o[st]=Math.round(((o[st]||0)+inst.tv)*10)/10;}const rs=runeStat(inst,'c');if(rs)o[rs.k]=Math.round(((o[rs.k]||0)+rs.v)*10)/10;return o;}
+/* hooks injected into calcStats / calcCombat */
+function petEq(mode){const uid=mode==='combat'?S.equippedCombatPet:S.equippedMiningPet;return uid?S.petInventory.find(p=>p.uid===uid):null;}
+function petPow(p){return 1+.04*(p.lv-1)+.15*p.stage+.05*(p.bond-1);}
+function v5MiningRaw(look){const o={P:0,S:0,M:0,C:0};const p=petEq('mine');if(p){const k=p.pid,w=petPow(p);if(k==='gearbeetle')o.S+=6*w;if(k==='driftling')o.S+=5*w;if(k==='magnetot'&&p.bond>=3)o.C+=8;}
+ o.C+=amB('collect');for(const sl of SLOTS){const pid=look[sl];if(!pid)continue;if(sl==='armR'&&look.armL===pid)continue;const g=mGM('m:'+pid);if(g&&g.k==='extracap')o.C+=g.p;}return o;}
+function v5MiningPost(o){const gm={};const pfx={};for(const sl of SLOTS){const pid=o.look[sl];if(!pid)continue;if(sl==='armR'&&o.look.armL===pid)continue;const key='m:'+pid;const g=mGM(key);if(g)gm[g.k]=(gm[g.k]||0)+g.p;const pa=mPath(key);if(pa){const P_=MPATH[PART[pid].type].find(x=>x.id===pa);for(const k in P_.fx)pfx[k]=(pfx[k]||0)+P_.fx[k];}
+  if(mLv(key)>=25&&(sl==='armL'||sl==='armR')){const sk=o.skills[sl==='armL'?0:1];if(sk&&sk.mult)sk.mult*=1.1;}}
+ /* overflow: Speed above 250% / Movement above 200% is not wasted — it converts into a little Mining Power */
+ {const ov=Math.max(0,o.raw.S-o.cap.S[1])*.5+Math.max(0,o.raw.M-o.cap.M[1])*.25;if(ov>0){o.ovP=Math.round(ov);o.rawP+=ov;o.P=Math.max(10,Math.round(o.rawP));o.maxTier=0;for(let t=1;t<=6;t++)if(o.P>=TIERS[t].req)o.maxTier=t;}}
+ o.gm=gm;o.pfx=pfx;const cdc=(gm.skillcd||0)+(pfx.cd||0);if(cdc)for(const sk of o.skills)if(sk)sk.cdEff=Math.round(sk.cdEff*(1-Math.min(40,cdc)/100)*10)/10;o.mpet=petEq('mine');return o;}
+function v5CombatRaw(raw,pieces){const p=petEq('combat');if(p){const k=p.pid,w=petPow(p);if(k==='aegishell'){raw.def+=8*w;raw.hp*=1+.05*w;}if(k==='crystare')raw.cc+=4*w;if(k==='titanpup')raw.stg+=8*w;if(k==='driftling')raw.def+=5*w;}
+ raw.atk*=1+.005*amB('weapon');raw.def+=.5*amB('defense');raw.res+=.5*amB('elemental');}
+function v5CombatPost(o){const gm={},pfx={};const seen=new Set();for(const sl of CSLOTS){const i=o.pieces[sl];if(!i)continue;if(seen.has(i.aid))continue;seen.add(i.aid);const key='c:'+i.aid;const g=mGM(key);if(g)gm[g.k]=(gm[g.k]||0)+g.p;const pa=mPath(key);if(pa){const t=ARMOR[i.aid].type;const P_=MPATH[t==='legs'?'clegs':t==='back'?'cback':t].find(x=>x.id===pa);for(const k in P_.fx)pfx[k]=(pfx[k]||0)+P_.fx[k];}
+  if(mLv(key)>=25){if(ARMOR[i.aid].type==='gaunt')for(const s of o.skills)if(s&&s.slot===sl)s.pow*=1.1;if(ARMOR[i.aid].type==='chest'&&o.ult)o.ult.pow*=1.1;if(ARMOR[i.aid].type==='back'&&o.guard)o.guard.pow*=1.1;}}
+ o.gm=gm;o.pfx=pfx;if(gm.critdmg)o.cd=Math.min(CCAP.cd[1]+100,o.cd+gm.critdmg);if(gm.cdr){o.cdr=Math.min(CCAP.cdr[1],o.cdr+gm.cdr);}
+ if(o.ult&&(pfx.ult||gm.ultplus)){if(pfx.ult)o.ult.en=Math.round(o.ult.en*(1-pfx.ult/100));if(gm.ultplus)o.ult.pow*=1+gm.ultplus/100;}
+ let dm=1-(gm.dodgecd||0)/100-(pfx.dcd||0)/100-.005*amB('dodge');const mp=petEq('combat');if(mp&&mp.pid==='mechafinch'&&mp.bond>=3)dm-=.08;o.dodge.cdEff=Math.max(1,Math.round(o.dodge.cdEff*Math.max(.6,dm)*100)/100);
+ o.cpet=mp;o.cp=Math.round(o.hp*.12+o.atk*3+o.def*2+o.as*2.2+o.cc*2.5+(o.cd-150)*.8+o.ms*1.5+o.cdr*2.5+o.stg*1.5+o.res*1.2+o.setFx.size*12+Object.keys(gm).length*15);return o;}
+/* ---------- PART 3/15 · crafting mining parts (no gacha) ---------- */
+function bpNeeded(kind,id){if(kind==='m')return PART[id].ri>=3;const a=ARMOR[id];return !!BP_LINE[a.fam];}
+function bpHas(kind,id){if(kind==='m')return !!S.blueprints.unl['m:'+id];const a=ARMOR[id];return bpUnlocked(BP_LINE[a.fam],a.type)||!!S.blueprints.unl['c:'+id];}
+function bpCost(kind,id){return BP_COST[kind==='m'?PART[id].ri:ARMOR[id].ri]||10;}
+function bpUnlock(kind,id){if(!bpNeeded(kind,id)||bpHas(kind,id))return false;const c=bpCost(kind,id);if(S.armorBlueprints.frag<c){toast(`ต้องใช้ 📄 Blueprint Fragment ${c}`,'err');sfx('err');return false;}
+ S.armorBlueprints.frag-=c;if(kind==='m')S.blueprints.unl['m:'+id]=true;else{const a=ARMOR[id];S.armorBlueprints.unl[BP_LINE[a.fam]+'_'+a.type]=true;}save();sfx('legend');toast(`📜 ปลดล็อก Blueprint: ${kind==='m'?PART[id].name:ARMOR[id].name}`,'gold');if(modalRefresh)modalRefresh();return true;}
+function craftDiscount(line){return 1-.01*amB(line==='m'?'mcraft':'acraft');}
+function modeOK(line,mode){if(mode==='std')return'';if(mode==='fine'&&line==='m'&&amLv('mcraft')<5)return 'Fine ต้องมี Mining Part Crafting Lv.5';if(mode==='perfect'&&amLv('masterwork')<8)return 'Perfect ต้องมี Masterwork Crafting Lv.8';return'';}
+/* armor: Fine = Iron Guardian Blueprint (V4) OR Combat Armor Crafting Lv.5; Perfect = Masterwork Lv.8 (checked in modeOK) */
+function craftCheck(aid,mode){const a=ARMOR[aid];const line=BP_LINE[a.fam];if(line&&!bpHas('c',aid))return `ต้องปลดล็อก Blueprint: ${a.name} (${BP_INFO[line].n})`;
+ if(mode==='fine'&&!bpUnlocked('guardian',a.type)&&amLv('acraft')<5)return `Fine ต้องมี Combat Armor Crafting Lv.5 หรือ Iron Guardian Blueprint (${CTYPE_NAME[a.type]})`;
+ if(mode==='perfect'&&amLv('masterwork')<8)return 'Perfect ต้องมี Masterwork Crafting Lv.8';return '';}
+/* Masterwork EXP: every Fine/Perfect craft and every upgrade/evolution/enhancement teaches it (no deadlock) */
+function craftAM(line,ri,mode,qty){addAM(line==='m'?'mcraft':'acraft',(20+ri*12)*qty);if(mode==='fine')addAM('masterwork',(25+ri*5)*qty);if(mode==='perfect')addAM('masterwork',(45+ri*5)*qty);}
+function partRecipe(pid,mode,qty=1){const r=mRecipe(pid,mode);const dc=craftDiscount('m');const o={coins:Math.round(r.coins*dc)*qty,ores:{}};for(const n in r.ores)o.ores[n]=Math.ceil(r.ores[n]*dc)*qty;if(r.stones){o.stones={};for(const k in r.stones)o.stones[k]=r.stones[k]*qty;}if(r.ess)o.ess=r.ess*qty;return o;}
+function craftPart(pid,mode='std',qty=1){qty=clamp(Math.floor(qty),1,5);if(bpNeeded('m',pid)&&!bpHas('m',pid)){toast('ต้องปลดล็อก Blueprint ก่อน','err');sfx('err');return [];}const why=modeOK('m',mode);if(why){toast(why,'err');sfx('err');return [];}
+ const req=partRecipe(pid,mode,qty);if(!haveMat(req)){toast('วัสดุไม่พอ','err');sfx('err');return [];}payMat(req);const out=[];
+ for(let i=0;i<qty;i++){const uid=addPart(S,pid);const inst=invGet(uid);inst.quality=mode==='perfect'?3:mode==='fine'?2:1;inst.crafted=true;out.push(uid);}
+ S.stats.crafts=(S.stats.crafts||0)+qty;S.v5stats.crafts+=qty;craftAM('m',PART[pid].ri,mode,qty);dEvent('craft',qty);save();sfx('hammer');setTimeout(()=>sfx('upgrade'),180);renderWorkshop();return out;}
+/* armor crafting uses V4 craftArmor; add mastery/discount/daily hooks */
+{const _ca=craftArmor;craftArmor=function(aid,mode='std',qty=1){const why=modeOK('c',mode);if(why){toast(why,'err');return [];}const out=_ca(aid,mode,qty);if(out.length){craftAM('c',ARMOR[aid].ri,mode,out.length);dEvent('craft',out.length);S.v5stats.crafts+=out.length;save();}return out;};}
+/* armor recipes: V5 rarity scale (same targets as mining) */
+{const _ro=recipeOf;recipeOf=function(aid,mode){const r=_ro(aid,mode);const k=RRM_A[ARMOR[aid].ri];if(k!==1){r.coins=Math.round(r.coins*k/50)*50;for(const n in r.ores)r.ores[n]=Math.ceil(r.ores[n]*k);}return r;};}
+/* ---------- runes ---------- */
+function runeTierOK(t){return t===0||(t===1&&amLv('rune')>=5)||(t===2&&amLv('rune')>=12);}
+function craftRune(id,t){t=+t;if(!RUNES[id])return false;if(!runeTierOK(t)){toast(`Rune ${RUNE_TIER[t]} ต้องมี Rune Crafting Lv.${t===1?5:12}`,'err');sfx('err');return false;}const c=RUNE_COST[t];if(!haveMat(c)){toast('วัสดุไม่พอ','err');sfx('err');return false;}
+ payMat(c);S.runes[id][t]++;addAM('rune',20+t*20);save();sfx('crystal');toast(`${RUNES[id].i} คราฟต์ ${RUNES[id].n} ${RUNE_TIER[t]}`,'ok');renderWorkshop();if(modalRefresh)modalRefresh();return true;}
+function socketRune(kind,uid,id,t){t=+t;const inst=kind==='m'?invGet(uid):cinvGet(uid);const R_=RUNES[id];if(!inst||!R_||R_.line!==kind){toast('Rune นี้ใส่ชิ้นส่วนนี้ไม่ได้','err');return false;}if(!(S.runes[id][t]>0)){toast('ไม่มี Rune นี้ในคลัง','err');return false;}
+ if(inst.rune){S.runes[inst.rune.id][inst.rune.t]++;}S.runes[id][t]--;inst.rune={id,t};save();sfx('attach');toast(`${R_.i} ติดตั้ง ${R_.n} ${RUNE_TIER[t]}`,'ok');renderWorkshop();if(modalRefresh)modalRefresh();return true;}
+function unsocketRune(kind,uid){const inst=kind==='m'?invGet(uid):cinvGet(uid);if(!inst||!inst.rune)return false;S.runes[inst.rune.id][inst.rune.t]++;delete inst.rune;save();sfx('click');renderWorkshop();if(modalRefresh)modalRefresh();return true;}
+/* ---------- pets ---------- */
+function petGet(uid){return S.petInventory.find(p=>p.uid===uid);}
+function petOwned(pid){return S.petInventory.find(p=>p.pid===pid);}
+function addPet(pid,name){if(petOwned(pid))return null;const uid='pet'+(S.petNextUid++);const p={uid,pid,lv:1,exp:0,stage:0,bond:1,bondPts:0,name:name||PETS[pid].st[0]};S.petInventory.push(p);S.notes.push({t:Date.now(),k:'pet',txt:`🥚 ฟักไข่สำเร็จ: ${PETS[pid].n}!`});return uid;}
+function petCanMode(p,mode){const t=PETS[p.pid].type;return t==='hybrid'||(mode==='combat'?t==='combat':t==='mine');}
+function equipPet(uid,mode){const p=uid?petGet(uid):null;if(uid&&!p)return false;if(p&&!petCanMode(p,mode)){toast(`${PETS[p.pid].n} ใช้ในโหมดนี้ไม่ได้`,'err');return false;}if(mode==='combat')S.equippedCombatPet=uid||null;else S.equippedMiningPet=uid||null;save();sfx('equip');renderWorkshop();if(modalRefresh)modalRefresh();return true;}
+function petExpGain(p,n){if(!p||!(n>0))return;if(PETS[p.pid]&&p.pid==='driftling'&&p.bond>=3)n*=1.2;const cap=PET_STAGE_LV[p.stage+1]||PET_MAXLV;p.exp+=Math.round(n);while(p.lv<Math.min(PET_MAXLV,cap)&&p.exp>=petNeed(p.lv)){p.exp-=petNeed(p.lv);p.lv++;}if(p.lv>=Math.min(PET_MAXLV,cap))p.exp=Math.min(p.exp,petNeed(p.lv));}
+function petEvoReady(p){const nx=p.stage+1;return nx<=2&&p.lv>=PET_STAGE_LV[nx];}
+function petEvolve(uid){const p=petGet(uid);if(!p||!petEvoReady(p)){toast('ยังวิวัฒนาการไม่ได้','err');return false;}const c=PET_EVO_COST[p.stage+1];const cores=Object.values(S.bossCoreInventory).reduce((a,b)=>a+b,0);
+ if(S.petItems.ess<c.ess||S.coins<c.coins||cores<c.core){toast(`ต้องใช้ ✨ Pet Essence ${c.ess} · 🪙${fmt(c.coins)}${c.core?` · Boss Core ${c.core}`:''}`,'err');sfx('err');return false;}
+ S.petItems.ess-=c.ess;S.coins-=c.coins;if(c.core){for(const k of['prim','iron','magma','void'])if(S.bossCoreInventory[k]>0){S.bossCoreInventory[k]--;break;}}p.stage++;if(p.name===PETS[p.pid].st[p.stage-1])p.name=PETS[p.pid].st[p.stage];
+ save();sfx('evolve');toast(`🌟 ${PETS[p.pid].n} วิวัฒนาการเป็น ${PETS[p.pid].st[p.stage]}!`,'gold');S.notes.push({t:Date.now(),k:'pet',txt:`🌟 ${PETS[p.pid].st[p.stage]}`});PFX.push({k:'evo',uid});renderWorkshop();if(modalRefresh)modalRefresh();return true;}
+function petFeed(uid,food){const p=petGet(uid);const F=PET_FOOD[food];if(!p||!F)return false;if(!(S.petItems[food]>0)){toast(`ไม่มี ${F.n}`,'err');return false;}S.petItems[food]--;p.bondPts+=F.bond;while(p.bond<5&&p.bondPts>=BOND_NEED[p.bond]){p.bond++;toast(`💗 Bond Lv.${p.bond}${p.bond===3?' — ปลดล็อก Bond Ability!':''}`,'gold');}
+ petExpGain(p,F.exp);save();sfx('coin');PFX.push({k:'happy',uid});renderWorkshop();if(modalRefresh)modalRefresh();return true;}
+function cookFood(food){const F=PET_FOOD[food];if(!haveMat(F.cost)){toast('วัสดุไม่พอ','err');sfx('err');return false;}payMat(F.cost);S.petItems[food]++;save();sfx('pick');toast(`${F.i} ทำ ${F.n} +1`,'ok');if(modalRefresh)modalRefresh();return true;}
+function petSrcOK(pid,ev,ctx){ctx=ctx||{};switch(pid){case'rockmole':case'magnetot':return ev==='extract';case'gearbeetle':return ev==='extract'||ev==='contract';case'prismowl':return ev==='extract'&&(ctx.d==='depths'||ctx.d==='rift'||ctx.endless)||ev==='endlessms';
+ case'frostpup':return (ev==='extract'&&ctx.d==='rift')||ev==='mboss';case'lavasnail':return (ev==='mboss'&&ctx.boss==='colossus')||(ev==='extract'&&ctx.endless&&ctx.floor>=30)||ev==='endlessms';
+ case'emberfox':case'aegishell':return ev==='bosswin'||ev==='ccontract';case'boltcub':return ev==='bosswin'||(ev==='train'&&ctx.dmg>=5000);case'voidbat':return ev==='bosswin'&&ctx.boss!=='sentinel';case'crystare':return ev==='bosswin'&&(ctx.boss==='warlord'||ctx.boss==='tyrant');
+ case'titanpup':return (ev==='bosswin'&&ctx.boss==='tyrant')||ev==='raidwin';case'driftling':return ev==='extract'||ev==='bosswin';case'mechafinch':return ev==='extract'||(ev==='train'&&ctx.dmg>=3000);}return false;}
+function petShardEvent(ev,n,ctx){const pid=S.petTarget;if(!pid||!PETS[pid])return 0;if(petOwned(pid)){/* owned target → shards become essence */if(petSrcOK(pid,ev,ctx)){S.petItems.ess+=n;return 0;}return 0;}if(!petSrcOK(pid,ev,ctx))return 0;S.petShards[pid]=(S.petShards[pid]||0)+n;return n;}
+function petHatch(pid){if(petOwned(pid))return false;const need=PETS[pid].egg.need;if((S.petShards[pid]||0)<need){toast('ชิ้นไข่ยังไม่พอ','err');return false;}S.petShards[pid]-=need;const uid=addPet(pid);save();sfx('legend');PFX.push({k:'hatch',uid});toast(`🐣 ${PETS[pid].n} ฟักออกมาแล้ว!`,'gold');
+ const p=petGet(uid);if(PETS[pid].type!=='combat'&&!S.equippedMiningPet)S.equippedMiningPet=uid;if(PETS[pid].type!=='mine'&&!S.equippedCombatPet)S.equippedCombatPet=uid;renderWorkshop();if(modalRefresh)modalRefresh();return true;}
+function petSanctuaryFirst(){if(S.petSanctuaryVisited)return false;S.petSanctuaryVisited=true;const uid=addPet('rockmole');if(uid&&!S.equippedMiningPet)S.equippedMiningPet=uid;S.petItems.treat+=3;save();setTimeout(()=>toast('🐾 ได้รับ Rockmole ตัวแรก + 🍪 Ore Treat ×3','gold'),200);return true;}
+const PFX=[];
+/* ---------- daily / weekly ---------- */
+function dailyRefresh(){const dk=dayKey();const D=S.dailyProgress;if(D.day===dk)return;const rng=mulberry32(dk*2654435761>>>0);const ok=t=>!t.need||(t.need==='pet'&&S.petInventory.length)||(t.need==='combat'&&S.armorForgeUnlocks.starter)||(t.need==='endless'&&S.cleared.rift);
+ const pool=DAILY_POOL.filter(ok);const picks=[];while(picks.length<3&&pool.length){picks.push(pool.splice(Math.floor(rng()*pool.length),1)[0].id);}Object.assign(D,{day:dk,picks,prog:{},claimed:[]});}
+function dEvent(k,n=1){if(!S||!S.dailyProgress)return;dailyRefresh();const D=S.dailyProgress;for(const id of D.picks){const t=DAILY_POOL.find(x=>x.id===id);if(t&&t.k===k&&!D.claimed.includes(id))D.prog[id]=Math.min(t.goal,(D.prog[id]||0)+n);}}
+function dClaim(id){dailyRefresh();const D=S.dailyProgress;const t=DAILY_POOL.find(x=>x.id===id);if(!t||!D.picks.includes(id)||D.claimed.includes(id)||(D.prog[id]||0)<t.goal)return false;D.claimed.push(id);const txt=giveV5(t.rw);save();sfx('coin');toast('📅 '+t.n+' → '+txt,'gold');renderWorkshop();if(modalRefresh)modalRefresh();return true;}
+function weekTheme(){return WEEKLY_THEMES[(weekKey()%WEEKLY_THEMES.length+WEEKLY_THEMES.length)%WEEKLY_THEMES.length];}
+function weeklyRefresh(){const wk=weekKey();const Wp=S.weeklyProgress;if(Wp.week!==wk)Object.assign(Wp,{week:wk,runs:0,claimed:false});}
+function giveV5(rw){const o=[];if(!rw)return'';if(rw.coins){S.coins+=rw.coins;o.push('🪙'+fmt(rw.coins));}if(rw.bpf){S.armorBlueprints.frag+=rw.bpf;o.push('📄'+rw.bpf);}if(rw.petShard){const n=petShardEventAny(rw.petShard);o.push(n?`🥚${n}`:`✨${rw.petShard} Essence`);}
+ if(rw.petTreat){S.petItems.treat+=rw.petTreat;o.push('🍪'+rw.petTreat);}if(rw.coreFrag){addCoreFrag(null,rw.coreFrag);o.push('🧩'+rw.coreFrag+' Core Frag');}if(rw.ess){S.enhancementMaterials.ess+=rw.ess;o.push('✴️'+rw.ess);}if(rw.stone)for(const k in rw.stone){S.enhancementMaterials[k]+=rw.stone[k];o.push(STONE[k].i+rw.stone[k]);}return o.join(' · ');}
+function petShardEventAny(n){const pid=S.petTarget;if(!pid||!PETS[pid])return 0;if(petOwned(pid)){S.petItems.ess+=n;return 0;}S.petShards[pid]=(S.petShards[pid]||0)+n;return n;}
+/* ---------- PART 19 · boss core fragments (guaranteed) ---------- */
+function addCoreFrag(core,n){const F=S.bossFragments;const k=core||['iron','magma','void'].find(x=>(S.combatBossClears[{iron:'sentinel',magma:'warlord',void:'tyrant'}[x]]||{}).wins)||'iron';F[k]=(F[k]||0)+n;while(F[k]>=CORE_FRAG_NEED){F[k]-=CORE_FRAG_NEED;S.bossCoreInventory[k]++;S.notes.push({t:Date.now(),k:'core',txt:`🧩 รวม Core Fragment → ${BCORE[k].n} +1`});}}
+/* ---------- wishlist ---------- */
+function wishToggle(kind,id,mode){const L=S.craftingWishlist;const i=L.findIndex(w=>w.kind===kind&&w.id===id);if(i>=0){L.splice(i,1);toast('📌 เอาออกจาก Wishlist');}else{if(L.length>=3){toast('Wishlist เต็ม (3)','err');return;}L.push({kind,id,mode:mode||'std'});toast('📌 ปักหมุดใน Wishlist','ok');}save();renderWorkshop();if(modalRefresh)modalRefresh();}
+function wishReq(w){if(w.kind==='m')return partRecipe(w.id,w.mode);if(w.kind==='c')return multReq(recipeOf(w.id,w.mode),1);if(w.kind==='rune')return RUNE_COST[w.mode|0];return{coins:0,ores:{}};}
+function wishName(w){return w.kind==='m'?PART[w.id].name:w.kind==='c'?ARMOR[w.id].name:w.kind==='rune'?`${RUNES[w.id].n} ${RUNE_TIER[w.mode|0]}`:'';}
+const ORE_PER_RUN=22;/* typical ores extracted per Quick Mining run in a matching dungeon */
+function bestFarm(n){const t=ORE_INFO[n].tier;let best=null,bw=0;for(const d of DUNGEONS){const i=d.tiers.indexOf(t);if(i<0)continue;const w=d.wts[i]/d.wts.reduce((a,b)=>a+b,0);if(w>bw){bw=w;best=d;}}return best?{name:best.name,id:best.id,perRun:ORE_PER_RUN*bw/2}:{name:'Endless Mine (Biome สูง)',id:'endless',perRun:ORE_PER_RUN*.12};}
+function wishInfo(w){const req=wishReq(w);const miss=[];let runs=0;for(const n in (req.ores||{})){const have=S.oreStorage[n]||0;if(have<req.ores[n]){const f=bestFarm(n);const r=Math.ceil((req.ores[n]-have)/Math.max(.5,f.perRun));runs=Math.max(runs,r);miss.push({n,need:req.ores[n]-have,where:f.name,runs:r});}}
+ const bpOK=w.kind==='rune'||!bpNeeded(w.kind,w.id)||bpHas(w.kind,w.id);return{req,miss,runs,bpOK,ready:bpOK&&haveMat(req)};}
+/* ---------- export / import ---------- */
+function exportSave(){save();return localStorage.getItem(SAVE_KEY)||JSON.stringify(S);}
+function importSave(txt){let d;try{d=JSON.parse(txt);}catch(e){toast('ข้อมูล Save ไม่ถูกต้อง (JSON)','err');return false;}if(!d||!Array.isArray(d.inv)||!d.equip){toast('ไม่ใช่ Save ของ Build a Golem','err');return false;}
+ try{localStorage.setItem('buildAGolem_backup_before_import',localStorage.getItem(SAVE_KEY)||'');localStorage.setItem(SAVE_KEY,JSON.stringify(d));}catch(e){toast('บันทึกไม่ได้','err');return false;}load();applyGfx();renderWorkshop();toast('📥 นำเข้า Save สำเร็จ (สำรองของเดิมไว้แล้ว)','gold');return true;}
+
+/* =====================================================================
+   V5.0 PET GRAPHICS — 14 chibi companions × 3 evolution stages (shape changes, not recolors)
+   anim: {walk, ph (walk phase), skill (0..1), happy (0..1), face}
+   ===================================================================== */
+function petEyes(c,x,y,r,col,t,happy){const bl=(t%4.1)<.12?.15:1;for(const s of[-1,1]){if(happy>0){c.strokeStyle=OL;c.lineWidth=1.6;c.beginPath();c.arc(x+s*r*1.6,y+1,r*.8,Math.PI*1.1,Math.PI*1.9);c.stroke();continue;}
+ ell(c,x+s*r*1.6,y,r,r*1.15*bl);c.fillStyle='#141826';c.fill();if(bl>.5){ell(c,x+s*r*1.6,y+r*.15,r*.75,r*.8);c.fillStyle=col;c.fill();circ(c,x+s*r*1.6-r*.35,y-r*.35,r*.32);c.fillStyle='#fff';c.fill();}}}
+function blush(c,x,y,r){c.fillStyle='rgba(255,120,150,.35)';for(const s of[-1,1]){ell(c,x+s*r*2.6,y+r*1.1,r*.8,r*.45);c.fill();}}
+function drawPet(c,x,y,s,pid,stage,t,a){a=a||{};const P_=PETS[pid];const[c1,c2,c3]=P_.c;const sz=[.8,1,1.22][stage];const hop=a.walk?Math.abs(Math.sin((a.ph||t*8)))*4:Math.sin(t*3)*1.2;const sq=a.walk?1-Math.abs(Math.sin(a.ph||0))*.06:1;
+ c.save();c.translate(x,y);if(GF().shadows){c.fillStyle='rgba(0,0,0,.3)';ell(c,0,0,14*s*sz,4*s*sz);c.fill();}
+ const fly=['prismowl','mechafinch','voidbat','driftling','gearbeetle'].includes(pid);c.translate(0,-(fly?18+Math.sin(t*4)*3:hop)*s);c.scale(s*sz*(a.face||1),s*sz*sq);
+ if(stage>=2)glow(c,0,-14,30,c3,.25+.1*Math.sin(t*3));if(a.skill>0)glow(c,0,-14,34,c3,.55*a.skill);if(a.syn)glow(c,0,-14,26,a.syn,.3);
+ const hp=a.happy||0;
+ switch(pid){
+ case'rockmole':{for(const sx of[-7,7]){P(c,[sx-4,-2,sx+4,-2,sx+5,2,sx-5,2],mix(c1,-.2),mix(c1,-.5),1.4);}ell(c,0,-11,13,11);fs(c,lg(c,-22,0,mix(c1,.25),mix(c1,-.3)),2);
+  for(let i=0;i<5;i++){circ(c,-8+i*4,-19+Math.abs(i-2),2.2);c.fillStyle=mix(c1,-.15);c.fill();}ell(c,0,-6,7,5);fs(c,'#e8d8c4',1.4);P(c,[-2,-9,2,-9,0,-12],c3,mix(c3,-.4),1);
+  rr(c,-10,-16,20,6,3);fs(c,'#3a3a4a',1.2);for(const sx of[-4.5,4.5]){circ(c,sx,-13,3);c.fillStyle=rgba('#bff8ff',.8);c.fill();c.strokeStyle=OL;c.lineWidth=1;c.stroke();}petEyes(c,0,-13,1.4,c3,t,hp);
+  for(const sx of[-1,1]){c.save();c.translate(sx*12,-4);c.rotate(sx*(a.skill>0?Math.sin(t*20)*.6:.3));P(c,[0,-3,sx*7,-1,sx*6,4,0,3],'#cfd8dc','#7a8494',1.2);c.restore();}
+  if(stage>=1){SHARD(c,0,-21,stage>=2?12:7,3,0,t,['#ffffff',c3]);}if(stage>=2){for(const sx of[-8,8])SHARD(c,sx,-18,7,2.4,sx*.06,t,['#e8fffb',c3]);}break;}
+ case'magnetot':{const tl=Math.sin(t*3)*.3;c.save();c.translate(-9,-6);c.rotate(-.8+tl);rr(c,-2,-14,4,14,2);fs(c,c1,1.2);ell(c,0,-16,5,2);c.lineWidth=2;c.strokeStyle=c2;c.stroke();c.restore();
+  ell(c,0,-8,10,8);fs(c,lg(c,-16,0,mix(c1,.2),mix(c1,-.3)),1.8);circ(c,0,-18,10);fs(c,lg(c,-28,-8,mix(c1,.25),mix(c1,-.2)),1.8);
+  for(const sx of[-1,1]){c.save();c.translate(sx*7,-26);c.beginPath();c.arc(0,0,4,Math.PI,0);c.lineWidth=3.4;c.strokeStyle=OL;c.stroke();c.lineWidth=2.2;c.strokeStyle=c2;c.stroke();c.fillStyle='#ff4d6d';c.fillRect(-5.2,-1,2.4,3);c.fillStyle='#e3e8f0';c.fillRect(2.8,-1,2.4,3);c.restore();}
+  petEyes(c,0,-18,1.6,c3,t,hp);blush(c,0,-18,1.6);P(c,[-1.4,-14,1.4,-14,0,-12.5],'#ff9db0','#ff6a8a',.6);
+  if(stage>=1){ell(c,0,-3,12,3);c.lineWidth=1.6;c.strokeStyle=rgba(c2,.8);c.stroke();}if(stage>=2){P(c,[-4,-27,0,-33,4,-27],'#ffd84a','#b07a1a',1);for(const sx of[-1,1])P(c,[sx*9,-2,sx*13,6,sx*6,2],'#e3e8f0','#8a93a3',1);}break;}
+ case'prismowl':{const fl=Math.sin(t*10)*.4;for(const sx of[-1,1]){c.save();c.translate(sx*9,-14);c.rotate(sx*(.5+fl));FACET(c,[0,0,sx*16,-4,sx*12,6,0,6],'#e8fdff',c2,.9);if(stage>=1)FACET(c,[0,4,sx*12,8,sx*6,12],'#ffe6fb',c3,.85);c.restore();}
+  ell(c,0,-14,11,12);fs(c,lg(c,-26,-2,mix(c1,.25),mix(c1,-.3)),1.8);ell(c,0,-10,7,7);fs(c,'#f0e8ff',1.2);
+  for(const sx of[-1,1]){circ(c,sx*4.5,-17,4.6);fs(c,'#ffffff',1.2);}petEyes(c,0,-17,1.8,['#ff9df0','#7fd8ff'][Math.floor(t)%2],t,hp);P(c,[-1.6,-14,1.6,-14,0,-11],'#ffd84a','#b07a1a',.8);
+  for(const sx of[-1,1])P(c,[sx*6,-25,sx*10,-30,sx*9,-23],c1,mix(c1,-.3),1);if(stage>=1)SHARD(c,0,-25,8,3,0,t,['#ffffff',c3]);if(stage>=2){for(const sx of[-5,5])SHARD(c,sx,-24,6,2,sx*.08,t,['#fff6a8','#ff9df0']);}break;}
+ case'gearbeetle':{const fl=Math.sin(t*30)*.5;for(const sx of[-1,1]){c.save();c.translate(sx*6,-16);c.rotate(sx*(-.4+fl*.3));ell(c,sx*9,0,10,4);c.fillStyle='rgba(220,240,255,.45)';c.fill();c.strokeStyle=OL;c.lineWidth=1;c.stroke();c.restore();}
+  ell(c,0,-12,11,9);fs(c,lg(c,-21,-3,mix(c1,.2),mix(c1,-.35)),1.8);c.strokeStyle=OL;c.lineWidth=1.2;c.beginPath();c.moveTo(0,-21);c.lineTo(0,-3);c.stroke();gear(c,0,-12,4,8,t*3,'#e8c070');circ(c,0,-12,1.6);c.fillStyle=c3;c.fill();
+  circ(c,10,-12,6);fs(c,mix(c2,.1),1.5);petEyes(c,10,-13,1.1,c3,t,hp);DRILL(c,14,-16,stage>=2?14:9,2.6,t,'#cfd8dc');c.save();c.translate(14,-16);c.rotate(-1.2);c.restore();
+  for(let i=-1;i<=1;i++){line(c,i*5,-5,i*6-2,0,1.3,OL);}if(stage>=1){gear(c,-8,-18,3,7,-t*4,'#e8c070');}if(stage>=2){P(c,[-12,-8,-18,-2,-12,-2],'#2f5aa8','#16305e',1);glow(c,0,-12,12,c3,.4);}break;}
+ case'frostpup':{const tw=Math.sin(t*6)*.3;c.save();c.translate(-10,-9);c.rotate(-.6+tw);P(c,[0,0,-8,-6,-12,-2,-6,3],c1,c2,1.2);for(let i=0;i<3;i++)SHARD(c,-4-i*3,-2,4,1.4,-.8,t,['#ffffff',c3]);c.restore();
+  ell(c,0,-8,10,7);fs(c,lg(c,-15,-1,'#ffffff',c2),1.6);for(const sx of[-5,5]){rr(c,sx-2,-3,4,4,2);fs(c,c1,1);}
+  circ(c,4,-17,9);fs(c,lg(c,-26,-8,'#ffffff',c1),1.6);for(const sx of[-1,1])P(c,[4+sx*4,-23,4+sx*7,-31,4+sx*8,-21],'#ffffff',c2,1.2);ell(c,8,-14,4,3);fs(c,'#f4fbff',1);circ(c,11,-15,1.2);c.fillStyle=OL;c.fill();
+  petEyes(c,3,-18,1.3,c3,t,hp);rr(c,-4,-11,14,3,1.5);fs(c,c3,1);if(stage>=1)SHARD(c,3,-10,5,2,0,t,['#ffffff',c3]);if(stage>=2){P(c,[0,-28,4,-36,8,-28],'#ffffff',c3,1.2);for(const sx of[-3,10])SHARD(c,sx,-25,6,2,0,t,['#ffffff','#a8e6ff']);}break;}
+ case'lavasnail':{const sl=Math.sin(t*2)*1;ell(c,2,-3,16,4);fs(c,lg(c,-7,1,'#3a2a26','#1a100e'),1.6);c.save();c.translate(12+sl,-8);rr(c,-4,-8,8,10,4);fs(c,'#4a3a35',1.4);for(const sx of[-2,2]){line(c,sx,-8,sx*2,-14,1.4,OL);circ(c,sx*2,-15,1.8);c.fillStyle=c3;c.fill();}c.restore();
+  const sh=[[-4,-12,12]];circ(c,-4,-13,stage>=2?12:10);fs(c,lg(c,-25,-3,'#3d2d2a','#140c0a'),2);c.strokeStyle=c2;c.lineWidth=2;c.beginPath();for(let a=0;a<9;a+=.3){const r=a*1.1;const xx=-4+Math.cos(a)*r,yy=-13+Math.sin(a)*r;a===0?c.moveTo(xx,yy):c.lineTo(xx,yy);}c.stroke();glow(c,-4,-13,14,c2,.35);
+  petEyes(c,14,-14,1,c3,t,hp);PUFF(c,-4,-24,t,stage>=1?3:2,'120,110,100');if(stage>=2){for(const sx of[-10,2])P(c,[sx-2,-22,sx,-30,sx+2,-22],'#2a1c18','#000',1);flame(c,-4,-25,5,t,'#ff6a1a','#ffd23f');}break;}
+ case'emberfox':{const tw=Math.sin(t*5)*.3;c.save();c.translate(-10,-9);c.rotate(-.7+tw);flame(c,0,0,stage>=2?12:8,t,'#ff6a1a','#ffd23f');c.restore();
+  ell(c,0,-8,10,7);fs(c,lg(c,-15,-1,mix(c1,.15),mix(c1,-.3)),1.6);for(const sx of[-5,5]){rr(c,sx-2,-3,4,4,1.5);fs(c,c2,1);}
+  circ(c,4,-17,9);fs(c,lg(c,-26,-8,mix(c1,.3),c1),1.6);for(const sx of[-1,1])P(c,[4+sx*3,-23,4+sx*8,-33,4+sx*8,-20],c1,mix(c1,-.4),1.2);ell(c,9,-14,5,3.4);fs(c,'#fff2e0',1);circ(c,13,-15,1.2);c.fillStyle=OL;c.fill();
+  petEyes(c,3,-18,1.3,c3,t,hp);if(stage>=1){P(c,[-6,-14,6,-14,4,-10,-4,-10],c2,'#000',1);}if(stage>=2){flame(c,0,-26,4,t,'#ff6a1a','#ffd23f');flame(c,8,-26,4,t+1,'#ff6a1a','#ffd23f');}break;}
+ case'boltcub':{const tw=Math.sin(t*5)*.25;c.save();c.translate(-10,-9);c.rotate(-.5+tw);rr(c,-10,-2,10,4,2);fs(c,c1,1.2);c.restore();
+  ell(c,0,-8,10.5,7.5);fs(c,lg(c,-15,-1,'#ffffff',mix(c1,-.15)),1.6);for(const sx of[-5,5]){rr(c,sx-2,-3,4,4,1.5);fs(c,'#cfd8dc',1);}c.strokeStyle=c3;c.lineWidth=1.6;c.beginPath();c.moveTo(-6,-13);c.lineTo(-3,-9);c.lineTo(-5,-6);c.moveTo(2,-14);c.lineTo(5,-10);c.lineTo(3,-6);c.stroke();
+  circ(c,4,-17,9);fs(c,lg(c,-26,-8,'#ffffff','#d8e8ff'),1.6);for(const sx of[-1,1]){circ(c,4+sx*7,-24,3.4);fs(c,'#ffffff',1.2);}petEyes(c,4,-18,1.4,'#3f8cff',t,hp);ell(c,8,-13,3.5,2.4);fs(c,'#f4f8ff',1);
+  if(stage>=1){P(c,[-8,-15,-2,-16,-3,-11,-9,-10],'#3f8cff','#1a3478',1.2);}if(stage>=2){ZAP(c,-10,-20,-16,-30,t);ZAP(c,12,-20,18,-30,t+.3);P(c,[2,-28,0,-34,4,-32,3,-38,7,-30,4,-31],c3,'#b0861a',.8);}break;}
+ case'aegishell':{for(const sx of[-8,8])for(const sy of[0]){rr(c,sx-3,-4,6,5,2);fs(c,'#7a9a8a',1.2);}rr(c,10,-12,8,7,3);fs(c,'#8ab0a0',1.3);petEyes(c,14,-10,1,'#1f6f9f',t,hp);
+  c.beginPath();c.moveTo(-14,-4);c.quadraticCurveTo(-14,-22,0,-22);c.quadraticCurveTo(14,-22,14,-4);c.closePath();fs(c,lg(c,-22,-4,mix(c2,.1),c1),2);
+  for(const[x,y]of[[-6,-12],[6,-12],[0,-17]]){P(c,[x-3,y-2,x+3,y-2,x+4,y+2,x,y+4,x-4,y+2],'#d8f4ff',c3,1);}glow(c,0,-13,12,c3,.3);
+  if(stage>=1){P(c,[-15,-4,15,-4,13,-1,-13,-1],'#4f88b0','#1f4f70',1);}if(stage>=2){for(const sx of[-8,0,8])P(c,[sx-2,-22,sx,-28,sx+2,-22],'#e8fdff',c3,1);ell(c,0,-13,18,6);c.strokeStyle=rgba(c3,.5);c.lineWidth=1.5;c.stroke();}break;}
+ case'voidbat':{const fl=Math.sin(t*12)*.5;for(const sx of[-1,1]){c.save();c.translate(sx*7,-14);c.rotate(sx*fl*.5);c.beginPath();c.moveTo(0,0);c.quadraticCurveTo(sx*10,-12,sx*20,-4);c.lineTo(sx*15,0);c.lineTo(sx*18,6);c.lineTo(sx*10,3);c.lineTo(sx*6,8);c.closePath();fs(c,lg(c,-12,8,rgba(c2,.9),rgba(c1,.95)),1.4);c.restore();}
+  circ(c,0,-14,9);fs(c,lg(c,-23,-5,'#3a2458',c1),1.8);for(const sx of[-1,1])P(c,[sx*4,-21,sx*7,-29,sx*8,-19],c1,'#000',1.2);petEyes(c,0,-15,1.4,c3,t,hp);P(c,[-2,-10,-1,-8,0,-10,1,-8,2,-10],'#fff','#ddd',.5);
+  const ry=-30+Math.sin(t*2)*1.5;ell(c,0,ry,8,2.5);c.lineWidth=1.6;c.strokeStyle=c3;c.stroke();if(stage>=1){for(let i=0;i<4;i++){const an=t*2+i*1.57;circ(c,Math.cos(an)*8,ry+Math.sin(an)*2.5,1);c.fillStyle='#ffd0f4';c.fill();}}if(stage>=2){VRING(c,0,-14,16,5,t,1.4);}break;}
+ case'crystare':{ell(c,0,-9,10,8);fs(c,lg(c,-17,-1,'#ffffff',c1),1.6);for(const sx of[-5,5]){ell(c,sx,-2,3.5,2.4);fs(c,'#ffffff',1);}circ(c,3,-18,8.5);fs(c,lg(c,-26,-9,'#ffffff',c1),1.6);
+  for(const sx of[-1,1]){c.save();c.translate(3+sx*3,-25);c.rotate(sx*(.15+Math.sin(t*2+sx)*.06));FACET(c,[0,0,sx*3,-14-(stage*3),0,-18-stage*4,-sx*2,-12],'#ffffff',c2,.95);c.restore();}petEyes(c,3,-18,1.3,c2,t,hp);blush(c,3,-18,1.2);
+  if(stage>=1)FACET(c,[-6,-12,6,-12,4,-6,-4,-6],'#e8fdff',c3,.9);if(stage>=2){for(let i=0;i<3;i++){const an=t*1.5+i*2.1;sprk(c,Math.cos(an)*16,-14+Math.sin(an)*6,3,['#ff9df0','#7fd8ff','#fff6a8'][i]);}}break;}
+ case'titanpup':{c.save();c.translate(-10,-8);c.rotate(-.5+Math.sin(t*4)*.2);rr(c,-8,-2,9,4,2);fs(c,c1,1.2);circ(c,-8,0,2.6);fs(c,c3,1);c.restore();
+  ell(c,0,-9,11.5,8);fs(c,lg(c,-17,-1,mix(c1,.2),c2),1.8);for(const sx of[-6,6]){rr(c,sx-3,-4,6,5,2);fs(c,c2,1.2);}
+  for(let i=0;i<8;i++){const an=i/8*Math.PI*2;SHARD(c,4+Math.cos(an)*8,-18+Math.sin(an)*8,stage>=2?8:5,2.4,an+Math.PI/2,t,['#ffe0b0',c3]);}circ(c,4,-18,8);fs(c,lg(c,-26,-10,mix(c1,.3),c1),1.6);
+  petEyes(c,4,-19,1.3,c3,t,hp);ell(c,8,-15,3.4,2.2);fs(c,mix(c1,.4),1);if(stage>=1){P(c,[-10,-14,-2,-16,-3,-10,-11,-8],'#8a92a2','#3a4252',1.2);}if(stage>=2){RUNE(c,-2,-9,2.5,c3,t);P(c,[0,-28,4,-34,8,-28],'#ffd84a','#b07a1a',1);}break;}
+ case'driftling':{const rs=stage>=2?3:stage>=1?2:1;for(let i=0;i<rs;i++){ell(c,0,-14,14+i*4,4+i*1.2);c.lineWidth=1.6;c.strokeStyle=rgba(i%2?'#ffffff':c1,.7);c.save();c.translate(0,-14);c.rotate(t*(i%2?1:-1)*.8);c.translate(0,14);c.stroke();c.restore();}
+  circ(c,0,-14,9);fs(c,lg(c,-23,-5,'#5a6a90',c2),1.8);circ(c,0,-14,6);c.fillStyle=rgba(c1,.35);c.fill();petEyes(c,0,-15,1.5,c1,t,hp);glow(c,0,-14,16,c1,.35);
+  for(const sx of[-1,1]){P(c,[sx*8,-20,sx*13,-24,sx*10,-16],'#cfd8dc','#5a6478',1);}if(stage>=2){for(let i=0;i<3;i++){const an=t*2+i*2.1;circ(c,Math.cos(an)*18,-14+Math.sin(an)*5,1.6);c.fillStyle='#ffffff';c.fill();}}break;}
+ case'mechafinch':{const fl=Math.sin(t*16)*.6;for(const sx of[-1,1]){c.save();c.translate(sx*5,-14);c.rotate(sx*(-.3+fl*.4));P(c,[0,0,sx*12,-5,sx*13,0,sx*9,4],'#cfd8dc','#6a7a90',1.2);if(stage>=1)line(c,sx*3,0,sx*11,-2,1,c2);c.restore();}
+  ell(c,0,-13,8,9);fs(c,lg(c,-22,-4,'#e3e8f0','#8a93a3'),1.6);ell(c,0,-10,5,5);fs(c,c2,1.2);P(c,[6,-16,12,-15,6,-13],c3,'#b07a1a',1);petEyes(c,2,-17,1.1,'#3fe0ff',t,hp);
+  c.save();c.translate(0,-23);c.rotate(t*12);line(c,-5,0,5,0,1.6,'#5a6478');c.restore();line(c,0,-21,0,-23,1.4,OL);if(stage>=2){P(c,[-3,-27,0,-32,3,-27],c3,'#b07a1a',1);glow(c,0,-13,14,c3,.3);}break;}
+ }
+ if(a.skill>0)for(let i=0;i<4;i++){const an=t*8+i*1.57;sprk(c,Math.cos(an)*16,-14+Math.sin(an)*10,3,c3);}
+ if(hp>0){P(c,[-2,-34-hp*6,0,-31-hp*6,2,-34-hp*6,0,-37-hp*6],'#ff6a8a','#ff3b5c',.8);}
+ c.restore();}
+/* pet portrait icon */
+const PICON={};function petIcon(pid,stage=0,sz=96){const k=pid+stage+'|'+sz;if(PICON[k])return PICON[k];const cv=document.createElement('canvas');cv.width=cv.height=sz;const c=cv.getContext('2d');const g=c.createRadialGradient(sz/2,sz/2,4,sz/2,sz/2,sz*.6);g.addColorStop(0,rgba(PETS[pid].c[2],.35));g.addColorStop(1,'rgba(10,15,30,0)');c.fillStyle=g;c.fillRect(0,0,sz,sz);
+ drawPet(c,sz/2,sz*.82,sz/40,pid,stage,1.3,{face:1});PICON[k]=cv.toDataURL();return PICON[k];}
+
+/* =====================================================================
+   V5.0 MINING RUNTIME — mastery counters & EXP · Grandmaster effects · pets in the mine ·
+   Quick Mining / Deep Expedition / Endless biomes + checkpoints · new modifiers
+   ===================================================================== */
+function v5gm(k){return R&&R.st&&R.st.gm?R.st.gm[k]||0:0;}
+function v5pf(k){return R&&R.st&&R.st.pfx?R.st.pfx[k]||0:0;}
+function mpid(){return R&&R.pet?R.pet.pid:null;}
+function mbond(n){return R&&R.pet&&R.pet.bond>=n;}
+/* pet synergy: 2+ equipped parts/pieces of the pet's family → cooldown −20% + linked glow (never required) */
+function petSyn(p,mode){if(!p)return false;const f=PETS[p.pid].syn;if(mode==='combat'){let n=0;for(const sl of CSLOTS){const u=S.combatEquip[sl];const i=u&&cinvGet(u);if(i&&ARMOR[i.aid].fam===f)n++;}return n>=2;}
+ let n=0;for(const sl of SLOTS){const u=S.equip[sl];const i=u&&invGet(u);if(i&&PART[i.pid].fam===f)n++;}return n>=2;}
+function petCd(p,syn){const base=PETS[p.pid].act.cd;return base*(1-.03*p.stage)*(syn?.8:1);}
+
+/* ---------- run start ---------- */
+{const _ir=initRun;initRun=function(type,d,m,st,o){const r=_ir(type,d,m,st,o);
+ r.mx={hits:[0,0],sk:[0,0],walk:0,hid:0,sec:0,haul:0,dmg:0,floors:0};r.v5t={scan:2,dist:20,stride:0,bspd:0,frz:[]};r.v5bonus=0;
+ if(type!=='boss'&&v5gm('timeup')){r.time+=v5gm('timeup');}
+ const p=st.mpet;if(p&&PETS[p.pid]){const syn=petSyn(p,'mine');r.pet={uid:p.uid,pid:p.pid,stage:p.stage,bond:p.bond,lv:p.lv,x:r.g.x-.9,y:r.g.y+.2,face:1,ph:0,cd:petCd(p,syn)*.4,cdMax:petCd(p,syn),syn,skill:0,happy:0,uses:0,walk:false,fly:null};}
+ return r;};}
+/* ---------- stat hooks ---------- */
+{const _tf=tileF;tileF=function(i){let f=_tf(i);if(R){if(R.mods&&R.mods.includes('gravity'))f*=.8;if(R.v5t&&R.v5t.stride>0)f*=1+v5gm('stride')/100;}return f;};}
+{const _t=terr;terr=function(f){f=_t(f);if(!R)return f;let red=v5gm('hazard')+v5pf('terr')+(mpid()==='frostpup'?40:0);red=Math.min(90,red);return 1-(1-f)*(1-red/100);};}
+{const _p=pickupR;pickupR=function(){let r=_p();if(!R)return r;r+=v5gm('magnet')+v5pf('pick');if(mpid()==='magnetot')r+=1.2;return r;};}
+{const _h=hidDet;hidDet=function(){let d=_h();if(!R)return d;d+=v5pf('det');const p=mpid();if(p==='rockmole')d+=1+(R.pet.stage>=2?1:0);if(p==='prismowl')d+=2;if(p==='mechafinch')d+=1;return d;};}
+{const _s=settleTime;settleTime=function(){let s=_s();if(R&&mpid()==='gearbeetle'&&mbond(3))s*=.7;return s;};}
+function v5SpdAdd(){if(!R||!R.v5t)return 0;return R.v5t.bspd>0?v5gm('breakspd'):0;}
+function v5Light(){if(!R)return 1;let k=1;if(R.mods&&R.mods.includes('dark'))k*=.62;if(mpid()==='prismowl'||mpid()==='mechafinch')k*=1.12;return k;}
+function v5StunMul(){return R&&mpid()==='frostpup'&&mbond(3)?.6:1;}
+{const _sm=stunMul;stunMul=function(){return _sm()*v5StunMul();};}
+/* ---------- value / damage / break hooks ---------- */
+{const _ba=bagAdd;bagAdd=function(name,tier){_ba(name,tier);if(!R)return;R.mx.haul++;let pct=v5gm('value')+(tier>=4?v5gm('hardval'):0)+v5pf('val')+(tier<=3?.5*amB('crystal'):0);if(tier>=5&&mpid()==='prismowl'&&mbond(3))pct+=8;
+ if(pct>0){const ex=TIERS[tier].price*R.valMul*pct/100;R.bag.val+=ex;}};}
+{const _d=damageOre;damageOre=function(o,amt,src){if(!R||!o)return _d(o,amt,src);let m=1;
+ if(!o.secret&&!o.boss&&o.tier>=4){m*=1+(v5gm('hard')+v5pf('hard')+(mpid()==='lavasnail'?8:0)+.5*amB('metal'))/100;}
+ if(o.crack&&R.elapsed<o.crack)m*=1.5;
+ const cc=v5gm('crit');if(cc&&!o.secret&&Math.random()*100<cc){m*=2;if(R.floats.length<40)floatTxt(o.x+.5,o.y-.35,'✦ CRIT','#ffd84a',.8);}
+ const r=_d(o,amt*m,src);if(r>0)R.mx.dmg+=r;return r;};}
+{const _am=afterMineHit;afterMineHit=function(o){_am(o);if(!R||R.ended)return;R.mx.hits[R.g.mineArm<0?0:1]++;
+ const alive=R.ores.includes(o);const ec=v5gm('echo');if(ec&&alive&&Math.random()*100<ec){damageOre(o,R.st.rawP*.8);if(R.floats.length<40)floatTxt(o.x+.5,o.y-.55,'↻ Echo','#9ef0ff',.75);}
+ const sp=v5gm('splash');if(sp){for(const x of oresIn(o.x+.5,o.y+.5,1.5)){if(x===o||x.boss||x.secret||!oreVisible(x)||!canMine(x))continue;damageOre(x,R.st.rawP*sp/100);}}};}
+{const _b=breakOre;breakOre=function(o){const was=!o.secret&&!o.boss;const prism=o.prism;const tier=o.tier,name=o.name,x=o.x,y=o.y;_b(o);if(!R||!was)return;
+ if(o.hiddenOrig&&mpid()==='rockmole'&&mbond(3))R.v5bonus+=TIERS[tier].price*R.valMul*.15;
+ if(prism)R.v5bonus+=TIERS[tier].price*R.valMul*.2;
+ const rf=v5gm('refund');let extra=rf&&Math.random()*100<rf;if(tier>=5&&mpid()==='lavasnail'&&mbond(3)&&Math.random()<.05)extra=true;
+ if(extra){R.drops.push({x:x+.5,y:y+.5,tier,name,t:0,fly:false,vy:-2});floatTxt(x+.5,y-.2,'+1 '+name,'#ffd84a',.85);}
+ if(v5gm('stride'))R.v5t.stride=3;if(v5gm('breakspd'))R.v5t.bspd=3;};}
+{const _rh=revealHidden;revealHidden=function(o){if(o&&o.hidden)o.hiddenOrig=true;_rh(o);if(R)R.mx.hid++;};}
+{const _bv=bagValue;bagValue=function(){return _bv()+Math.round(R&&R.v5bonus||0);};}
+/* ---------- per-tick: timers, GM scan, modifiers, pet ---------- */
+{const _rt=runTick;runTick=function(dt){if(!R||R.ended)return _rt(dt);const gx=R.g.x,gy=R.g.y;_rt(dt);if(!R||R.ended)return;
+ R.mx.walk+=Math.hypot(R.g.x-gx,R.g.y-gy);const V=R.v5t;V.stride=Math.max(0,V.stride-dt);V.bspd=Math.max(0,V.bspd-dt);
+ const sc=v5gm('scan');if(sc){V.scan-=dt;if(V.scan<=0){V.scan=10;const rr_=Math.max(2,sc/4);let n=0;for(const o of R.ores)if(o.hidden&&gDist(o.x,o.y)<=rr_){revealHidden(o);n++;}if(n)floatTxt(R.g.x,R.g.y-1.7,`📡 Scan +${n}`,'#9ef0ff',.85);}}
+ if(R.mods&&R.mods.includes('distort')&&R.type!=='boss'){V.dist-=dt;if(V.dist<=0){V.dist=20;distortWarp();}}
+ for(let k=V.frz.length-1;k>=0;k--){const f=V.frz[k];f.t-=dt;if(f.t<=0){if(R.map.g[f.i]===T_FLOOR&&!R.oreAt[f.i])R.map.g[f.i]=T_LAVA;R.bgKey='';V.frz.splice(k,1);}}
+ if(R.pet)petStepMine(dt);};}
+function distortWarp(){const g=R.g;if(g.state==='mine'||R.extracting)return;const opts=[];for(let i=0;i<W*H;i++)if(stand(i)&&Math.hypot(i%W+.5-g.x,((i/W)|0)+.5-g.y)>3&&Math.hypot(i%W+.5-g.x,((i/W)|0)+.5-g.y)<7)opts.push(i);if(!opts.length)return;
+ for(let k=0;k<16;k++)part(g.x,g.y,'#c066ff',4,3);const j=opts[Math.floor(Math.random()*opts.length)];g.x=j%W+.5;g.y=((j/W)|0)+.5;g.path=[];g.tgt=null;g.state='idle';g.idleWait=.2;for(let k=0;k<16;k++)part(g.x,g.y,'#ff4fd8',4,3);
+ floatTxt(g.x,g.y-1.5,'🌀 Void Distortion','#e0a0ff',.9);for(const o of R.ores)if(o.hidden&&gDist(o.x,o.y)<2.5)revealHidden(o);if(R.pet){R.pet.x=g.x-.8;R.pet.y=g.y+.2;}}
+function petStepMine(dt){const P_=R.pet,g=R.g;P_.cd=Math.max(0,P_.cd-dt);P_.skill=Math.max(0,P_.skill-dt);P_.happy=Math.max(0,P_.happy-dt);
+ let tx=g.x-.85*(g.face||1),ty=g.y+.25;if(P_.fly){tx=P_.fly.x;ty=P_.fly.y;P_.fly.t-=dt;if(P_.fly.t<=0)P_.fly=null;}
+ const dx=tx-P_.x,dy=ty-P_.y,d=Math.hypot(dx,dy);const sp=Math.max(2.2,R.st.move*1.35)*(P_.fly?2.2:1);
+ if(d>.08){const s_=Math.min(d,sp*dt*(d>3?2:1));P_.x+=dx/d*s_;P_.y+=dy/d*s_;P_.walk=true;P_.ph+=dt*9;if(Math.abs(dx)>.05)P_.face=dx>0?1:-1;}else{P_.walk=false;P_.face=g.face||1;}
+ if(d>8){P_.x=g.x-.8;P_.y=g.y+.2;}
+ if(P_.cd<=0&&!R.extracting&&R.type!=='boss'||P_.cd<=0&&R.type==='boss'&&P_.pid==='gearbeetle'){if(petActMine(P_)){P_.cd=P_.cdMax;P_.skill=.7;P_.uses++;dEvent('petskill',1);S.v5stats.petSkills++;}else P_.cd=1.2;}}
+function petActMine(P_){const pid=P_.pid,g=R.g,pw=1+.15*P_.stage;const col=PETS[pid].c[2];const say=(t)=>floatTxt(P_.x,P_.y-1.1,t,col,.85);
+ switch(pid){
+  case'rockmole':{const r=4+P_.stage*.5;let n=0;for(const o of R.ores){if(o.hidden&&Math.hypot(o.x+.5-P_.x,o.y+.5-P_.y)<=r){revealHidden(o);n++;}if(o.secret&&!o.revealed&&Math.hypot(o.x+.5-P_.x,o.y+.5-P_.y)<=r){o.revealed=true;n++;}}
+   R.efx.push({type:'ring',x:P_.x,y:P_.y,r,t:0,dur:.7,col});for(let k=0;k<14;k++)part(P_.x,P_.y,'#8a7f74',3,3);if(!n)return R.ores.some(o=>o.hidden)?(say('🐾 Burrow Ping'),true):false;say(`🐾 Burrow Ping +${n}`);return true;}
+  case'magnetot':{const r=6;const L=R.drops.filter(d=>!d.fly&&Math.hypot(d.x-g.x,d.y-g.y)<=r&&bagFits(d.tier));if(!L.length)return false;L.forEach(d=>d.fly=true);R.efx.push({type:'ring',x:g.x,y:g.y,r,t:0,dur:.6,col:'#8e6ad8',inward:true});say(`🧲 Magnet Burst ×${L.length}`);return true;}
+  case'prismowl':{const L=R.ores.filter(o=>oreVisible(o)&&!o.secret&&!o.boss&&!o.prism&&canMine(o)).sort((a,b)=>oreValue(b)-oreValue(a)).slice(0,3);if(!L.length)return false;L.forEach(o=>{o.prism=true;R.efx.push({type:'beam',x0:P_.x,y0:P_.y-.6,x1:o.x+.5,y1:o.y+.5,t:0,dur:.5,col:'#ff9df0'});});say('🔮 Prism Scan');return true;}
+  case'gearbeetle':{const o=g.tgt&&g.tgt.kind==='ore'&&R.ores.includes(g.tgt.o)?g.tgt.o:skillTarget(4);if(!o||!canMine(o))return false;P_.fly={x:o.x+.5,y:o.y+.6,t:.5};R.timers.push({t:.3,fn:()=>{if(R&&R.ores.includes(o)){damageOre(o,R.st.rawP*1.5*pw);R.efx.push({type:'spin',x:o.x+.5,y:o.y+.5,t:0,dur:.3,col:'#3fe0ff'});}}});say('⚙ Drill Tap');return true;}
+  case'frostpup':{const cx=Math.floor(P_.x),cy=Math.floor(P_.y);let n=0;for(let y=cy-3;y<=cy+3;y++)for(let x=cx-3;x<=cx+3;x++){if(x<0||y<0||x>=W||y>=H)continue;const i=ix(x,y);if(R.map.g[i]===T_LAVA){R.map.g[i]=T_FLOOR;R.v5t.frz.push({i,t:8});n++;}}
+   if(!n)return false;R.bgKey='';R.efx.push({type:'ring',x:P_.x,y:P_.y,r:3.2,t:0,dur:.7,col:'#bff0ff',fill:true});for(let k=0;k<20;k++)part(P_.x,P_.y,'#e9fbff',5,3);say('❄ Frost Trail');return true;}
+  case'lavasnail':{const o=g.tgt&&g.tgt.kind==='ore'&&R.ores.includes(g.tgt.o)?g.tgt.o:null;if(!o||o.secret)return false;o.crack=R.elapsed+6;R.efx.push({type:'burst',x:o.x+.5,y:o.y+.5,t:0,dur:.5,col:'#ff6a1a',r:1});say('🌋 Molten Crack');return true;}
+  case'driftling':{const L=R.drops.filter(d=>!d.fly&&Math.hypot(d.x-g.x,d.y-g.y)<=3+P_.stage*.5&&bagFits(d.tier));if(!L.length)return false;L.forEach(d=>d.fly=true);R.efx.push({type:'ring',x:g.x,y:g.y,r:3,t:0,dur:.5,col:'#7fffd4',inward:true});say('🌬 Support Pulse');return true;}
+  case'mechafinch':{let best=null;for(const o of R.ores){if(o.secret||o.boss||!o.hidden)continue;if(!best||o.tier>best.tier)best=o;}if(!best){const v=R.ores.filter(o=>oreVisible(o)&&!o.secret&&!o.boss).sort((a,b)=>b.tier-a.tier)[0];if(!v)return false;R.efx.push({type:'ring',x:v.x+.5,y:v.y+.5,r:.9,t:0,dur:1,col:'#ffd84a'});say(`📡 Rare: T${v.tier}`);return true;}
+   revealHidden(best);R.efx.push({type:'ring',x:best.x+.5,y:best.y+.5,r:1,t:0,dur:1,col:'#ffd84a'});say('📡 Signal Chirp!');return true;}}
+ return false;}
+/* ---------- drawing: pet beside golem (y-sorted with the golem) + prism marks + mastery FX on golem ---------- */
+{const _de=drawEnt;drawEnt=function(c,e,T,t){if(e.k!=='g'||!R||!R.pet)return _de(c,e,T,t);const P_=R.pet;const behind=P_.y<=R.g.y;const dp=()=>{const s=T/40*.72;
+  if(P_.syn&&GF().glow!==false){glow(c,P_.x*T,P_.y*T-T*.2,T*.55,PETS[P_.pid].c[2],.18+.08*Math.sin(t*3));}
+  drawPet(c,P_.x*T,P_.y*T+T*.32,s,P_.pid,P_.stage,t,{walk:P_.walk,ph:P_.ph,skill:P_.skill,happy:P_.happy,face:P_.face,syn:P_.syn});
+  if(P_.cd>0&&P_.cdMax){const k=1-P_.cd/P_.cdMax;c.strokeStyle='rgba(255,255,255,.55)';c.lineWidth=2;c.beginPath();c.arc(P_.x*T,P_.y*T-T*.85,T*.1,-Math.PI/2,-Math.PI/2+k*Math.PI*2);c.stroke();}};
+ if(behind)dp();_de(c,e,T,t);if(!behind)dp();
+ if(P_.syn){c.strokeStyle=rgba(PETS[P_.pid].c[2],.25+.15*Math.sin(t*4));c.lineWidth=1.5;c.setLineDash([3,5]);c.lineDashOffset=-t*20;c.beginPath();c.moveTo(P_.x*T,P_.y*T-T*.2);c.lineTo(R.g.x*T,R.g.y*T-T*.5);c.stroke();c.setLineDash([]);}};}
+{const _dv=drawV2Overlay;drawV2Overlay=function(c,T,t,gx,gy){_dv(c,T,t,gx,gy);for(const o of R.ores){if(o.prism&&oreVisible(o)){const X=(o.x+.5)*T,Y=(o.y+.5)*T;c.strokeStyle=`rgba(255,157,240,${.6+.3*Math.sin(t*5)})`;c.lineWidth=2.5;circ(c,X,Y,T*.58);c.stroke();}
+  if(o.crack&&R.elapsed<o.crack){const X=(o.x+.5)*T,Y=(o.y+.5)*T;glow(c,X,Y,T*.6,'#ff6a1a',.35);}}
+ for(const f of R.v5t?R.v5t.frz:[]){const X=(f.i%W)*T,Y=((f.i/W)|0)*T;c.fillStyle=`rgba(190,240,255,${.35*Math.min(1,f.t)})`;c.fillRect(X+2,Y+2,T-4,T-4);}};}
+/* mastery visuals on the mining golem: Lv10 bronze glints · Lv20 silver ring · Lv30 gold aura + crown spark */
+const MPOS={head:[0,-95],core:[0,-56],armL:[-32,-62],armR:[32,-62],legs:[0,-26],back:[0,-50]};
+function mastTierOf(lv){return lv>=30?3:lv>=20?2:lv>=10?1:0;}
+{const _dg=drawGolem;drawGolem=function(c,x,y,s,look,a){_dg(c,x,y,s,look,a);if(!look||!S||!S.partMastery||(a&&a.noMast))return;const t=(a&&a.t)||0;let gm=0;
+ c.save();c.translate(x,y);c.scale(s*((a&&a.face)||1),s);
+ for(const sl in MPOS){const pid=look[sl];if(!pid)continue;const tier=mastTierOf(mLv('m:'+pid));if(!tier)continue;const[px,py]=MPOS[sl];const col=tier===3?'#ffd84a':tier===2?'#dfe7ff':'#d08a4a';
+  if(tier===3){gm++;glow(c,px,py,26,col,.22+.08*Math.sin(t*3+px));}
+  if(tier>=2){c.strokeStyle=rgba(col,.55);c.lineWidth=1.6;c.beginPath();c.ellipse(px,py,18,6,0,t*2%(Math.PI*2),t*2%(Math.PI*2)+Math.PI*1.3);c.stroke();}
+  const k=(t*.8+px*.01+py*.02)%1;sprk(c,px+Math.sin(t*2+py)*12,py-6-k*14,tier===3?4:3,rgba(col,1-k));}
+ if(gm>=6){const k=.5+.5*Math.sin(t*2.4);sprk(c,0,-128-k*4,6,'#ffe14a');glow(c,0,-60,110,'#ffd84a',.10+.05*k);}
+ c.restore();};}
+/* ---------- run end: mastery EXP · pet EXP · shards · AM · daily ---------- */
+function v5RunEnd(kind,ok){if(!R||R.v5done)return null;R.v5done=true;const mined=R.mined||0;const out={mast:{},pet:0,shards:0};
+ if(R.dbg)return out;
+ const look=R.st.look;let base=0;
+ if(kind==='boss')base=ok?90:30;else if(mined>=3)base=Math.min(100,22+2.6*mined)*(ok?1:.7);
+ if(kind==='endless'||kind==='deep')base=Math.min(120,base+10*(R.mx.floors||0));
+ if(base>0){const act={head:R.mx.hid*6+R.mined*.5,core:R.mined,arm:(R.mx.hits[0]+R.mx.hits[1])*.25,legs:R.mx.walk*.4,back:R.mx.haul};
+  const done=new Set();for(const sl of SLOTS){const pid=look[sl];if(!pid)continue;const key='m:'+pid;if(done.has(key))continue;done.add(key);const ty=PART[pid].type;
+   /* role factor 0.85–1.15 so every slot levels at a similar pace while still rewarding its own activity */
+   const a=act[ty]||0,ref=Math.max(1,R.mined);const f=clamp(.85+.3*Math.min(1,a/(ref*(ty==='arm'?2:ty==='legs'?2.5:ty==='head'?1.2:1))),.85,1.15);
+   const n=Math.round(Math.min(120,base*f));const up=addMastExp(key,n);out.mast[key]={n,up};}}
+ /* activity mastery */
+ if(mined>0){let t13=0,t46=0;for(const k in R.bag.items){const it=R.bag.items[k];if(it.tier<=3)t13+=it.count;else t46+=it.count;}if(R.exp)for(const k in R.exp.items){const it=R.exp.items[k];if(it.tier<=3)t13+=it.count;else t46+=it.count;}
+  addAM('crystal',t13*2);addAM('metal',t46*3);addAM('collect',Math.round(mined*1.2));if(kind==='endless'||kind==='deep')addAM('deep',15*(R.mx.floors||0));}
+ /* pet */
+ if(R.pet){const p=petGet(R.pet.uid);if(p){const n=Math.round((12+mined*1.4+(ok?10:0))*(mined>=3||kind==='boss'?1:.2));petExpGain(p,n);out.pet=n;if(ok&&mined>=3){p.bondPts+=2;while(p.bond<5&&p.bondPts>=BOND_NEED[p.bond])p.bond++;}}}
+ dEvent('mine',mined);if(ok&&kind!=='boss'&&mined>=3){dEvent('extract',1);const ctx={d:R.d.id,endless:kind==='endless',floor:R.floor||0};out.shards=petShardEvent('extract',kind==='deep'?3:kind==='endless'?1+Math.floor((R.mx.floors||0)/5):1,ctx);}
+ if(kind==='boss'&&ok){out.shards=petShardEvent('mboss',2,{boss:R.boss.def.id});}
+ if(ok&&R.mods&&R.mods.includes('machine')&&mined>=3){const sc=3+Math.floor(mined/8);S.scrap+=sc;out.scrap=sc;}
+ R.v5out=out;LAST_V5=out;return out;}
+let LAST_V5=null;
+{const _er=endRun;endRun=function(extracted){if(R&&!R.ended&&R.type==='normal')v5RunEnd('normal',!!extracted);return _er(extracted);};}
+{const _eb=endBoss;endBoss=function(win,why){if(R&&!R.ended)v5RunEnd('boss',!!win);return _eb(win,why);};}
+/* save: any legacy ticket reward converts at the fixed V5 rate (gacha removed; never duplicates — balance becomes 0) */
+{const _sv=save;save=function(){if(S){if(S.tickets>0){S.armorBlueprints.frag+=S.tickets*2;S.convLog.tickets+=S.tickets;S.tickets=0;}if(S.combatTickets>0){S.armorBlueprints.frag+=S.combatTickets*2;S.enhancementMaterials.b+=S.combatTickets;S.convLog.ctix+=S.combatTickets;S.combatTickets=0;}}return _sv();};}
+
+/* =====================================================================
+   PART 17/18 · FARMING MODES · DEEP EXPEDITION · ENDLESS BIOMES / CHECKPOINTS / MILESTONES
+   ===================================================================== */
+const QUICK_TIME=180;
+function endlessUnlocked(st){return !!S.cleared.depths||!!S.cleared.rift||(S.endless.best||0)>0;}
+function endlessDef(f){if(R&&R.deep){const d=DMAP[R.deep.did];return Object.assign({},d,{id:d.id,name:d.name,room:'secret',deepFloor:f});}
+ const b=biomeOf(f);const k=BIOMES.indexOf(b);const pal=THEMES[b.th]||THEMES.quarry;const base=k===0?DMAP.quarry.th1:k===1?DMAP.depths.th1:DMAP.rift.th1;
+ return{id:'endless',name:b.n,tiers:b.tiers.slice(),wts:b.wts.slice(),th1:Object.assign({},base,{dark:Math.min(.62,(pal.dark||.4)+(f>100?.06:0))}),hz:{rock:k>=1,slow:k>=1,lava:k===2||k>=4||(k===3&&f%2===0),rails:k===1&&f%3===0},room:k>=1?'secret':null,band:k,biome:b.n};}
+function endlessMods(f,rng){if(R&&R.deep)return R.deep.mods.slice();const pool=['heavy','rush','hidden','heat','shift','rich','rare','gravity','vault','machine','distort','dark'];if(f<=10)return[];const pick=()=>pool.splice(Math.floor(rng()*pool.length),1)[0];
+ if(f<=40)return[pick()];if(f<=100)return[pick(),pick()];return[pick(),pick(),pick()];}
+function endlessGoal(f){if(R&&R.deep)return 10+R.deep.floor*2;if(f<=10)return 5+Math.round((f-1)/3);if(f<=40)return 8+Math.round((f-10)/10);if(f<=100)return 11+Math.round((f-40)/30);return 13;}
+function endlessHp(f){if(R&&R.deep)return 1+.12*(R.deep.floor-1);return Math.min(3.5,1+.025*(f-1));}
+{const _tk=themeKey;themeKey=function(){if(R&&R.deep)return THEMES[R.deep.did]?R.deep.did:'quarry';if(R&&R.type==='endless'&&R.floor){const b=biomeOf(R.floor);return THEMES[b.th]?b.th:'quarry';}return _tk();};}
+{const _lf=loadEndlessFloor;loadEndlessFloor=function(){_lf();if(!R)return;if(R.deep){R.time=QUICK_TIME;}else{R.time=90+.5*amB('deep');}if(v5gm('timeup'))R.time+=v5gm('timeup');R.bgKey='';R.map.props=null;
+ if(R.pet){R.pet.x=R.g.x-.8;R.pet.y=R.g.y+.2;}R.v5t.frz=[];};}
+function startEndless(floor,force){floor=Math.max(1,+floor||1);const st=calcStats(S.equip);if(!force&&!endlessUnlocked(st)){toast('ยังไม่ปลดล็อก Endless Mine (ผ่าน Iron Depths ก่อน)','err');return;}
+ if(!force&&floor>1&&!(floor<=S.endlessCheckpoints.max&&(floor-1)%5===0)){toast('ยังไม่ปลดล็อก Checkpoint นี้','err');return;}
+ const seed=Math.floor(Math.random()*1e9);const d=endlessDef(floor);const m=genDungeon(d,seed,{maxTier:st.maxTier,need:6});
+ initRun('endless',d,m,st,{seed,time:90});R.floor=floor;R.startFloor=floor;R.exp={items:{},val:0};R.pendShards=0;R.deep=null;loadEndlessFloor();
+ enterView(`🕳 Endless B${floor} · ${biomeOf(floor).n}`);toast(`🕳 Endless เริ่มที่ B${floor} (${biomeOf(floor).n}) — ขุด ${R.goal} ก้อนเพื่อผ่านชั้น`,'ok');}
+/* Deep Expedition: 4 floors of one dungeon (≈12 min), ores accumulate into ONE pending claim; continue or extract after each floor */
+const DEEP_FLOORS=4;
+function startDeep(did){const d=DMAP[did];if(!d||!S.unlocked[did]){toast('ยังไม่ปลดล็อกดันเจี้ยนนี้','err');return;}const st=calcStats(S.equip);weeklyRefresh();const th=weekTheme();
+ const seed=Math.floor(Math.random()*1e9);const mods=th.mods.slice(0,2);const m=genChecked(d,seed,{mods,maxTier:st.maxTier,need:10});
+ initRun('endless',d,m,st,{seed,time:QUICK_TIME});R.deep={did,mods,floor:1,theme:th.id};R.floor=1;R.startFloor=1;R.exp={items:{},val:0};R.pendShards=0;loadEndlessFloor();
+ enterView(`🧭 Deep Expedition · ${d.name} 1/${DEEP_FLOORS}`);toast(`🧭 Deep Expedition: ${d.name} · ${th.i} ${th.n} — ชั้น 1/${DEEP_FLOORS}`,'ok');}
+{const _fc=floorComplete;floorComplete=function(){if(!R)return;R.mx.floors=(R.mx.floors||0)+1;dEvent('floor',1);
+ if(R.deep){R.floorDone=true;const f=R.deep.floor;sfx('upgrade');R.deep.cleared=f;if(f>=DEEP_FLOORS){toast(`🏁 Deep Expedition ครบ ${DEEP_FLOORS} ชั้น! กด ⇪ Extract เพื่อรับรางวัลทั้งหมด`,'gold');}else toast(`✅ ชั้น ${f}/${DEEP_FLOORS} ผ่าน! ⬇ ลงต่อ หรือ ⇪ Extract (เก็บทุกอย่างเป็น 1 รางวัล)`,'gold');updateHudButtons();save();return;}
+ const f=R.floor;_fc();
+ if(f%5===0){const cp=f+1;if(cp>S.endlessCheckpoints.max){S.endlessCheckpoints.max=cp;const rw={coins:150*f/5,petTreat:1};const t=giveV5(rw);setTimeout(()=>toast(`🚩 Checkpoint B${cp} ปลดล็อก (เริ่มจากชั้นนี้ได้) · ${t}`,'gold'),900);}}
+ if(f%10===0&&EMS5[f]&&!S.endlessMs5.includes(f)){S.endlessMs5.push(f);const t=giveV5(EMS5[f]);if(EMS5[f].petShard)petShardEvent('endlessms',0,{});setTimeout(()=>toast(`🏅 Milestone B${f}: ${t}`,'gold'),1400);S.notes.push({t:Date.now(),k:'ems',txt:`🏅 Endless B${f}: ${t}`});}
+ save();};}
+{const _ds=descend;descend=function(){if(R&&R.deep){if(!R.floorDone||R.ended)return;if(R.deep.floor>=DEEP_FLOORS){toast('ครบทุกชั้นแล้ว — กด Extract','err');return;}
+  for(const k in R.bag.items){const it=R.bag.items[k];const e=R.exp.items[k]||(R.exp.items[k]={tier:it.tier,count:0});e.count+=it.count;}R.exp.val+=R.bag.val;R.bag={items:{},w:0,res:0,val:0};
+  R.deep.floor++;R.floor=R.deep.floor;loadEndlessFloor();$('#hName').textContent=`🧭 Deep ${DMAP[R.deep.did].name} ${R.deep.floor}/${DEEP_FLOORS}`;toast(`⬇ ชั้น ${R.deep.floor}/${DEEP_FLOORS} — ขุด ${R.goal} ก้อน · แร่ HP +${Math.round((endlessHp()-1)*100)}%`,'ok');sfx('upgrade');return;}
+ return _ds();};}
+{const _ee=endEndless;endEndless=function(extracted){if(!R||R.ended)return;const deep=R.deep;v5RunEnd(deep?'deep':'endless',!!extracted);
+ if(deep){/* deep bonus on extract: fragments by floors cleared; weekly progress when all floors cleared */const fl=deep.cleared||0;
+  if(extracted&&fl>0){const bpf=fl+(fl>=DEEP_FLOORS?2:0);S.armorBlueprints.frag+=bpf;R.v5out.bpf=bpf;weeklyRefresh();if(fl>=DEEP_FLOORS){S.weeklyProgress.runs++;}}
+  R.pendShards=0;}
+ return _ee(extracted);};}
+{const _ser=showEndlessResult;showEndlessResult=function(r){_ser(r);};}
+/* ---------- quick mining time + modifier pool + 'rare' weights ---------- */
+function dungeonMod(did){if(S.dbgMod&&S.dbgMod[did])return S.dbgMod[did];const pool=['normal','heavy','rush','hidden','heat','shift','rich','rare','gravity','vault','machine','distort','dark'];
+ const base=Math.floor(mulberry32(weekKey()*7919+11)()*pool.length);const i=DUNGEONS.findIndex(d=>d.id===did);return pool[(base+i*3)%pool.length];}
+for(const k of['rich','rare','gravity','vault','machine','distort','dark'])if(!MOD_IDS.includes(k))MOD_IDS.push(k);
+/* ---------- retro: veterans keep Endless progress → checkpoints + milestones up to their best floor (one-time, no duplicates) ---------- */
+function v5EndlessRetro(){if(S.endlessCheckpoints.retro)return;S.endlessCheckpoints.retro=true;const best=S.endless.best||0;if(best>=5)S.endlessCheckpoints.max=Math.max(S.endlessCheckpoints.max,Math.floor(best/5)*5+1);
+ const got=[];for(let f=10;f<=best;f+=10){if(EMS5[f]&&!S.endlessMs5.includes(f)){S.endlessMs5.push(f);got.push(giveV5(EMS5[f]));}}if(got.length)S.notes.push({t:Date.now(),k:'ems',txt:`🏅 V5 Endless Milestones (ย้อนหลังถึง B${best}) ×${got.length}`});
+ if(S.settings.runTime===150)S.settings.runTime=QUICK_TIME;}
+/* contracts → pet egg shards (Gearbeetle: Mining Contracts · Emberfox/Aegishell: Combat Contracts) */
+{const _c=ctClaim;ctClaim=function(i){const a=S.contracts.active[i];const ok=a&&a.done;const r=_c(i);if(ok){const n=petShardEvent('contract',2,{});if(n)toast(`🥚 +${n} ${PETS[S.petTarget].n} Shard`,'ok');}return r;};}
+{const _c=ccClaim;ccClaim=function(id){const before=S.combatContracts.claimed.length;const r=_c(id);if(S.combatContracts.claimed.length>before){const n=petShardEvent('ccontract',2,{});if(n)toast(`🥚 +${n} ${PETS[S.petTarget].n} Shard`,'ok');}return r;};}
+
+/* =====================================================================
+   V5.0 COMBAT RUNTIME — Grandmaster effects · Lv20 paths · combat pets · boss ranks ·
+   guaranteed Boss Core Fragments · mastery / pet / activity EXP
+   ===================================================================== */
+function cgm(k){return CB&&CB.st&&CB.st.gm?CB.st.gm[k]||0:0;}
+function cpf(k){return CB&&CB.st&&CB.st.pfx?CB.st.pfx[k]||0:0;}
+function cpid(){return CB&&CB.pet?CB.pet.pid:null;}
+function cbond(n){return CB&&CB.pet&&CB.pet.bond>=n;}
+{const _sc=startCombat;startCombat=function(type,bid,o={}){const r=_sc(type,bid,o);if(!r||!CB)return r;
+ CB.v5={bh:0,aeg:cgm('aegis')||0,wpm:cgm('wpmark')||0,reg:0,mx:{dmg:0,taken:0,dodge:0,skill:0},teleSeen:new WeakSet(),warn:0};
+ /* boss rank (Normal / Hard / Nightmare) */
+ let rank=o.rank!=null?o.rank:(type==='boss'?(o.sim?(window.V5SIMRANK||0):(S.bossRank[bid]||0)):0);rank=clamp(rank|0,0,2);if(type!=='boss')rank=0;CB.rank=rank;
+ if(rank&&CB.boss){const B=BRANK[rank];CB.boss.mhp=Math.round(CB.boss.mhp*B.hp);CB.boss.hp=CB.boss.mhp;}
+ const p=CB.st.cpet;if(p&&PETS[p.pid]){const syn=petSyn(p,'combat');CB.pet={uid:p.uid,pid:p.pid,stage:p.stage,bond:p.bond,lv:p.lv,x:CB.p.x-1,y:CB.p.y+.4,face:1,ph:0,cd:petCd(p,syn)*.5,cdMax:petCd(p,syn),syn,skill:0,happy:0,walk:false,uses:0,lunge:null};}
+ return r;};}
+/* ---------- damage hooks ---------- */
+{const _he=hitEnemy;hitEnemy=function(e,o){if(!CB||!e)return _he(e,o);o=Object.assign({},o);const isBoss=e===CB.boss;let m=o.m==null?1:o.m;
+ if(o.src==='basic'){const cl=cgm('cleave');if(cl&&(e.stagT>0||e.frozen>0))m*=1+cl/100;}
+ const wpOn=isBoss&&(e.wpOpen>0||o.wp);if(wpOn){let w=cpf('wp');if(cpid()==='crystare'&&cbond(3))w+=12;if(w)m*=1+w/100;}
+ if(isBoss&&e.v5mark>CB.t&&cpid()==='voidbat')m*=1.1;if(e.burn>0&&cpid()==='emberfox'&&cbond(3))m*=1.08;
+ if(isBoss)m*=1+.005*amB('hunter');
+ o.m=m;const d=_he(e,o);if(d>0){CB.v5.mx.dmg+=d;
+  if(o.src==='basic'){CB.v5.bh++;const cb=cgm('combo');if(cb&&CB.v5.bh%Math.max(2,Math.round(cb))===0&&!e.dead){CB.timers.push({t:.06,fn:()=>{if(!e.dead){_he(e,{m:.8,src:'proc',stg:4});fxAdd({type:'ring',x:e.x,y:e.y,r:1.2,t:0,dur:.3,col:'#ffd84a'});}}});}
+   if(cpid()==='emberfox'&&Math.random()<.12)addStatus(e,'burn',1);}}
+ return d;};}
+{const _as=addStatus;addStatus=function(e,k,n=1){if(k==='shock'&&cpid()==='boltcub')n+=1;return _as(e,k,n);};}
+{const _gs=giveShield;giveShield=function(frac){return _gs(frac*(1+cpf('shield')/100));};}
+{const _dp=damagePlayer;damagePlayer=function(raw,el,o={}){if(!CB)return _dp(raw,el,o);o=Object.assign({},o);
+ if(CB.rank)raw*=BRANK[CB.rank].dmg;if((o.stun||o.kb)&&cpid()==='titanpup'&&cbond(3))raw*=.8;if(o.stun&&cpid()==='aegishell'&&cbond(3)&&CB.p.shield>0)o.stun=0;
+ const d=_dp(raw,el,o);if(d>0){CB.v5.mx.taken+=d;const th=cgm('thorns');if(th&&CB.boss&&!CB.boss.dead){const rf=Math.round(d*th/100);CB.boss.hp-=rf;CB.stats.dmg+=rf;if(CB.boss.hp<=0)enemyDie(CB.boss);}}return d;};}
+{const _ds=dodgeSuccess;dodgeSuccess=function(...a){const r=_ds(...a);if(!CB)return r;CB.v5.mx.dodge++;dEvent('dodge',1);const ct=cgm('counter');if(ct){const e=nearestEnemy(4);if(e){CB.timers.push({t:.12,fn:()=>{if(CB&&!e.dead){hitEnemy(e,{m:ct,src:'proc',stg:8});fxAdd({type:'slash',x:CB.p.x,y:CB.p.y,tx:e.x,ty:e.y,t:0,dur:.2,col:'#ffd84a',hand:1});}}});}}
+ if(cpid()==='voidbat'&&cbond(3))CB.p.nextAtkBonus=Math.max(CB.p.nextAtkBonus||0,.3);return r;};}
+{const _pa=pAS;pAS=function(){let a=_pa();if(CB&&hasB('boltb'))a+=.15;return a;};}
+{const _us=useCSkill;useCSkill=function(...a){const r=_us(...a);if(CB&&CB.v5)CB.v5.mx.skill++;return r;};}
+/* ---------- per-step: regen / aegis / wp mark / pet / boss telegraph warning ---------- */
+{const _st=cbStep;cbStep=function(dt){_st(dt);if(!CB||CB.paused||CB.intro>0||CB.ended)return;const p=CB.p,V=CB.v5;if(!V||p.dead)return;
+ const rg=cgm('regen');if(rg){V.reg+=dt;if(V.reg>=3){V.reg=0;if(p.hp<p.mhp){const h=Math.round(p.mhp*rg/100);p.hp=Math.min(p.mhp,p.hp+h);if(!CB.sim)floatTxtC(p.x,p.y-2,'+'+h,'#52e08a',.8);}}}
+ if(V.aeg){V.aegT=(V.aegT||0)+dt;if(V.aegT>=V.aeg){V.aegT=0;giveShield(.08);if(!CB.sim)fxAdd({type:'ring',x:p.x,y:p.y,r:1.1,t:0,dur:.35,col:'#8fd3ff'});}}
+ if(V.wpm&&CB.boss&&!CB.boss.dead){V.wpT=(V.wpT||0)+dt;if(V.wpT>=V.wpm){V.wpT=0;CB.boss.wpOpen=Math.max(CB.boss.wpOpen||0,2);if(!CB.sim)floatTxtC(CB.boss.x,CB.boss.y-2.4,'◎ WEAK POINT','#ff9df0',1);}}
+ /* mechafinch: passive +0.12 s on every boss telegraph, +0.25 s while Signal Chirp is active */
+ if(cpid()==='mechafinch'){V.warn=Math.max(0,V.warn-dt);for(const T of CB.teles){if(V.teleSeen.has(T))continue;V.teleSeen.add(T);T.dur+=.12+(V.warn>0?.25:0);}}
+ if(CB.pet)petStepC(dt);};}
+function petStepC(dt){const P_=CB.pet,p=CB.p;P_.cd=Math.max(0,P_.cd-dt);P_.skill=Math.max(0,P_.skill-dt);P_.happy=Math.max(0,P_.happy-dt);
+ let tx=p.x-1.1*(p.face||1),ty=p.y+.5;if(P_.lunge){tx=P_.lunge.x;ty=P_.lunge.y;P_.lunge.t-=dt;if(P_.lunge.t<=0)P_.lunge=null;}
+ const dx=tx-P_.x,dy=ty-P_.y,d=Math.hypot(dx,dy);const sp=Math.max(4,CB.st.move*1.2)*(P_.lunge?2.5:1);if(d>.08){const s_=Math.min(d,sp*dt*(d>3?2:1));P_.x+=dx/d*s_;P_.y+=dy/d*s_;P_.walk=true;P_.ph+=dt*9;if(Math.abs(dx)>.05)P_.face=dx>0?1:-1;}else{P_.walk=false;P_.face=p.face||1;}
+ P_.x=clamp(P_.x,.4,AW-.4);P_.y=clamp(P_.y,.6,AH-.3);
+ if(P_.cd<=0){if(petActC(P_)){P_.cd=P_.cdMax;P_.skill=.7;P_.uses++;if(!CB.sim){dEvent('petskill',1);S.v5stats.petSkills++;}}else P_.cd=.6;}}
+function petActC(P_){const pid=P_.pid,p=CB.p,pw=1+.15*P_.stage+.04*(P_.lv-1);const e=CB.boss&&!CB.boss.dead&&!CB.boss.gone?CB.boss:nearestEnemy(12);const col=PETS[pid].c[2];const say=t=>{if(!CB.sim)floatTxtC(P_.x,P_.y-1.4,t,col,.85);};
+ switch(pid){
+  case'emberfox':{if(!e)return false;fxAdd({type:'bolt',x:P_.x,y:P_.y-.4,tx:e.x,ty:e.y,t:0,dur:.25,col:'#ff7a2a'});CB.timers.push({t:.15,fn:()=>{if(!e.dead){hitEnemy(e,{m:1.2*pw,src:'proc',stg:4,el:'fire'});addStatus(e,'burn',2);}}});say('🔥 Foxfire');return true;}
+  case'boltcub':{if(!e)return false;P_.lunge={x:e.x-(e.r||1)*.8,y:e.y+.3,t:.35};CB.timers.push({t:.25,fn:()=>{if(!e.dead){hitEnemy(e,{m:1.5*pw,src:'proc',stg:6,el:'shock'});addStatus(e,'shock',2);fxAdd({type:'zap',x:e.x,y:e.y,t:0,dur:.35});}}});say('⚡ Chain Pounce');
+   if(cbond(3)&&CB.v5.bh>=10){buff('boltb',4);CB.v5.bh=0;}return true;}
+  case'aegishell':{if(p.hp>p.mhp*.7)return false;giveShield(.15);fxAdd({type:'ring',x:p.x,y:p.y,r:1.4,t:0,dur:.45,col:'#8fd3ff'});say('🛡 Shell Barrier');return true;}
+  case'voidbat':{if(!CB.boss||CB.boss.dead)return false;const b=CB.boss;b.v5mark=CB.t+3;b.wpOpen=Math.max(b.wpOpen||0,3);fxAdd({type:'ring',x:b.x,y:b.y,r:1.6,t:0,dur:.5,col:'#ff4fd8'});say('🦇 Abyss Tag');return true;}
+  case'crystare':{if(!e)return false;fxAdd({type:'bolt',x:P_.x,y:P_.y-.5,tx:e.x,ty:e.y,t:0,dur:.3,col:'#c9a7ff'});CB.timers.push({t:.12,fn:()=>{if(!e.dead)hitEnemy(e,{m:2*pw,src:'proc',crit:true,stg:6});}});say('💎 Prism Lance');return true;}
+  case'titanpup':{if(!CB.boss||CB.boss.dead)return false;const b=CB.boss;hitEnemy(b,{m:.3,stg:25*pw,src:'proc'});fxAdd({type:'ring',x:P_.x,y:P_.y,r:2.2,t:0,dur:.5,col:'#ff9a3c'});CB.shake=Math.max(CB.shake,.2);say('🦁 Titan Roar');return true;}
+  case'driftling':{giveShield(.08);fxAdd({type:'ring',x:p.x,y:p.y,r:1.2,t:0,dur:.4,col:'#7fffd4'});say('🌬 Support Pulse');return true;}
+  case'mechafinch':{if(!CB.boss||CB.boss.dead)return false;CB.v5.warn=6;say('📡 Signal Chirp');return true;}
+  /* mining pets cannot be equipped in combat (petCanMode) */}
+ return false;}
+{const _dpc=drawPlayerC;drawPlayerC=function(c,x,y,s,dt,alpha){if(!CB||!CB.pet)return _dpc(c,x,y,s,dt,alpha);const P_=CB.pet;const behind=P_.y<=CB.p.y;const t=GT;
+ const dp=()=>{const[px,py]=W2S(P_.x,P_.y);const ps=AV.T/40*.8;if(P_.syn)glow(c,px,py-AV.T*.3,AV.T*.7,PETS[P_.pid].c[2],.2+.08*Math.sin(t*3));drawPet(c,px,py,ps,P_.pid,P_.stage,t,{walk:P_.walk,ph:P_.ph,skill:P_.skill,happy:P_.happy,face:P_.face,syn:P_.syn});
+  if(P_.cd>0){const k=1-P_.cd/P_.cdMax;c.strokeStyle='rgba(255,255,255,.55)';c.lineWidth=2;c.beginPath();c.arc(px,py-AV.T*1.05,AV.T*.12,-Math.PI/2,-Math.PI/2+k*Math.PI*2);c.stroke();}};
+ if(behind)dp();_dpc(c,x,y,s,dt,alpha);if(!behind)dp();};}
+/* armor mastery visuals (Lv10/20/30) on the armored golem */
+const CPOS={helm:[0,-97],chest:[0,-58],gL:[-34,-62],gR:[34,-62],legs:[0,-26],back:[0,-52]};
+{const _da=drawArmored;drawArmored=function(c,x,y,s,L,a){_da(c,x,y,s,L,a);if(!L||!S||!S.partMastery||(a&&a.noMast))return;const t=(a&&a.t)||0;let gm=0;c.save();c.translate(x,y);c.scale(s*((a&&a.face)||1),s);
+ for(const sl in CPOS){const aid=L[sl];if(!aid||!ARMOR[aid])continue;const tier=mastTierOf(mLv('c:'+aid));if(!tier)continue;const[px,py]=CPOS[sl];const col=tier===3?'#ffd84a':tier===2?'#dfe7ff':'#d08a4a';
+  if(tier===3){gm++;glow(c,px,py,26,col,.22+.08*Math.sin(t*3+px));}if(tier>=2){c.strokeStyle=rgba(col,.55);c.lineWidth=1.6;c.beginPath();c.ellipse(px,py,18,6,0,t*2%(Math.PI*2),t*2%(Math.PI*2)+Math.PI*1.3);c.stroke();}
+  const k=(t*.8+px*.01+py*.02)%1;sprk(c,px+Math.sin(t*2+py)*12,py-6-k*14,tier===3?4:3,rgba(col,1-k));}
+ if(gm>=6){const k=.5+.5*Math.sin(t*2.4);sprk(c,0,-130-k*4,6,'#ffe14a');}c.restore();};}
+/* ---------- rewards: boss core fragments (guaranteed) · rank multiplier ---------- */
+const BOSS_CORE={sentinel:'iron',warlord:'magma',tyrant:'void',raid:'magma'};
+{const _gb=grantBossReward;grantBossReward=function(bid,fightId,info){const g=_gb(bid,fightId,info);if(!g)return g;const rank=CB&&CB.rank||0;const core=BOSS_CORE[bid];const n=[2,3,5][rank];addCoreFrag(core,n);
+ let extra=`🧩 ${BCORE[core].n} Fragment ×${n}`;if(rank){const B=BRANK[rank];const bonus=Math.round((g.rw.coins||0)*(B.rw-1));S.coins+=bonus;const bf=rank;S.armorBlueprints.frag+=bf;extra+=` · ${B.i} ${B.n}: +🪙${fmt(bonus)} +📄${bf}`;}
+ const R_=S.bossRank;const key='max_'+bid;if((R_[key]||0)<Math.min(2,rank+1)){R_[key]=Math.min(2,rank+1);extra+=` · 🔓 ปลดล็อกระดับ ${BRANK[R_[key]].n}`;}
+ g.txt=(g.txt?g.txt+' · ':'')+extra;save();return g;};}
+function bossRankMax(bid){return S.bossRank['max_'+bid]||0;}
+function setBossRank(bid,r){r=clamp(+r|0,0,bossRankMax(bid));S.bossRank[bid]=r;save();if(modalRefresh)modalRefresh();}
+/* ---------- end of fight: mastery EXP per armor design (deduped gauntlets), pet EXP, shards, activity mastery ---------- */
+function v5CombatEnd(win){if(!CB||CB.sim||CB.v5done||!CB.v5)return null;CB.v5done=true;const out={mast:{},pet:0,shards:0};const V=CB.v5.mx;const t=CB.t;const train=CB.type==='train';
+ let base=0;if(train){base=V.dmg>=1500?Math.min(20,6+V.dmg/2000):0;}else if(CB.type==='boss'||CB.type==='raid'){base=win?80+CB.rank*20:Math.min(40,10+t/6);}
+ if(base>0){const st=CB.st;const act={helm:CB.stats.crits*2,chest:V.taken/Math.max(1,st.hp)*40+CB.stats.ults*10,gaunt:CB.stats.hits*.3+V.skill*4,legs:V.dodge*6+3,back:V.taken/Math.max(1,st.hp)*30+V.skill*3};
+  const seen=new Set();for(const sl of CSLOTS){const i=st.pieces[sl];if(!i)continue;if(seen.has(i.aid))continue;seen.add(i.aid);const ty=ARMOR[i.aid].type;const a=act[ty]||0;const f=clamp(.85+.3*Math.min(1,a/40),.85,1.15);
+   const n=Math.round(Math.min(120,base*f));const up=addMastExp('c:'+i.aid,n);out.mast['c:'+i.aid]={n,up};}}
+ if(!train||V.dmg>=1500){addAM('weapon',Math.round(V.dmg/400));addAM('defense',Math.round(V.taken/60));addAM('dodge',V.dodge*4);if(CB.type==='boss'||CB.type==='raid')addAM('hunter',win?40:10);addAM('elemental',Math.round((CB.stats.by['dot:fire']||0)/300));}
+ if(CB.pet){const p=petGet(CB.pet.uid);if(p){const n=Math.round(train?Math.min(15,V.dmg/800):(win?40:15)+t/10);petExpGain(p,n);out.pet=n;if(win&&!train){p.bondPts+=3;while(p.bond<5&&p.bondPts>=BOND_NEED[p.bond])p.bond++;}}}
+ if(win&&(CB.type==='boss'||CB.type==='raid')){dEvent('bosswin',1);out.shards=petShardEvent(CB.type==='raid'?'raidwin':'bosswin',2+CB.rank,{boss:CB.bid});}
+ if(train&&V.dmg>0)out.shards=petShardEvent('train',V.dmg>=5000?1:0,{dmg:V.dmg});
+ LAST_V5=out;return out;}
+{const _ec=endCombat;endCombat=function(win,why){if(CB&&!CB.ended&&!CB.sim)v5CombatEnd(!!win);return _ec(win,why);};}
+{const _tx=trainExit;trainExit=function(...a){if(CB&&!CB.ended&&!CB.sim)v5CombatEnd(false);return _tx(...a);};}
+
+/* =====================================================================
+   V5.0 UI (1/2) — 5-tab navigation (HOME / GOLEM / ADVENTURE / WORKSHOP / PET) + secondary menu,
+   responsive layout (desktop 3 col · tablet 2 col · mobile stacked + bottom nav + bottom sheets),
+   home notifications, pre-activity info, Quick / Deep / Endless selection, boss ranks
+   ===================================================================== */
+const V5CSS=`
+.ws.v5{grid-template-columns:330px minmax(0,1fr) 330px;grid-template-areas:"nav main side";max-width:1680px;align-items:start}
+.ws.v5>.v5pane{grid-area:nav;min-width:0}.ws.v5>.v5main{grid-area:main;min-width:0}.ws.v5>.side{grid-area:side}
+.v5tabs{display:flex;gap:6px;margin-bottom:10px;background:rgba(10,15,28,.6);border:1px solid var(--line);border-radius:14px;padding:5px}
+.v5tabs button{flex:1 1 0;min-width:0;padding:0 1px;letter-spacing:-.3px;min-height:46px;border-radius:10px;font-weight:700;font-size:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;color:var(--muted);position:relative;background:none;border:0}
+.v5tabs button .e{font-size:19px;line-height:1}.v5tabs button.on{background:linear-gradient(180deg,#2c4277,#1d2c52);color:#fff;box-shadow:inset 0 0 0 1px #4a6ab0}
+.v5tabs .dot{position:absolute;top:4px;right:10px;width:8px;height:8px;border-radius:50%;background:var(--red);box-shadow:0 0 6px var(--red)}
+.v5more{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}.v5more button{flex:1 1 30%;min-height:40px;font-size:12px;padding:4px 6px;border-radius:10px;background:var(--panel2);border:1px solid var(--line);color:var(--text)}
+.v5sec{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:10px}
+.v5sec h3{margin:0 0 8px;font-size:15px;display:flex;align-items:center;gap:6px;justify-content:space-between}
+.v5big{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.v5big button{min-height:64px;border-radius:14px;background:linear-gradient(180deg,#22325a,#19254a);border:1px solid var(--line);color:var(--text);font-weight:700;font-size:13px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px;text-align:center;position:relative}
+.v5big button .e{font-size:22px}.v5big button small{font-weight:500;color:var(--muted);font-size:10.5px;line-height:1.2}
+.v5big button.hot{background:linear-gradient(180deg,#ffd35e,#e09a1c);color:#2a1700;border-color:#ffe08a}.v5big button.hot small{color:#5a3a00}
+.v5big button.red{background:linear-gradient(180deg,#c8344a,#8a1d2e);border-color:#ff7a8a}
+.v5big button.wide{grid-column:1/-1}
+.v5big .badge{position:absolute;top:5px;right:7px;background:var(--red);color:#fff;border-radius:9px;font-size:10px;padding:0 6px}
+.v5note{display:flex;gap:8px;align-items:center;padding:7px 9px;border-radius:11px;background:#111a31;border:1px solid var(--line);margin-bottom:6px;font-size:12.5px}
+.v5note .ic{font-size:18px;width:24px;text-align:center}.v5note .tx{flex:1;min-width:0}.v5note.gold{border-color:#a8801c;background:#2a2210}.v5note.cy{border-color:#2a6a8a}
+.dq{padding:7px 9px;border-radius:11px;background:#111a31;border:1px solid var(--line);margin-bottom:6px;font-size:12.5px}
+.dq .row{display:flex;justify-content:space-between;gap:6px;align-items:center}.dq .bar{margin:5px 0 0}
+.wl{padding:8px;border-radius:12px;background:#111a31;border:1px solid var(--line);margin-bottom:6px;font-size:12px}
+.wl.ready{border-color:var(--green);box-shadow:0 0 0 1px rgba(82,224,138,.35),0 0 14px rgba(82,224,138,.15)}
+.wl .hd{display:flex;gap:8px;align-items:center}.wl img{width:38px;height:38px;border-radius:8px;background:#0e1527}
+.wl .miss{color:#ffb3c0}.wl .ok{color:var(--green)}
+.mchip{display:flex;align-items:center;gap:4px;font-size:10.5px;color:#ffe9a8;margin-top:3px;min-width:0}
+.mchip .mb{flex:1;height:4px;border-radius:3px;background:#0b1222;overflow:hidden;min-width:30px}.mchip .mb i{display:block;height:100%;background:linear-gradient(90deg,#d08a4a,#ffd84a)}
+.mchip.t2{color:#e9f0ff}.slot,.gslot,.wcard,.pc{position:relative}.slot .mchip,.gslot .mchip,.wcard .mchip{position:absolute;right:7px;bottom:4px;margin:0;font-size:10px}.slot .mchip .mb,.gslot .mchip .mb,.wcard .mchip .mb{width:26px;flex:0 0 26px;min-width:0}.pc .mchip{margin-top:4px}.mchip.t3{color:#ffd84a;font-weight:800}
+.petmini{display:flex;gap:8px;align-items:center}.petmini canvas{width:64px;height:64px;border-radius:12px;background:radial-gradient(circle at 50% 70%,#1d2c52,#0b1222)}
+.rankrow{display:flex;gap:4px;margin:6px 0}.rankrow button{flex:1;min-height:34px;font-size:11.5px;border-radius:9px;background:#141e38;border:1px solid var(--line);color:var(--text)}
+.rankrow button.on{background:linear-gradient(180deg,#7a2a3a,#4a1624);border-color:#ff7a8a}.rankrow button:disabled{opacity:.4}
+.pre{font-size:12px;color:var(--muted);background:#0e1527;border-radius:10px;padding:6px 8px;margin:6px 0}.pre b{color:var(--text)}
+.mpanel .mstone{display:flex;gap:6px;align-items:flex-start;padding:5px 7px;border-radius:9px;margin-bottom:4px;background:#111a31;font-size:12px}
+.mpanel .mstone.on{background:#1d2a14;border:1px solid #4a7a2a}.mpanel .mstone .lv{min-width:42px;font-weight:800;color:#ffd84a}
+.pathc{display:grid;grid-template-columns:1fr 1fr;gap:8px}.pathc button{min-height:74px;border-radius:12px;background:#141e38;border:1px solid var(--line);color:var(--text);padding:6px;text-align:left;font-size:12px}
+.pathc button.on{border-color:#ffd84a;background:#2a2410}
+.wtabs{display:flex;gap:4px;overflow-x:auto;margin-bottom:10px;padding-bottom:2px}.wtabs button{flex:0 0 auto;min-height:40px;padding:4px 12px;border-radius:10px;background:#141e38;border:1px solid var(--line);color:var(--muted);font-weight:700;font-size:12.5px}
+.wtabs button.on{background:linear-gradient(180deg,#2c4277,#1d2c52);color:#fff;border-color:#4a6ab0}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.fpart{border:2px solid var(--line);border-radius:12px;background:#111a31;padding:6px;text-align:center;font-size:11.5px;color:var(--text);min-height:44px;position:relative}
+.fpart img{width:64px;height:64px}.fpart.on{box-shadow:0 0 0 2px #ffd84a}.fpart .lk{position:absolute;top:4px;right:6px}
+.petgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.petc{border:2px solid var(--line);border-radius:14px;background:#111a31;padding:6px;text-align:center;font-size:12px;color:var(--text);position:relative}
+.petc canvas{width:100%;height:100px}.petc.own{border-color:#4a7ab0}.petc.eq{box-shadow:0 0 0 2px var(--gold)}.petc .ty{font-size:10px;color:var(--muted)}
+.pdetail{display:grid;grid-template-columns:260px minmax(0,1fr);gap:12px}.pdetail canvas{width:100%;height:220px;border-radius:14px;background:radial-gradient(circle at 50% 75%,#24386a,#0b1222)}
+.runeinv{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}
+.rune{border:1px solid var(--line);border-radius:12px;background:#111a31;padding:8px;font-size:12px}
+.sockl{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px}
+.sock{display:flex;gap:6px;align-items:center;border:1px solid var(--line);border-radius:10px;background:#111a31;padding:5px;font-size:11.5px}.sock img{width:36px;height:36px}
+@media (min-width:1200px){.ws.v5 .stage{grid-template-columns:175px minmax(0,1fr) 175px}}
+body:has(#modal:not(.hidden)) .v5tabs{display:none}
+#petName{background:#0e1527;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:4px 8px}
+@media (max-width:1199px){.ws.v5{grid-template-columns:minmax(0,1fr) 320px;grid-template-areas:"main side" "nav side"}}
+@media (max-width:767px){
+ .ws.v5{grid-template-columns:1fr;grid-template-areas:"main" "nav" "side";padding-bottom:84px}
+ .v5tabs{position:fixed;left:0;right:0;bottom:0;z-index:60;margin:0;border-radius:16px 16px 0 0;padding:4px 4px calc(4px + env(safe-area-inset-bottom));background:rgba(10,15,28,.97);box-shadow:0 -6px 20px rgba(0,0,0,.5)}
+ .v5tabs button{min-height:54px;font-size:10.5px}
+ #modal .mbox:not(.full),#mbox{align-self:flex-end;border-radius:18px 18px 0 0!important;max-height:88dvh!important;margin:0!important;width:100%!important;max-width:100%!important}
+ #modal{align-items:flex-end!important;padding:0!important}
+ .pdetail{grid-template-columns:1fr}.pdetail canvas{height:180px}
+ .v5big button{min-height:58px}
+ .slot .mchip .mb{display:none}.slot .mchip{bottom:auto;top:5px}
+}
+@media (min-width:768px) and (max-width:1199px){.v5big{grid-template-columns:repeat(3,1fr)}}
+`;
+const V5={tab:'home',wtab:'craft',ptab:'pets',psel:null,fsel:{fam:'scrap',type:'head',mode:'std',qty:1},msel:null};
+try{const t=localStorage.getItem('bag_v5tab');if(t)V5.tab=t;}catch(e){}
+function v5Boot(){if(document.getElementById('v5css'))return;const st=document.createElement('style');st.id='v5css';st.textContent=V5CSS;document.head.appendChild(st);
+ const ws=document.querySelector('#workshop .ws');if(!ws)return;ws.classList.add('v5');const main=ws.children[0];main.classList.add('v5main');
+ const keep=document.createElement('div');keep.style.display='none';keep.id='v5keep';main.querySelectorAll('.navgrp .badge,.navgrp .hint[id]').forEach(b=>keep.appendChild(b));main.appendChild(keep);
+ main.querySelectorAll('.navgrp').forEach(n=>n.remove());
+ const pane=document.createElement('section');pane.className='v5pane';pane.innerHTML='<nav class="v5tabs" id="v5tabs"></nav><div id="v5body"></div>';ws.insertBefore(pane,main);
+ /* topbar: 🎫 → 📄 Blueprint Fragments (tickets no longer exist) */
+ const tx=$('#rTix');if(tx&&tx.parentElement){tx.parentElement.title='Blueprint Fragments';tx.parentElement.firstChild.textContent='📄 ';}
+ const lg=document.querySelector('.logo small');if(lg)lg.textContent='V5.0 · MASTER CRAFTSMAN';document.title='Build a Golem — V5 Master Craftsman';
+ v5Render();}
+const V5TABS=[['home','🏠','HOME'],['golem','🤖','GOLEM'],['adv','🗺','ADVENTURE'],['work','⚒','WORKSHOP'],['pet','🐾','PET']];
+function v5SetTab(t){V5.tab=t;try{localStorage.setItem('bag_v5tab',t);}catch(e){}if(t==='pet'&&!S.petSanctuaryVisited)petSanctuaryFirst();v5Render();const b=$('#v5body');if(b&&window.innerWidth<768)b.scrollIntoView({behavior:'smooth',block:'start'});}
+function v5Dots(){const d={};d.home=homeNotes().some(n=>n.hot);d.work=S.craftingWishlist.some(w=>wishInfo(w).ready);d.pet=S.petInventory.some(p=>petEvoReady(p))||PET_ORDER.some(k=>!petOwned(k)&&(S.petShards[k]||0)>=PETS[k].egg.need);d.golem=mastPathPending().length>0;return d;}
+function v5Render(){const nav=$('#v5tabs'),body=$('#v5body');if(!nav||!body||!S)return;const dots=v5Dots();
+ nav.innerHTML=V5TABS.map(([k,e,n])=>`<button class="${V5.tab===k?'on':''}" data-act="v5tab" data-arg="${k}"><span class="e">${e}</span>${n}${dots[k]?'<i class="dot"></i>':''}</button>`).join('');
+ let h='';try{h=V5.tab==='home'?paneHome():V5.tab==='golem'?paneGolem():V5.tab==='adv'?paneAdv():V5.tab==='work'?paneWork():panePet();}catch(e){console.error(e);h=`<div class="v5sec neg">UI error: ${esc(String(e))}</div>`;}
+ h+=`<div class="v5more">${[['openCodex','📖 Codex'],['openResearch','🔬 Research'],['openContractsAll','📋 Contracts'],['openAchievements','🏆 Achievements'],['openRecords','📊 Records'],['openSettings','⚙ Settings']].map(([a,n])=>`<button data-act="${a}">${n}</button>`).join('')}</div>`;
+ body.innerHTML=h;body.querySelectorAll('canvas[data-pet]').forEach(cv=>petThumb(cv));}
+function petThumb(cv){const c=cv.getContext('2d');const w=cv.width,h=cv.height;c.clearRect(0,0,w,h);const pid=cv.dataset.pet,st=+cv.dataset.st||0;if(!PETS[pid])return;const own=cv.dataset.own!=='0';
+ c.save();if(!own){c.filter='brightness(0) opacity(.55)';}drawPet(c,w/2,h*.86,Math.min(w,h)/52,pid,st,GT,{face:1,happy:0});c.restore();}
+/* ---------- HOME ---------- */
+function mastPathPending(){const out=[];for(const k in S.partMastery){if(S.partMastery[k].lv>=20&&!S.masterySpecializations[k])out.push(k);}return out;}
+function homeNotes(){const N=[];const pe=S.pendingExtraction.length;if(pe)N.push({hot:1,ic:'📦',tx:`รางวัล Extract รอรับ ${pe} รายการ`,act:'openClaimFirst',btn:'รับ'});
+ dailyRefresh();const D=S.dailyProgress;const dr=D.picks.filter(id=>{const t=DAILY_POOL.find(x=>x.id===id);return t&&!D.claimed.includes(id)&&(D.prog[id]||0)>=t.goal;}).length;if(dr)N.push({hot:1,ic:'📅',tx:`Daily Contract สำเร็จ ${dr} งาน`,act:'v5tab',arg:'home',btn:'ดู'});
+ for(const w of S.craftingWishlist){if(wishInfo(w).ready)N.push({hot:1,ic:'📌',tx:`พร้อมคราฟต์: <b>${esc(wishName(w))}</b>`,act:'wishCraft',arg:w.kind+'|'+w.id+'|'+w.mode,btn:'คราฟต์'});}
+ for(const p of S.petInventory)if(petEvoReady(p))N.push({hot:1,ic:'🌟',tx:`${esc(p.name)} พร้อมวิวัฒนาการ!`,act:'petOpen',arg:p.pid,btn:'ดู'});
+ for(const k of PET_ORDER)if(!petOwned(k)&&(S.petShards[k]||0)>=PETS[k].egg.need)N.push({hot:1,ic:'🥚',tx:`ไข่ ${PETS[k].n} พร้อมฟัก!`,act:'petHatch',arg:k,btn:'ฟัก'});
+ const mp=mastPathPending();if(mp.length)N.push({hot:1,ic:'🎯',tx:`เลือก Specialization (Mastery Lv.20) ${mp.length} ชิ้น`,act:'openMastery',arg:mp[0],btn:'เลือก'});
+ weeklyRefresh();if(S.weeklyProgress.runs>=3&&!S.weeklyProgress.claimed)N.push({hot:1,ic:weekTheme().i,tx:`Weekly Expedition สำเร็จ!`,act:'weeklyClaim',btn:'รับ'});
+ for(const n of S.notes.slice(-5).reverse())N.push({ic:'•',tx:n.txt});return N;}
+function paneHome(){const st=curStats();const D=S.dailyProgress;dailyRefresh();weeklyRefresh();const th=weekTheme();const W_=S.weeklyProgress;
+ const best=DUNGEONS.filter(d=>S.unlocked[d.id]&&st.maxTier>=d.tiers[0]).slice(-1)[0]||DUNGEONS[0];const mp=petEq('mine'),cp=petEq('combat');
+ let h=`<div class="v5sec"><h3>🏠 ${esc((S.cos.name||'MY GOLEM').toUpperCase())} <span class="hint">P ${st.P} · Tier ${st.maxTier} · CP ${calcCombat(S.combatEquip).cp}</span></h3>
+ <div class="v5big"><button class="hot" data-act="quickRun" data-arg="${best.id}"><span class="e">⛏</span>Quick Mining<small>${best.name} · ${QUICK_TIME/60|0} นาที</small></button>
+ <button data-act="v5tab" data-arg="adv"><span class="e">🗺</span>Adventure<small>Deep · Endless · Boss</small></button>
+ <button data-act="openForge"><span class="e">⚒</span>Assembly Forge<small>คราฟต์ชิ้นส่วนโดยตรง</small></button>
+ <button data-act="v5tab" data-arg="pet"><span class="e">🐾</span>Pets<small>${mp?esc(mp.name):'— ไม่มี Mining Pet'}${cp?' · '+esc(cp.name):''}</small></button></div></div>`;
+ const N=homeNotes();h+=`<div class="v5sec"><h3>🔔 แจ้งเตือน</h3>${N.length?N.slice(0,8).map(n=>`<div class="v5note ${n.hot?'gold':''}"><span class="ic">${n.ic}</span><span class="tx">${n.tx}</span>${n.btn?`<button class="btn sm ${n.hot?'gold':''}" data-act="${n.act}" ${n.arg!=null?`data-arg="${esc(n.arg)}"`:''}>${n.btn}</button>`:''}</div>`).join(''):'<div class="hint">ไม่มีอะไรค้าง — ออกไปขุดกัน!</div>'}</div>`;
+ h+=`<div class="v5sec"><h3>📅 Daily Contracts <span class="hint">รีเซ็ตทุกวัน · ไม่มี Stamina · พลาดได้ไม่เสียอะไร</span></h3>${D.picks.map(id=>{const t=DAILY_POOL.find(x=>x.id===id);if(!t)return'';const pr=Math.min(t.goal,D.prog[id]||0);const cl=D.claimed.includes(id);const ok=pr>=t.goal;
+  return `<div class="dq"><div class="row"><span>${cl?'✅ ':''}${t.n}</span><span class="hint">${rwV5(t.rw)}</span></div><div class="row"><div class="bar" style="flex:1"><i style="width:${pr/t.goal*100}%;background:${ok?'var(--green)':'var(--cyan)'}"></i></div><span class="hint">${fmt(pr)}/${fmt(t.goal)}</span>${cl?'':`<button class="btn sm ${ok?'gold':''}" data-act="dClaim" data-arg="${id}" ${ok?'':'disabled'}>รับ</button>`}</div></div>`;}).join('')}</div>`;
+ h+=`<div class="v5sec"><h3>${th.i} ${th.n} <span class="hint">Weekly Expedition</span></h3><div class="hint">${th.d} · Modifier: ${th.mods.map(k=>MODS[k]?MODS[k].icon+' '+MODS[k].name:k).join(' + ')}</div>
+  <div class="dq"><div class="row"><span>จบ Deep Expedition ครบทุกชั้น 3 ครั้ง</span><span class="hint">${th.bonus}</span></div><div class="row"><div class="bar" style="flex:1"><i style="width:${Math.min(1,W_.runs/3)*100}%;background:var(--gold)"></i></div><span class="hint">${Math.min(3,W_.runs)}/3</span><button class="btn sm ${W_.runs>=3&&!W_.claimed?'gold':''}" data-act="weeklyClaim" ${W_.runs>=3&&!W_.claimed?'':'disabled'}>${W_.claimed?'✅':'รับ'}</button></div></div></div>`;
+ h+=wishlistHtml();return h;}
+function rwV5(rw){const o=[];if(rw.coins)o.push('🪙'+fmt(rw.coins));if(rw.bpf)o.push('📄'+rw.bpf);if(rw.petShard)o.push('🥚'+rw.petShard);if(rw.petTreat)o.push('🍪'+rw.petTreat);if(rw.coreFrag)o.push('🧩'+rw.coreFrag);if(rw.ess)o.push('✴️'+rw.ess);if(rw.stone)for(const k in rw.stone)o.push(STONE[k].i+rw.stone[k]);return o.join(' ');}
+const WEEKLY_RW={crystal:{coins:3000,bpf:6},iron:{coins:3000,bpf:3,coreFrag:2},volcanic:{coins:3000,bpf:3,petShard:3},relic:{coins:3000,bpf:6},void:{coins:3000,bpf:3,ess:1}};
+function weeklyClaim(){weeklyRefresh();const W_=S.weeklyProgress;if(W_.runs<3||W_.claimed)return;W_.claimed=true;const t=giveV5(WEEKLY_RW[weekTheme().id]||{coins:3000,bpf:3});save();sfx('legend');toast('🗓 Weekly Expedition: '+t,'gold');v5Render();}
+function wishlistHtml(){const L=S.craftingWishlist;let h=`<div class="v5sec"><h3>📌 Craft Wishlist <span class="hint">${L.length}/3 · ปักหมุดจาก Forge / Blacksmith / Runes</span></h3>`;
+ if(!L.length)h+='<div class="hint">ยังไม่มีเป้าหมาย — เปิด ⚒ Assembly Forge แล้วกด 📌 ที่ชิ้นที่อยากได้</div>';
+ for(const w of L){const I=wishInfo(w);const icon=w.kind==='m'?partIcon(w.id,0):w.kind==='c'?armorIcon(w.id,0,64):'';const req=I.req;
+  const rows=[];if(req.coins)rows.push(`<span class="${S.coins>=req.coins?'ok':'miss'}">🪙 ${fmt(Math.min(S.coins,req.coins))}/${fmt(req.coins)}</span>`);for(const n in (req.ores||{})){const have=S.oreStorage[n]||0;rows.push(`<span class="${have>=req.ores[n]?'ok':'miss'}" title="${n}"><span style="color:${ORE_INFO[n].c1}">◆</span>${n} ${fmt(Math.min(have,req.ores[n]))}/${req.ores[n]}</span>`);}
+  for(const k in (req.stones||{}))rows.push(`<span class="${(S.enhancementMaterials[k]||0)>=req.stones[k]?'ok':'miss'}">${STONE[k].i} ${S.enhancementMaterials[k]||0}/${req.stones[k]}</span>`);if(req.ess)rows.push(`<span class="${S.enhancementMaterials.ess>=req.ess?'ok':'miss'}">✴️ ${S.enhancementMaterials.ess}/${req.ess}</span>`);
+  const bp=w.kind!=='rune'&&bpNeeded(w.kind,w.id);
+  h+=`<div class="wl ${I.ready?'ready':''}"><div class="hd">${icon?`<img src="${icon}">`:`<div style="font-size:26px;width:38px;text-align:center">${RUNES[w.id].i}</div>`}<div style="flex:1;min-width:0"><b>${esc(wishName(w))}</b> <span class="hint">${w.mode==='perfect'?'Perfect':w.mode==='fine'?'Fine':w.kind==='rune'?'':'Standard'}</span>
+   <div class="hint">${I.ready?'<b class="ok">✅ พร้อมคราฟต์!</b>':I.runs?`ฟาร์มอีกประมาณ <b>${I.runs}</b> รอบ`:'ขาดเฉพาะ Coins / วัสดุอื่น'}${bp?` · 📜 ${I.bpOK?'Blueprint ✔':`Blueprint ${S.armorBlueprints.frag}/${bpCost(w.kind,w.id)} 📄`}`:''}</div></div>
+   ${I.ready?`<button class="btn sm gold" data-act="wishCraft" data-arg="${w.kind}|${w.id}|${w.mode}">⚒</button>`:''}<button class="btn sm" data-act="wishDel" data-arg="${w.kind}|${w.id}">✕</button></div>
+   <div style="display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:5px">${rows.join('')}</div>${I.miss.length?`<div class="hint" style="margin-top:3px">📍 ${I.miss.map(m=>`${m.n} ← ${m.where} (~${m.runs} รอบ)`).join(' · ')}</div>`:''}</div>`;}
+ return h+'</div>';}
+/* ---------- GOLEM ---------- */
+function mastChipHtml(key){const m=mOf(key);const lv=mLv(key)||1;const need=lv>=MAST_MAX?1:mastNeed(lv);const k=lv>=MAST_MAX?1:m.exp/need;const t=mastTierOf(lv);
+ return `<div class="mchip t${t}" title="Part Mastery">${t===3?'👑':'⭐'} M.${lv}${t===3?' GM':''}<span class="mb"><i style="width:${k*100}%"></i></span></div>`;}
+function paneGolem(){const st=curStats();const cs=calcCombat(S.combatEquip);
+ let h=`<div class="v5sec"><h3>🤖 GOLEM</h3><div class="v5big"><button class="hot" data-act="openGarage"><span class="e">🧍</span>Mining Garage<small>P ${st.P} · Tier ${st.maxTier}</small></button>
+ <button class="red" data-act="openGarageC"><span class="e">🛡</span>Combat Loadout<small>CP ${cs.cp}</small></button><button data-act="openInventory"><span class="e">🎒</span>Mining Parts<small>${S.inv.length} ชิ้น</small></button>
+ <button data-act="openCInv"><span class="e">🗃</span>Combat Armor<small>${S.combatInventory.length} ชิ้น</small></button><button data-act="openPresets"><span class="e">💾</span>Presets</button><button data-act="openMasteryList"><span class="e">⭐</span>Part Mastery<small>${Object.keys(S.partMastery).length} แบบ</small></button></div></div>`;
+ h+=`<div class="v5sec"><h3>⭐ Mastery ของชิ้นที่ใส่อยู่</h3>`;const seen=new Set();
+ for(const sl of SLOTS){const pid=st.look[sl];if(!pid)continue;const key='m:'+pid;if(seen.has(key))continue;seen.add(key);h+=mastRow(key,SLOT_NAME[sl].split(' · ')[0]);}
+ for(const sl of CSLOTS){const u=S.combatEquip[sl];const i=u&&cinvGet(u);if(!i)continue;const key='c:'+i.aid;if(seen.has(key))continue;seen.add(key);h+=mastRow(key,CTYPE_NAME[ARMOR[i.aid].type]);}
+ h+=`<div class="hint">ชิ้นซ้ายและขวาแบบเดียวกันนับ Mastery ร่วมกัน (EXP ไม่ซ้อน) · EXP ได้จากการเล่นจริงเท่านั้น</div></div>`;return h;}
+function mastRow(key,lab){const lv=mLv(key)||1;const g=gmOf(mFam(key),mSlotKey(key));const pend=lv>=20&&!S.masterySpecializations[key];
+ return `<div class="v5note ${lv>=30?'gold':''}" style="cursor:pointer" data-act="openMastery" data-arg="${key}"><span class="ic">${key[0]==='m'?'⛏':'⚔'}</span><span class="tx"><b style="color:${rarCol(mRi(key))}">${esc(mName(key))}</b> <span class="hint">${lab}</span>${mastChipHtml(key)}<span class="hint">GM: ${g.n}${pend?' · <b class="gold">🎯 เลือก Specialization!</b>':''}</span></span></div>`;}
+/* ---------- ADVENTURE (pre-activity info) ---------- */
+function preInfo(o){return `<div class="pre">${o.map(([a,b])=>`${a} <b>${b}</b>`).join(' · ')}</div>`;}
+function petLine(mode){const p=petEq(mode);return p?`${PETS[p.pid].n} (${PETS[p.pid].st[p.stage]} Lv.${p.lv})${petSyn(p,mode)?' 🔗':''}`:'—';}
+function paneAdv(){const st=curStats();const cs=calcCombat(S.combatEquip);const eu=endlessUnlocked(st);
+ let h=`<div class="v5sec"><h3>⛏ Mining <span class="hint">P ${st.P} · Tier ${st.maxTier} · Pet: ${petLine('mine')}</span></h3><div class="v5big">
+ <button class="hot" data-act="openDungeons"><span class="e">⛏</span>Quick Mining<small>3 นาที · ทุกรอบได้ความคืบหน้า</small></button><button data-act="openDeep"><span class="e">🧭</span>Deep Expedition<small>4 ชั้น ≈12 นาที · ${weekTheme().i} ${weekTheme().n}</small></button>
+ <button data-act="openEndless" ${eu?'':'disabled'}><span class="e">🕳</span>Endless Mine<small>${eu?`Biome · Checkpoint B${S.endlessCheckpoints.max}`:'🔒 ผ่าน Iron Depths'}</small></button><button data-act="openBoss"><span class="e">👹</span>Mining Boss<small>3 บอส</small></button></div></div>`;
+ h+=`<div class="v5sec"><h3>⚔ Combat <span class="hint">CP ${cs.cp} · Pet: ${petLine('combat')}</span></h3><div class="v5big"><button class="red" data-act="openArena"><span class="e">⚔</span>Boss Arena<small>Normal / Hard / Nightmare</small></button>
+ <button data-act="openTraining"><span class="e">🥊</span>Training<small>ทดสอบ DPS</small></button><button data-act="openRaid"><span class="e">🌋</span>Hybrid Raid</button><button data-act="openBossCodex"><span class="e">📕</span>Boss Codex</button></div></div>`;
+ h+=`<div class="v5sec"><h3>📋 Contracts</h3><div class="v5big"><button data-act="openContracts"><span class="e">📋</span>Mining Contracts</button><button data-act="openCContracts"><span class="e">⚔</span>Combat Contracts</button></div></div>`;return h;}
+function openContractsAll(){openContracts();}
+/* Quick Mining selection (replaces V2 dungeon list text: no tickets, fragments, pre-activity info) */
+function openDungeons(){const render=()=>{const st=curStats();let h=`<div class="hint" style="margin-bottom:8px">⛏ Quick Mining · ${QUICK_TIME} วิ ต่อรอบ · Extract = ขาย/เก็บแร่ 100% · หมดเวลา = 70% · ทุกรอบได้ Mastery EXP / Pet EXP</div><div class="dgrid">`;
+ for(const d of DUNGEONS){const un=S.unlocked[d.id];const canP=st.P>=d.reqP;const canC=S.coins>=d.cost;const th=d.th1;const M=MODS[dungeonMod(d.id)];
+  h+=`<div class="dcard" style="background:linear-gradient(160deg,${th.wall},${th.bg});border-color:${th.acc}"><h4 style="color:${th.acc}">${d.name}</h4><div class="hint" style="color:#cfd8ee">${d.th}</div>${modHtml(d)}
+  <div class="ores">${d.tiers.map(ti=>TIERS[ti].ores.map(o=>`<span class="tag" style="color:${o[1]}">T${ti} ${o[0]}</span>`).join('')).join('')}</div>
+  ${preInfo([['⛏ P แนะนำ',TIERS[d.tiers[d.tiers.length-1]].req],['ของคุณ',`${st.P} (T${st.maxTier})`],['🐾',petLine('mine')],['⏱',QUICK_TIME+'s'],['รางวัล',`แร่ · 📄1${S.cleared[d.id]?'':' (+2 ครั้งแรก)'} · Mastery`]])}
+  ${M.coin!==1?`<div class="hint">มูลค่าแร่ x${M.coin.toFixed(2)} (${M.name})</div>`:''}<div class="sp"></div>
+  ${un?`<div class="row2"><button class="btn gold" data-act="quickRun" data-arg="${d.id}">⛏ Quick Mining</button><button class="btn" data-act="startDeep" data-arg="${d.id}">🧭 Deep</button></div>`:`<div class="hint">🔒 ปลดล็อก: Power ≥ ${d.reqP} ${canP?'✅':'❌'} · 🪙 ${fmt(d.cost)} ${canC?'✅':'❌'}</div><button class="btn pri" data-act="unlockDungeon" data-arg="${d.id}" ${canP&&canC?'':'disabled'}>🔓 Unlock (🪙${fmt(d.cost)})</button>`}</div>`;}
+ $('#mbody').innerHTML=h+'</div>';};openModal('⛏ Quick Mining','',render);render();}
+function quickRun(did){if(S.settings.runTime<QUICK_TIME&&!S.settings.debug)S.settings.runTime=QUICK_TIME;closeModal();startRun(did);}
+function openDeep(){weeklyRefresh();const th=weekTheme();const st=curStats();const render=()=>{let h=`<div class="hint">🧭 Deep Expedition — ${DEEP_FLOORS} ชั้นของดันเจี้ยนเดียว (ชั้นละ ${QUICK_TIME} วิ ≈ 10–15 นาที) · แร่ทุกชั้นรวมเป็นรางวัลเดียว · หลังแต่ละชั้นเลือก ⬇ ลงต่อ หรือ ⇪ Extract · หมดเวลาได้ 70%</div>
+ <div class="v5note gold"><span class="ic">${th.i}</span><span class="tx"><b>${th.n}</b> — ${th.d}<br><span class="hint">Modifier สัปดาห์นี้: ${th.mods.map(k=>MODS[k]?MODS[k].icon+' '+MODS[k].name:k).join(' + ')} · Weekly ${Math.min(3,S.weeklyProgress.runs)}/3</span></span></div>
+ <table class="t"><tr><th>ชั้น</th><th>เป้าหมาย</th><th>แร่ HP</th></tr>${[1,2,3,4].map(f=>`<tr><td>${f}</td><td>${10+f*2} ก้อน</td><td>+${Math.round(12*(f-1))}%</td></tr>`).join('')}</table>
+ <div class="hint">รางวัลพิเศษเมื่อ Extract: 📄 Blueprint Fragment = จำนวนชั้นที่ผ่าน (+2 ถ้าครบ ${DEEP_FLOORS}) · 🥚 Pet Shard ×3 · Mastery EXP สูงกว่า Quick</div><div class="dgrid">`;
+ for(const d of DUNGEONS){if(!S.unlocked[d.id])continue;h+=`<div class="dcard" style="background:linear-gradient(160deg,${d.th1.wall},${d.th1.bg});border-color:${d.th1.acc};min-height:0"><h4 style="color:${d.th1.acc}">${d.name}</h4>${preInfo([['P แนะนำ',TIERS[d.tiers[d.tiers.length-1]].req],['ของคุณ',st.P],['🐾',petLine('mine')]])}<button class="btn gold" data-act="startDeep" data-arg="${d.id}">🧭 เริ่ม Deep Expedition</button></div>`;}
+ $('#mbody').innerHTML=h+'</div>';};openModal('🧭 Deep Expedition','',render);render();}
+function openEndless(){const render=()=>{const st=curStats();const un=endlessUnlocked(st);const E=S.endless;const CP=S.endlessCheckpoints;const cps=[];for(let f=1;f<=CP.max;f+=5)cps.push(f);
+ const next=[];for(let f=10;f<=300&&next.length<5;f+=10)if(!S.endlessMs5.includes(f))next.push(f);
+ $('#mbody').innerHTML=`<div class="hint">🕳 Endless — ชั้นละ ${90+.5*amB('deep')} วิ · ขุดครบเป้าหมาย → ⬇ ลงต่อ หรือ ⇪ Extract · รอบยาว 20–30 นาที · Checkpoint ทุก 5 ชั้น (เริ่มใหม่จาก Checkpoint ได้ · รางวัล Checkpoint/Milestone รับครั้งเดียว)</div>
+ ${preInfo([['ลึกสุด','B'+E.best],['Checkpoint','B'+CP.max],['P',st.P+' (T'+st.maxTier+')'],['🐾',petLine('mine')]])}
+ <table class="t"><tr><th>ชั้น</th><th>Biome</th><th>แร่</th></tr>${BIOMES.map((b,i)=>`<tr><td>B${i?BIOMES[i-1].to+1:1}${b.to<1e8?'–'+b.to:'+'}</td><td>${b.n}</td><td>T${b.tiers[0]}–${b.tiers[b.tiers.length-1]}</td></tr>`).join('')}</table>
+ <h4 style="margin:8px 0 4px">🏅 Milestone ถัดไป (ทุก 10 ชั้น)</h4><div class="hint">${next.map(f=>`B${f}: ${rwV5(EMS5[f])}`).join('<br>')||'ครบแล้ว'}</div>
+ <h4 style="margin:8px 0 4px">🚩 เริ่มที่ Checkpoint</h4><div class="row2">${cps.map(f=>`<button class="btn ${f===cps[cps.length-1]?'gold':''}" data-act="startEndless" data-arg="${f}" ${un?'':'disabled'}>B${f} · ${biomeOf(f).n}</button>`).join('')}</div>
+ ${un?'':'<div class="neg">🔒 ปลดล็อกเมื่อผ่าน Iron Depths (Extract สำเร็จ)</div>'}`;};openModal('🕳 Endless Mine','',render,true);render();}
+/* boss ranks on the Combat Arena cards */
+{const _oa=openArena;openArena=function(){_oa();const r0=modalRefresh;const add=()=>{document.querySelectorAll('#mbody .bcard').forEach((el,i)=>{const id=CBOSS_ORDER[i];if(!id||el.querySelector('.rankrow'))return;const mx=bossRankMax(id);const cur=Math.min(S.bossRank[id]||0,mx);
+  const div=document.createElement('div');div.innerHTML=`<div class="rankrow">${BRANK.map((b,k)=>`<button class="${cur===k?'on':''}" data-act="bossRank" data-arg="${id}|${k}" ${k<=mx?'':'disabled'}>${b.i}${b.n}${k?` ×${b.hp}HP`:''}</button>`).join('')}</div><div class="hint">🧩 Core Fragment การันตี ${[2,3,5][cur]} ชิ้น/ชนะ (5 = 1 Core) · 🐾 ${petLine('combat')}</div>`;
+  const fb=el.querySelector('[data-act="cbStart"]');if(fb)fb.parentElement.insertBefore(div,fb);else el.appendChild(div);});};add();modalRefresh=()=>{if(r0)r0();add();};};}
+/* ---------- PET pane ---------- */
+function panePet(){const mp=petEq('mine'),cp=petEq('combat');const own=S.petInventory.length;
+ let h=`<div class="v5sec"><h3>🐾 Pet Sanctuary <span class="hint">${own}/14</span></h3><div class="v5big"><button class="hot" data-act="openPets" data-arg="pets"><span class="e">🐾</span>My Pets</button><button data-act="openPets" data-arg="eggs"><span class="e">🥚</span>Eggs<small>เป้าหมาย: ${PETS[S.petTarget]?PETS[S.petTarget].n:'-'}</small></button>
+ <button data-act="openPets" data-arg="feed"><span class="e">🍪</span>Feed & Cook<small>🍪${S.petItems.treat} 🍱${S.petItems.feast} ✨${S.petItems.ess}</small></button><button data-act="openPets" data-arg="codex"><span class="e">📖</span>Pet Codex</button></div></div>`;
+ for(const[mode,p,lab]of[['mine',mp,'⛏ Mining Pet'],['combat',cp,'⚔ Combat Pet']]){h+=`<div class="v5sec"><h3>${lab}</h3>`;
+  if(p){const P_=PETS[p.pid];h+=`<div class="petmini"><canvas width="128" height="128" data-pet="${p.pid}" data-st="${p.stage}"></canvas><div style="flex:1;min-width:0"><b>${esc(p.name)}</b> <span class="hint">${P_.st[p.stage]} · Lv.${p.lv} · 💗${p.bond}</span>
+   <div class="hint">Passive: ${P_.pas.n} · Active: ${P_.act.n} (${Math.round(petCd(p,petSyn(p,mode))*10)/10}s)${petSyn(p,mode)?` · <b style="color:${P_.c[2]}">🔗 Synergy ${FAMS[P_.syn].name}</b>`:''}</div><button class="btn sm" data-act="petOpen" data-arg="${p.pid}">ดูรายละเอียด</button></div></div>`;}
+  else h+=`<div class="hint">ยังไม่ได้ติดตั้ง — ${S.petInventory.some(x=>petCanMode(x,mode))?'เลือกใน My Pets':'ฟักไข่ใน Eggs'}</div>`;h+='</div>';}
+ return h;}
+/* ---------- topbar + renderWorkshop hook + part-card mastery chips ---------- */
+{const _rw=renderWorkshop;renderWorkshop=function(){_rw();if(!S)return;const t=$('#rTix');if(t)t.textContent=fmt(S.armorBlueprints.frag);const tb=$('#tixBadge');if(tb)tb.classList.add('hidden');v5Render();};}
+function addChip(html,key){return html.replace(/<\/button>\s*$/,mastChipHtml(key)+'</button>');}
+{const _f=slotHtml;slotHtml=function(sl){const s=_f(sl);const u=S.equip[sl];const i=u&&invGet(u);return i?addChip(s,'m:'+i.pid):s;};}
+{const _f=slotCard;slotCard=function(sl){const s=_f(sl);const u=(GA.prev||S.equip)[sl];const i=u&&invGet(u);return i?addChip(s,'m:'+i.pid):s;};}
+{const _f=wardCard;wardCard=function(inst){return addChip(_f(inst),'m:'+inst.pid);};}
+{const _f=partCard;partCard=function(inst,o){return addChip(_f(inst,o),'m:'+inst.pid);};}
+{const _f=cslotCard;cslotCard=function(sl){const s=_f(sl);const u=(GA.cprev||S.combatEquip)[sl];const i=u&&cinvGet(u);return i&&/<\/button>\s*$/.test(s)?addChip(s,'c:'+i.aid):s;};}
+{const _f=cwardCard;cwardCard=function(inst){const s=_f(inst);return /<\/button>\s*$/.test(s)?addChip(s,'c:'+inst.aid):s;};}
+/* part / armor detail: mastery panel + rune socket */
+{const _op=openPart;openPart=function(uid){_op(uid);const r0=modalRefresh;const add=()=>{const inst=invGet(uid);const box=$('#mbody .inspR');if(!inst||!box||box.querySelector('.v5mp'))return;const d=document.createElement('div');d.className='v5mp';d.innerHTML=mastPanelHtml('m:'+inst.pid,true)+runeSlotHtml('m',inst);box.insertBefore(d,box.children[3]||null);};add();modalRefresh=()=>{if(r0)r0();add();};};}
+{const _oa=openArmor;openArmor=function(uid){_oa(uid);const r0=modalRefresh;const add=()=>{const inst=cinvGet(uid);const box=$('#mbody');if(!inst||!box||box.querySelector('.v5mp'))return;const d=document.createElement('div');d.className='v5mp';d.innerHTML=mastPanelHtml('c:'+inst.aid,true)+runeSlotHtml('c',inst);box.appendChild(d);};add();modalRefresh=()=>{if(r0)r0();add();};};}
+
+/* =====================================================================
+   V5.0 UI (2/2) — Mining Assembly Forge · Workshop tabs · Runes · Blueprints · Mastery ·
+   Pet Sanctuary · Export/Import · gacha redirects · action registry · boot
+   ===================================================================== */
+/* ---------- gacha removed: old entry points redirect to the crafting screens ---------- */
+function openSummon(){toast('🔥 Summon ถูกแทนที่ด้วย Mining Assembly Forge (คราฟต์ได้แน่นอน)','gold');openForge();}
+function openArmorForge(){toast('🛡 Armor Summon ถูกแทนที่ด้วย Combat Armor Blacksmith','gold');openBlacksmith();}
+function openCraft(){openForge();}
+/* ---------- MINING ASSEMBLY FORGE ---------- */
+function partBaseStats(pid,q){const o={};const d=PART[pid];const qm=QUAL[q].mul;for(const k in d.stats){const v=d.stats[k];o[k]=v>0?v*qm:v;}return o;}
+function openForge(pid){if(pid&&PART[pid]){V5.fsel.fam=PART[pid].fam;V5.fsel.type=PART[pid].type;}const F=V5.fsel;
+ const render=()=>{const p=PART_LIST.find(x=>x.fam===F.fam&&x.type===F.type);const pid2=p.id;const why=modeOK('m',F.mode);const bpN=bpNeeded('m',pid2),bpH=bpHas('m',pid2);const req=partRecipe(pid2,F.mode,F.qty);const can=!why&&(!bpN||bpH)&&haveMat(req);
+  const famL=FAM_ORDER.map(f=>{const ri=FAMS[f].ri;const nb=ri>=3?['head','core','arm','legs','back'].filter(t=>bpHas('m',f+'_'+t)).length:5;return `<button class="${F.fam===f?'on':''}" data-act="fgFam" data-arg="${f}" style="--rc:${rarCol(ri)}"><img src="${partIcon(f+'_core',0)}"><span><b>${FAMS[f].name}</b><small>${RAR[ri].name}${ri>=3?` · 📜 ${nb}/5`:''}</small></span></button>`;}).join('');
+  const modes=[['std','Standard','วัสดุปกติ → Standard Quality'],['fine','Fine','×1.5 วัสดุ + Basic Stone → Fine Quality (ต้องมี Mining Part Crafting Lv.5)'],['perfect','Perfect','×2 วัสดุ + Advanced Stone + Masterwork Essence → Perfect (Masterwork Lv.8)']];
+  const qn=F.mode==='perfect'?3:F.mode==='fine'?2:1;const own=S.inv.filter(i=>i.pid===pid2).length;const I=wishInfo({kind:'m',id:pid2,mode:F.mode});const pinned=S.craftingWishlist.some(w=>w.kind==='m'&&w.id===pid2);const sk=SKILLS[pid2];
+  $('#mbody').innerHTML=`<div class="bsw"><div class="bsfam">${famL}</div><div class="bsmain">
+   <div class="row2">${['head','core','arm','legs','back'].map(t=>`<button class="chipb ${F.type===t?'on':''}" data-act="fgType" data-arg="${t}">${TYPE_NAME[t]}</button>`).join('')}</div>
+   <div class="bsrec"><div class="bsimg" style="--rc:${rarCol(p.ri)}"><img src="${partIcon(pid2,0)}"></div><div><h3 style="color:${rarCol(p.ri)}">${esc(p.name)}</h3><div class="hint">${FAMS[p.fam].name} · ${RAR[p.ri].name} · ${TYPE_NAME[p.type]}</div><div class="hint">${p.desc}</div>
+    <div class="wst">${statLine(partBaseStats(pid2,qn))} <span class="hint">(Lv.1 · ${QUAL[qn].name})</span></div>${sk?`<div class="hint">${sk.icon} ${sk.name} · CD ${sk.cd}s</div>`:''}${mastChipHtml('m:'+pid2)}<div class="hint">มีอยู่ ${own} ชิ้น · GM: ${gmOf(p.fam,p.type).n}</div></div></div>
+   <div class="seg">${modes.map(([k,n])=>`<button class="${F.mode===k?'on':''}" data-act="fgMode" data-arg="${k}">${n}</button>`).join('')}</div><div class="hint">${modes.find(m=>m[0]===F.mode)[2]}</div>
+   <div class="row2"><span class="hint">จำนวน</span>${[1,2,3,5].map(q=>`<button class="chipb ${F.qty===q?'on':''}" data-act="fgQty" data-arg="${q}">×${q}</button>`).join('')}</div>
+   ${matHtml(req)}${why?`<div class="neg">🔒 ${why}</div>`:''}
+   ${bpN?`<div class="card" style="margin:6px 0"><b>📜 Blueprint</b> ${bpH?'<span class="pos">✔ ปลดล็อกแล้ว</span>':`<span class="hint">ต้องใช้ 📄 ${bpCost('m',pid2)} (มี ${S.armorBlueprints.frag})</span> <button class="btn sm gold" data-act="bpUnlockM" data-arg="${pid2}" ${S.armorBlueprints.frag>=bpCost('m',pid2)?'':'disabled'}>ปลดล็อก</button>`}</div>`:''}
+   <div class="row2"><button class="btn gold big" data-act="fgCraft" ${can?'':'disabled'}>⚒ ASSEMBLE ${esc(p.name)} ×${F.qty}</button><button class="btn ${pinned?'gold':''}" data-act="wishPin" data-arg="m|${pid2}|${F.mode}">📌 ${pinned?'ปักแล้ว':'Wishlist'}</button></div>
+   <div class="hint">${I.ready?'✅ วัสดุครบ':I.runs?`🧭 ขาดแร่ — ฟาร์มอีก ~${I.runs} รอบ: ${I.miss.map(m=>`${m.n} @ ${m.where}`).join(', ')}`:''}</div>
+   <div class="hint">⚙ Mining Part Crafting Lv.${amLv('mcraft')} (ค่าคราฟต์ −${amB('mcraft')}%) · Masterwork Lv.${amLv('masterwork')} · แร่มาจาก <a href="#" data-act="openOreStorage">Ore Storage</a> (เลือก STORE หลัง Extract)</div></div></div>`;};
+ openModal('⚒ MINING ASSEMBLY FORGE',`<div></div>`,render);$('#mbox').classList.add('wide');render();}
+function fgCraft(){const F=V5.fsel;const p=PART_LIST.find(x=>x.fam===F.fam&&x.type===F.type);const out=craftPart(p.id,F.mode,F.qty);if(out.length){toast(`⚒ ประกอบ ${p.name} ×${out.length} สำเร็จ! (${QUAL[invGet(out[0]).quality].name})`,'gold');if(modalRefresh)modalRefresh();}}
+/* armor crafting: random traits removed (Runes replace them) — existing traits on old items are kept */
+{const _ca=craftArmor;craftArmor=function(aid,mode='std',qty=1){const out=_ca(aid,mode,qty);for(const u of out){const i=cinvGet(u);if(i){delete i.trait;delete i.tv;}}if(out.length)save();return out;};}
+/* ---------- WORKSHOP pane (CRAFT / ENHANCE / MASTERWORK / RUNES / STORAGE / BLUEPRINTS / MASTERY) ---------- */
+const WTABS=[['craft','CRAFT'],['enh','ENHANCE'],['mw','MASTERWORK'],['rune','RUNES'],['store','STORAGE'],['bp','BLUEPRINTS'],['mast','MASTERY']];
+function amBar(k){const m=S.activityMastery[k]||{lv:1,exp:0};const need=amNeed(m.lv);return `<div class="dq"><div class="row"><span><b>${AMAST[k].n}</b> Lv.${m.lv}/${AMAST_MAX}</span><span class="hint">${AMAST[k].d}</span></div><div class="bar"><i style="width:${m.lv>=AMAST_MAX?100:m.exp/need*100}%;background:var(--cyan)"></i></div></div>`;}
+function paneWork(){const t=V5.wtab;let h=`<div class="v5sec"><h3>⚒ WORKSHOP</h3><div class="wtabs">${WTABS.map(([k,n])=>`<button class="${t===k?'on':''}" data-act="wtab" data-arg="${k}">${n}</button>`).join('')}</div>`;
+ if(t==='craft')h+=`<div class="v5big"><button class="hot" data-act="openForge"><span class="e">⚒</span>Mining Assembly Forge<small>60 ชิ้นส่วน · คราฟต์ได้แน่นอน</small></button><button class="red" data-act="openBlacksmith"><span class="e">🛡</span>Combat Armor Blacksmith<small>60 เกราะ</small></button></div>
+  <div class="hint" style="margin:8px 0">ไม่มีระบบสุ่ม (Gacha) — ทุกชิ้นได้จากการคราฟต์ด้วยวัสดุ · Quality กำหนดได้ด้วยโหมด Standard / Fine / Perfect</div>${amBar('mcraft')}${amBar('acraft')}${amBar('masterwork')}`;
+ else if(t==='enh')h+=`<div class="v5big"><button data-act="openUpgrade"><span class="e">⬆️</span>Mining Upgrade<small>Lv.1–10</small></button><button data-act="openEvolution"><span class="e">🧬</span>Evolution<small>Awakened · Ascended</small></button><button class="red" data-act="openEnhance"><span class="e">✨</span>Armor Enhancement<small>+0 → +10</small></button><button data-act="openMaterials"><span class="e">🔹</span>Materials</button></div>${amBar('assembly')}
+  <div class="hint">Mining: Level 1–10 + Evolution + Mastery + Quality + Rune · Armor: +0–10 + Mastery + Quality + Rune + Set Bonus · Rune เป็นค่าคงที่ ไม่ถูกคูณ</div>`;
+ else if(t==='mw')h+=`<div class="hint" style="margin-bottom:6px">Masterwork = ควบคุม Quality แบบแน่นอน: คราฟต์ Fine/Perfect หรือ Improve Quality ของชิ้นเดิมด้วย ⚙️ Scrap (ในหน้ารายละเอียดชิ้นส่วน)</div>${amBar('masterwork')}
+  <table class="t"><tr><th>Quality</th><th>ค่าบวก</th><th>วิธีได้</th></tr>${QUAL.map(q=>`<tr><td style="color:${q.col}">${q.name}</td><td>×${q.mul.toFixed(2)}</td><td>${q.id===0?'ของเก่าเท่านั้น':q.id===1?'Standard Craft':q.id===2?'Fine Craft / Improve':'Perfect Craft / Improve'}</td></tr>`).join('')}</table>
+  <div class="v5big" style="margin-top:8px"><button data-act="openInventory"><span class="e">💠</span>Improve Quality<small>เลือกชิ้นส่วน → Improve</small></button><button data-act="openForge"><span class="e">⚒</span>Perfect Craft</button></div>`;
+ else if(t==='rune'){const tot=Object.values(S.runes).reduce((a,b)=>a+b[0]+b[1]+b[2],0);h+=`<div class="v5big"><button class="hot" data-act="openRunes"><span class="e">🔮</span>Rune & Module Forge<small>คลัง ${tot} ชิ้น</small></button></div><div class="hint" style="margin:6px 0">Rune แทนที่ Trait แบบสุ่ม: เลือกเองได้ ถอด/ใส่ใหม่ได้ฟรี · ชิ้นละ 1 ช่อง · ค่าคงที่ (ไม่คูณกับ Level/Mastery)</div>${amBar('rune')}`;}
+ else if(t==='store'){const tot=oreTotal();h+=`<div class="v5big"><button class="hot" data-act="openOreStorage"><span class="e">🏦</span>Ore Storage<small>${fmt(tot)} ก้อน</small></button></div><div class="hint" style="margin-top:6px">หลัง Extract เลือก SELL / STORE / SPLIT ได้ทุกครั้ง · แร่ในคลังใช้คราฟต์ทุกอย่าง</div>`;}
+ else if(t==='bp')h+=`<div class="v5big"><button class="hot" data-act="openBlueprints"><span class="e">📜</span>Blueprints<small>📄 ${S.armorBlueprints.frag} Fragments</small></button></div>${bpSourcesHtml()}`;
+ else h+=`<div class="v5big"><button class="hot" data-act="openMasteryList"><span class="e">⭐</span>Part Mastery<small>120 แบบ · Lv.1–30</small></button></div><h4 style="margin:8px 0 4px">📘 Activity Mastery</h4>${Object.keys(AMAST).map(amBar).join('')}`;
+ return h+'</div>'+wishlistHtml();}
+/* ---------- RUNES ---------- */
+function runeSlotHtml(kind,inst){const r=inst.rune;const R_=r&&RUNES[r.id];return `<div class="card" style="margin-top:6px"><b>🔮 Rune Socket</b> ${R_?`${R_.i} ${R_.n} ${RUNE_TIER[r.t]} <span class="pos">+${R_.v[r.t]} ${R_.st}</span> <button class="btn sm" data-act="unsock" data-arg="${kind}|${inst.uid}">ถอด</button>`:'<span class="hint">ว่าง</span>'} <button class="btn sm pri" data-act="openRunes" data-arg="${kind}|${inst.uid}">${R_?'เปลี่ยน':'ใส่ Rune'}</button></div>`;}
+function openRunes(arg){if(arg){const[k,u]=String(arg).split('|');V5.rsel={kind:k,uid:u};}const render=()=>{
+ const craft=Object.keys(RUNES).map(id=>{const R_=RUNES[id];return `<div class="rune"><b>${R_.i} ${R_.n}</b> <span class="hint">${R_.line==='m'?'⛏ Mining':'⚔ Combat'} · ${R_.st}</span><div class="hint">มี: ${[0,1,2].map(t=>`${RUNE_TIER[t]}×${S.runes[id][t]}`).join(' · ')}</div>
+  <div class="row2">${[0,1,2].map(t=>`<button class="btn sm ${runeTierOK(t)?'':'dis'}" data-act="craftRune" data-arg="${id}|${t}" ${runeTierOK(t)&&haveMat(RUNE_COST[t])?'':'disabled'} title="${matRows(RUNE_COST[t]).map(r=>r.n+' '+r.need).join(', ')}">${RUNE_TIER[t]} +${R_.v[t]}</button>`).join('')}<button class="btn sm" data-act="wishPin" data-arg="rune|${id}|${runeTierOK(2)?2:runeTierOK(1)?1:0}">📌</button></div></div>`;}).join('');
+ const costs=RUNE_COST.map((c,t)=>`<div><b>${RUNE_TIER[t]}</b> ${matHtml(c)} ${runeTierOK(t)?'':`<span class="neg">🔒 Rune Crafting Lv.${t===1?5:12}</span>`}</div>`).join('');
+ const eqM=SLOTS.map(sl=>S.equip[sl]&&invGet(S.equip[sl])).filter(Boolean),eqC=CSLOTS.map(sl=>S.combatEquip[sl]&&cinvGet(S.combatEquip[sl])).filter(Boolean);const uniq=a=>a.filter((x,i)=>a.indexOf(x)===i);
+ const sock=(kind,inst)=>{const on=V5.rsel&&V5.rsel.uid===inst.uid;const nm=kind==='m'?PART[inst.pid].name:ARMOR[inst.aid].name;const ic=kind==='m'?partIcon(inst.pid,inst.evo||0):armorIcon(inst.aid,inst.enh||0,64);const r=inst.rune;
+  return `<button class="sock ${on?'on':''}" style="${on?'border-color:#ffd84a':''}" data-act="rsel" data-arg="${kind}|${inst.uid}"><img src="${ic}"><span style="text-align:left"><b>${esc(nm)}</b><br><span class="hint">${r?RUNES[r.id].i+' '+RUNES[r.id].n+' '+RUNE_TIER[r.t]:'— ว่าง —'}</span></span></button>`;};
+ let sel='';if(V5.rsel){const k=V5.rsel.kind;const inst=k==='m'?invGet(V5.rsel.uid):cinvGet(V5.rsel.uid);if(inst){const opts=[];for(const id in RUNES){if(RUNES[id].line!==k)continue;for(let t=0;t<3;t++)if(S.runes[id][t]>0)opts.push(`<button class="btn sm gold" data-act="sockRune" data-arg="${k}|${inst.uid}|${id}|${t}">${RUNES[id].i} ${RUNES[id].n} ${RUNE_TIER[t]} (+${RUNES[id].v[t]} ${RUNES[id].st})</button>`);}
+  sel=`<div class="card" style="border-color:#ffd84a"><b>ใส่ Rune ให้: ${esc(k==='m'?PART[inst.pid].name:ARMOR[inst.aid].name)}</b> ${inst.rune?`<button class="btn sm" data-act="unsock" data-arg="${k}|${inst.uid}">ถอด Rune เดิม (คืนเข้าคลัง)</button>`:''}<div class="row2" style="margin-top:6px">${opts.join('')||'<span class="hint">ไม่มี Rune สาย '+(k==='m'?'Mining':'Combat')+' ในคลัง — คราฟต์ด้านบน</span>'}</div></div>`;}}
+ $('#mbody').innerHTML=`<div class="hint">Rune/Module = ค่าคงที่ที่คุณเลือกเอง (ไม่สุ่ม) · 1 ช่องต่อชิ้น · ถอดแล้วได้ Rune คืน 100% · Rune Crafting Lv.${amLv('rune')}</div>
+  <h4 style="margin:8px 0 4px">ต้นทุน</h4>${costs}<h4 style="margin:10px 0 4px">คราฟต์ Rune</h4><div class="runeinv">${craft}</div>
+  <h4 style="margin:10px 0 4px">ติดตั้ง — ชิ้นที่ใส่อยู่</h4>${sel}<div class="hint">⛏ Mining</div><div class="sockl">${uniq(eqM).map(i=>sock('m',i)).join('')||'<span class="hint">-</span>'}</div><div class="hint" style="margin-top:6px">⚔ Combat</div><div class="sockl">${uniq(eqC).map(i=>sock('c',i)).join('')||'<span class="hint">-</span>'}</div>`;};
+ openModal('🔮 RUNE & MODULE FORGE','',render);$('#mbox').classList.add('wide');render();}
+/* ---------- BLUEPRINTS ---------- */
+function bpSourcesHtml(){return `<div class="card" style="margin-top:8px"><b>📄 แหล่ง Blueprint Fragment (แน่นอน ไม่สุ่ม)</b><table class="t"><tr><td>Quick Mining Extract สำเร็จ (≥5 ก้อน)</td><td>1 (+2 ครั้งแรกต่อดันเจี้ยน)</td></tr><tr><td>Deep Expedition</td><td>ชั้นละ 1 · ครบ ${DEEP_FLOORS} ชั้น +2</td></tr><tr><td>Endless Milestone (ทุก 10 ชั้น)</td><td>2–${2+Math.floor(30/3)}</td></tr>
+ <tr><td>Daily Contracts</td><td>1–2</td></tr><tr><td>Weekly Expedition</td><td>3–6</td></tr><tr><td>Combat Boss Hard / Nightmare</td><td>1 / 2 ต่อชนะ</td></tr><tr><td>แลกด้วย ⚙️ Ancient Scrap</td><td>40 ⚙️ → 1 📄</td></tr><tr><td>Ticket เก่า (แปลงอัตโนมัติครั้งเดียว)</td><td>🎫1 → 📄2</td></tr></table></div>`;}
+const SCRAP_PER_BPF=40;
+function scrapToBpf(n){n=Math.max(1,n|0);if(S.scrap<SCRAP_PER_BPF*n){toast(`ต้องใช้ ⚙️ ${SCRAP_PER_BPF*n}`,'err');return;}S.scrap-=SCRAP_PER_BPF*n;S.armorBlueprints.frag+=n;save();sfx('coin');toast(`📄 +${n} Blueprint Fragment`,'ok');renderWorkshop();if(modalRefresh)modalRefresh();}
+function openBlueprints(){const render=()=>{const mf=FAM_ORDER.filter(f=>FAMS[f].ri>=3);const types=['head','core','arm','legs','back'];
+ const mrow=f=>`<tr><td style="color:${rarCol(FAMS[f].ri)}"><b>${FAMS[f].name}</b><br><small class="hint">${RAR[FAMS[f].ri].name} · 📄${BP_COST[FAMS[f].ri]}</small></td>${types.map(t=>{const id=f+'_'+t;const h=bpHas('m',id);return `<td>${h?'<span class="pos">✔</span>':`<button class="btn sm" data-act="bpUnlockM" data-arg="${id}" ${S.armorBlueprints.frag>=bpCost('m',id)?'':'disabled'}>🔓</button>`}<br><small class="hint">${TYPE_NAME[t]}</small></td>`;}).join('')}</tr>`;
+ const lines=Object.keys(BP_LINE);const arow=f=>`<tr><td style="color:${rarCol(FAMS[f].ri)}"><b>${ASET[f].set}</b><br><small class="hint">${BP_INFO[BP_LINE[f]].n}</small></td>${CTYPES.map(t=>{const id=f+'_'+t;const h=bpHas('c',id);return `<td>${h?'<span class="pos">✔</span>':`<button class="btn sm" data-act="bpUnlockC" data-arg="${id}" ${S.armorBlueprints.frag>=bpCost('c',id)?'':'disabled'}>🔓 ${bpCost('c',id)}</button>`}<br><small class="hint">${CTYPE_NAME[t]}</small></td>`;}).join('')}</tr>`;
+ $('#mbody').innerHTML=`<div class="row2"><b>📄 Blueprint Fragment: ${S.armorBlueprints.frag}</b><button class="btn sm" data-act="scrapBpf" data-arg="1" ${S.scrap>=SCRAP_PER_BPF?'':'disabled'}>⚙️${SCRAP_PER_BPF} → 📄1</button><button class="btn sm" data-act="scrapBpf" data-arg="5" ${S.scrap>=SCRAP_PER_BPF*5?'':'disabled'}>⚙️${SCRAP_PER_BPF*5} → 📄5</button><span class="hint">⚙️ ${fmt(S.scrap)}</span></div>
+ <h4 style="margin:8px 0 4px">⛏ Mining Parts (Epic+ ต้องใช้ Blueprint ต่อแบบ)</h4><div style="overflow-x:auto"><table class="t">${mf.map(mrow).join('')}</table></div>
+ <h4 style="margin:8px 0 4px">🛡 Combat Armor (Legendary/Mythic Sets)</h4><div style="overflow-x:auto"><table class="t">${lines.map(arow).join('')}</table></div>
+ <div class="hint">Iron Guardian Blueprint (ปลดล็อก Fine Armor) ยังได้จาก First Clear ของ Iron Sentinel เหมือนเดิม — หรือใช้ Combat Armor Crafting Lv.5</div>${bpSourcesHtml()}`;};
+ openModal('📜 BLUEPRINTS','',render);$('#mbox').classList.add('wide');render();}
+/* ---------- MASTERY ---------- */
+const MAST_TXT={5:'Basic — โบนัสค่าสถานะ Mastery เริ่มทำงานชัดเจน',10:'Skilled — ประกายสีบรอนซ์บนชิ้นส่วน (โกเลม)',15:'Advanced — ค่าอัปเกรด/Enhance แบบนี้ −10%',20:'Expert — เลือก Specialization 1 จาก 2 สาย (Respec ได้)',25:'Elite — พลังสกิล +10% · วงแหวนสีเงินบนชิ้นส่วน',30:'Grandmaster — เอฟเฟกต์พิเศษเฉพาะแบบ + ออร่าทอง'};
+function mastPanelHtml(key,compact){const m=mOf(key);const lv=mLv(key)||1;const ri=mRi(key);const need=lv>=MAST_MAX?0:mastNeed(lv);const g=gmOf(mFam(key),mSlotKey(key));const paths=MPATH[mSlotKey(key)];const cur=S.masterySpecializations[key];
+ let h=`<div class="card mpanel" style="margin-top:8px;border-color:${lv>=30?'#ffd84a':'var(--line)'}"><b>⭐ Part Mastery — ${esc(mName(key))}</b> <span class="hint">Lv.${lv}/30 · ค่าบวก ×${mastMul(lv,ri).toFixed(2)} (GM ×${mastMul(30,ri).toFixed(2)})</span>
+  <div class="bar"><i style="width:${lv>=MAST_MAX?100:m.exp/need*100}%;background:linear-gradient(90deg,#d08a4a,#ffd84a)"></i></div><div class="hint">${lv>=MAST_MAX?'GRANDMASTER':`EXP ${fmt(m.exp)}/${fmt(need)} · ได้จากการใช้งานจริง (ขุด/ต่อสู้) — ไม่มีการซื้อ EXP`}</div>`;
+ if(!compact||true){h+=Object.keys(MAST_TXT).map(L=>`<div class="mstone ${lv>=L?'on':''}"><span class="lv">Lv.${L}</span><span>${MAST_TXT[L]}${+L===30?`<br><b style="color:#ffd84a">👑 ${g.n}</b>: ${g.desc}`:''}</span></div>`).join('');}
+ h+=`<div class="pathc" style="margin-top:6px">${paths.map(p=>`<button class="${cur===p.id?'on':''}" data-act="setPath" data-arg="${key}|${p.id}" ${lv>=20?'':'disabled'}><b>${p.id}. ${p.n}</b><br><span class="hint">${p.d}</span></button>`).join('')}</div>
+  <div class="hint">${lv<20?'🔒 Specialization ปลดล็อกที่ Lv.20':cur?`Respec: 🪙${fmt(respecCost(key).coins)} + ⚙️${respecCost(key).scrap}`:'🎯 เลือกได้ฟรีครั้งแรก'}</div></div>`;return h;}
+function openMastery(key){if(!key||!key.includes(':'))return openMasteryList();const render=()=>{$('#mbody').innerHTML=mastPanelHtml(key,false)+`<div class="hint" style="margin-top:6px">EXP ต่อรอบ ~60–100 ต่อชิ้น (Quick Mining ขุด ≥3 ก้อน) · แขนซ้าย/ขวาแบบเดียวกันได้ EXP ครั้งเดียว · Training ได้น้อยมาก (กันฟาร์ม AFK)</div>`;};openModal('⭐ PART MASTERY','',render,true);render();}
+function openMasteryList(){const render=()=>{const rows=[];const add=(kind,id,name,ri,slot)=>{const key=kind+':'+id;const lv=mLv(key);rows.push({key,name,ri,slot,lv,own:true});};
+ const seen=new Set();for(const i of S.inv){if(seen.has('m:'+i.pid))continue;seen.add('m:'+i.pid);add('m',i.pid,PART[i.pid].name,PART[i.pid].ri,TYPE_NAME[PART[i.pid].type]);}
+ for(const i of S.combatInventory){if(seen.has('c:'+i.aid))continue;seen.add('c:'+i.aid);add('c',i.aid,ARMOR[i.aid].name,ARMOR[i.aid].ri,CTYPE_NAME[ARMOR[i.aid].type]);}
+ rows.sort((a,b)=>b.lv-a.lv||b.ri-a.ri);const gm=rows.filter(r=>r.lv>=30).length;
+ $('#mbody').innerHTML=`<div class="hint">แบบที่ครอบครอง ${rows.length}/120 · Grandmaster ${gm} · Mastery ผูกกับ "แบบ" ไม่ใช่ชิ้น — คราฟต์ชิ้นใหม่ของแบบเดิมได้ Mastery เดิมทันที</div>
+ <div class="list">${rows.map(r=>`<div class="v5note ${r.lv>=30?'gold':''}" data-act="openMastery" data-arg="${r.key}" style="cursor:pointer"><span class="ic">${r.key[0]==='m'?'⛏':'⚔'}</span><span class="tx"><b style="color:${rarCol(r.ri)}">${esc(r.name)}</b> <span class="hint">${r.slot}</span>${mastChipHtml(r.key)}</span></div>`).join('')}</div>`;};openModal('⭐ PART MASTERY (120)','',render);render();}
+/* Lv15 Advanced: −10% upgrade / enhance coins · Mechanical Assembly −1%/Lv */
+{const _uc=upCost;upCost=function(inst){const c=_uc(inst);const k=(1-.01*amB('assembly'))*(mLv('m:'+inst.pid)>=15?.9:1);c.coins=Math.round(c.coins*k);return c;};}
+{const _ec=enhCost;enhCost=function(inst){const c=_ec(inst);if(!c)return c;const k=(1-.01*amB('assembly'))*(mLv('c:'+inst.aid)>=15?.9:1);c.coins=Math.round(c.coins*k/10)*10;return c;};}
+{const _du=doUpgrade;doUpgrade=function(uid){const i=invGet(uid);const l0=i?i.lvl:0;const r=_du(uid);const i2=invGet(uid);if(i2&&i2.lvl>l0){addAM('assembly',12+PART[i2.pid].ri*3);addAM('masterwork',6);save();}return r;};}
+{const _de=doEvolve;doEvolve=function(uid){const i=invGet(uid);const e0=i?(i.evo||0):0;const r=_de(uid);const i2=invGet(uid);if(i2&&(i2.evo||0)>e0){addAM('masterwork',40);addAM('assembly',30);save();}return r;};}
+{const _dn=doEnhance;doEnhance=function(uid){const i=cinvGet(uid);const e0=i?(i.enh||0):0;const r=_dn(uid);const i2=cinvGet(uid);if(i2&&(i2.enh||0)>e0){addAM('assembly',12+ARMOR[i2.aid].ri*3);addAM('masterwork',8);save();}return r;};}
+/* ---------- PET SANCTUARY ---------- */
+let PETANIM=null;
+function petAnimLoop(){clearInterval(PETANIM);PETANIM=setInterval(()=>{const L=document.querySelectorAll('#mbody canvas[data-pet][data-anim]');if(!L.length||$('#modal').classList.contains('hidden')){clearInterval(PETANIM);PETANIM=null;return;}L.forEach(petThumb);},66);}
+function openPets(tab){if(!S.petSanctuaryVisited)petSanctuaryFirst();if(tab)V5.ptab=tab;const render=()=>{const t=V5.ptab;let h=`<div class="wtabs">${[['pets','🐾 My Pets'],['eggs','🥚 Eggs'],['feed','🍪 Feed & Cook'],['codex','📖 Codex']].map(([k,n])=>`<button class="${t===k?'on':''}" data-act="ptab" data-arg="${k}">${n}</button>`).join('')}</div>`;
+ if(t==='pets'){h+=`<div class="hint" style="margin-bottom:6px">⛏ Mining Pet 1 ตัว + ⚔ Combat Pet 1 ตัว · Hybrid ใช้ได้ทั้งสองโหมด · Pet ไม่บังคับ แต่ช่วยเล่นง่ายขึ้น</div><div class="petgrid">${S.petInventory.map(p=>{const P_=PETS[p.pid];const eqM=S.equippedMiningPet===p.uid,eqC=S.equippedCombatPet===p.uid;
+   return `<button class="petc own ${eqM||eqC?'eq':''}" data-act="petOpen" data-arg="${p.pid}"><canvas width="200" height="120" data-pet="${p.pid}" data-st="${p.stage}" data-anim="1"></canvas><b>${esc(p.name)}</b><div class="ty">${P_.type==='mine'?'⛏ Mining':P_.type==='combat'?'⚔ Combat':'✦ Hybrid'} · Lv.${p.lv} · ${'💗'.repeat(p.bond)}</div>${eqM?'<div class="hint pos">⛏ ติดตั้ง</div>':''}${eqC?'<div class="hint pos">⚔ ติดตั้ง</div>':''}${petEvoReady(p)?'<div class="hint gold">🌟 พร้อมวิวัฒนาการ</div>':''}</button>`;}).join('')||'<div class="hint">ยังไม่มี Pet</div>'}</div>`;}
+ else if(t==='eggs'){h+=`<div class="hint" style="margin-bottom:6px">ไม่มีการสุ่ม Pet — เลือก 1 ตัวเป็น 🎯 เป้าหมาย แล้วทำกิจกรรมตามแหล่งที่กำหนดเพื่อสะสมชิ้นไข่ (ได้ทีละตัว) · Pet ที่มีแล้ว ชิ้นไข่จะกลายเป็น ✨ Pet Essence</div><div class="list">${PET_ORDER.map(k=>{const P_=PETS[k];const own=petOwned(k);const sh=S.petShards[k]||0;const tg=S.petTarget===k;
+   return `<div class="v5note ${tg?'gold':''}"><canvas width="96" height="72" style="width:64px;height:48px" data-pet="${k}" data-st="0" data-own="${own?1:0}"></canvas><span class="tx"><b style="color:${rarCol(P_.ri)}">${P_.n}</b> <span class="hint">${P_.type==='mine'?'⛏':P_.type==='combat'?'⚔':'✦'} ${RAR[P_.ri].name}</span><br><span class="hint">แหล่ง: ${P_.egg.src}</span>${own?'<br><span class="pos">✔ มีแล้ว</span>':`<div class="bar" style="margin:3px 0 0"><i style="width:${Math.min(1,sh/P_.egg.need)*100}%;background:var(--gold)"></i></div><span class="hint">🥚 ${sh}/${P_.egg.need}</span>`}</span>
+    ${own?'':sh>=P_.egg.need?`<button class="btn sm gold" data-act="petHatch" data-arg="${k}">🐣 ฟัก</button>`:`<button class="btn sm ${tg?'gold':''}" data-act="petTarget" data-arg="${k}">${tg?'🎯 เป้าหมาย':'ตั้งเป้า'}</button>`}</div>`;}).join('')}</div>`;}
+ else if(t==='feed'){h+=`<div class="hint">อาหารเพิ่ม 💗 Bond (Lv.3 ปลดล็อก Bond Ability) และ EXP · ✨ Pet Essence ใช้วิวัฒนาการ (ได้จากชิ้นไข่ของ Pet ที่มีแล้ว)</div><div class="row2" style="margin:8px 0"><b>คลัง:</b> 🍪 ${S.petItems.treat} · 🍱 ${S.petItems.feast} · ✨ ${S.petItems.ess}</div>
+   ${Object.entries(PET_FOOD).map(([k,F])=>`<div class="card"><b>${F.i} ${F.n}</b> <span class="hint">Bond +${F.bond} · EXP +${F.exp}</span>${matHtml(F.cost)}<button class="btn sm gold" data-act="cookFood" data-arg="${k}" ${haveMat(F.cost)?'':'disabled'}>🍳 ทำอาหาร</button></div>`).join('')}`;}
+ else{h+=`<div class="petgrid">${PET_ORDER.map(k=>{const P_=PETS[k];const own=petOwned(k);return `<div class="petc ${own?'own':''}"><canvas width="200" height="120" data-pet="${k}" data-st="${own?own.stage:0}" data-own="${own?1:0}"></canvas><b style="color:${rarCol(P_.ri)}">${own?P_.n:'???'}</b><div class="ty">${P_.type==='mine'?'⛏ Mining':P_.type==='combat'?'⚔ Combat':'✦ Hybrid'} · ${RAR[P_.ri].name}</div><div class="hint">${own?P_.st.join(' → '):'ยังไม่ค้นพบ'}</div></div>`;}).join('')}</div>`;}
+ $('#mbody').innerHTML=h;$('#mbody').querySelectorAll('canvas[data-pet]').forEach(petThumb);petAnimLoop();};openModal('🐾 PET SANCTUARY','',render);$('#mbox').classList.add('wide');render();}
+function openPetDetail(pid){const p=petOwned(pid);if(!p){V5.ptab='eggs';openPets();return;}const render=()=>{const P_=PETS[pid];const p=petOwned(pid);const need=petNeed(p.lv);const cap=PET_STAGE_LV[p.stage+1]||PET_MAXLV;const ec=PET_EVO_COST[p.stage+1];
+ const bn=p.bond<5?BOND_NEED[p.bond]:0;const eqM=S.equippedMiningPet===p.uid,eqC=S.equippedCombatPet===p.uid;const synM=petSyn(p,'mine'),synC=petSyn(p,'combat');
+ $('#mbody').innerHTML=`<div class="pdetail"><div><canvas width="400" height="320" data-pet="${pid}" data-st="${p.stage}" data-anim="1"></canvas><div class="row2" style="justify-content:center">${P_.st.map((n,i)=>`<span class="tag" style="${i===p.stage?'color:#ffd84a;border-color:#ffd84a':''}">${n}</span>`).join('→')}</div></div>
+ <div><input id="petName" maxlength="16" value="${esc(p.name)}" style="font-size:18px;font-weight:800;width:100%"><div class="hint">${P_.type==='mine'?'⛏ Mining':P_.type==='combat'?'⚔ Combat':'✦ Hybrid'} · ${RAR[P_.ri].name} · Synergy: ${FAMS[P_.syn].name} (ใส่ 2 ชิ้นขึ้นไป → CD −20% + เส้นเชื่อมแสง)</div>
+  <div class="stat"><div class="row"><span>Lv.${p.lv}/${PET_MAXLV}</span><span class="hint">${p.lv>=cap&&p.stage<2?`ถึงเพดาน Stage — วิวัฒนาการเพื่อไปต่อ`:`EXP ${fmt(p.exp)}/${fmt(need)}`}</span></div><div class="bar"><i style="width:${Math.min(1,p.exp/need)*100}%;background:var(--cyan)"></i></div></div>
+  <div class="stat"><div class="row"><span>💗 Bond ${p.bond}/5</span><span class="hint">${p.bond<5?`${p.bondPts}/${bn}`:'MAX'}</span></div><div class="bar"><i style="width:${p.bond<5?Math.min(1,p.bondPts/bn)*100:100}%;background:#ff7ab0"></i></div></div>
+  <table class="t"><tr><td>Passive</td><td><b>${P_.pas.n}</b><br><span class="hint">${P_.pas.d}</span></td></tr><tr><td>Active (Auto)</td><td><b>${P_.act.n}</b> · CD ${Math.round(petCd(p,false)*10)/10}s<br><span class="hint">${P_.act.d}</span></td></tr><tr><td>Bond Lv.3</td><td><b>${P_.bond.n}</b> ${p.bond>=3?'<span class="pos">✔</span>':'🔒'}<br><span class="hint">${P_.bond.d}</span></td></tr></table>
+  <div class="row2" style="margin-top:6px">${P_.type!=='combat'?`<button class="btn ${eqM?'gold':''}" data-act="petEquip" data-arg="${p.uid}|mine">${eqM?'⛏ ติดตั้งอยู่ (ถอด)':'⛏ ใช้เป็น Mining Pet'}${synM?' 🔗':''}</button>`:''}${P_.type!=='mine'?`<button class="btn ${eqC?'gold':''}" data-act="petEquip" data-arg="${p.uid}|combat">${eqC?'⚔ ติดตั้งอยู่ (ถอด)':'⚔ ใช้เป็น Combat Pet'}${synC?' 🔗':''}</button>`:''}</div>
+  <div class="row2"><button class="btn sm" data-act="petFeed" data-arg="${p.uid}|treat" ${S.petItems.treat>0?'':'disabled'}>🍪 Feed (${S.petItems.treat})</button><button class="btn sm" data-act="petFeed" data-arg="${p.uid}|feast" ${S.petItems.feast>0?'':'disabled'}>🍱 Feast (${S.petItems.feast})</button><button class="btn sm" data-act="ptabOpen" data-arg="feed">🍳 ทำอาหาร</button></div>
+  ${p.stage<2?`<div class="card" style="margin-top:6px"><b>🌟 Evolve → ${P_.st[p.stage+1]}</b> <span class="hint">ต้องการ Lv.${PET_STAGE_LV[p.stage+1]} · ✨${ec.ess} · 🪙${fmt(ec.coins)}${ec.core?` · Boss Core ${ec.core}`:''}</span><br><button class="btn gold" data-act="petEvolve" data-arg="${p.uid}" ${petEvoReady(p)?'':'disabled'}>🌟 วิวัฒนาการ</button></div>`:'<div class="hint gold">👑 Alpha Stage สูงสุดแล้ว</div>'}</div></div>`;
+ const ni=$('#petName');if(ni)ni.onchange=()=>{p.name=ni.value.trim().slice(0,16)||P_.st[p.stage];save();v5Render();};$('#mbody').querySelectorAll('canvas[data-pet]').forEach(petThumb);petAnimLoop();};
+ openModal('🐾 '+PETS[pid].n,'',render);$('#mbox').classList.add('wide');render();}
+/* ---------- SETTINGS · Export / Import ---------- */
+{const _os=openSettings;openSettings=function(){_os();const r0=modalRefresh;const add=()=>{const b=$('#mbody');if(!b||b.querySelector('.v5io'))return;const d=document.createElement('div');d.className='card v5io';d.style.marginTop='10px';
+  d.innerHTML=`<h3>💾 Save Export / Import</h3><div class="hint">สำรอง Save เป็นข้อความหรือไฟล์ แล้วนำเข้าบนเครื่องอื่นได้ · ก่อนนำเข้าจะสำรอง Save ปัจจุบันไว้อัตโนมัติ · Save ก่อนอัปเดต V5 ถูกสำรองไว้แล้ว</div>
+  <div class="row2"><button class="btn pri" data-act="saveExport">📤 Export (คัดลอก)</button><button class="btn" data-act="saveDownload">⬇ ดาวน์โหลดไฟล์</button><label class="btn">📂 นำเข้าจากไฟล์<input type="file" id="ioFile" accept=".json,.txt" style="display:none"></label></div>
+  <textarea id="ioTxt" rows="3" style="width:100%;margin-top:6px;font-size:11px" placeholder="วาง Save ที่นี่แล้วกด Import"></textarea><div class="row2"><button class="btn red" data-act="saveImport">📥 Import</button>${localStorage.getItem('buildAGolem_backup_pre_v5')?'<button class="btn sm" data-act="saveBackup">⬇ Save ก่อน V5 (Backup)</button>':''}</div>`;
+  b.appendChild(d);const f=$('#ioFile');if(f)f.onchange=()=>{const fl=f.files[0];if(!fl)return;const rd=new FileReader();rd.onload=()=>{$('#ioTxt').value=rd.result;toast('โหลดไฟล์แล้ว — กด Import เพื่อยืนยัน','ok');};rd.readAsText(fl);};};add();modalRefresh=()=>{if(r0)r0();add();};};}
+function dlText(name,txt){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);}
+/* ---------- action registry ---------- */
+Object.assign(ACT,{v5tab:a=>v5SetTab(a),wtab:a=>{V5.wtab=a;v5Render();},quickRun:a=>quickRun(a),startDeep:a=>{closeModal();startDeep(a);},openDeep:()=>openDeep(),openDungeons:()=>openDungeons(),openEndless:()=>openEndless(),startEndless:a=>{closeModal();startEndless(+a||1);},
+ openArena:()=>openArena(),openSettings:()=>openSettings(),openSummon:()=>openSummon(),openArmorForge:()=>openArmorForge(),openCraft:()=>openCraft(),openContractsAll:()=>openContractsAll(),
+ openForge:a=>openForge(a),fgFam:a=>{V5.fsel.fam=a;if(modalRefresh)modalRefresh();},fgType:a=>{V5.fsel.type=a;if(modalRefresh)modalRefresh();},fgMode:a=>{V5.fsel.mode=a;if(modalRefresh)modalRefresh();},fgQty:a=>{V5.fsel.qty=+a;if(modalRefresh)modalRefresh();},fgCraft:()=>fgCraft(),
+ bpUnlockM:a=>bpUnlock('m',a),bpUnlockC:a=>bpUnlock('c',a),openBlueprints:()=>openBlueprints(),scrapBpf:a=>scrapToBpf(+a),
+ wishPin:a=>{const[k,id,m]=a.split('|');wishToggle(k,id,k==='rune'?+m:m);},wishDel:a=>{const[k,id]=a.split('|');wishToggle(k,id);},
+ wishCraft:a=>{const[k,id,m]=a.split('|');let ok;if(k==='m')ok=craftPart(id,m,1).length;else if(k==='c')ok=craftArmor(id,m,1).length;else ok=craftRune(id,+m);if(ok){toast('⚒ คราฟต์สำเร็จจาก Wishlist!','gold');const L=S.craftingWishlist;const i=L.findIndex(w=>w.kind===k&&w.id===id);if(i>=0&&!wishInfo(L[i]).ready&&k!=='rune'){}save();v5Render();}},
+ dClaim:a=>{dClaim(a);v5Render();},weeklyClaim:()=>weeklyClaim(),openClaimFirst:()=>{const p=S.pendingExtraction[0];if(p)openClaim(p.id);},
+ openRunes:a=>openRunes(a),craftRune:a=>{const[id,t]=a.split('|');craftRune(id,+t);},rsel:a=>{const[k,u]=a.split('|');V5.rsel={kind:k,uid:u};if(modalRefresh)modalRefresh();},sockRune:a=>{const[k,u,id,t]=a.split('|');socketRune(k,u,id,+t);},unsock:a=>{const[k,u]=a.split('|');unsocketRune(k,u);},
+ openMastery:a=>openMastery(a),openMasteryList:()=>openMasteryList(),setPath:a=>{const i=a.lastIndexOf('|');setPath(a.slice(0,i),a.slice(i+1));},
+ openPets:a=>openPets(a),ptab:a=>{V5.ptab=a;if(modalRefresh)modalRefresh();},ptabOpen:a=>openPets(a),petOpen:a=>openPetDetail(a),petHatch:a=>{if(petHatch(a))openPetDetail(a);},petTarget:a=>{S.petTarget=a;save();toast(`🎯 เป้าหมายไข่: ${PETS[a].n}`,'ok');if(modalRefresh)modalRefresh();v5Render();},
+ petEquip:a=>{const[u,m]=a.split('|');const cur=m==='combat'?S.equippedCombatPet:S.equippedMiningPet;equipPet(cur===u?null:u,m);},petFeed:a=>{const[u,f]=a.split('|');petFeed(u,f);},petEvolve:a=>petEvolve(a),cookFood:a=>cookFood(a),
+ bossRank:a=>{const[b,r]=a.split('|');setBossRank(b,+r);},
+ reforge:()=>{toast('🔁 Reforge (สุ่ม Trait) ถูกแทนที่ด้วย Rune — Trait เดิมยังคงอยู่','err');},
+ saveExport:()=>{const t=exportSave();const ta=$('#ioTxt');if(ta){ta.value=t;ta.select();}try{navigator.clipboard.writeText(t);toast('📤 คัดลอก Save แล้ว','ok');}catch(e){toast('เลือกข้อความแล้วคัดลอกเอง','ok');}},
+ saveDownload:()=>dlText(`build-a-golem-save-${new Date().toISOString().slice(0,10)}.json`,exportSave()),saveBackup:()=>dlText('build-a-golem-backup-pre-v5.json',localStorage.getItem('buildAGolem_backup_pre_v5')||''),
+ saveImport:()=>{const t=($('#ioTxt')||{}).value||'';if(!t.trim()){toast('วาง Save ก่อน','err');return;}confirmBox('นำเข้า Save นี้แทน Save ปัจจุบัน?<br><span class="hint">Save ปัจจุบันถูกสำรองไว้ใน buildAGolem_backup_before_import</span>',()=>{if(importSave(t))closeModal();},'📥 Import','Import Save');}});
+window.__V5={S:()=>S,craftPart,craftArmor,bpUnlock,addMastExp,mLv,setPath,partStats,armorStats,petHatch,addPet,equipPet,petFeed,petEvolve,petExpGain,petShardEvent,craftRune,socketRune,unsocketRune,wishToggle,wishInfo,dClaim,dEvent,startDeep,startEndless,
+ v5RunEnd,v5CombatEnd,exportSave,importSave,grantBossReward,setBossRank,bossRankMax,addCoreFrag,openForge,openPets,openPetDetail,openRunes,openBlueprints,openMastery,v5SetTab,weeklyClaim,scrapToBpf,last:()=>LAST_V5};
+setTimeout(()=>{try{v5Boot();renderWorkshop();}catch(e){console.error('v5Boot',e);}},0);
+
+/* =====================================================================
+   V5.0 BALANCE LAB — real-engine simulations with development levels (Lv / Evo / Quality / Mastery)
+   Mining: 10 full-family builds · same seeds/maps · metrics P/Tier/ores-min/coins-min/travel%/skill%
+   Combat: 10 builds (V4 list) · Mastery applied to every armor design · win% / time / DPS / taken
+   ===================================================================== */
+const V5MB=['scrap','stoneguard','coppergear','drilltech','titanstone','magnetite','prism','magma','thunder','void'];
+/* comparable roles (equal-potential check): power · all-round · speed · haul */
+const V5ROLE={stoneguard:'power',titanstone:'power',magma:'power',scrap:'allround',prism:'allround',void:'allround',coppergear:'speed',drilltech:'speed',thunder:'speed',magnetite:'haul'};
+const ROLE_PATH={power:{head:'B',core:'A',arm:'B',legs:'A',back:'A'},allround:{head:'B',core:'A',arm:'B',legs:'A',back:'A'},speed:{head:'B',core:'A',arm:'B',legs:'A',back:'B'},haul:{head:'B',core:'A',arm:'B',legs:'A',back:'A'}};
+function v5SimMine(fam,did,seed,o){const snap=JSON.stringify(S);let res=null;const keepR=R;try{S.settings.sound=false;S.inv=[];S.partMastery={};S.masterySpecializations={};S.equippedMiningPet=null;const eq={};
+ for(const sl of SLOTS){const pid=fam+'_'+SLOT_TYPE[sl];const u=addPart(S,pid);const i=invGet(u);i.lvl=o.lvl||1;i.evo=o.evo||0;i.quality=o.q==null?1:o.q;i.isNew=false;if(o.rune)i.rune={id:o.rune,t:2};eq[sl]=u;S.partMastery['m:'+pid]={lv:o.mast||0,exp:0};if((o.mast||0)>=20&&o.path)S.masterySpecializations['m:'+pid]=o.path[SLOT_TYPE[sl]]||'A';}
+ const st=calcStats(eq);const d=DMAP[did];const m=genChecked(d,seed,{mods:[],maxTier:st.maxTier,need:8});initRun('normal',d,m,st,{seed,time:9999});R.auto=true;R.dbg=true;
+ let t=0,walk=0;const dt=.05,secs=o.secs||120;let val=0,mined=0,trips=0,idle=0;
+ while(t<secs){runTick(dt);t+=dt;if(R.g.state==='walk')walk+=dt;for(let k=0;k<2;k++){const sk=R.skills[k];if(sk&&R.cds[k]<=0&&R.g.state==='mine'&&R.g.settle<=0&&sk.type!=='dash')useSkill(k);}
+  /* full bag: bank it (models an extract + new run) so capacity matters but does not end the measurement */
+  if(R.g.state==='idle')idle+=dt;else idle=0;if(R.bag.w>=R.st.C*.95||idle>3||(!R.ores.some(x=>oreVisible(x)&&canMine(x))&&!R.drops.length)){idle=0;val+=bagValue();mined+=R.mined;trips++;const m2=genChecked(d,seed+trips*7,{mods:[],maxTier:st.maxTier,need:8});const keep={pet:R.pet};initRun('normal',d,m2,st,{seed:seed+trips,time:9999});R.auto=true;R.dbg=true;t+=6;}}
+ val+=bagValue();mined+=R.mined;res={P:st.P,S:st.S,M:st.M,C:st.C,T:st.maxTier,orePerMin:+(mined/(secs/60)).toFixed(1),coinPerMin:Math.round(val/(secs/60)),travel:Math.round(walk/secs*100),skill:R.dmgT?Math.round((R.dmgS||0)/R.dmgT*100):0,trips};}
+ catch(e){console.error(e);res={err:String(e)};}finally{R=keepR;S=JSON.parse(snap);}return res;}
+function v5MineBal(o={}){const out=[];const dids=o.dids||['depths','rift'];for(const f of V5MB){const row={fam:f,ri:FAMS[f].ri,role:V5ROLE[f],res:{}};for(const did of dids){let acc=null;for(const seed of(o.seeds||[101,202])){const oo=o.role?Object.assign({},o,{rune:'power',path:ROLE_PATH[V5ROLE[f]]}):o;const r=v5SimMine(f,did,seed,oo);if(r.err){acc=r;break;}if(!acc)acc=Object.assign({},r);else for(const k of['orePerMin','coinPerMin','travel','skill'])acc[k]+=r[k];}
+  if(!acc.err)for(const k of['orePerMin','coinPerMin','travel','skill'])acc[k]=Math.round(acc[k]/(o.seeds||[1,2]).length*10)/10;row.res[did]=acc;}out.push(row);}return out;}
+{const _sc=simCombat;simCombat=function(build,bid,o={}){if(o.mast==null)return _sc(build,bid,o);const pm=JSON.stringify(S.partMastery);try{if(build)for(const sl of CSLOTS){const aid=build[sl];if(aid)S.partMastery['c:'+aid]={lv:o.mast,exp:0};}return _sc(build,bid,o);}finally{S.partMastery=JSON.parse(pm);}};}
+function v5CombBal(o={}){window.V5SIMRANK=o.rank||0;const out=[];const bosses=o.bosses||CBOSS_ORDER;for(const[name,b]of CBAL_BUILDS.slice(0,10).filter((x,i)=>!o.only||o.only.includes(i))){const row={name,res:{}};let ri=0;for(const sl of CSLOTS)if(b[sl])ri=Math.max(ri,ARMOR[b[sl]].ri);row.ri=ri;
+ for(const bid of bosses){let w=0,t=0,dps=0,taken=0,cp=0,n=0;for(let s=0;s<(o.seeds||2);s++){const r=simCombat(b,bid,{enh:o.enh||0,skill:.85,q:o.q==null?1:o.q,mast:o.mast||0});if(!r||r.err)continue;n++;cp=r.cp;if(r.win){w++;t+=r.time;}dps+=r.stats.dmg/Math.max(1,r.time);taken+=r.stats.taken;}
+  row.cp=cp;row.res[bid]={win:n?w/n:0,time:w?Math.round(t/w):null,dps:n?Math.round(dps/n):0,taken:n?Math.round(taken/n):0};}out.push(row);}return out;}
+function openV5Bal(){openModal('🧪 V5 Balance Lab',`<div class="hint">จำลองด้วย Engine จริง · Mining 10 Builds (Lv10 · Ascended · Perfect · Mastery 30) · Combat 10 Builds (+10 · Perfect · Mastery 30)</div><div class="row2"><button class="btn" data-act="v5balM">⛏ Mining GM</button><button class="btn" data-act="v5balC">⚔ Combat GM</button></div><div id="v5balOut" class="hint">กดเพื่อเริ่ม (ใช้เวลาหลายวินาที)</div>`,null,false);$('#mbox').classList.add('wide');}
+ACT.v5balM=()=>{$('#v5balOut').textContent='กำลังจำลอง…';setTimeout(()=>{const r=v5MineBal({lvl:10,evo:2,q:3,mast:30,secs:120});$('#v5balOut').innerHTML=`<table class="t"><tr><th>Build</th><th>P/T</th><th>Depths ore/m · 🪙/m</th><th>Rift ore/m · 🪙/m</th></tr>${r.map(x=>`<tr><td style="color:${rarCol(x.ri)}">${FAMS[x.fam].name}</td><td>${x.res.rift.P} / T${x.res.rift.T}</td><td>${x.res.depths.orePerMin} · ${fmt(x.res.depths.coinPerMin)}</td><td>${x.res.rift.orePerMin} · ${fmt(x.res.rift.coinPerMin)}</td></tr>`).join('')}</table>`;},50);};
+ACT.v5balC=()=>{$('#v5balOut').textContent='กำลังจำลอง…';setTimeout(()=>{const r=v5CombBal({enh:10,q:3,mast:30,seeds:2});$('#v5balOut').innerHTML=`<table class="t"><tr><th>Build</th><th>CP</th>${CBOSS_ORDER.map(b=>`<th>${CBOSS[b].name}</th>`).join('')}</tr>${r.map(x=>`<tr><td style="color:${rarCol(x.ri)}">${x.name}</td><td>${x.cp}</td>${CBOSS_ORDER.map(b=>{const y=x.res[b];return `<td>${Math.round(y.win*100)}% · ${y.time||'-'}s · ${y.dps}</td>`;}).join('')}</tr>`).join('')}</table>`;},50);};
+window.__V5B={v5SimMine,v5MineBal,v5CombBal};
+/* debug panel (Settings → Debug) */
+{const _dh=dbgV2Html;dbgV2Html=function(){return _dh()+`<h4 style="margin:12px 0 6px">🆕 V5 Master Craftsman</h4><div class="row2"><button class="btn" data-act="openV5Bal">🧪 V5 Balance Lab</button><button class="btn" data-act="dbg5" data-arg="mats">+999 แร่ทุกชนิด + 1M 🪙</button><button class="btn" data-act="dbg5" data-arg="pets">🐾 ได้ Pet ทั้ง 14</button>
+ <button class="btn" data-act="dbg5" data-arg="m30">⭐ Mastery 30 (ชิ้นที่ใส่)</button><button class="btn" data-act="dbg5" data-arg="bpf">+50 📄</button><button class="btn" data-act="dbg5" data-arg="am">📘 Activity Mastery Lv.12</button></div>`;};}
+function dbg5(k){if(k==='mats'){for(const n of ORE_NAMES)S.oreStorage[n]=(S.oreStorage[n]||0)+999;S.coins+=1e6;}else if(k==='pets'){for(const pid of PET_ORDER)if(!petOwned(pid))addPet(pid);}
+ else if(k==='m30'){for(const sl of SLOTS){const i=S.equip[sl]&&invGet(S.equip[sl]);if(i)S.partMastery['m:'+i.pid]={lv:30,exp:0};}for(const sl of CSLOTS){const i=S.combatEquip[sl]&&cinvGet(S.combatEquip[sl]);if(i)S.partMastery['c:'+i.aid]={lv:30,exp:0};}}
+ else if(k==='bpf')S.armorBlueprints.frag+=50;else if(k==='am'){for(const a in AMAST)S.activityMastery[a]={lv:Math.max(12,amLv(a)),exp:0};}save();renderWorkshop();toast('DEBUG: '+k,'ok');if(modalRefresh)modalRefresh();}
+Object.assign(ACT,{openV5Bal:()=>openV5Bal(),dbg5:a=>dbg5(a)});
 
 
 /* ========================= LOOP ========================= */
