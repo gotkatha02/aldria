@@ -686,8 +686,8 @@ function newState(){
 function load(){
  try{const raw=localStorage.getItem(SAVE_KEY);if(raw){const d=JSON.parse(raw);const base=newState();
    const m=(a,b)=>{for(const k in a){if(b[k]===undefined)b[k]=a[k];else if(a[k]&&typeof a[k]==='object'&&!Array.isArray(a[k]))m(a[k],b[k]);}return b;};
-   S=m(base,d);S.v=3;S.inv=S.inv.filter(i=>PART[i.pid]);S.inv.forEach(i=>{if(i.quality==null)i.quality=1;if(!S.seen.includes(i.pid))S.seen.push(i.pid);});for(const sl of SLOTS)if(S.equip[sl]&&!invGet(S.equip[sl]))S.equip[sl]=null;v4Migrate(S);v5Migrate(S,raw,d);v5EndlessRetro();return;}}catch(e){console.warn('load failed',e);}
- S=newState();v4Migrate(S);v5Migrate(S);v5EndlessRetro();
+   S=m(base,d);S.v=3;S.inv=S.inv.filter(i=>PART[i.pid]);S.inv.forEach(i=>{if(i.quality==null)i.quality=1;if(!S.seen.includes(i.pid))S.seen.push(i.pid);});for(const sl of SLOTS)if(S.equip[sl]&&!invGet(S.equip[sl]))S.equip[sl]=null;v4Migrate(S);v5Migrate(S,raw,d);v5EndlessRetro();v51Migrate();return;}}catch(e){console.warn('load failed',e);}
+ S=newState();v4Migrate(S);v5Migrate(S);v5EndlessRetro();v51Migrate();
 }
 let saveT=0;/* save() is defined in V3 CORE (adds auto-save indicator) */
 function saveSoon(){clearTimeout(saveT);saveT=setTimeout(save,250);}
@@ -1045,7 +1045,7 @@ function debugAct(k){if(dbgV2(k))return;
  afterChange();}
 
 /* ========================= DUNGEON ========================= */
-const W=22,H=14;const T_FLOOR=0,T_WALL=1,T_RUBBLE=2,T_SLOW=3,T_LAVA=4,T_SECRET=5;
+let W=22,H=14;const T_FLOOR=0,T_WALL=1,T_RUBBLE=2,T_SLOW=3,T_LAVA=4,T_SECRET=5;
 let R=null;
 function genDungeon(d,seed,opt){
  opt=opt||{};const mods=opt.mods||[];const has=k=>mods.includes(k)||mods.some(m=>(MOD_ALIAS[m]||[]).includes(k));
@@ -1137,7 +1137,7 @@ function chooseTarget(){
  const g=R.g;const D=dijkstra(gTile());const spd=R.st.move;let best=null,bs=-Infinity;let anyMineable=false,fullBlock=false;
  for(const dr of R.drops){if(dr.fly)continue;if(!bagFits(dr.tier)){fullBlock=true;continue;}const i=ix(Math.floor(dr.x),Math.floor(dr.y));let dd=D.dist[i];if(dd===Infinity){const b=bestStand(D,{x:Math.floor(dr.x),y:Math.floor(dr.y)});dd=b.d;}if(dd===Infinity)continue;
   const sc=R.mode==='nearest'?-dd+.5:TIERS[dr.tier].price*R.valMul/(dd/spd+.3);if(sc>bs){bs=sc;best={kind:'drop',d:dr};}}
- for(const o of R.ores){if(!oreVisible(o)||!canMine(o))continue;anyMineable=true;if(!bagFits(o.tier)&&!o.secret&&!o.boss){fullBlock=true;continue;}
+ for(const o of R.ores){if(!oreVisible(o)||!canMine(o))continue;anyMineable=true;if(!bagFits(o.tier)&&!o.secret&&!o.boss&&!R.v51){fullBlock=true;continue;}
   const near=gDist(o.x,o.y)<=1.55;const dd=near?0:bestStand(D,o).d;if(dd===Infinity)continue;
   const mineT=Math.ceil(o.hp/R.st.rawP)*R.st.interval;const sc=R.mode==='nearest'?-dd:oreValue(o)/(dd/spd+mineT+.5);if(sc>bs){bs=sc;best={kind:'ore',o};}}
  if(best){setTarget(best,false);return true;}
@@ -1226,7 +1226,7 @@ function stepGolem(dt){
  if(g.state==='mine'){
   const o=g.tgt&&g.tgt.o;if(!o||!R.ores.includes(o)){g.state='idle';g.tgt=null;g.idleWait=0;return;}
   if(gDist(o.x,o.y)>1.6){if(!setTarget(g.tgt,g.manual)){g.state='idle';g.tgt=null;}return;}
-  if(!o.secret&&!bagFits(o.tier)){notify('fullo','🎒 กระเป๋าเต็ม — เก็บแร่ก้อนนี้ไม่ได้ (ไม่เริ่มขุด)','err',4);g.state='idle';g.tgt=null;g.idleWait=.5;return;}
+  if(!o.secret&&!bagFits(o.tier)&&!R.v51){notify('fullo','🎒 กระเป๋าเต็ม — เก็บแร่ก้อนนี้ไม่ได้ (ไม่เริ่มขุด)','err',4);g.state='idle';g.tgt=null;g.idleWait=.5;return;}
   if(o.hidden||o.closed){g.state='idle';g.tgt=null;g.idleWait=.2;return;}
   g.face=(o.x+.5)>=g.x?1:-1;
   if(g.settle>0){g.settle-=dt;return;}
@@ -1264,7 +1264,7 @@ function stepHazards(dt){
   if(o.secret&&!o.revealed&&(revS||(secDet()>0&&gDist(o.x,o.y)<=1.2+secDet()))){o.revealed=true;floatTxt(o.x+.5,o.y+.2,'✨ ทางเข้าห้องลับ!','#ff9df0');}}
 }
 function runTick(dt){
- if(!R||R.ended)return;R.time-=dt;R.elapsed+=dt;if(R.time<=0){R.time=0;endRun(false);return;}
+ if(!R||R.ended)return;if(R.timed!==false)R.time-=dt;R.elapsed+=dt;if(R.timed!==false&&R.time<=0){R.time=0;endRun(false);return;}
  for(let i=0;i<2;i++)R.cds[i]=Math.max(0,R.cds[i]-dt);R.over=Math.max(0,R.over-dt);R.blinkCd=Math.max(0,R.blinkCd-dt);R.flashCd=Math.max(0,R.flashCd-dt);R.boost=Math.max(0,R.boost-dt);R.turbo=Math.max(0,R.turbo-dt);R.turboCd=Math.max(0,R.turboCd-dt);R.shake=Math.max(0,R.shake-dt);
  for(let k=R.timers.length-1;k>=0;k--){const tm=R.timers[k];tm.t-=dt;if(tm.t<=0){R.timers.splice(k,1);tm.fn();}}
  stepHazards(dt);if(R.ended)return;if(R.type==='boss'){stepBoss(dt);if(R.ended)return;}stepGolem(dt);if(R.ended)return;updDrops(dt);
@@ -1278,7 +1278,7 @@ function endRun(extracted){
  if(R.type==='boss'){endBoss(false,extracted?'retreat':'time');return;}
  if(R.type==='endless'){endEndless(extracted);return;}
  R.ended=true;const value=bagValue();const mult=extracted?1:.7;const coins=Math.floor(value*mult);
- const success=extracted&&R.mined>=5;let tix=0,first=false;if(success){tix=1;if(!S.cleared[R.d.id]){S.cleared[R.d.id]=true;tix+=2;first=true;}}
+ const success=extracted&&R.mined>=5&&(!R.v51||clearInfo().pct>=40);let tix=0,first=false;if(success){tix=1;if(!S.cleared[R.d.id]){S.cleared[R.d.id]=true;tix+=2;first=true;}}
  const bf=miningFragments(R.mined,R.bag.items,success);S.battleFragments+=bf;const pend=extracted?createPending('dungeon',R.bag.items,exValMul(R.bag.items,value),{d:R.d.id,title:R.d.name,tix,first,mined:R.mined,time:Math.round(R.elapsed),bf}):null;const paid=extracted?0:coins;S.coins+=paid;S.armorBlueprints.frag+=tix;S.stats.earned+=paid;S.stats.runs++;if(extracted&&R.collectedCount>0)S.stats.extracts++;S.settings.mode=R.mode;
  ctEvent('runEnd',{extracted,success,fill:R.bag.w/R.st.C});recordRun(coins,value);
  const res={pend:pend?pend.id:null,bf,d:R.d,items:JSON.parse(JSON.stringify(R.bag.items)),value,mult,coins,tix,first,mined:R.mined,time:R.elapsed,extracted,success,melted:R.melted,valMul:R.valMul,mod:R.modId||'normal'};
@@ -1300,7 +1300,7 @@ function showResult(r){if(r.pend&&S.pendingExtraction.some(p=>p.id===r.pend)){op
 /* ===== dungeon input ===== */
 let DV={T:40,ox:0,oy:0,w:0,h:0,top:0,bot:0};
 function resizeDungeon(){const cv=$('#dcv');const dpr=Math.min(2,window.devicePixelRatio||1);const w=window.innerWidth,h=window.innerHeight;cv.width=w*dpr;cv.height=h*dpr;
- const top=$('#hudTop').offsetHeight,bot=$('#hudBot').offsetHeight;const aw=w-16,ah=h-top-bot-10;let T=clamp(Math.min(aw/W,(ah)/(H+.6)),26,72);if(aw/W<26)T=clamp(Math.min(ah/(H+.6),40),26,40);DV={T,w,h,top,bot,dpr,aw,ah};}
+ const top=$('#hudTop').offsetHeight,bot=$('#hudBot').offsetHeight;const aw=w-16,ah=h-top-bot-10;let T=clamp(Math.min(aw/W,(ah)/(H+.6)),26,72);if(aw/W<26)T=clamp(Math.min(ah/(H+.6),40),26,40);if(W>30)T=w<768?38:clamp(Math.round(Math.min(aw/22,ah/13)),44,58);DV={T,w,h,top,bot,dpr,aw,ah};}
 function camUpdate(){const T=DV.T;const ww=W*T,wh=(H+.6)*T;const vx=DV.w,vy=DV.h-DV.top-DV.bot;let ox,oy;
  if(ww<=vx)ox=(vx-ww)/2;else ox=clamp(vx/2-R.g.x*T,vx-ww-8,8);if(wh<=vy)oy=DV.top+(vy-wh)/2+.6*T;else oy=DV.top+clamp(vy/2-R.g.y*T,vy-wh,0)+.6*T;
  R.cam.x+=(ox-R.cam.x)*(R.cam.init?.15:1);R.cam.y+=(oy-R.cam.y)*(R.cam.init?.15:1);R.cam.init=true;}
@@ -1789,7 +1789,7 @@ function hudV2(){const hb=$('#hBoss');
  if(R.type==='boss'){hb.classList.remove('hidden');const B=R.boss;let rem=0;for(const o of R.ores)if(o.boss)rem+=Math.max(0,o.hp);$('#hBossF').style.width=(rem/B.total*100)+'%';$('#hBossN').textContent=`👹 ${B.def.name}`;
   let ph=`Phase ${B.phase}/3 · ${PH_NAME[B.phase-1]}`;if(B.phase===2&&R.ores.some(o=>o.wp==='core'))ph+=B.coreOpen?` · 🔓 ${Math.ceil(B.ct)}s`:` · 🔒 ${Math.ceil(B.ct)}s`;if(B.phase===3&&B.def.id==='excavator'&&!R.ended)ph+=` · ⏳ ${Math.ceil(B.ft)}s`;$('#hBossP').textContent=ph;}
  else if(!hb.classList.contains('hidden'))hb.classList.add('hidden');
- if(R.type==='endless'){$('#hName').textContent=`🕳 B${R.floor} · ⛏ ${Math.min(R.floorMined,R.goal)}/${R.goal}${R.floorDone?' ✅':''}${R.mods.length?' · '+R.mods.map(k=>MODS[k].icon).join(''):''}`;$('#hValue').textContent=`🪙 ${fmt(R.bag.val)} · 📦 ${fmt(R.exp.val)}`;}
+ if(R.type==='endless'){$('#hName').textContent=`${R.deep?'🧭 Deep '+(R.deep.floor||1)+'/'+DEEP_FLOORS:'🕳 B'+R.floor} · ⛏ ${Math.min(R.floorMined,R.goal)}/${R.goal}${R.floorDone?' ✅':''}${R.mods.length?' · '+R.mods.map(k=>MODS[k].icon).join(''):''}`;$('#hValue').textContent=`🪙 ${fmt(R.bag.val)} · 📦 ${fmt(R.exp.val)}`;}
  const bd=$('#bDescend');const show=R.type==='endless'&&R.floorDone&&!R.ended;if(bd.classList.contains('hidden')===show)bd.classList.toggle('hidden',!show);}
 function v2Workshop(){$('#rShard').textContent=fmt(S.shards);$('#rCore').textContent=fmt(S.cores);$('#rData').textContent=fmt(S.data);
  const cb=$('#ctBadge');if(cb){const n=S.contracts.active.filter(a=>a.done).length;cb.classList.toggle('hidden',!n);cb.textContent=n;}const cx=$('#cdxBadge');if(cx)cx.textContent=`${S.codex.length}/12`;}
@@ -2462,16 +2462,16 @@ function drawFloorPropAnim(c,p,T,t,th){const X=p.x*T,Y=p.y*T,cx=X+T/2,cy=Y+T/2;s
  case'rails':{c.strokeStyle='rgba(160,140,110,.55)';c.lineWidth=2;c.beginPath();c.moveTo(X,Y+T*.4);c.lineTo(X+T,Y+T*.4);c.moveTo(X,Y+T*.6);c.lineTo(X+T,Y+T*.6);c.stroke();break;}}}
 const LIGHTP={torch:1,brazierW:1,brazier:1,crystal:1,crystalBig:1,pcrystal:1,pcrystalT:1,portal:1,lamp:1,lavacrack:1,magmaRock:1};
 /* ---------- cached static floor layer + wall tile sprites ---------- */
-function buildBG(T){const th=TH();const m=R.map;const cv=document.createElement('canvas');const dp=Math.min(2,DV.dpr||1);cv.width=Math.ceil(W*T*dp);cv.height=Math.ceil(H*T*dp);const c=cv.getContext('2d');c.scale(dp,dp);const r=mulberry32((m.seed||7)*13);
- for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=ix(x,y);const tt=m.g[i];if((tt===T_WALL&&!isBT(i))||tt===T_SECRET)continue;const X=x*T,Y=y*T;
+function buildBG(T,bx0=0,by0=0,bx1=W,by1=H){const th=TH();const m=R.map;const cv=document.createElement('canvas');const dp=Math.min(2,DV.dpr||1);cv.width=Math.ceil((bx1-bx0)*T*dp);cv.height=Math.ceil((by1-by0)*T*dp);const c=cv.getContext('2d');c.scale(dp,dp);c.translate(-bx0*T,-by0*T);const r=mulberry32(((m.seed||7)*13+bx0*131+by0*7)>>>0);
+ for(let y=by0;y<by1;y++)for(let x=bx0;x<bx1;x++){const i=ix(x,y);const tt=m.g[i];if((tt===T_WALL&&!isBT(i))||tt===T_SECRET)continue;const X=x*T,Y=y*T;
   const g=c.createLinearGradient(X,Y,X+T,Y+T);g.addColorStop(0,mix(th.fl[(x+y)%2],.04));g.addColorStop(1,mix(th.fl[(x+y)%2],-.06));c.fillStyle=g;c.fillRect(X,Y,T+.5,T+.5);
   c.strokeStyle=rgba(th.fd,.7);c.lineWidth=1;c.strokeRect(X+.5,Y+.5,T-1,T-1);
   for(let k=0;k<4;k++){c.fillStyle=r()<.5?'rgba(255,255,255,.04)':'rgba(0,0,0,.12)';c.fillRect(X+r()*T,Y+r()*T,1+r()*2,1+r()*2);}
   if(r()<.12){c.strokeStyle='rgba(0,0,0,.28)';c.lineWidth=1;c.beginPath();const sx=X+r()*T,sy=Y+r()*T;c.moveTo(sx,sy);c.lineTo(sx+(r()-.5)*T*.6,sy+(r()-.5)*T*.6);c.lineTo(sx+(r()-.5)*T*.8,sy+(r()-.5)*T*.8);c.stroke();}
   if(m.deco&&m.deco[i]){c.strokeStyle='rgba(160,140,110,.55)';c.lineWidth=2;c.beginPath();c.moveTo(X,Y+T*.35);c.lineTo(X+T,Y+T*.35);c.moveTo(X,Y+T*.65);c.lineTo(X+T,Y+T*.65);c.stroke();c.fillStyle='rgba(110,80,50,.7)';for(let k=0;k<3;k++)c.fillRect(X+k*T/3+2,Y+T*.28,3,T*.44);}
-  if(m.room&&x>=m.room.x0&&x<=m.room.x1&&y>=m.room.y0&&y<=m.room.y1){c.fillStyle=rgba(th.acc,.07);c.fillRect(X,Y,T,T);}}
+  if(m.room&&x>=m.room.x0&&x<=m.room.x1&&y>=m.room.y0&&y<=m.room.y1){c.fillStyle=rgba(th.acc,.07);c.fillRect(X,Y,T,T);}if(m.roomAt&&m.roomAt[i]>=0)roomTint51(c,m,i,X,Y,T);}
  if(th.circle&&R.type==='boss'){c.save();c.translate(9*T,7*T);c.scale(1,.55);c.strokeStyle=rgba(th.circle,.35);c.lineWidth=3;for(const rr2 of[T*4,T*3.2]){c.beginPath();c.arc(0,0,rr2,0,7);c.stroke();}for(let k=0;k<12;k++){c.rotate(Math.PI/6);c.fillStyle=rgba(th.circle,.4);c.fillRect(T*3.3,-T*.1,T*.6,T*.2);}c.restore();}
- for(const p of m.props)if(!p.wall)drawFloorPropStatic(c,p,T,th);
+ for(const p of m.props)if(!p.wall&&p.x>=bx0-1&&p.x<=bx1&&p.y>=by0-1&&p.y<=by1)drawFloorPropStatic(c,p,T,th);
  return cv;}
 function wallSprites(T){const th=TH();const wh=T*.42;const mk=(w,h,fn)=>{const cv=document.createElement('canvas');const dp=Math.min(2,DV.dpr||1);cv.width=Math.ceil(w*dp);cv.height=Math.ceil(h*dp);const c=cv.getContext('2d');c.scale(dp,dp);fn(c);return cv;};
  const tops=[0,1,2].map(v=>mk(T+1,T+1,c=>{const r=mulberry32((T|0)*7+v*131);const g=c.createLinearGradient(0,0,T,T);g.addColorStop(0,th.top2);g.addColorStop(1,th.top);c.fillStyle=g;c.fillRect(0,0,T+1,T+1);
@@ -2550,14 +2550,14 @@ function footstep(g){const lf=R.st.look.legs?PART[R.st.look.legs].fam:'scrap';co
 /* ---------- dungeon renderer ---------- */
 function renderDungeon(){
  const cv=$('#dcv');const c=cv.getContext('2d');const T=DV.T;c.setTransform(DV.dpr,0,0,DV.dpr,0,0);if(!R.map.props)genProps();const th=TH();c.fillStyle=th.bg;c.fillRect(0,0,DV.w,DV.h);
- camUpdate();const t=GT;if(th.stars){for(let i=0;i<60;i++){const x=(i*137.5+R.cam.x*.15)%DV.w,y=(i*91.3+R.cam.y*.15)%DV.h;c.fillStyle=`rgba(255,255,255,${.25+.25*Math.sin(t*2+i)})`;c.fillRect((x+DV.w)%DV.w,(y+DV.h)%DV.h,1.5,1.5);}}
+ camUpdate();const t=GT;const[VX0,VY0,VX1,VY1]=viewRect51(T);if(th.stars){for(let i=0;i<60;i++){const x=(i*137.5+R.cam.x*.15)%DV.w,y=(i*91.3+R.cam.y*.15)%DV.h;c.fillStyle=`rgba(255,255,255,${.25+.25*Math.sin(t*2+i)})`;c.fillRect((x+DV.w)%DV.w,(y+DV.h)%DV.h,1.5,1.5);}}
  c.save();let sx=0,sy=0;if(R.shake>0&&shakeOn()){sx=(Math.random()-.5)*R.shake*16;sy=(Math.random()-.5)*R.shake*16;}c.translate(R.cam.x+sx,R.cam.y+sy);
- const g=R.map.g;const key=R.thKey+'|'+T+'|'+R.map.seed;if(R.bgKey!==key||!R.bgc){R.bgc=buildBG(T);R.ws=wallSprites(T);R.bgKey=key;}const wh=R.ws.wh;
- c.drawImage(R.bgc,0,0,W*T,H*T);
- for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=ix(x,y);const tt=g[i];const X=x*T,Y=y*T;
+ const g=R.map.g;const key=R.thKey+'|'+T+'|'+R.map.seed;if(R.bgKey!==key||!R.ws){R.bgChunks={};R.ws=wallSprites(T);R.bgKey=key;}const wh=R.ws.wh;
+ drawBG51(c,T,VX0,VY0,VX1,VY1);
+ for(let y=VY0;y<VY1;y++)for(let x=VX0;x<VX1;x++){const i=ix(x,y);const tt=g[i];const X=x*T,Y=y*T;
   if(tt===T_SLOW){c.fillStyle=R.d.id==='rift'||R.thKey==='e5'?'rgba(150,60,220,.38)':'rgba(70,120,60,.45)';rr(c,X+2,Y+2,T-4,T-4,T*.3);c.fill();c.fillStyle='rgba(255,255,255,.12)';circ(c,X+T*.3+Math.sin(t*2+x)*2,Y+T*.4,T*.08);c.fill();}
   else if(tt===T_LAVA){const k=.5+.5*Math.sin(t*2.5+x*.7+y);c.fillStyle=`rgb(${200+k*55|0},${70+k*50|0},20)`;c.fillRect(X,Y,T+.5,T+.5);c.strokeStyle='rgba(255,230,140,.5)';c.lineWidth=1.5;c.beginPath();for(let j=0;j<2;j++){const yy=Y+T*(.3+j*.4)+Math.sin(t*2+x+j)*T*.06;c.moveTo(X,yy);c.quadraticCurveTo(X+T/2,yy+Math.sin(t*3+x*2)*T*.1,X+T,yy);}c.stroke();c.fillStyle='rgba(255,230,120,.6)';circ(c,X+T*(.3+.4*((x*7+y*3)%5)/5),Y+T*.5+Math.sin(t*3+x)*T*.1,T*(.06+.04*Math.sin(t*5+y)));c.fill();}}
- for(const p of R.map.props)if(!p.wall)drawFloorPropAnim(c,p,T,t,th);
+ for(const p of R.map.props)if(!p.wall&&p.x>=VX0&&p.x<VX1&&p.y>=VY0&&p.y<VY1&&fogSeen(p.x,p.y))drawFloorPropAnim(c,p,T,t,th);
  if(R.type!=='boss'){const ex=(R.map.ent.x+.5)*T,ey=(R.map.ent.y+.5)*T;glow(c,ex,ey,T*1.1,th.acc,.5+.15*Math.sin(t*3));c.strokeStyle=th.acc;c.lineWidth=3;ell(c,ex,ey,T*.42,T*.24);c.stroke();ell(c,ex,ey,T*.28+Math.sin(t*4)*2,T*.15);c.stroke();
   c.fillStyle='#fff';c.font=`bold ${Math.max(9,T*.22)}px Kanit,sans-serif`;c.textAlign='center';c.fillText(R.type==='endless'&&R.floorDone?'EXIT / ⬇':'EXIT',ex,ey-T*.35);}
  if(R.rock.warn){const w=R.rock.warn;const k=1-w.t/w.dur;c.fillStyle=`rgba(255,60,60,${.18+.25*Math.abs(Math.sin(t*12))})`;circ(c,w.x*T,w.y*T,T*1.2);c.fill();c.strokeStyle='rgba(255,90,90,.9)';c.lineWidth=2;circ(c,w.x*T,w.y*T,T*1.2*(1-k*.3));c.stroke();
@@ -2565,19 +2565,20 @@ function renderDungeon(){
  if(R.type==='boss')drawTele(c,T,t);
  const gx=R.g.x*T,gy=R.g.y*T;
  if(R.g.tgt&&R.g.path.length){if(R.fx.has('thunder_head')){c.strokeStyle='rgba(158,240,255,.75)';c.setLineDash([6,6]);c.lineDashOffset=-t*30;c.lineWidth=2.5;c.beginPath();c.moveTo(gx,gy);for(const p of R.g.path)c.lineTo((p%W+.5)*T,(((p/W)|0)+.5)*T);c.stroke();c.setLineDash([]);}}
- const ents=[];for(const o of R.ores)ents.push({y:o.y+.5,k:'o',o});for(const d of R.drops)ents.push({y:d.y,k:'d',d});ents.push({y:R.g.y,k:'g'});if(R.type==='boss')ents.push({y:9.95,k:'b'});ents.sort((a,b)=>a.y-b.y);let ei=0;
+ const ents=[];const inV=(x,y)=>x>=VX0-1&&x<VX1+1&&y>=VY0-1&&y<VY1+2;for(const o of R.ores)if(inV(o.x,o.y)&&fogSeen(o.x,o.y))ents.push({y:o.y+.5,k:'o',o});for(const d of R.drops)if(inV(d.x,d.y))ents.push({y:d.y,k:'d',d});if(R.inter)for(const it of R.inter)if(inV(it.x,it.y)&&fogSeen(it.x,it.y))ents.push({y:it.y+.5,k:'i',it});ents.push({y:R.g.y,k:'g'});if(R.type==='boss')ents.push({y:9.95,k:'b'});ents.sort((a,b)=>a.y-b.y);let ei=0;
  const wprops={};for(const p of R.map.props)if(p.wall)(wprops[p.y]=wprops[p.y]||[]).push(p);
- for(let y=0;y<H;y++){
+ for(let y=VY0;y<VY1;y++){
   while(ei<ents.length&&ents[ei].y<y){drawEnt(c,ents[ei],T,t);ei++;}
-  for(let x=0;x<W;x++){const i=ix(x,y);const tt=g[i];const X=x*T,Y=y*T;
-   if((tt===T_WALL&&!isBT(i))||(tt===T_SECRET&&!(R.oreAt[i]&&R.oreAt[i].revealed))){const below=y<H-1?g[ix(x,y+1)]:T_WALL;const fb=below===T_WALL||below===T_SECRET;
+  for(let x=VX0;x<VX1;x++){const i=ix(x,y);const tt=g[i];const X=x*T,Y=y*T;
+   if(tt===T_WALL&&R.map.edge&&!R.map.edge[i]){c.fillStyle=R.deepCol||(R.deepCol=mix(TH().face,-.62));c.fillRect(X,Y-wh,T+.5,T+.5);}
+   else if((tt===T_WALL&&!isBT(i))||(tt===T_SECRET&&!(R.oreAt[i]&&R.oreAt[i].revealed))){const below=y<H-1?g[ix(x,y+1)]:T_WALL;const fb=below===T_WALL||below===T_SECRET;
     const tv=R.ws.tops[(x*7+y*13)%3];if(!fb){c.fillStyle='rgba(0,0,0,.35)';c.fillRect(X,Y+T,T+.5,T*.18);c.drawImage(R.ws.face,X,Y+T-wh,T+.5,wh+.5);}else{c.drawImage(tv,X,Y+T-wh,T+.5,wh+.5);}
     c.drawImage(tv,X,Y-wh,T+.5,T+.5);}
    else if(tt===T_SECRET){const o=R.oreAt[i];c.fillStyle=mix(th.face,-.2);c.fillRect(X,Y+T-wh,T+.5,wh+.5);c.fillStyle=mix(th.top,-.08);c.fillRect(X,Y-wh,T+.5,T+.5);c.strokeStyle=`rgba(255,157,240,${.6+.3*Math.sin(t*4)})`;c.lineWidth=2;c.beginPath();c.moveTo(X+T*.3,Y-wh+3);c.lineTo(X+T*.5,Y);c.lineTo(X+T*.35,Y+T*.4);c.moveTo(X+T*.5,Y);c.lineTo(X+T*.75,Y+T*.2);c.stroke();
     glow(c,X+T/2,Y,T*.7,'#ff9df0',.25);if(o)hpBar(c,o,X+T/2,Y-wh-6,T);}
    else if(tt===T_RUBBLE){for(let k=0;k<3;k++){c.fillStyle=mix(th.face,k*.1-.1);ell(c,X+T*(.3+k*.2),Y+T*(.6-((k*7)%3)*.08),T*.17,T*.12);c.fill();c.strokeStyle='rgba(0,0,0,.4)';c.lineWidth=1;c.stroke();}}}
   if(wprops[y])for(const p of wprops[y])drawWallProp(c,p,T,t,th);}
- while(ei<ents.length){drawEnt(c,ents[ei],T,t);ei++;}
+ while(ei<ents.length){drawEnt(c,ents[ei],T,t);ei++;}drawFog51(c,T,VX0,VY0,VX1,VY1);
  for(const e of R.efx){const k=e.t/e.dur;c.globalAlpha=1-k;
   if(e.type==='ring'){const r=e.inward?e.r*T*(1-k):e.r*T*(.3+k*.7);if(e.fill){c.fillStyle=rgba(e.col,.25);circ(c,e.x*T,e.y*T,r);c.fill();}c.strokeStyle=e.col;c.lineWidth=3;circ(c,e.x*T,e.y*T,Math.max(1,r));c.stroke();}
   if(e.type==='burst'){glow(c,e.x*T,e.y*T,T*e.r*(.5+k),e.col,.8);for(let n=0;n<8;n++){const a=n*Math.PI/4;line(c,e.x*T+Math.cos(a)*T*.3*k,e.y*T+Math.sin(a)*T*.3*k,e.x*T+Math.cos(a)*T*(.4+.6*k),e.y*T+Math.sin(a)*T*(.4+.6*k),3,e.col);}}
@@ -5121,19 +5122,20 @@ function mastTierOf(lv){return lv>=30?3:lv>=20?2:lv>=10?1:0;}
 function v5RunEnd(kind,ok){if(!R||R.v5done)return null;R.v5done=true;const mined=R.mined||0;const out={mast:{},pet:0,shards:0};
  if(R.dbg)return out;
  const look=R.st.look;let base=0;
- if(kind==='boss')base=ok?90:30;else if(mined>=3)base=Math.min(100,22+2.6*mined)*(ok?1:.7);
- if(kind==='endless'||kind==='deep')base=Math.min(120,base+10*(R.mx.floors||0));
+ const big=!!R.v51;const CAPB=big?1500:120;
+ if(kind==='boss')base=ok?90:30;else if(mined>=3)base=Math.min(big?1500:100,22+2.6*mined)*(ok?1:.7)*(big&&R.cleared?1.3:1);
+ if(kind==='endless'||kind==='deep')base=Math.min(CAPB,base+10*(R.mx.floors||0));
  if(base>0){const act={head:R.mx.hid*6+R.mined*.5,core:R.mined,arm:(R.mx.hits[0]+R.mx.hits[1])*.25,legs:R.mx.walk*.4,back:R.mx.haul};
   const done=new Set();for(const sl of SLOTS){const pid=look[sl];if(!pid)continue;const key='m:'+pid;if(done.has(key))continue;done.add(key);const ty=PART[pid].type;
    /* role factor 0.85–1.15 so every slot levels at a similar pace while still rewarding its own activity */
    const a=act[ty]||0,ref=Math.max(1,R.mined);const f=clamp(.85+.3*Math.min(1,a/(ref*(ty==='arm'?2:ty==='legs'?2.5:ty==='head'?1.2:1))),.85,1.15);
-   const n=Math.round(Math.min(120,base*f));const up=addMastExp(key,n);out.mast[key]={n,up};}}
+   const n=Math.round(Math.min(CAPB,base*f));const up=addMastExp(key,n);out.mast[key]={n,up};}}
  /* activity mastery */
  if(mined>0){let t13=0,t46=0;for(const k in R.bag.items){const it=R.bag.items[k];if(it.tier<=3)t13+=it.count;else t46+=it.count;}if(R.exp)for(const k in R.exp.items){const it=R.exp.items[k];if(it.tier<=3)t13+=it.count;else t46+=it.count;}
   addAM('crystal',t13*2);addAM('metal',t46*3);addAM('collect',Math.round(mined*1.2));if(kind==='endless'||kind==='deep')addAM('deep',15*(R.mx.floors||0));}
  /* pet */
  if(R.pet){const p=petGet(R.pet.uid);if(p){const n=Math.round((12+mined*1.4+(ok?10:0))*(mined>=3||kind==='boss'?1:.2));petExpGain(p,n);out.pet=n;if(ok&&mined>=3){p.bondPts+=2;while(p.bond<5&&p.bondPts>=BOND_NEED[p.bond])p.bond++;}}}
- dEvent('mine',mined);if(ok&&kind!=='boss'&&mined>=3){dEvent('extract',1);const ctx={d:R.d.id,endless:kind==='endless',floor:R.floor||0};out.shards=petShardEvent('extract',kind==='deep'?3:kind==='endless'?1+Math.floor((R.mx.floors||0)/5):1,ctx);}
+ dEvent('mine',mined);if(ok&&kind!=='boss'&&mined>=3&&(!R.v51||(clearInfo()||{pct:100}).pct>=40)){dEvent('extract',1);const ctx={d:R.d.id,endless:kind==='endless',floor:R.floor||0};out.shards=petShardEvent('extract',kind==='deep'?3:kind==='endless'?1+Math.floor((R.mx.floors||0)/5):1,ctx);}
  if(kind==='boss'&&ok){out.shards=petShardEvent('mboss',2,{boss:R.boss.def.id});}
  if(ok&&R.mods&&R.mods.includes('machine')&&mined>=3){const sc=3+Math.floor(mined/8);S.scrap+=sc;out.scrap=sc;}
  R.v5out=out;LAST_V5=out;return out;}
@@ -5394,7 +5396,7 @@ function homeNotes(){const N=[];const pe=S.pendingExtraction.length;if(pe)N.push
 function paneHome(){const st=curStats();const D=S.dailyProgress;dailyRefresh();weeklyRefresh();const th=weekTheme();const W_=S.weeklyProgress;
  const best=DUNGEONS.filter(d=>S.unlocked[d.id]&&st.maxTier>=d.tiers[0]).slice(-1)[0]||DUNGEONS[0];const mp=petEq('mine'),cp=petEq('combat');
  let h=`<div class="v5sec"><h3>🏠 ${esc((S.cos.name||'MY GOLEM').toUpperCase())} <span class="hint">P ${st.P} · Tier ${st.maxTier} · CP ${calcCombat(S.combatEquip).cp}</span></h3>
- <div class="v5big"><button class="hot" data-act="quickRun" data-arg="${best.id}"><span class="e">⛏</span>Quick Mining<small>${best.name} · ${QUICK_TIME/60|0} นาที</small></button>
+ <div class="v5big"><button class="hot" data-act="quickRun" data-arg="${best.id}"><span class="e">⛏</span>Quick Mining<small>${best.name} · ไม่มีเวลาจำกัด</small></button>
  <button data-act="v5tab" data-arg="adv"><span class="e">🗺</span>Adventure<small>Deep · Endless · Boss</small></button>
  <button data-act="openForge"><span class="e">⚒</span>Assembly Forge<small>คราฟต์ชิ้นส่วนโดยตรง</small></button>
  <button data-act="v5tab" data-arg="pet"><span class="e">🐾</span>Pets<small>${mp?esc(mp.name):'— ไม่มี Mining Pet'}${cp?' · '+esc(cp.name):''}</small></button></div></div>`;
@@ -5436,7 +5438,7 @@ function preInfo(o){return `<div class="pre">${o.map(([a,b])=>`${a} <b>${b}</b>`
 function petLine(mode){const p=petEq(mode);return p?`${PETS[p.pid].n} (${PETS[p.pid].st[p.stage]} Lv.${p.lv})${petSyn(p,mode)?' 🔗':''}`:'—';}
 function paneAdv(){const st=curStats();const cs=calcCombat(S.combatEquip);const eu=endlessUnlocked(st);
  let h=`<div class="v5sec"><h3>⛏ Mining <span class="hint">P ${st.P} · Tier ${st.maxTier} · Pet: ${petLine('mine')}</span></h3><div class="v5big">
- <button class="hot" data-act="openDungeons"><span class="e">⛏</span>Quick Mining<small>3 นาที · ทุกรอบได้ความคืบหน้า</small></button><button data-act="openDeep"><span class="e">🧭</span>Deep Expedition<small>4 ชั้น ≈12 นาที · ${weekTheme().i} ${weekTheme().n}</small></button>
+ <button class="hot" data-act="openDungeons"><span class="e">⛏</span>Standard Expedition<small>80×48 · Rooms · Chest</small></button><button data-act="openDeep"><span class="e">🧭</span>Deep Expedition<small>4 ชั้น × 96×64 · ${weekTheme().i} ${weekTheme().n}</small></button>
  <button data-act="openEndless" ${eu?'':'disabled'}><span class="e">🕳</span>Endless Mine<small>${eu?`Biome · Checkpoint B${S.endlessCheckpoints.max}`:'🔒 ผ่าน Iron Depths'}</small></button><button data-act="openBoss"><span class="e">👹</span>Mining Boss<small>3 บอส</small></button></div></div>`;
  h+=`<div class="v5sec"><h3>⚔ Combat <span class="hint">CP ${cs.cp} · Pet: ${petLine('combat')}</span></h3><div class="v5big"><button class="red" data-act="openArena"><span class="e">⚔</span>Boss Arena<small>Normal / Hard / Nightmare</small></button>
  <button data-act="openTraining"><span class="e">🥊</span>Training<small>ทดสอบ DPS</small></button><button data-act="openRaid"><span class="e">🌋</span>Hybrid Raid</button><button data-act="openBossCodex"><span class="e">📕</span>Boss Codex</button></div></div>`;
@@ -5675,6 +5677,620 @@ function dbg5(k){if(k==='mats'){for(const n of ORE_NAMES)S.oreStorage[n]=(S.oreS
  else if(k==='m30'){for(const sl of SLOTS){const i=S.equip[sl]&&invGet(S.equip[sl]);if(i)S.partMastery['m:'+i.pid]={lv:30,exp:0};}for(const sl of CSLOTS){const i=S.combatEquip[sl]&&cinvGet(S.combatEquip[sl]);if(i)S.partMastery['c:'+i.aid]={lv:30,exp:0};}}
  else if(k==='bpf')S.armorBlueprints.frag+=50;else if(k==='am'){for(const a in AMAST)S.activityMastery[a]={lv:Math.max(12,amLv(a)),exp:0};}save();renderWorkshop();toast('DEBUG: '+k,'ok');if(modalRefresh)modalRefresh();}
 Object.assign(ACT,{openV5Bal:()=>openV5Bal(),dbg5:a=>dbg5(a)});
+
+/* =====================================================================
+   V5.1 INFINITE DUNGEON (1/4) — per-map dimensions + room-based procedural generator + validation
+   W/H are no longer constants: every map carries its own w/h and setDims() activates it.
+   Legacy generators (Mining Boss arena, balance sims) keep 22×14.
+   ===================================================================== */
+function setDims(w,h){W=w;H=h;}
+const MAPSZ={std:[80,48],deep:[96,64],tut:[40,26]};
+const DIFF=[{id:0,n:'Explorer',i:'🧭',rooms:[10,12],haz:0,ev:1,relic:2,mods:0,hp:1,chest:0,bonus:0,col:'#52e08a',d:'ห้องอันตรายน้อย · Relic เข้าใจง่าย · รางวัลพื้นฐาน'},
+ {id:1,n:'Adventurer',i:'⚔',rooms:[12,15],haz:1,ev:2,relic:2,mods:1,hp:1.08,chest:0,bonus:1,col:'#3fe0ff',d:'สมดุล · Hazard และ Event มากขึ้น'},
+ {id:2,n:'Veteran',i:'🔥',rooms:[14,17],haz:2,ev:2,relic:3,mods:2,hp:1.18,chest:1,bonus:2,col:'#ffb020',d:'หลาย Modifier · Bonus Chest Materials มากขึ้น'},
+ {id:3,n:'Master',i:'💀',rooms:[16,18],haz:3,ev:3,relic:3,mods:3,hp:1.3,chest:1,bonus:3,col:'#ff5d6c',d:'Hazard ซับซ้อน · รางวัลพิเศษ · Challenge Cosmetic'}];
+const RT={start:{n:'Starting Room',i:'🏁',c:'#3fe0ff',den:.07},ore:{n:'Ore Room',i:'⛏',c:'#9fb0c3',den:.26},rich:{n:'Rich Ore Room',i:'💰',c:'#ffd84a',den:.42},rare:{n:'Rare Ore Chamber',i:'🔶',c:'#ffb020',den:.28},
+ crystal:{n:'Crystal Cavern',i:'💎',c:'#7fd8ff',den:.34},machine:{n:'Ancient Machine Room',i:'⚙️',c:'#c0c6d0',den:.18},hazard:{n:'Hazard Room',i:'⚠️',c:'#ff6a1a',den:.24},rest:{n:'Rest Area',i:'🏕',c:'#52e08a',den:0},
+ relic:{n:'Relic Room',i:'🔮',c:'#c066ff',den:.08},event:{n:'Event Room',i:'❓',c:'#ff9df0',den:.12},secret:{n:'Secret Room',i:'✨',c:'#ff9df0',den:.55},treasure:{n:'Treasure Chamber',i:'🏆',c:'#ffd84a',den:0}};
+const GEN51={on:false};
+function genBig(d,seed,opt){opt=opt||{};const kind=opt.kind||'std';const diff=DIFF[opt.diff|0];const[w,h]=opt.size||MAPSZ[kind]||MAPSZ.std;setDims(w,h);
+ const mods=opt.mods||[];const has=k=>mods.includes(k)||mods.some(m=>(MOD_ALIAS[m]||[]).includes(k));
+ const rng=mulberry32(seed>>>0);const ri=(a,b)=>a+Math.floor(rng()*(b-a+1));const N=w*h;const I=(x,y)=>y*w+x;
+ const g=new Uint8Array(N).fill(T_WALL),deco=new Uint8Array(N),room=new Uint8Array(N),roomAt=new Int16Array(N).fill(-1);
+ const rooms=[];const free=(x0,y0,x1,y1,pad)=>{if(x0<2||y0<2||x1>w-3||y1>h-3)return false;for(const r of rooms){if(x0-pad<=r.x1&&x1+pad>=r.x0&&y0-pad<=r.y1&&y1+pad>=r.y0)return false;}return true;};
+ const addRoom=(x0,y0,x1,y1,type)=>{const r={id:rooms.length,x0,y0,x1,y1,cx:(x0+x1)>>1,cy:(y0+y1)>>1,type,area:(x1-x0+1)*(y1-y0+1)};rooms.push(r);for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){g[I(x,y)]=T_FLOOR;roomAt[I(x,y)]=r.id;}return r;};
+ /* rooms: fixed start room on the left, then random rectangles */
+ const big=kind==='deep'||w>=96;const nWant=kind==='tut'?4:kind==='deep'?ri(16,Math.min(25,16+3*(opt.diff|0)+3)):ri(diff.rooms[0],diff.rooms[1]);
+ const sw=7,sh=6;const sy=Math.floor(h/2-sh/2);addRoom(3,sy,3+sw-1,sy+sh-1,'start');
+ for(let a=0;a<1400&&rooms.length<nWant;a++){const rw=ri(7,big?15:13),rh=ri(6,big?11:9);const x0=ri(3,w-4-rw),y0=ri(3,h-4-rh);if(free(x0,y0,x0+rw-1,y0+rh-1,3))addRoom(x0,y0,x0+rw-1,y0+rh-1,'ore');}
+ /* connections: Prim MST + a few loops; L-shaped corridors 2 tiles wide */
+ const dist2=(a,b)=>(a.cx-b.cx)**2+(a.cy-b.cy)**2;const inT=new Set([0]);const edges=[];
+ while(inT.size<rooms.length){let best=null,bd=1e18;for(const a of inT)for(const b of rooms){if(inT.has(b.id))continue;const dd=dist2(rooms[a],b);if(dd<bd){bd=dd;best=[a,b.id];}}inT.add(best[1]);edges.push(best);}
+ for(const r of rooms){if(rng()<.2){let best=null,bd=1e18;for(const o of rooms){if(o===r||edges.some(e=>(e[0]===r.id&&e[1]===o.id)||(e[1]===r.id&&e[0]===o.id)))continue;const dd=dist2(r,o);if(dd<bd){bd=dd;best=o;}}if(best&&bd<900)edges.push([r.id,best.id]);}}
+ const carve=(x,y)=>{if(x<1||y<1||x>w-2||y>h-2)return;const i=I(x,y);if(g[i]===T_WALL)g[i]=T_FLOOR;};
+ const corr=(a,b)=>{let x=a.cx,y=a.cy;const hf=rng()<.5;const stepX=()=>{while(x!==b.cx){carve(x,y);carve(x,y+1);x+=Math.sign(b.cx-x);}};const stepY=()=>{while(y!==b.cy){carve(x,y);carve(x+1,y);y+=Math.sign(b.cy-y);}};if(hf){stepX();stepY();}else{stepY();stepX();}carve(x,y);carve(x+1,y);carve(x,y+1);};
+ for(const[a,b]of edges)corr(rooms[a],rooms[b]);
+ rooms.forEach(r=>r.links=edges.filter(e=>e[0]===r.id||e[1]===r.id).length);
+ /* depth = corridor hops from the start room → deeper rooms hold richer ore (exploration beats re-entering) */
+ {const adj=rooms.map(()=>[]);for(const[a,b]of edges){adj[a].push(b);adj[b].push(a);}const dep=rooms.map(()=>-1);dep[0]=0;const q=[0];while(q.length){const u=q.shift();for(const v of adj[u])if(dep[v]<0){dep[v]=dep[u]+1;q.push(v);}}const mx=Math.max(1,...dep);rooms.forEach((r,i)=>r.depth=Math.max(0,dep[i])/mx);}
+ /* room types: treasure = farthest from start; then a deterministic bag of types by difficulty */
+ const st=rooms[0];let far=null,fd=-1;for(const r of rooms){if(r===st)continue;const dd=dist2(r,st);if(dd>fd){fd=dd;far=r;}}if(far)far.type='treasure';
+ const others=rooms.filter(r=>r.type==='ore');for(let i=others.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[others[i],others[j]]=[others[j],others[i]];}
+ const bag=[];const push=(t,n)=>{for(let k=0;k<n;k++)bag.push(t);};
+ if(kind==='tut'){push('relic',1);push('rich',1);}else{push('relic',diff.relic+(kind==='deep'?1:0));push('event',diff.ev+(kind==='deep'?1:0));push('rest',kind==='deep'?2:1);push('hazard',diff.haz);push('rich',2);push('rare',1);push('crystal',1);push('machine',1);}
+ others.forEach((r,k)=>{if(k<bag.length)r.type=bag[k];});
+ /* mission room (main objective): the largest rich/ore room */
+ const mis=rooms.filter(r=>r.type==='rich'||r.type==='ore').sort((a,b)=>b.area-a.area)[0];if(mis)mis.mission=true;
+ /* secret rooms: separated from a main room by one breakable secret wall */
+ const secrets=[];const nSec=kind==='tut'?0:ri(1,big?3:2)+(has('hidden')?1:0);
+ for(let a=0;a<300&&secrets.length<nSec;a++){const base=rooms[ri(1,rooms.length-1)];if(!base||base.type==='secret')continue;const side=ri(0,3);const rw=ri(5,7),rh=ri(4,5);let x0,y0,sx,sy2;
+  if(side===0){x0=base.x1+2;y0=base.cy-(rh>>1);sx=base.x1+1;sy2=base.cy;}else if(side===1){x0=base.x0-1-rw;y0=base.cy-(rh>>1);sx=base.x0-1;sy2=base.cy;}else if(side===2){y0=base.y1+2;x0=base.cx-(rw>>1);sy2=base.y1+1;sx=base.cx;}else{y0=base.y0-1-rh;x0=base.cx-(rw>>1);sy2=base.y0-1;sx=base.cx;}
+  const x1=x0+rw-1,y1=y0+rh-1;if(x0<2||y0<2||x1>w-3||y1>h-3)continue;let ok=g[I(sx,sy2)]===T_WALL;for(let y=y0-1;y<=y1+1&&ok;y++)for(let x=x0-1;x<=x1+1&&ok;x++){if(g[I(x,y)]!==T_WALL)ok=false;}if(!ok)continue;
+  const r=addRoom(x0,y0,x1,y1,'secret');r.secret=true;r.door=I(sx,sy2);g[r.door]=T_SECRET;room[r.door]=1;secrets.push(r);}
+ /* hazards in hazard rooms (+ modifiers) */
+ const lavaOK=has('heat')||d.hz&&d.hz.lava||kind==='deep';
+ for(const r of rooms){if(r.type!=='hazard')continue;const n=ri(2,4);for(let k=0;k<n;k++){let x=ri(r.x0,r.x1),y=ri(r.y0,r.y1);const t=lavaOK&&rng()<.6?T_LAVA:T_SLOW;for(let s=0;s<ri(4,7);s++){if(x>=r.x0&&x<=r.x1&&y>=r.y0&&y<=r.y1)g[I(x,y)]=t;const dd=ri(0,3);x+=[1,-1,0,0][dd];y+=[0,0,1,-1][dd];}}}
+ if(has('heat')||(d.hz&&d.hz.slow))for(const r of rooms){if(r.type!=='ore'||rng()>.35)continue;const t=has('heat')?T_LAVA:T_SLOW;let x=ri(r.x0,r.x1),y=ri(r.y0,r.y1);for(let s=0;s<5;s++){if(x>=r.x0&&x<=r.x1&&y>=r.y0&&y<=r.y1)g[I(x,y)]=t;x+=ri(-1,1);y+=ri(-1,1);}}
+ /* interactables (kept free of ores) */
+ const inter=[];const EV_IDS=Object.keys(EVENTS51);let evI=ri(0,EV_IDS.length-1);
+ for(const r of rooms){let k=null;if(r.type==='relic')k='altar';else if(r.type==='event')k='event';else if(r.type==='rest')k='station';else if(r.type==='treasure')k='chest';if(!k)continue;
+  const it={id:inter.length,k,x:r.cx,y:r.cy,room:r.id,used:false};if(k==='event'){it.ev=EV_IDS[evI%EV_IDS.length];evI+=ri(1,3);}if(k==='station')it.cap=0;inter.push(it);g[I(r.cx,r.cy)]=T_FLOOR;}
+ if(kind==='tut'){/* tutorial: guaranteed altar in the relic room */}
+ /* ores */
+ const ores=[];const oreAt=new Array(N).fill(null);const ent={x:st.cx,y:st.cy};
+ const hpMul=(opt.hpMul||1)*(has('heavy')?1.4:1)*diff.hp;const tiers=d.tiers,wts0=d.wts.slice();if(has('heat'))wts0[wts0.length-1]*=1.8;if(mods.includes('rare'))wts0[wts0.length-1]*=2.2;
+ const pick=(wts)=>{let tot=wts.reduce((a,b)=>a+b,0),x=rng()*tot;for(let k=0;k<tiers.length;k++){x-=wts[k];if(x<0)return tiers[k];}return tiers[0];};
+ const nearLava=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(g[I(x+dx,y+dy)]===T_LAVA)return true;}return false;};
+ const mk=(x,y,tier,extra)=>{const T_=TIERS[tier];const hp=Math.round(T_.hp*hpMul);const o=Object.assign({id:ores.length,x,y,tier,hp,maxHp:hp,name:T_.ores[Math.floor(rng()*2)][0],hidden:false,hot:nearLava(x,y),seed:rng(),hitT:0,room:roomAt[I(x,y)]},extra||{});ores.push(o);oreAt[I(x,y)]=o;return o;};
+ const keep=new Set();/* door zones + interactable rings stay clear */
+ for(const r of rooms){for(let y=r.y0-1;y<=r.y1+1;y++)for(let x=r.x0-1;x<=r.x1+1;x++){const onEdge=x<r.x0||x>r.x1||y<r.y0||y>r.y1;if(!onEdge)continue;const i=I(x,y);if(g[i]===T_FLOOR||g[i]===T_SECRET){for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)keep.add(I(x+dx,y+dy));
+   /* L-shaped open lane from every door to the room centre */let px=clamp(x,r.x0,r.x1),py=clamp(y,r.y0,r.y1);while(px!==r.cx){keep.add(I(px,py));px+=Math.sign(r.cx-px);}while(py!==r.cy){keep.add(I(px,py));py+=Math.sign(r.cy-py);}keep.add(I(px,py));}}}
+ for(const it of inter)for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)keep.add(I(it.x+dx,it.y+dy));
+ for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++)keep.add(I(ent.x+dx,ent.y+dy));
+ const top=tiers[tiers.length-1];
+ for(const r of rooms){const R_=RT[r.type];let den=R_.den*(has('rush')?1.3:1);if(!den)continue;const wts=wts0.slice();const df=r.secret?1:(r.depth||0);wts[wts.length-1]*=1+2*df;if(wts.length>1)wts[0]*=1-.5*df;const dv=1+.45*df;if(r.type==='rare'||r.type==='crystal'||r.type==='secret'){wts[wts.length-1]*=3;wts[0]*=.4;}if(r.type==='start'){wts.fill(0);wts[0]=1;}
+  /* every other row stays mostly open so rooms never become sealed blocks */
+  for(let y=r.y0;y<=r.y1;y++)for(let x=r.x0;x<=r.x1;x++){const i=I(x,y);if(keep.has(i)||g[i]!==T_FLOOR&&g[i]!==T_SLOW)continue;if(((x+y+(r.id&1))%3===0)&&rng()<.85)continue;if(rng()<den){const o=mk(x,y,pick(wts));if(dv>1.02)o.bonusVal=+dv.toFixed(2);}}}
+ /* hidden ores near room walls */
+ const hmax=kind==='tut'?1:Math.round(rooms.length*(has('hidden')?.7:.45));let hc=0;
+ for(let a=0;a<hmax*30&&hc<hmax;a++){const r=rooms[ri(1,rooms.length-1)];if(!r||r.type==='treasure'||r.type==='rest')continue;const x=ri(r.x0,r.x1),y=ri(r.y0,r.y1);const i=I(x,y);if(oreAt[i]||keep.has(i)||g[i]!==T_FLOOR)continue;let adjW=0;for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]])if(g[I(x+dx,y+dy)]===T_WALL)adjW++;if(adjW>=1){mk(x,y,top,{hidden:true});hc++;}}
+ /* secret-wall objects (same mechanics as V2 secret walls) */
+ for(const r of secrets){const x=r.door%w,y=(r.door/w)|0;const o={id:ores.length,x,y,tier:0,hp:160,maxHp:160,name:'ผนังลับ',secret:true,revealed:false,hidden:false,seed:rng(),hitT:0,room:r.id};ores.push(o);oreAt[r.door]=o;}
+ /* guarantee enough ore the current golem can mine (no impossible objective) */
+ if(opt.maxTier){const mineable=()=>ores.filter(o=>!o.secret&&o.tier<=opt.maxTier).length;const need=Math.round(ores.length*.45);let mn=mineable();
+  for(const o of ores){if(mn>=need)break;if(o.secret||o.tier<=opt.maxTier||rooms[o.room]&&(rooms[o.room].type==='rare'||rooms[o.room].type==='secret'))continue;const nt=Math.max(1,opt.maxTier);o.tier=nt;o.name=TIERS[nt].ores[Math.floor(rng()*2)][0];o.hp=o.maxHp=Math.round(TIERS[nt].hp*hpMul);mn++;}}
+ return{g,deco,ent,ores,oreAt,room:null,seed,mods,w,h,rooms,roomAt,inter,kind,diff:opt.diff|0,big:true,secrets:secrets.length};}
+/* validation: everything required must be reachable WITHOUT mining anything (ores = walls) → no softlock even if ores are unmineable */
+function validBig(m,opt){const w=m.w,h=m.h,N=w*h;const seen=new Uint8Array(N);const q=new Int32Array(N);let qh=0,qt=0;const s=m.ent.y*w+m.ent.x;if(m.oreAt[s])return 'ore on entry';seen[s]=1;q[qt++]=s;
+ const pass=i=>{const t=m.g[i];return(t===T_FLOOR||t===T_SLOW||t===T_LAVA)&&!m.oreAt[i];};
+ while(qh<qt){const i=q[qh++];const x=i%w,y=(i/w)|0;for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=w||ny>=h)continue;const j=ny*w+nx;if(seen[j]||!pass(j))continue;seen[j]=1;q[qt++]=j;}}
+ for(const r of m.rooms){if(r.secret)continue;let ok=false;for(let y=r.y0;y<=r.y1&&!ok;y++)for(let x=r.x0;x<=r.x1;x++){if(seen[y*w+x]){ok=true;break;}}if(!ok)return 'room '+r.id+' '+r.type+' unreachable';}
+ for(const it of m.inter){let ok=false;for(const[dx,dy]of[[0,0],[1,0],[-1,0],[0,1],[0,-1]])if(seen[(it.y+dy)*w+it.x+dx])ok=true;if(!ok)return 'interactable '+it.k+' unreachable';}
+ for(const r of m.rooms){if(!r.secret)continue;const dx=r.door%w,dy=(r.door/w)|0;let ok=false;for(const[ax,ay]of[[1,0],[-1,0],[0,1],[0,-1]])if(seen[(dy+ay)*w+dx+ax])ok=true;if(!ok)return 'secret door unreachable';}
+ /* every ore must be minable from somewhere: at least one passable or ore neighbour (8-dir like the golem) */
+ for(const o of m.ores){let ok=false;for(let a=-1;a<=1&&!ok;a++)for(let b=-1;b<=1;b++){if(!a&&!b)continue;const j=(o.y+b)*w+o.x+a;const t=m.g[j];if(t===T_FLOOR||t===T_SLOW||t===T_LAVA||t===T_SECRET){ok=true;break;}}if(!ok)return 'ore '+o.id+' enclosed';}
+ if(opt&&opt.maxTier){const mn=m.ores.filter(o=>!o.secret&&!o.hidden&&o.tier<=opt.maxTier).length;if(mn<8)return 'too few mineable ores';}
+ return '';}
+function genBigChecked(d,seed,opt){let m=null,why='';for(let a=0;a<8;a++){m=genBig(d,(seed+a*7919)>>>0,opt);why=validBig(m,opt);if(!why){m.tries=a+1;m.genOpt=Object.assign({},opt);m.oresOrig=m.ores.map(o=>o.id);return m;}}
+ /* repair: drop ores that block (should never be needed; logged) */
+ m.genOpt=Object.assign({},opt);m.repaired=why;for(const o of m.ores.slice()){if(o.secret)continue;const i=o.y*m.w+o.x;m.oreAt[i]=null;}m.ores=m.ores.filter(o=>o.secret);m.oresOrig=m.ores.map(o=>o.id);return m;}
+/* legacy generator always runs on the classic 22×14 grid (boss arena, sims, old saves) */
+{const _gd=genDungeon;genDungeon=function(d,seed,opt){setDims(22,14);return _gd(d,seed,opt);};}
+{const _ga=genArena;genArena=function(B,seed){setDims(22,14);return _ga(B,seed);};}
+{const _gc=genChecked;genChecked=function(d,seed,opt){if(GEN51.on||(R&&R.wantBig&&R.type==='endless')){const o=Object.assign({},GEN51.opt||{},opt||{});return genBigChecked(d,seed,o);}return _gc(d,seed,opt);};}
+/* heap-based Dijkstra (same {dist,prev} contract as the V1 version; prev is Int32 so large maps never overflow) */
+function dijkstra(src){const N=W*H;const dist=new Float32Array(N).fill(Infinity),prev=new Int32Array(N).fill(-1),done=new Uint8Array(N);dist[src]=0;
+ const hk=new Float32Array(N*8+16),hv=new Int32Array(N*8+16);let hn=0;const push=(k,v)=>{let i=hn++;hk[i]=k;hv[i]=v;while(i>0){const p=(i-1)>>1;if(hk[p]<=hk[i])break;const tk=hk[p];hk[p]=hk[i];hk[i]=tk;const tv=hv[p];hv[p]=hv[i];hv[i]=tv;i=p;}};
+ const pop=()=>{const v=hv[0];hn--;if(hn>0){hk[0]=hk[hn];hv[0]=hv[hn];let i=0;for(;;){const l=2*i+1,r=l+1;let m=i;if(l<hn&&hk[l]<hk[m])m=l;if(r<hn&&hk[r]<hk[m])m=r;if(m===i)break;const tk=hk[m];hk[m]=hk[i];hk[i]=tk;const tv=hv[m];hv[m]=hv[i];hv[i]=tv;i=m;}}return v;};
+ push(0,src);while(hn>0){if(hn>=hk.length-9)break;const u=pop();if(done[u])continue;done[u]=1;const ux=u%W,uy=(u/W)|0;
+  for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dy)continue;const vx=ux+dx,vy=uy+dy;if(vx<0||vy<0||vx>=W||vy>=H)continue;const v=vy*W+vx;if(done[v]||!walkable(v))continue;
+   if(dx&&dy&&(!walkable(uy*W+vx)||!walkable(vy*W+ux)))continue;const t=R.map.g[v];let cost=(dx&&dy?1.414:1)/tileF(v);if(t===T_LAVA)cost+=.8;if(t===T_RUBBLE)cost+=1.2;const nd=dist[u]+cost;if(nd<dist[v]){dist[v]=nd;prev[v]=u;push(nd,v);}}}
+ return{dist,prev};}
+
+/* =====================================================================
+   V5.1 INFINITE DUNGEON (2/4) — run rules (no timer) · fog of war · rooms · interactables ·
+   relics · events · clear detection · auto explore · instant exit · stations
+   ===================================================================== */
+function v51Defaults(){return{chests:{},pendingChest:[],diffMax:{},diffSel:{},cosFrag:0,runSeq:0,clears:0,relicsSeen:{},tips:{},tut:{step:0,done:false,skipped:false,rewarded:false,started:false},stats:{rooms:0,clears:0,chests:0,events:0,relics:0,secrets:0,longest:0}};}
+function newRunId(){S.v51.runSeq=(S.v51.runSeq||0)+1;return 'r'+Date.now().toString(36)+'-'+S.v51.runSeq;}
+/* ---------- RELICS (run-only) ---------- */
+const RELICS51={
+ rapid:{n:'Rapid Drill',i:'⚡',d:'Mining Speed +12'},heavy:{n:'Heavy Strike',i:'🔨',d:'ดาเมจต่อแร่แข็ง (Tier 4+) +15%'},magnet:{n:'Crystal Magnet',i:'🧲',d:'ระยะเก็บแร่ +1.5 ช่อง'},
+ overclock:{n:'Overclock',i:'🌀',d:'ทุบแร่แตก 3 ก้อนภายใน 8 วิ → Mining Speed +25 นาน 6 วิ'},geode:{n:'Geode Burst',i:'💥',d:'แร่แตก: 25% โอกาสระเบิดใส่แร่รอบข้าง 40% Power'},
+ tsense:{n:'Treasure Sense',i:'🗝',d:'เปิดเผยห้องพิเศษทั้งหมดบนแผนที่ + ทางเข้าห้องลับ'},shield:{n:'Stone Shield',i:'🛡',d:'กันหินถล่มครั้งถัดไป — ชาร์จใหม่ทุกครั้งที่เข้าห้องใหม่'},
+ swift:{n:'Swift Legs',i:'🦿',d:'Movement +15%'},eloop:{n:'Energy Loop',i:'🔁',d:'สกิลทำให้แร่แตก → คูลดาวน์สกิลนั้น −2 วิ'},focus:{n:'Mineral Focus',i:'🎯',d:'แร่ Tier สูงสุดที่ขุดได้: ดาเมจ +20% · มูลค่า +10%'},
+ engine:{n:'Ancient Engine',i:'⚙️',d:'พลังสกิลขุด +15%'},pack:{n:'Packing Expert',i:'🎒',d:'Capacity +20% (รอบนี้)'},lucky:{n:'Lucky Vein',i:'🍀',d:'8% โอกาสได้แร่เพิ่ม 1 ก้อน'},
+ apprais:{n:"Appraiser's Lens",i:'🔍',d:'มูลค่าแร่ +10%'},petcharm:{n:'Pet Bond Charm',i:'🐾',d:'คูลดาวน์สกิล Pet −25%'},eye:{n:'Hidden Eye',i:'👁',d:'ตรวจจับแร่ซ่อน +2 · มองเห็นในหมอก +1.5'},
+ boots:{n:'Lava Boots',i:'🥾',d:'ผลกระทบลาวา/พื้นหน่วง −50%'},crit:{n:'Critical Pick',i:'✦',d:'10% โอกาสขุดคริติคอล ×2'},momentum:{n:'Momentum',i:'🏃',d:'เดินครบ 6 ช่อง → การขุดครั้งถัดไป +50%'},
+ echo:{n:'Echo Hammer',i:'↻',d:'12% โอกาสตีซ้ำทันที'},link:{n:'Storage Link',i:'📦',d:'Expedition Storage Station รับแร่ได้ +50%'},glass:{n:'Glass Cannon',i:'🔺',d:'ดาเมจขุด +30% แต่ Movement −15%'},
+ scout:{n:'Scout Drone',i:'🛰',d:'มองเห็นในหมอก +3 ช่อง · Minimap แสดงแร่ Tier สูงสุด'},refill:{n:'Second Wind',i:'💨',d:'เข้าห้องใหม่ → คูลดาวน์สกิลรีเซ็ต'}};
+const RELIC_EASY=['rapid','magnet','swift','pack','apprais','lucky','crit','echo','engine','eye'];
+/* stacking caps (relics + event buffs): never multiply into absurd values */
+const CAP51={spd:40,move:30,val:40,area:60,cap:40,cd:40,dmg:50};
+function hasRel(k){return !!(R&&R.relics&&R.relics.includes(k));}
+function rel51(){const r={spd:0,move:0,val:0,cap:0,dmg:0};if(!R||!R.relics)return r;if(hasRel('rapid'))r.spd+=12;if(hasRel('swift'))r.move+=15;if(hasRel('glass')){r.move-=15;r.dmg+=30;}if(hasRel('apprais'))r.val+=10;if(hasRel('pack'))r.cap+=20;
+ const B=R.buffs51||{};r.move+=B.move||0;r.cap+=B.cap||0;r.dmg+=B.dmg||0;for(const k in r)r[k]=clamp(r[k],-50,CAP51[k==='spd'?'spd':k]||50);return r;}
+function applyRunStats(){if(!R||!R.st0)return;const r=rel51();R.st.move=R.st0.move*(1+r.move/100);R.st.C=Math.max(5,Math.round(R.st0.C*(1+r.cap/100)));
+ for(let i=0;i<2;i++){const s0=R.skills0&&R.skills0[i],s=R.skills[i];if(s0&&s&&s0.mult)s.mult=s0.mult*(hasRel('engine')?1.15:1);}if(R.pet&&R.pet.cdBase)R.pet.cdMax=R.pet.cdBase*(hasRel('petcharm')?.75:1);}
+function relicOffer(seedKey,n,easy){const pool=Object.keys(RELICS51).filter(k=>!R.relics.includes(k)&&(!easy||RELIC_EASY.includes(k)));const rng=mulberry32(hashStr(R.runId+'|'+seedKey));const out=[];while(out.length<n&&pool.length)out.push(pool.splice(Math.floor(rng()*pool.length),1)[0]);return out;}
+function hashStr(s){let h=2166136261>>>0;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}return h>>>0;}
+function takeRelic(k){if(!R||!RELICS51[k]||R.relics.includes(k))return false;R.relics.push(k);S.v51.relicsSeen[k]=1;S.v51.stats.relics++;applyRunStats();
+ if(k==='tsense'){for(const r of R.map.rooms)if(r.type!=='ore'&&r.type!=='start')R.known.add(r.id);for(const o of R.ores)if(o.secret)o.revealed=true;}
+ if(k==='shield')R.shield=true;dEvent('relic',1);tutEvent('relic');sfx('legend');toast(`${RELICS51[k].i} ได้รับ Relic: ${RELICS51[k].n}`,'gold');return true;}
+/* ---------- EVENTS (each has real decisions) ---------- */
+const EVENTS51={
+ overload:{n:'Crystal Overload',i:'💠',d:'คริสตัลในห้องเปล่งพลังงานรุนแรง!',ch:[['mine','⛏ ขุดต่อ (เสี่ยง)','คริสตัลมูลค่า ×1.5 เกิดเพิ่ม 6 ก้อน แต่พื้นรอบ ๆ ร้อนเป็นลาวา'],['relic','🔌 ปิดเครื่อง','เลือก Relic 1 จาก 3'],['skip','➡ ข้าม','ไม่มีผล']]},
+ forge:{n:'Abandoned Forge',i:'⚒',d:'โรงตีเหล็กเก่ายังมีไฟอยู่ — ใช้แร่ในกระเป๋าหลอมของได้',ch:[['relic6','🔥 หลอมแร่ 6 ก้อน','เสียแร่ 6 ก้อน (ราคาต่ำสุดก่อน) → เลือก Relic'],['stone3','🔹 หลอมแร่ 3 ก้อน','เสียแร่ 3 ก้อน → Basic Stone ×2'],['skip','➡ ข้าม','ไม่มีผล']]},
+ cache:{n:'Lost Miner Cache',i:'🧰',d:'กล่องเครื่องมือของคนขุดแร่รุ่นเก่า',ch:[['coins','🪙 เอาเงิน','Coins (ตามระดับดันเจี้ยน)'],['mats','🔹 เอาวัสดุ','Basic Stone ×2 + Ore Treat ×1'],['pet','🐾 ให้ Pet ค้น','Pet EXP +80 · 30% โอกาส Pet Essence ×2 (ต้องมี Pet)']]},
+ terminal:{n:'Ancient Terminal',i:'🖥',d:'แผงควบคุมโบราณยังทำงาน',ch:[['secret','🔓 ปลดล็อกห้องลับ','เปิดทางเข้าห้องลับทั้งหมดในชั้นนี้'],['risk','⚠ Overclock Sector','หินถล่มถี่ขึ้น 60% ตลอดรอบ แต่กล่องสมบัติ +1 Bonus Roll'],['skip','➡ ข้าม','ไม่มีผล']]},
+ mystic:{n:'Mysterious Crystal',i:'🔮',d:'คริสตัลลึกลับเสนอพลัง… แต่มีราคา',ch:[['surge','⚡ Power Surge','ดาเมจขุด +20% · Movement −20% (รอบนี้)'],['feather','🪶 Featherweight','Movement +25% · Capacity −15% (รอบนี้)'],['skip','➡ ปฏิเสธ','ไม่มีผล']]},
+ petdisc:{n:'Pet Discovery',i:'🐾',d:'สัตว์เลี้ยงได้กลิ่นบางอย่าง…',ch:[['follow','🐾 ตามไป','เปิดแร่ซ่อน 3 จุด + มาร์กแร่ดีที่สุด · Pet EXP +40 · 🥚 Pet Shard +1'],['skip','➡ ไม่ตาม','ไม่มีผล']]},
+ cursed:{n:'Cursed Room',i:'☠',d:'ห้องนี้ถูกสาป — แร่แข็งพิเศษปรากฏ หินถล่มรุนแรง',ch:[['accept','☠ รับคำสาป','แร่ต้องคำสาป 5 ก้อน (HP ×2, มูลค่า ×2) · ทุบครบ = 📄2 + กล่อง +1 Bonus Roll'],['skip','➡ หลีกเลี่ยง','ไม่มีผล']]}};
+/* ---------- run init ---------- */
+{const _ir=initRun;initRun=function(type,d,m,st,o){if(m&&m.big)setDims(m.w,m.h);else if(type==='boss'||!m.w)setDims(m.w||22,m.h||14);const r=_ir(type,d,m,st,o);r.timed=true;r.wantBig=type==='endless'&&!(o&&o.legacy);
+ if(m&&m.big)v51Init(r,o||{});return r;};}
+function v51Init(r,o){const m=r.map;r.v51=true;r.timed=false;r.time=0;r.runId=r.runId||o.runId||newRunId();r.diff=m.diff|0;r.fog=new Uint8Array(m.w*m.h);r.known=new Set();r.visited=new Set();r.relics=r.relics||[];r.buffs51=r.buffs51||{};r.loot=r.loot||{coins:0,bpf:0,stone:{},treat:0,ess:0,petEss:0,petExp:0};
+ r.inter=m.inter;r.cm=0;r.cur=-1;r.cleared=false;r.chestBonus=r.chestBonus||0;r.hazMul=r.hazMul||1;r.walk51=0;r.ocT=[];r.v51spd=0;r.stCap=r.stCap||{};r.lastTile=-1;r.exp=r.exp||{items:{},val:0};
+ if(!r.st0){r.st0={move:r.st.move,C:r.st.C};r.skills0=r.skills.map(s=>s?Object.assign({},s):null);}if(r.pet){r.pet.cdBase=r.pet.cdBase||r.pet.cdMax;}
+ const mt=r.st.maxTier;const main=m.rooms.filter(x=>!x.secret&&x.type!=='treasure');const att=attainable51(m,mt);const mineable=m.ores.filter(x=>!x.secret&&!x.hidden&&x.tier<=mt&&x.room>=0&&!m.rooms[x.room].secret&&att.has(x.id));
+ const mis=m.rooms.find(x=>x.mission);r.clear={rooms:main.map(x=>x.id),oreTarget:Math.max(5,Math.ceil(mineable.length*.65)),events:m.inter.filter(x=>x.k==='event').map(x=>x.id),mission:mis?mis.id:-1,misIds:new Set(mis?mineable.filter(x=>x.room===mis.id).map(x=>x.id):[]),secrets:m.rooms.filter(x=>x.secret).map(x=>x.id)};
+ if(!m.edge){const e=new Uint8Array(m.w*m.h);for(let y=0;y<m.h;y++)for(let x=0;x<m.w;x++){const i=y*m.w+x;if(m.g[i]!==T_WALL)continue;let n=0;for(let b=-1;b<=1&&!n;b++)for(let a=-1;a<=1;a++){const xx=x+a,yy=y+b;if(xx<0||yy<0||xx>=m.w||yy>=m.h)continue;if(m.g[yy*m.w+xx]!==T_WALL){n=1;break;}}e[i]=n;}m.edge=e;}
+ r.known.add(m.rooms[0].id);applyRunStats();if(hasRel('tsense')){for(const x of m.rooms)if(x.type!=='ore'&&x.type!=='start')r.known.add(x.id);for(const x of r.ores)if(x.secret)x.revealed=true;}
+ fogUpdate(true);}
+/* ores the CURRENT golem can actually reach by mining (closure through floor + mineable ores); unmineable walls of ore never create an impossible goal */
+function attainable51(m,mt){const w=m.w,h=m.h,N=w*h;const seen=new Uint8Array(N);const q=new Int32Array(N);let qh=0,qt=0;const s=m.ent.y*w+m.ent.x;seen[s]=1;q[qt++]=s;const out=new Set();
+ const pass=i=>{const t=m.g[i];const o=m.oreAt[i];if(o)return o.secret||(o.tier<=mt);return t===T_FLOOR||t===T_SLOW||t===T_LAVA;};
+ while(qh<qt){const i=q[qh++];const x=i%w,y=(i/w)|0;const o=m.oreAt[i];if(o)out.add(o.id);for(let b=-1;b<=1;b++)for(let a=-1;a<=1;a++){if(!a&&!b)continue;const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=w||ny>=h)continue;const j=ny*w+nx;if(seen[j])continue;const oj=m.oreAt[j];if(oj&&oj.tier<=mt&&!oj.secret)out.add(oj.id);
+   if(a&&b)continue;if(!pass(j))continue;seen[j]=1;q[qt++]=j;}}return out;}
+/* ---------- fog of war ---------- */
+function visR(){let v=5+(R.st.fx.has('scrap_head')?1.5:0);if(hasRel('eye'))v+=1.5;if(hasRel('scout'))v+=3;return v;}
+function fogSeen(x,y){return !R||!R.v51||R.fog[y*W+x]>0;}
+function revealRoom(rm){for(let y=rm.y0-1;y<=rm.y1+1;y++)for(let x=rm.x0-1;x<=rm.x1+1;x++)if(x>=0&&y>=0&&x<W&&y<H)R.fog[y*W+x]=1;}
+function fogUpdate(force){const gx=Math.floor(R.g.x),gy=Math.floor(R.g.y);const t=gy*W+gx;if(!force&&t===R.lastTile)return;R.lastTile=t;const v=visR(),v2=v*v;
+ for(let y=Math.max(0,Math.floor(gy-v));y<=Math.min(H-1,Math.ceil(gy+v));y++)for(let x=Math.max(0,Math.floor(gx-v));x<=Math.min(W-1,Math.ceil(gx+v));x++){if((x-gx)**2+(y-gy)**2<=v2)R.fog[y*W+x]=1;}
+ const ra=R.map.roomAt[t];if(ra>=0&&ra!==R.cur){R.cur=ra;const rm=R.map.rooms[ra];if(!R.visited.has(ra))enterRoom(rm);}else if(ra<0)R.cur=-1;}
+function enterRoom(rm){R.visited.add(rm.id);R.known.add(rm.id);revealRoom(rm);S.v51.stats.rooms++;dEvent('room',1);
+ if(rm.type!=='start'){floatTxt(rm.cx+.5,rm.cy-.6,`${RT[rm.type].i} ${RT[rm.type].n}`,RT[rm.type].c,1.1);if(rm.secret){S.v51.stats.secrets++;toast('✨ พบห้องลับ!','gold');}
+  if(hasRel('shield'))R.shield=true;if(hasRel('refill'))R.cds=[0,0];const tu=v5gm('timeup');if(tu)R.v51spd=10;tip51('room_'+rm.type,`${RT[rm.type].i} <b>${RT[rm.type].n}</b> — ${ROOM_TIP[rm.type]||''}`);}
+ ctEvent('room',1);tutEvent('room');checkClear();}
+const ROOM_TIP={rich:'แร่หนาแน่น',rare:'แร่ Tier สูงเกิดบ่อย',crystal:'คริสตัลมูลค่าสูง',machine:'ซากเครื่องจักร (Modifier Machine ให้ Scrap)',hazard:'ระวังลาวา/พื้นหน่วง',rest:'มี 📦 Expedition Storage Station ฝากแร่ได้',relic:'แท่น Relic — เลือกพลังเสริม 1 จาก 3',event:'เหตุการณ์พิเศษ — ต้องตัดสินใจ',treasure:'ห้องสมบัติ — กล่องเปิดได้เมื่อเคลียร์ดันเจี้ยน',secret:'ห้องลับ (Optional)'};
+/* ---------- clear progress ---------- */
+function clearInfo(){if(!R||!R.v51)return null;const C=R.clear;const rv=C.rooms.filter(id=>R.visited.has(id)).length;const ev=C.events.filter(id=>R.inter[id].used).length;const mis=C.mission<0?1:C.misIds.size?[...C.misIds].filter(id=>!R.ores.some(o=>o.id===id)).length/C.misIds.size:1;
+ const ore=Math.min(R.cm,C.oreTarget);const sec=C.secrets.filter(id=>R.visited.has(id)).length;
+ const fr=C.rooms.length?rv/C.rooms.length:1,fo=ore/C.oreTarget,fe=C.events.length?ev/C.events.length:1;const pct=Math.floor(100*(.3*fr+.4*fo+.15*fe+.15*mis));
+ return{rv,rt:C.rooms.length,ore,ot:C.oreTarget,ev,et:C.events.length,mis,misLeft:C.misIds.size?[...C.misIds].filter(id=>R.ores.some(o=>o.id===id)).length:0,sec,st:C.secrets.length,pct:Math.min(100,pct),done:rv>=C.rooms.length&&ore>=C.oreTarget&&ev>=C.events.length&&mis>=1};}
+function checkClear(){if(!R||!R.v51||R.cleared)return;const c=clearInfo();if(c&&c.done)onCleared();}
+function objectiveText(){const c=clearInfo();if(!c)return'';if(R.cleared)return R.chestKey&&chestState(R.chestKey)==='claimed'?'✅ เคลียร์แล้ว — สำรวจต่อหรือ 🏠 กลับ Workshop':'🏆 เคลียร์แล้ว! เปิดกล่องสมบัติ';
+ if(c.rv<c.rt)return `🗺 สำรวจห้อง ${c.rv}/${c.rt}`;if(c.ev<c.et)return `❓ เหตุการณ์ ${c.ev}/${c.et}`;if(c.mis<1)return `⛏ ภารกิจ: ขุดสายแร่หลักให้หมด (เหลือ ${c.misLeft})`;return `⛏ ขุดแร่ ${c.ore}/${c.ot}`;}
+/* ---------- break / mine hooks (clear counters + relics) ---------- */
+{const _b=breakOre;breakOre=function(o){const v=R&&R.v51&&!o.secret&&!o.boss;const id=o.id,tier=o.tier,name=o.name,x=o.x,y=o.y,cursed=o.cursed,bonus=o.bonusVal;_b(o);if(!R||!v)return;R.cm++;
+ if(bonus)R.v5bonus+=TIERS[tier].price*R.valMul*(bonus-1);
+ if(cursed){R.curseLeft--;if(R.curseLeft===0){R.loot.bpf+=2;R.chestBonus++;toast('☠ คำสาปสลาย! 📄+2 · กล่อง +1 Bonus Roll','gold');}}
+ if(hasRel('lucky')&&Math.random()<.08){R.drops.push({x:x+.5,y:y+.5,tier,name,t:0,fly:false,vy:-2});floatTxt(x+.5,y-.2,'🍀 +1','#52e08a',.8);}
+ if(hasRel('geode')&&Math.random()<.25){let a=0;for(const n of oresIn(x+.5,y+.5,1.6)){if(n.secret||n.boss||!oreVisible(n)||!canMine(n))continue;damageOre(n,R.st.rawP*.4);a++;}if(a)R.efx.push({type:'ring',x:x+.5,y:y+.5,r:1.6,t:0,dur:.35,col:'#ffb347'});}
+ if(hasRel('overclock')){R.ocT=R.ocT.filter(t=>R.elapsed-t<8);R.ocT.push(R.elapsed);if(R.ocT.length>=3){R.ocBuff=6;R.ocT=[];floatTxt(R.g.x,R.g.y-1.6,'🌀 Overclock!','#ffd84a',.9);}}
+ if(hasRel('eloop')&&R.inSkill&&R.curSkill!=null){R.cds[R.curSkill]=Math.max(0,R.cds[R.curSkill]-2);}
+ tutEvent('mine');checkClear();if(R.type==='endless'&&R.v51&&!R.deep){/* endless keeps its descend goal */}};}
+{const _us=useSkill;useSkill=function(i){if(R)R.curSkill=i;const c0=R&&R.cds[i];_us(i);if(R){R.curSkill=null;if(R.cds[i]>0&&c0<=0){R.tutSkill=true;tutEvent('skill');}}};}
+{const _d=damageOre;damageOre=function(o,amt,src){if(!R||!R.v51||!o||o.secret||o.boss)return _d(o,amt,src);let m=1+rel51().dmg/100;if(hasRel('heavy')&&o.tier>=4)m*=1.15;if(hasRel('focus')&&o.tier===R.st.maxTier)m*=1.2;
+ if(hasRel('crit')&&Math.random()<.1){m*=2;if(R.floats.length<40)floatTxt(o.x+.5,o.y-.35,'✦','#ffd84a',.8);}return _d(o,amt*Math.min(1+CAP51.dmg/100*2,m),src);};}
+{const _mb=mineBonus;mineBonus=function(o){let m=_mb(o);if(R&&R.v51&&hasRel('momentum')&&R.walk51>=6){m*=1.5;R.walk51=0;floatTxt(o.x+.5,o.y-.5,'🏃 +50%','#7fffd4',.8);}return m;};}
+{const _am=afterMineHit;afterMineHit=function(o){_am(o);if(R&&R.v51&&hasRel('echo')&&R.ores.includes(o)&&Math.random()<.12)damageOre(o,R.st.rawP*.8);};}
+{const _ba=bagAdd;bagAdd=function(name,tier){_ba(name,tier);if(!R||!R.v51)return;let pct=rel51().val;if(hasRel('focus')&&tier===R.st.maxTier)pct+=10;if(R.type==='endless')pct+=.5*amB('deep');pct=Math.min(CAP51.val,pct);if(pct>0)R.bag.val+=TIERS[tier].price*R.valMul*pct/100;};}
+{const _p=pickupR;pickupR=function(){let r=_p();if(R&&R.v51&&hasRel('magnet'))r+=1.5;return r;};}
+{const _h=hidDet;hidDet=function(){let d=_h();if(R&&R.v51&&hasRel('eye'))d+=2;return d;};}
+{const _t=terr;terr=function(f){f=_t(f);if(R&&R.v51&&hasRel('boots'))f=1-(1-f)*.5;return f;};}
+function v5SpdAdd(){if(!R||!R.v5t)return 0;let a=R.v5t.bspd>0?v5gm('breakspd'):0;if(R.v51){a+=rel51().spd;if(R.ocBuff>0)a+=25;if(R.v51spd>0)a+=v5gm('timeup');}return Math.min(a,CAP51.spd+30);}
+GM_DESC.timeup=p=>`เข้าห้องใหม่ → Mining Speed +${p} นาน 10 วิ`;
+AMAST.deep.d='Endless/Deep: มูลค่าแร่ +0.5%/Lv';
+/* mining continues when the bag is full in V5.1 maps (drops stay on the floor — never forced to leave) */
+/* ---------- per tick ---------- */
+{const _rt=runTick;runTick=function(dt){if(!R||R.ended)return _rt(dt);if(R.paused)return;const gx=R.g.x,gy=R.g.y;_rt(dt);if(!R||R.ended||!R.v51)return;
+ R.walk51+=Math.hypot(R.g.x-gx,R.g.y-gy);if(R.ocBuff>0)R.ocBuff-=dt;if(R.v51spd>0)R.v51spd-=dt;fogUpdate(false);
+ R.iT=(R.iT||0)-dt;if(R.iT<=0){R.iT=.15;interCheck();}
+ if(R.hazMul>1&&R.rock&&R.rock.next>0)R.rock.next-=dt*(R.hazMul-1);
+ if(R.curseRoom!=null&&R.cur===R.curseRoom&&R.rock&&R.rock.next>0)R.rock.next-=dt;
+ if(Math.floor(R.elapsed)%15===0&&Math.floor(R.elapsed)!==R.snapAt&&R.elapsed>3){R.snapAt=Math.floor(R.elapsed);suspendSnapshot(true);}};}
+/* ---------- interactables ---------- */
+function interNear(r){let best=null,bd=r;for(const it of R.inter){if(it.used&&it.k!=='chest'&&it.k!=='station')continue;const d=Math.hypot(it.x+.5-R.g.x,it.y+.5-R.g.y);if(d<bd){bd=d;best=it;}}return best;}
+function interCheck(){if(R.paused||R.g.stun>0)return;const it=interNear(1.6);if(!it)return;
+ if(it.k==='altar'&&!it.used){if(R.lastAltar===it.id&&R.altarSkip)return;openAltar(it);}
+ else if(it.k==='event'&&!it.used&&!(it.skipT>R.elapsed))openEvent(it);
+ else if(it.k==='station')stationDeposit(it,false);
+ else if(it.k==='chest'&&R.cleared&&R.chestKey&&['unlocked','opened'].includes(chestState(R.chestKey))&&R.lastChestPrompt!==R.chestKey){R.lastChestPrompt=R.chestKey;openChest51(R.chestKey);}}
+function pauseRun(on){if(R)R.paused=!!on;}
+{const _cm=closeModal;closeModal=function(){_cm();if(R&&R.pauseModal){R.pauseModal=false;R.paused=false;if(R.altarIt){R.lastAltar=R.altarIt.id;R.altarSkip=true;R.altarIt=null;}if(R.evIt&&!R.evIt.used){R.evIt.skipT=R.elapsed+25;}R.evIt=null;}};}
+function runModal(title,html,narrow){pauseRun(true);openModal(title,html,null,narrow);R.pauseModal=true;}
+function openAltar(it,from){const opts=relicOffer('altar'+it.id+(from||''),3,R.tutorial||R.diff===0);if(!opts.length){it.used=true;return;}R.altarOpts=opts;R.altarIt=it;tip51('altar','🔮 <b>Relic</b> มีผลเฉพาะรอบสำรวจนี้ — ออกจากดันเจี้ยนแล้วหายไป แต่แร่และ Mastery ยังอยู่');
+ runModal('🔮 RELIC ALTAR',`<div class="hint" style="text-align:center">เลือก 1 อย่าง — <b>พลังนี้อยู่เฉพาะรอบสำรวจปัจจุบัน</b> (มีแล้ว ${R.relics.length})</div><div class="relicc">${opts.map(k=>`<button class="relic" data-act="relicPick" data-arg="${k}"><span class="ri">${RELICS51[k].i}</span><b>${RELICS51[k].n}</b><span class="hint">${RELICS51[k].d}</span></button>`).join('')}</div>
+ <div class="row2" style="justify-content:center"><button class="btn sm" data-act="relicLater">ไว้ทีหลัง</button></div>`);}
+function relicPick(k){const it=R.altarIt;if(!it||!R.altarOpts.includes(k))return;if(it.k!=='event')it.used=true;takeRelic(k);R.altarIt=null;R.efx.push({type:'ring',x:it.x+.5,y:it.y+.5,r:2,t:0,dur:.6,col:'#c066ff',fill:true});closeModal();checkClear();}
+function openEvent(it){const E=EVENTS51[it.ev];R.evIt=it;tip51('event','❓ <b>เหตุการณ์</b> — ต้องตัดสินใจ (นับเป็นเป้าหมายเคลียร์)');const hasPet=!!R.pet;const bagN=Object.values(R.bag.items).reduce((a,b)=>a+b.count,0);
+ runModal(`${E.i} ${E.n.toUpperCase()}`,`<div class="hint" style="text-align:center;margin-bottom:8px">${E.d}</div><div class="relicc">${E.ch.map(([k,n,d])=>{const dis=(k==='relic6'&&bagN<6)||(k==='stone3'&&bagN<3)||(k==='pet'&&!hasPet);return `<button class="relic" data-act="evPick" data-arg="${it.id}|${k}" ${dis?'disabled':''}><b>${n}</b><span class="hint">${d}${dis?' — ไม่ตรงเงื่อนไข':''}</span></button>`;}).join('')}</div>`);}
+function bagTake(n){const L=[];for(const k in R.bag.items){const it=R.bag.items[k];for(let c=0;c<it.count;c++)L.push([k,it.tier]);}L.sort((a,b)=>TIERS[a[1]].price-TIERS[b[1]].price);if(L.length<n)return false;
+ for(let i=0;i<n;i++){const[k,t]=L[i];const it=R.bag.items[k];it.count--;R.bag.w=Math.max(0,R.bag.w-TIERS[t].w);R.bag.val=Math.max(0,R.bag.val-TIERS[t].price*R.valMul);if(!it.count)delete R.bag.items[k];}return true;}
+function spawnNear(cx,cy,n,tier,extra){let made=0;const T_=TIERS[tier];for(let r=1;r<=4&&made<n;r++)for(let y=cy-r;y<=cy+r&&made<n;y++)for(let x=cx-r;x<=cx+r&&made<n;x++){if(x<1||y<1||x>=W-1||y>=H-1)continue;const i=ix(x,y);if(R.map.g[i]!==T_FLOOR||R.oreAt[i]||Math.hypot(x+.5-R.g.x,y+.5-R.g.y)<1.5)continue;if(R.inter.some(q=>Math.abs(q.x-x)<=1&&Math.abs(q.y-y)<=1))continue;if((x+y)%2)continue;
+  const hp=Math.round(T_.hp*(extra.hpMul||1));const o=Object.assign({id:R.oreSeq=(R.oreSeq||R.map.ores.length+1000)+1,x,y,tier,hp,maxHp:hp,name:T_.ores[made%2][0],hidden:false,hot:false,seed:Math.random(),hitT:0,room:R.map.roomAt[i],spawned:1},extra.o||{});R.ores.push(o);R.oreAt[i]=o;R.spawned=(R.spawned||[]);R.spawned.push({id:o.id,x,y,tier,hp,o:extra.o||{}});made++;}return made;}
+function evPick(a){const[idS,k]=a.split('|');const it=R.inter[+idS];if(!it||it.used)return;const E=EVENTS51[it.ev];const top=Math.min(R.st.maxTier,R.d.tiers[R.d.tiers.length-1])||1;let msg='';
+ switch(k){case'mine':{const n=spawnNear(it.x,it.y,6,top,{o:{bonusVal:1.5}});for(const[dx,dy]of[[2,0],[-2,0]]){const i=ix(it.x+dx,it.y+dy);if(R.map.g[i]===T_FLOOR&&!R.oreAt[i]){R.map.g[i]=T_LAVA;(R.tileDiff=R.tileDiff||{})[i]=T_LAVA;R.bgKey='';}}msg=`💠 คริสตัลเกิดเพิ่ม ${n} ก้อน (มูลค่า ×1.5)`;break;}
+  case'relic':it.used=true;closeModal();setTimeout(()=>openAltar(it,'ev'),60);S.v51.stats.events++;dEvent('event',1);checkClear();return;
+  case'relic6':if(!bagTake(6))return;it.used=true;closeModal();setTimeout(()=>openAltar(it,'forge'),60);S.v51.stats.events++;checkClear();return;
+  case'stone3':if(!bagTake(3))return;R.loot.stone.b=(R.loot.stone.b||0)+2;msg='🔹 Basic Stone ×2 (รับเมื่อกลับ Workshop)';break;
+  case'coins':{const c=Math.round((60+40*top)*(1+.25*R.diff));R.loot.coins+=c;msg=`🪙 +${c} (รับเมื่อกลับ Workshop)`;break;}
+  case'mats':R.loot.stone.b=(R.loot.stone.b||0)+2;R.loot.treat++;msg='🔹×2 + 🍪×1';break;
+  case'pet':R.loot.petExp+=80;if(Math.random()<.3){R.loot.petEss+=2;msg='🐾 Pet EXP +80 · ✨ Pet Essence ×2!';}else msg='🐾 Pet EXP +80';if(R.pet)R.pet.happy=2;break;
+  case'secret':{let n=0;for(const o of R.ores.slice())if(o.secret){o.revealed=true;n++;}for(const r of R.map.rooms)if(r.secret)R.known.add(r.id);msg=n?`🔓 พบทางเข้าห้องลับ ${n} จุด (ทุบผนังลับเพื่อเข้า)`:'ไม่มีห้องลับในชั้นนี้ — ได้ Coins +150 แทน';if(!n)R.loot.coins+=150;break;}
+  case'risk':R.hazMul=1.6;R.chestBonus++;if(!R.d.hz||!R.d.hz.rock){R.d=Object.assign({},R.d,{hz:Object.assign({},R.d.hz||{},{rock:true})});}msg='⚠ Sector Overclocked: หินถล่มถี่ขึ้น · กล่อง +1 Bonus Roll';break;
+  case'surge':R.buffs51.dmg=(R.buffs51.dmg||0)+20;R.buffs51.move=(R.buffs51.move||0)-20;applyRunStats();msg='⚡ ดาเมจขุด +20% · Movement −20%';break;
+  case'feather':R.buffs51.move=(R.buffs51.move||0)+25;R.buffs51.cap=(R.buffs51.cap||0)-15;applyRunStats();msg='🪶 Movement +25% · Capacity −15%';break;
+  case'follow':{if(!R.pet){R.loot.coins+=100;msg='🪙 +100';break;}const H_=R.ores.filter(o=>o.hidden).sort((a,b)=>Math.hypot(a.x-it.x,a.y-it.y)-Math.hypot(b.x-it.x,b.y-it.y)).slice(0,3);H_.forEach(o=>{revealHidden(o);R.fog[ix(o.x,o.y)]=1;});
+   const best=R.ores.filter(o=>!o.secret&&!o.hidden&&canMine(o)).sort((a,b)=>b.tier-a.tier)[0];if(best){best.prism=true;R.fog[ix(best.x,best.y)]=1;R.markOre=best.id;}R.loot.petExp+=40;const sh=petShardEventAny(1);msg=`🐾 เปิดแร่ซ่อน ${H_.length} จุด · Pet EXP +40${sh?' · 🥚 +1':' · ✨ +1'}`;break;}
+  case'accept':{const n=spawnNear(it.x,it.y,5,top,{hpMul:2,o:{cursed:1,bonusVal:2}});R.curseLeft=n;R.curseRoom=it.room;msg=`☠ แร่ต้องคำสาป ${n} ก้อนปรากฏ — ทุบให้ครบ!`;break;}
+  case'skip':msg='➡ ข้ามเหตุการณ์';break;}
+ it.used=true;S.v51.stats.events++;dEvent('event',1);closeModal();if(msg)toast(msg,'gold');sfx('upgrade');R.efx.push({type:'ring',x:it.x+.5,y:it.y+.5,r:1.6,t:0,dur:.5,col:'#ff9df0'});checkClear();}
+/* ---------- Expedition Storage Station ---------- */
+function stationCapOf(it){return Math.round(R.st0.C*2*(hasRel('link')?1.5:1));}
+function stationDeposit(it,manual){const cap=stationCapOf(it);const used=it.cap||0;if(R.bag.w<=0&&!manual)return;if(used>=cap){if(manual)toast('📦 Station นี้เต็มแล้ว','err');return;}
+ if(!manual&&R.bag.w<R.st.C*.35&&!R.goStation)return;let moved=0,wsum=0;const L=Object.entries(R.bag.items).sort((a,b)=>TIERS[b[1].tier].price-TIERS[a[1].tier].price);
+ for(const[k,itm]of L){while(itm.count>0&&used+wsum+TIERS[itm.tier].w<=cap){itm.count--;const w=TIERS[itm.tier].w;wsum+=w;moved++;R.bag.w=Math.max(0,R.bag.w-w);const v=TIERS[itm.tier].price*R.valMul;R.bag.val=Math.max(0,R.bag.val-v);const e=R.exp.items[k]||(R.exp.items[k]={tier:itm.tier,count:0});e.count++;R.exp.val+=v;}if(!itm.count)delete R.bag.items[k];}
+ R.bag.res=0;it.cap=used+wsum;R.goStation=false;if(!moved&&R.bag.w>0){it.cap=cap;if(manual)toast('📦 Station นี้รับแร่ชิ้นที่หนักขนาดนี้ไม่ได้แล้ว','err');}if(moved){sfx('pick');toast(`📦 ฝากแร่ ${moved} ก้อนที่ Expedition Storage (${it.cap}/${cap}) — ยังไม่ถาวรจนกว่าจะกลับ Workshop`,'ok');R.efx.push({type:'ring',x:it.x+.5,y:it.y+.5,r:1.4,t:0,dur:.5,col:'#52e08a',inward:true});tip51('station','📦 แร่ใน Expedition Storage จะได้รับเมื่อกด 🏠 Return to Workshop');}}
+/* ---------- AUTO EXPLORE / target selection ---------- */
+const MODES51=['nearest','value','explore','room'];const MODE_N={nearest:['🎯','ใกล้สุด'],value:['💎','มูลค่าสูง'],explore:['🧭','สำรวจ'],room:['🧹','เคลียร์ห้อง']};
+{const _ov=oreVisible;oreVisible=function(o){if(!_ov(o))return false;if(R&&R.v51){if(!R.fog[o.y*W+o.x])return false;if(R.tf&&!R.tf(o))return false;}return true;};}
+{const _nt=notify;notify=function(k,m,t,cd){if(R&&R.quiet)return;return _nt(k,m,t,cd);};}
+function frontier(){const N=W*H;const s=gTile();const seen=new Uint8Array(N);const q=new Int32Array(N);let h=0,t=0;seen[s]=1;q[t++]=s;const bl=R.blk||(R.blk=new Set());
+ while(h<t){const i=q[h++];const x=i%W,y=(i/W)|0;if(i!==s&&!bl.has(i)){for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){const j=(y+dy)*W+x+dx;if(!R.fog[j]&&R.map.g[j]!==T_WALL){return i;}}}
+  for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=W||ny>=H)continue;const j=ny*W+nx;if(seen[j]||!stand(j))continue;seen[j]=1;q[t++]=j;}}return -1;}
+function goTo(x,y,manual){const tgt={kind:'move',i:ix(x,y)};if(stand(tgt.i)&&setTarget(tgt,manual))return true;for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]]){const i=ix(x+dx,y+dy);if(stand(i)&&setTarget({kind:'move',i},manual))return true;}return false;}
+{const _ct=chooseTarget;chooseTarget=function(){if(!R||!R.v51)return _ct();const g=R.g;
+ /* 1 · pending decisions first (events are clear objectives; altars are free power) */
+ const pend=R.inter.filter(it=>!it.used&&((it.k==='event'&&!(it.skipT>R.elapsed))||(it.k==='altar'&&!(R.altarSkip&&R.lastAltar===it.id)))&&R.fog[it.y*W+it.x]);
+ if(pend.length){pend.sort((a,b)=>Math.hypot(a.x-g.x,a.y-g.y)-Math.hypot(b.x-g.x,b.y-g.y));for(const it of pend){if(goTo(it.x,it.y,false))return true;}}
+ /* 2 · bag nearly full → known station with room left */
+ if(R.bag.w>=R.st.C*.9){const stn=R.inter.filter(it=>it.k==='station'&&(it.cap||0)<stationCapOf(it)&&R.fog[it.y*W+it.x]).sort((a,b)=>Math.hypot(a.x-g.x,a.y-g.y)-Math.hypot(b.x-g.x,b.y-g.y))[0];if(stn&&Math.hypot(stn.x-g.x,stn.y-g.y)>1.4){R.goStation=true;if(goTo(stn.x,stn.y,false))return true;}else if(stn){stationDeposit(stn,true);}}
+ R.mineFull=R.bag.w>=R.st.C;/* full bag: chooseTarget still picks ores (patched) — drops wait on the floor */
+ const mode=R.mode;if(mode==='room'&&R.cur>=0){const cur=R.cur;R.tf=o=>o.room===cur;}
+ R.quiet=true;let ok=false;try{if(mode!=='explore'||Math.random()<.5){const keep=R.mode;if(mode==='explore'||mode==='room')R.mode='nearest';ok=_ct();R.mode=keep;}}finally{R.quiet=false;R.tf=null;}
+ if(ok)return true;
+ /* 3a · rooms seen through a doorway but never entered */
+ {const C=R.clear;const want=R.map.rooms.filter(rm=>!R.visited.has(rm.id)&&(C.rooms.includes(rm.id)||rm.secret)&&(R.fog[rm.cy*W+rm.cx]||R.known.has(rm.id))&&!(R.blkRoom&&R.blkRoom.get(rm.id)>R.elapsed)).sort((a,b)=>Math.hypot(a.cx-g.x,a.cy-g.y)-Math.hypot(b.cx-g.x,b.cy-g.y));
+  for(const rm of want.slice(0,4)){let ok2=false;for(let y=rm.y0;y<=rm.y1&&!ok2;y++)for(let x=rm.x0;x<=rm.x1&&!ok2;x++){if(!R.fog[y*W+x]||!stand(ix(x,y)))continue;if(setTarget({kind:'move',i:ix(x,y)},false))ok2=true;}if(ok2)return true;(R.blkRoom=R.blkRoom||new Map()).set(rm.id,R.elapsed+20);}}
+ /* 3 · explore: nearest frontier */
+ for(let k=0;k<6;k++){const f=frontier();if(f<0)break;if(setTarget({kind:'move',i:f},false))return true;R.blk.add(f);}
+ if(mode==='explore'){R.quiet=true;try{R.mode='nearest';ok=_ct();}finally{R.mode='explore';R.quiet=false;}if(ok)return true;}
+ /* 4 · nothing left */
+ if(R.mineFull&&R.drops.length)notify('full51','🎒 กระเป๋าเต็ม — ไปฝากที่ 📦 Station หรือกด 🏠 Return to Workshop ได้ทันที','err',8);
+ else if(!R.cleared)notify('none51','ไม่มีเป้าหมายที่ขุดได้ในพื้นที่ที่สำรวจแล้ว — ดู 🗺 Map','',10);
+ g.idleWait=.8;return false;};}
+/* off-centre golem next to a diagonal ore: walk to the tile centre first (prevents a mine/retarget loop) */
+{const _st=setTarget;setTarget=function(tgt,manual){const ok=_st(tgt,manual);const g=R&&R.g;if(ok&&g&&tgt.kind==='ore'&&g.state==='mine'&&gDist(tgt.o.x,tgt.o.y)>1.55){const c=gTile();g.path=[c];g.pathGoal=c;g.state='walk';}return ok;};}
+/* ---------- INSTANT EXIT ---------- */
+function runSummary(){const items={};for(const src of[R.bag.items,R.exp?R.exp.items:{}])for(const k in src){items[k]=(items[k]||0)+src[k].count;}const c=clearInfo();const mined=R.mined||0;
+ const mExp=Math.round(Math.min(1500,22+2.6*mined)*(R.cleared?1.3:1));return{items,coins:bagValue(),c,mExp,pExp:Math.round(12+mined*1.4+(R.loot?R.loot.petExp:0))};}
+function openExit51(){if(!R||R.ended)return;if(!R.v51){ACT.extract0();return;}const s=runSummary();const c=s.c;const ck=R.chestKey&&chestState(R.chestKey);
+ const rows=Object.entries(s.items).sort((a,b)=>ORE_INFO[b[0]].tier-ORE_INFO[a[0]].tier).map(([n,k])=>`<span class="tag"><span style="color:${ORE_INFO[n].c1}">◆</span> ${n} ×${k}</span>`).join(' ');
+ const L=R.loot;const sp=[];if(L.coins)sp.push('🪙'+fmt(L.coins));if(L.bpf)sp.push('📄'+L.bpf);for(const k in L.stone)if(L.stone[k])sp.push(STONE[k].i+L.stone[k]);if(L.treat)sp.push('🍪'+L.treat);if(L.petEss)sp.push('✨'+L.petEss);
+ runModal('🏠 ต้องการออกจากดันเจี้ยนหรือไม่?',`<div class="ex51"><div class="row2">${rows||'<span class="hint">ยังไม่มีแร่</span>'}</div>
+ <table class="t"><tr><td>🪙 Coins ที่คาดว่าจะได้ (ถ้าขายทั้งหมด)</td><td><b>${fmt(s.coins)}</b></td></tr><tr><td>🗺 ห้องที่สำรวจ</td><td>${R.visited.size}/${R.map.rooms.length} (หลัก ${c.rv}/${c.rt})</td></tr><tr><td>🏆 ความคืบหน้า</td><td>${c.pct}%</td></tr>
+ <tr><td>🎁 วัตถุดิบพิเศษ</td><td>${sp.join(' · ')||'-'}</td></tr><tr><td>📦 Treasure Chest</td><td>${R.cleared?(ck==='claimed'?'✅ รับแล้ว':'🏆 ปลดล็อกแล้ว (เปิดได้ที่ Home ภายหลัง)'):'<span class="neg">🔒 ยังไม่เคลียร์ — ออกตอนนี้ไม่ได้กล่องรอบนี้</span>'}</td></tr>
+ <tr><td>⭐ Mastery EXP (ต่อชิ้น)</td><td>~${s.mExp}</td></tr><tr><td>🐾 Pet EXP</td><td>${R.pet?'~'+s.pExp:'-'}</td></tr><tr><td>⏱ Time Explored</td><td>${fmtT(R.elapsed)}</td></tr></table>
+ <div class="hint">ได้แร่ที่เก็บแล้ว 100% · ไม่มีบทลงโทษ · Relic ทั้งหมดจะหายเมื่อออก</div>
+ <div class="row2" style="justify-content:center;margin-top:8px"><button class="btn gold big" data-act="exitConfirm">✅ ออกจากดันเจี้ยน</button><button class="btn" data-act="closeModal">↩ สำรวจต่อ</button></div></div>`,true);tutEvent('exitOpen');}
+function fmtT(s){s=Math.floor(s||0);const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return(h?h+':'+String(m).padStart(2,'0'):m)+':'+String(x).padStart(2,'0');}
+function exitConfirm(){if(!R||R.ended||R.exiting)return;R.exiting=true;R.pauseModal=false;closeModal();R.paused=false;
+ /* uncollected drops right next to the golem are picked up; expedition storage joins the bag (normal runs) */
+ if(R.type==='normal'&&R.exp){for(const k in R.exp.items){const e=R.exp.items[k];const b=R.bag.items[k]||(R.bag.items[k]={tier:e.tier,count:0});b.count+=e.count;}R.bag.val+=R.exp.val;R.exp={items:{},val:0};}
+ if(R.tutorial)S.v51.tut.exited=true;tutEvent('exit');endRun(true);}
+/* loot from events + clear bookkeeping happens at the moment of extraction (single commit with the pending claim) */
+function grantRunLoot(){if(!R||!R.v51||R.lootDone)return '';R.lootDone=true;const L=R.loot;const o=[];if(L.coins){S.coins+=L.coins;o.push('🪙'+fmt(L.coins));}if(L.bpf){S.armorBlueprints.frag+=L.bpf;o.push('📄'+L.bpf);}
+ for(const k in L.stone)if(L.stone[k]){S.enhancementMaterials[k]+=L.stone[k];o.push(STONE[k].i+L.stone[k]);}if(L.treat){S.petItems.treat+=L.treat;o.push('🍪'+L.treat);}if(L.petEss){S.petItems.ess+=L.petEss;o.push('✨'+L.petEss);}
+ if(L.petExp&&R.pet){const p=petGet(R.pet.uid);if(p)petExpGain(p,L.petExp);}S.v51.stats.longest=Math.max(S.v51.stats.longest||0,Math.round(R.elapsed));return o.join(' · ');}
+{const _er=endRun;endRun=function(ex){if(R&&!R.ended&&R.v51){S.suspended=null;R.lootTxt=grantRunLoot();}return _er(ex);};}
+/* V5.1 mastery scale: EXP per ore stays the same as V5 (≈2.6/ore) but is not capped at one short run */
+{const _re=v5RunEnd;v5RunEnd=function(kind,ok){if(R&&R.v51&&!R.v5done){R.v51scale=true;}return _re(kind,ok);};}
+
+/* =====================================================================
+   V5.1 INFINITE DUNGEON (3/4) — treasure chests (loot + anti-dup) · clear flow · HUD/minimap/map ·
+   rendering (culling, chunked BG, fog, interactables) · difficulty · Deep/Endless · Suspend & Resume
+   ===================================================================== */
+/* ---------- TREASURE CHEST ---------- */
+const CHEST51=[{id:'wood',n:'Wooden Chest',c:'#c08a4a',c2:'#6a4220',coins:[400,700],ores:[10,16],bpf:1,rolls:1},{id:'iron',n:'Iron Chest',c:'#c9d2dc',c2:'#5a6472',coins:[900,1400],ores:[14,22],bpf:2,rolls:2},
+ {id:'crystal',n:'Crystal Chest',c:'#7fd8ff',c2:'#2a6a9a',coins:[2000,3000],ores:[16,24],bpf:3,rolls:2},{id:'ancient',n:'Ancient Chest',c:'#ffd84a',c2:'#8a6010',coins:[4000,6000],ores:[18,26],bpf:4,ess:1,rolls:3},
+ {id:'void',n:'Void Chest',c:'#c066ff',c2:'#3a1060',coins:[8000,12000],ores:[20,30],bpf:5,ess:1,rolls:3}];
+/* bonus pool: weights per entry; `min` = minimum chest tier index · displayed rates are computed from these exact weights */
+const LOOT51=[{k:'stoneB',n:'Basic Enhancement Stone',i:'🔹',w:30,q:[2,4]},{k:'stoneA',n:'Advanced Enhancement Stone',i:'🔷',w:18,q:[1,2],min:1},{k:'stoneM',n:'Master Enhancement Stone',i:'💠',w:6,q:[1,1],min:3},
+ {k:'rune',n:'Rune (สุ่มชนิด, Tier ตามกล่อง)',i:'🔮',w:12,q:[1,1]},{k:'recipe',n:'Rune Recipe Fragment → Rune Crafting EXP',i:'📜',w:8,q:[60,120],min:2},{k:'petEss',n:'Pet Essence',i:'✨',w:15,q:[2,4]},{k:'treat',n:'Ore Treat',i:'🍪',w:10,q:[2,3]},
+ {k:'petShard',n:'Pet Egg Shard (เป้าหมาย)',i:'🥚',w:10,q:[2,3]},{k:'evo',n:'Evolution Shards',i:'💠',w:12,q:[2,5]},{k:'bpf',n:'Blueprint Fragment (Rare)',i:'📄',w:12,q:[2,3]},{k:'ess',n:'Masterwork Essence',i:'✴️',w:8,q:[1,1],min:2},
+ {k:'cos',n:'Cosmetic Fragment',i:'🎨',w:5,q:[1,2],min:3},{k:'ore',n:'Rare Ore Bundle (Tier สูงสุดของดันเจี้ยน)',i:'◆',w:10,q:[3,6]}];
+function lootPool(tier,diff){return LOOT51.filter(e=>(e.min||0)<=tier||(e.k==='cos'&&diff>=3));}
+function lootRates(tier,diff){const P=lootPool(tier,diff);const s=P.reduce((a,e)=>a+e.w,0);return P.map(e=>({e,p:e.w/s}));}
+function chestTierFor(did,diff,floor,kind){let t=did==='quarry'?0:did==='depths'?1:did==='rift'?2:0;if(kind==='endless'){t=floor<=20?0:floor<=40?1:floor<=60?2:floor<=100?3:4;}if(kind==='deep')t=Math.min(4,t+(floor>=3?1:0));return Math.min(4,t+DIFF[diff].chest);}
+function chestKey(){return R.type==='endless'?R.runId+'#'+(R.floor||1):R.runId;}
+function chestState(k){const c=S.v51.chests[k];return c?c.st:null;}
+function rollChest(k){const c=S.v51.chests[k];if(!c||c.rewards)return c&&c.rewards;const C=CHEST51[c.tier];const rng=mulberry32(hashStr(k+'|chest'));const ri=(a,b)=>a+Math.floor(rng()*(b-a+1));const d=DMAP[c.did]||DMAP.quarry;const tiers=c.tiers||d.tiers;
+ const out=[];out.push({k:'coins',n:'Coins',i:'🪙',q:ri(C.coins[0],C.coins[1])});const ores={};const nO=ri(C.ores[0],C.ores[1]);for(let i=0;i<nO;i++){const t=tiers[Math.min(tiers.length-1,Math.floor(rng()*tiers.length))];const nm=TIERS[t].ores[Math.floor(rng()*2)][0];ores[nm]=(ores[nm]||0)+1;}
+ out.push({k:'ores',n:'Ore Bundle',i:'◆',ores});out.push({k:'bpf',n:'Blueprint Fragment',i:'📄',q:C.bpf});if(C.ess)out.push({k:'ess',n:'Masterwork Essence',i:'✴️',q:C.ess});
+ const rolls=C.rolls+DIFF[c.diff].bonus+(c.bonus||0);const P=lootPool(c.tier,c.diff);const sum=P.reduce((a,e)=>a+e.w,0);
+ for(let r=0;r<rolls;r++){let x=rng()*sum,e=P[0];for(const p of P){x-=p.w;if(x<0){e=p;break;}}const it={k:e.k,n:e.n,i:e.i,q:ri(e.q[0],e.q[1]),bonus:true};
+  if(e.k==='rune'){const ids=Object.keys(RUNES);it.rid=ids[Math.floor(rng()*ids.length)];it.t=Math.min(2,c.tier>>1);it.n=`${RUNES[it.rid].n} ${RUNE_TIER[it.t]}`;it.i=RUNES[it.rid].i;}
+  if(e.k==='ore'){const t=tiers[tiers.length-1];it.ore=TIERS[t].ores[Math.floor(rng()*2)][0];it.n=`${it.ore} ×${it.q}`;}out.push(it);}
+ c.rewards=out;c.st='opened';save();return out;}
+function giveChest(k){const c=S.v51.chests[k];if(!c||c.st!=='opened'||!c.rewards)return '';c.st='claimed';const o=[];
+ for(const r of c.rewards){switch(r.k){case'coins':S.coins+=r.q;S.stats.earned+=r.q;o.push('🪙'+fmt(r.q));break;case'ores':for(const n in r.ores)S.oreStorage[n]=(S.oreStorage[n]||0)+r.ores[n];o.push('◆×'+Object.values(r.ores).reduce((a,b)=>a+b,0));break;
+  case'bpf':S.armorBlueprints.frag+=r.q;o.push('📄'+r.q);break;case'ess':S.enhancementMaterials.ess+=r.q;o.push('✴️'+r.q);break;case'stoneB':S.enhancementMaterials.b+=r.q;o.push('🔹'+r.q);break;case'stoneA':S.enhancementMaterials.a+=r.q;o.push('🔷'+r.q);break;case'stoneM':S.enhancementMaterials.m+=r.q;o.push('💠'+r.q);break;
+  case'rune':S.runes[r.rid][r.t]++;o.push(r.i+' '+r.n);break;case'recipe':addAM('rune',r.q);o.push('📜 Rune EXP +'+r.q);break;case'petEss':S.petItems.ess+=r.q;o.push('✨'+r.q);break;case'treat':S.petItems.treat+=r.q;o.push('🍪'+r.q);break;
+  case'petShard':{const n=petShardEventAny(r.q);o.push(n?'🥚'+n:'✨'+r.q);break;}case'evo':S.shards+=r.q;o.push('💠Evo '+r.q);break;case'cos':S.v51.cosFrag+=r.q;o.push('🎨'+r.q);break;case'ore':S.oreStorage[r.ore]=(S.oreStorage[r.ore]||0)+r.q;o.push(`◆${r.ore} ${r.q}`);break;}}
+ while(S.v51.cosFrag>=10){const nx=Object.keys(ACOS).find(id=>!S.armorCosmetics.own.includes(id));if(!nx)break;S.v51.cosFrag-=10;S.armorCosmetics.own.push(nx);o.push('🎨 ปลดล็อก '+ACOS[nx].n);}
+ S.v51.stats.chests++;S.v51.pendingChest=S.v51.pendingChest.filter(x=>x!==k);dEvent('chest',1);tutEvent('chest');pruneChests();save();renderWorkshop();return o.join(' · ');}
+function pruneChests(){const ks=Object.keys(S.v51.chests);if(ks.length<=150)return;const old=ks.filter(k=>S.v51.chests[k].st==='claimed').sort((a,b)=>S.v51.chests[a].at-S.v51.chests[b].at);for(const k of old.slice(0,ks.length-150))delete S.v51.chests[k];}
+/* ---------- CLEAR ---------- */
+function onCleared(){if(R.cleared)return;R.cleared=true;const k=chestKey();R.chestKey=k;const did=R.type==='endless'?(R.deep?R.deep.did:'endless'):R.d.id;
+ if(!S.v51.chests[k]){S.v51.chests[k]={st:'unlocked',tier:chestTierFor(did,R.diff,R.floor||1,R.type==='endless'?(R.deep?'deep':'endless'):'std'),did,diff:R.diff,bonus:R.chestBonus||0,tiers:R.d.tiers.slice(),at:Date.now()};S.v51.pendingChest.push(k);}
+ if(R.tutorial){S.v51.tut.chestKey=k;}S.v51.stats.clears++;S.v51.clears++;if(R.type==='normal'){const cur=S.v51.diffMax[did]==null?1:S.v51.diffMax[did];if(R.diff>=cur&&cur<3)S.v51.diffMax[did]=Math.min(3,R.diff+1);}dEvent('clear',1);tutEvent('clear');
+ {const cb=Math.round(.2*(R.bag.val+(R.exp?R.exp.val:0)+(R.v5bonus||0)));if(cb>0){R.v5bonus=(R.v5bonus||0)+cb;R.clearBonus=cb;setTimeout(()=>toast(`🏆 Clear Bonus: มูลค่าแร่ทั้งรอบ +20% (+🪙${fmt(cb)})`,'gold'),900);}}
+ if(R.deep)floorComplete();save();clearBanner();setTimeout(()=>{if(R&&!R.ended&&!R.paused)clearPrompt();},1400);}
+function clearBanner(){let b=$('#clr51');if(!b){b=document.createElement('div');b.id='clr51';document.body.appendChild(b);}const C=CHEST51[S.v51.chests[R.chestKey].tier];b.innerHTML=`<div class="cb">🏆 DUNGEON CLEARED!</div><div class="cs" style="color:${C.c}">${C.n} ปลดล็อกแล้ว</div>`;b.classList.remove('show');void b.offsetWidth;b.classList.add('show');sfx('legend');R.shake=.3;for(let k=0;k<40;k++)part(R.g.x,R.g.y-.5,k%2?'#ffd84a':C.c,7,4);setTimeout(()=>b.classList.remove('show'),2600);}
+function clearPrompt(){const C=CHEST51[S.v51.chests[R.chestKey].tier];runModal('🏆 DUNGEON CLEARED!',`<div style="text-align:center"><canvas id="chpv" width="200" height="150"></canvas><div class="hint">เคลียร์ครบทุกเป้าหมายแล้ว — ได้รับสิทธิ์เปิด <b style="color:${C.c}">${C.n}</b> (1 ครั้งต่อรอบ)</div>
+ <div class="row2" style="justify-content:center;margin-top:8px"><button class="btn gold big" data-act="chestOpen" data-arg="${R.chestKey}">🎁 เปิดกล่องเลย</button><button class="btn" data-act="closeModal">🧭 สำรวจต่อ</button>${R.deep&&R.deep.floor<DEEP_FLOORS?'<button class="btn" data-act="descendC">⬇ ลงชั้นต่อไป</button>':''}${R.type==='endless'&&!R.deep?'<button class="btn" data-act="descendC">⬇ Descend</button>':''}</div></div>`,true);
+ setTimeout(()=>{const cv=$('#chpv');if(cv)drawChest(cv.getContext('2d'),100,120,1.3,C,0,GT);},20);}
+/* chest drawing + opening animation (rise · glow · shake · lid opens · beam · items float · reward cards) */
+function drawChest(c,x,y,s,C,open,t,shake){c.save();c.translate(x+(shake?Math.sin(t*60)*shake*4:0),y);c.scale(s,s);c.fillStyle='rgba(0,0,0,.35)';ell(c,0,4,46,10);c.fill();
+ rr(c,-40,-34,80,38,6);fs(c,lg(c,-34,4,C.c,C.c2),2.6);for(const xx of[-28,28]){c.fillStyle=C.c2;c.fillRect(xx-4,-34,8,38);}c.fillStyle='#ffe9a8';rr(c,-7,-24,14,14,3);c.fill();c.strokeStyle=OL;c.lineWidth=1.6;c.stroke();
+ if(open>0){c.fillStyle='#120a04';rr(c,-36,-38,72,8,3);c.fill();}c.save();c.translate(0,-34-open*16);c.scale(1,1-.55*open);rr(c,-42,-22,84,24,10);fs(c,lg(c,-22,2,mix(C.c,.25+.25*open),C.c2),2.6);c.fillStyle=C.c2;c.fillRect(-32,-22,8,24);c.fillRect(24,-22,8,24);c.restore();
+ if(open>0){glow(c,0,-40,90*open,C.c,.6*open);c.fillStyle=rgba('#ffffff',.25*open);c.beginPath();c.moveTo(-30,-36);c.lineTo(-70,-200);c.lineTo(70,-200);c.lineTo(30,-36);c.closePath();c.fill();}c.restore();}
+let CHA=null;
+function openChest51(k){const c=S.v51.chests[k];if(!c){toast('ไม่พบกล่องนี้','err');return;}if(c.st==='claimed'){toast('กล่องนี้รับรางวัลไปแล้ว','err');return;}const C=CHEST51[c.tier];const rewards=rollChest(k);
+ if(R&&!R.ended)pauseRun(true);CHA={k,t:0,dur:GF().skip?0:2.4,C,rewards};
+ openModal(`🎁 ${C.n.toUpperCase()}`,`<div class="cho"><canvas id="chcv" width="420" height="300"></canvas><div id="chr" class="chr"></div><div class="row2" style="justify-content:center"><button class="btn sm" id="chSkip" data-act="chestSkip">⏭ Skip Animation</button><button class="btn gold big hidden" id="chClaim" data-act="chestClaim" data-arg="${k}">✅ รับรางวัล</button></div>
+  <details style="margin-top:6px"><summary class="hint">🎲 Drop Pool (อัตราจริง)</summary>${dropPoolHtml(c.tier,c.diff,c.bonus)}</details></div>`,null,true);if(R)R.pauseModal=true;
+ let last=performance.now();const step=()=>{if(!CHA||CHA.k!==k||!$('#chcv'))return;const now=performance.now();CHA.t+=Math.min(.1,(now-last)/1000);last=now;renderChestAnim();if(CHA.t<CHA.dur)requestAnimationFrame(step);else showChestCards();};sfx('summon',c.tier+1);requestAnimationFrame(step);}
+function renderChestAnim(){const cv=$('#chcv');if(!cv)return;const c=cv.getContext('2d');const A=CHA;const t=A.t;c.clearRect(0,0,420,300);const g=c.createRadialGradient(210,190,10,210,190,220);g.addColorStop(0,rgba(A.C.c,.25));g.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=g;c.fillRect(0,0,420,300);
+ const rise=Math.min(1,t/.6),shake=t>.6&&t<1.3?(t-.6)/.7:0,open=t>1.3?Math.min(1,(t-1.3)/.4):0;drawChest(c,210,250-rise*40,1.6,A.C,open,GT,shake);
+ if(open>0){for(let i=0;i<Math.min(A.rewards.length,8);i++){const k=Math.min(1,(t-1.5-i*.08)/.5);if(k<=0)continue;const a=-Math.PI/2+(i-(Math.min(A.rewards.length,8)-1)/2)*.32;c.globalAlpha=k;c.font='26px sans-serif';c.textAlign='center';c.fillText(A.rewards[i].i,210+Math.cos(a)*k*130,170+Math.sin(a)*k*110);}c.globalAlpha=1;}}
+function showChestCards(){const A=CHA;if(!A)return;A.t=A.dur;renderChestAnim();const r=$('#chr');if(r)r.innerHTML=A.rewards.map(x=>`<div class="rcard ${x.bonus?'bon':''}"><span class="ri">${x.i}</span><b>${x.k==='ores'?Object.entries(x.ores).map(([n,q])=>`${n} ×${q}`).join(', '):x.n}</b><span>${x.k==='ores'||x.k==='rune'||x.k==='ore'?'':'×'+fmt(x.q)}</span>${x.bonus?'<i>BONUS</i>':''}</div>`).join('');
+ const b=$('#chClaim');if(b)b.classList.remove('hidden');const s=$('#chSkip');if(s)s.classList.add('hidden');sfx('legend');}
+function dropPoolHtml(tier,diff,bonus){const C=CHEST51[tier];const L=lootRates(tier,diff);return `<div class="hint">การันตี: 🪙 ${fmt(C.coins[0])}–${fmt(C.coins[1])} · ◆ แร่ ${C.ores[0]}–${C.ores[1]} ก้อน (Tier ของดันเจี้ยน) · 📄 ${C.bpf}${C.ess?' · ✴️ '+C.ess:''} · Bonus Roll ${C.rolls}+${DIFF[diff].bonus} (ความยาก)${bonus?' +'+bonus+' (เหตุการณ์)':''}</div>
+ <table class="t">${L.map(x=>`<tr><td>${x.e.i} ${x.e.n}</td><td>×${x.e.q[0]}${x.e.q[1]!==x.e.q[0]?'–'+x.e.q[1]:''}</td><td><b>${(x.p*100).toFixed(1)}%</b> / roll</td></tr>`).join('')}</table><div class="hint">ไม่มีอุปกรณ์สำเร็จรูปในกล่อง — ชิ้นส่วนหลักยังได้จากการคราฟต์ (Crafting-First)</div>`;}
+/* ---------- rendering ---------- */
+function viewRect51(T){if(!R||!R.map.big)return[0,0,W,H];const x0=Math.max(0,Math.floor(-R.cam.x/T)-1),y0=Math.max(0,Math.floor(-R.cam.y/T)-1);const x1=Math.min(W,Math.ceil((DV.w-R.cam.x)/T)+1),y1=Math.min(H,Math.ceil((DV.h-R.cam.y)/T)+2);return[x0,y0,x1,y1];}
+const CHUNK=8;
+/* background chunks are built lazily with a per-frame budget (no frame spikes when scrolling); unbuilt chunks show a flat floor colour for a frame or two */
+function drawBG51(c,T,x0,y0,x1,y1){if(!R.bgChunks)R.bgChunks={};const n=R.map.big?CHUNK:Math.max(W,H);let budget=R.map.big?2:99;const th=TH();
+ for(let cy=Math.floor(y0/n);cy*n<y1;cy++)for(let cx=Math.floor(x0/n);cx*n<x1;cx++){const key=cx+','+cy;let ch=R.bgChunks[key];const bx0=cx*n,by0=cy*n,bx1=Math.min(W,bx0+n),by1=Math.min(H,by0+n);
+  if(!ch&&budget>0){budget--;ch=R.bgChunks[key]=buildBG(T,bx0,by0,bx1,by1);}if(ch)c.drawImage(ch,bx0*T,by0*T,(bx1-bx0)*T,(by1-by0)*T);else{c.fillStyle=th.fl?th.fl[0]:'#1b2030';c.fillRect(bx0*T,by0*T,(bx1-bx0)*T,(by1-by0)*T);}}
+ /* idle prebuild: one chunk just outside the view */if(R.map.big&&budget>0){const gx=Math.floor(R.g.x/n),gy=Math.floor(R.g.y/n);for(let r=1;r<=2&&budget>0;r++)for(let dy=-r;dy<=r&&budget>0;dy++)for(let dx=-r;dx<=r&&budget>0;dx++){const cx=gx+dx,cy=gy+dy;if(cx<0||cy<0||cx*n>=W||cy*n>=H)continue;const key=cx+','+cy;if(R.bgChunks[key])continue;budget--;R.bgChunks[key]=buildBG(T,cx*n,cy*n,Math.min(W,cx*n+n),Math.min(H,cy*n+n));}}}
+function roomTint51(c,m,i,X,Y,T){const rm=m.rooms[m.roomAt[i]];if(!rm)return;const col=RT[rm.type].c;c.fillStyle=rgba(col,rm.type==='ore'?.025:.07);c.fillRect(X,Y,T,T);
+ if(rm.type==='treasure'||rm.type==='relic'||rm.type==='secret'){const x=i%m.w,y=(i/m.w)|0;if((x+y)%4===0){c.fillStyle=rgba(col,.12);circ(c,X+T/2,Y+T/2,T*.08);c.fill();}}}
+function drawFog51(c,T,x0,y0,x1,y1){if(!R.v51)return;const th=TH();c.fillStyle=th.bg||'#05070d';for(let y=y0;y<y1;y++){let run=-1;for(let x=x0;x<=x1;x++){const dark=x<x1&&!R.fog[y*W+x];if(dark&&run<0)run=x;if(!dark&&run>=0){c.fillRect(run*T,y*T-T*.45,(x-run)*T+.5,T*1.46);run=-1;}}}
+ /* soft edge so the fog reads as fog, not black blocks */c.fillStyle='rgba(5,7,13,.35)';for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++){const i=y*W+x;if(!R.fog[i])continue;if((x>0&&!R.fog[i-1])||(x<W-1&&!R.fog[i+1])||(y>0&&!R.fog[i-W])||(y<H-1&&!R.fog[i+W]))c.fillRect(x*T,y*T-T*.2,T,T*1.2);}}
+function drawInter51(c,it,T,t){const X=(it.x+.5)*T,Y=(it.y+.5)*T;c.save();c.translate(X,Y);const k=T/40;c.scale(k,k);
+ if(it.k==='altar'){c.fillStyle='rgba(0,0,0,.3)';ell(c,0,12,18,6);c.fill();rr(c,-14,-6,28,18,4);fs(c,lg(c,-6,12,'#6a5a8a','#2a2040'),2);rr(c,-10,-12,20,8,3);fs(c,'#8a7aaa',1.6);
+  if(!it.used){const b=Math.sin(t*3)*3;glow(c,0,-24+b,26,'#c066ff',.5);poly(c,[0,-36+b,8,-24+b,0,-14+b,-8,-24+b]);fs(c,lg(c,-36,-14,'#ffffff','#c066ff'),1.6);}}
+ else if(it.k==='event'){const E=EVENTS51[it.ev];const b=Math.sin(t*2.5)*2;if(!it.used){glow(c,0,-14,30,'#ff9df0',.35+.15*Math.sin(t*4));}c.fillStyle='rgba(0,0,0,.3)';ell(c,0,12,14,5);c.fill();poly(c,[-10,10,-6,-18,6,-18,10,10]);fs(c,lg(c,-18,10,'#5a4a6a','#2a1e3a'),2);
+  c.font='18px sans-serif';c.textAlign='center';c.fillText(it.used?'✔':E.i,0,-22+b);}
+ else if(it.k==='station'){c.fillStyle='rgba(0,0,0,.3)';ell(c,0,14,20,6);c.fill();rr(c,-16,-14,32,28,5);fs(c,lg(c,-14,14,'#4a6a5a','#1e3028'),2);rr(c,-11,-9,22,10,3);c.fillStyle='#0e1a14';c.fill();const cap=stationCapOf(it),u=it.cap||0;c.fillStyle='#52e08a';c.fillRect(-10,-8,20*(1-u/cap),8);
+  gear(c,10,8,5,7,t,'#9fb0c3');glow(c,0,-4,18,'#52e08a',.25);c.font='12px sans-serif';c.textAlign='center';c.fillText('📦',0,26);}
+ else if(it.k==='chest'){const st=R.chestKey?chestState(R.chestKey):null;const C=CHEST51[chestTierFor(R.type==='endless'?(R.deep?R.deep.did:'endless'):R.d.id,R.diff,R.floor||1,R.type==='endless'?(R.deep?'deep':'endless'):'std')];
+  if(R.cleared&&st!=='claimed')glow(c,0,-10,40,C.c,.45+.2*Math.sin(t*4));drawChest(c,0,12,.42,C,st==='claimed'||st==='opened'?1:0,t,0);if(!R.cleared){c.font='14px sans-serif';c.textAlign='center';c.fillText('🔒',0,-22);}}
+ c.restore();}
+{const _de=drawEnt;drawEnt=function(c,e,T,t){if(e.k==='i'){drawInter51(c,e.it,T,t);return;}return _de(c,e,T,t);};}
+{const _gp=genProps;genProps=function(){_gp();const m=R.map;if(!m.big)return;const th=THEMES[R.thKey]||THEMES.quarry;const rng=mulberry32((m.seed||1)*17);
+ const add=(k,x,y,wall)=>m.props.push({k,x,y,wall:wall?1:0,s:rng()});for(const rm of m.rooms){const fl=(k,n)=>{for(let a=0;a<n*6&&n>0;a++){const x=rm.x0+Math.floor(rng()*(rm.x1-rm.x0+1)),y=rm.y0+Math.floor(rng()*(rm.y1-rm.y0+1));const i=ix(x,y);if(m.g[i]!==T_FLOOR||m.oreAt[i]||m.inter.some(q=>Math.abs(q.x-x)<=1&&Math.abs(q.y-y)<=1))continue;add(k,x,y);n--;}};
+  const wl=(k,n)=>{for(let x=rm.x0;x<=rm.x1&&n>0;x+=2){const y=rm.y0-1;if(y>0&&m.g[ix(x,y)]===T_WALL&&rng()<.5){add(k,x,y,1);n--;}}};
+  if(rm.type==='machine'){fl('machine',3);wl('pipe',3);wl('gear',2);}else if(rm.type==='crystal'){wl('crystalBig',4);fl('glowcrack',3);}else if(rm.type==='rest'){fl('lamp',2);fl('crate',2);fl('sign',1);}else if(rm.type==='treasure'){fl('brazier',2);wl('statue',3);fl('rune',2);}
+  else if(rm.type==='relic'){fl('rune',3);wl('runePillar',2);}else if(rm.type==='secret'){fl('portal',1);wl('crystal',2);}else if(rm.type==='hazard'){fl('rubble',2);wl('torch',2);}else if(rm.type==='rich'){fl('cart',1);wl('beam',2);}}};}
+/* ---------- HUD ---------- */
+const V51CSS=`#hClear{cursor:pointer}.hobj{position:absolute;left:50%;transform:translateX(-50%);top:calc(100% + 4px);background:rgba(8,12,24,.82);border:1px solid var(--line);border-radius:10px;padding:3px 10px;font-size:12px;white-space:nowrap;pointer-events:none;max-width:92vw;overflow:hidden;text-overflow:ellipsis}
+.mmw{position:fixed;right:8px;z-index:22;display:flex;flex-direction:column;align-items:flex-end;gap:4px}.mmw canvas{width:168px;height:108px;border-radius:10px;border:1px solid var(--line);background:rgba(4,6,12,.85);image-rendering:pixelated;cursor:pointer}
+.mmb{display:flex;gap:4px}.mmb button{min-width:44px;min-height:40px;border-radius:10px;background:rgba(20,30,56,.92);border:1px solid var(--line);color:var(--text);font-size:16px}
+.hpet{display:flex;align-items:center;gap:4px;background:rgba(10,15,28,.85);border:1px solid var(--line);border-radius:12px;padding:3px 8px;font-size:11px;min-height:40px}.hpet .pc{width:26px;height:26px;border-radius:50%;background:conic-gradient(#3fe0ff var(--p),#1a2440 0);display:flex;align-items:center;justify-content:center}.hpet .pc i{background:#0e1527;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-style:normal}
+.hud-x{display:flex;flex-direction:column;align-items:flex-end;gap:10px}.hud-x .row{display:flex;gap:8px;align-items:center}#bExtract.ret{background:linear-gradient(180deg,#2c4277,#1d2c52);border-color:#4a6ab0;color:#fff;min-height:44px}
+.relicc{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:8px 0}.relic{border:2px solid #4a3a7a;border-radius:14px;background:linear-gradient(180deg,#24183e,#120c22);color:var(--text);padding:10px;display:flex;flex-direction:column;gap:4px;align-items:center;text-align:center;min-height:120px}
+.relic:hover:not(:disabled){border-color:#c066ff;transform:translateY(-2px)}.relic .ri{font-size:30px}.relic:disabled{opacity:.45}
+#clr51{position:fixed;left:50%;top:22%;transform:translate(-50%,-20px) scale(.85);opacity:0;z-index:130;pointer-events:none;text-align:center;transition:all .45s cubic-bezier(.2,1.4,.4,1)}#clr51.show{opacity:1;transform:translate(-50%,0) scale(1)}
+#clr51 .cb{font:900 40px Kanit,sans-serif;color:#ffd84a;text-shadow:0 0 24px rgba(255,216,74,.8),0 4px 0 #5a3a00}#clr51 .cs{font-weight:800;font-size:16px;text-shadow:0 2px 6px #000}
+.cho canvas{width:100%;max-width:420px;height:auto;display:block;margin:0 auto}.chr{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px;margin:6px 0}.rcard{border:1px solid var(--line);border-radius:12px;background:#111a31;padding:8px;display:flex;flex-direction:column;align-items:center;text-align:center;font-size:12px;position:relative;animation:rc .4s ease both}
+.rcard .ri{font-size:24px}.rcard.bon{border-color:#c066ff}.rcard i{position:absolute;top:4px;right:6px;font-size:9px;color:#c066ff;font-style:normal;font-weight:800}@keyframes rc{from{opacity:0;transform:translateY(10px) scale(.9)}to{opacity:1;transform:none}}
+.diffs{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:6px 0}.diffs button{min-height:44px;border-radius:10px;background:#141e38;border:1px solid var(--line);color:var(--text);font-size:11.5px;padding:2px}.diffs button.on{border-color:var(--dc);box-shadow:inset 0 0 0 1px var(--dc);background:#1d2a4a}.diffs button:disabled{opacity:.4}
+.mapcv{width:100%;height:auto;border-radius:12px;background:#05070d;image-rendering:pixelated;cursor:pointer;touch-action:manipulation}
+.ex51 .tag{font-size:12px}
+@media (max-width:767px){.mmw canvas{width:120px;height:78px}#clr51 .cb{font-size:30px}.hobj{font-size:11px}.hud-x{gap:14px}}`;
+function v51HudInit(){if($('#mmw'))return;const st=document.createElement('style');st.textContent=V51CSS;document.head.appendChild(st);
+ const top=$('#hudTop');const hc=document.createElement('div');hc.className='hp';hc.id='hClear';hc.dataset.act='clearInfo';hc.textContent='🏆 0%';$('#hTimer').after(hc);const ob=document.createElement('div');ob.className='hobj';ob.id='hObj';top.appendChild(ob);top.style.position='relative';
+ const mw=document.createElement('div');mw.className='mmw';mw.id='mmw';mw.innerHTML='<canvas id="mm" width="192" height="124" data-act="openMap51"></canvas><div class="mmb"><button data-act="openMap51" title="Map (M)">🗺</button><button data-act="pause51" title="Pause (P)">⏸</button></div>';$('#dungeon').appendChild(mw);
+ const hs=$('#hudBot .hud-s');const hx=document.createElement('div');hx.className='hud-x';const be=$('#bExtract');be.classList.add('ret');const r1=document.createElement('div');r1.className='row';r1.appendChild(be);hx.appendChild(r1);const r2=document.createElement('div');r2.className='row';const pet=document.createElement('div');pet.className='hpet';pet.id='hPet';r2.appendChild(pet);r2.appendChild(hs);hx.appendChild(r2);$('#hudBot').appendChild(hx);}
+{const _ev=enterView;enterView=function(name){v51HudInit();_ev(name);v51HudMode();};}
+function v51HudMode(){const on=!!(R&&R.v51);$('#mmw').style.display=on?'':'none';$('#hClear').style.display=on?'':'none';$('#hObj').style.display=on?'':'none';const t=$('#hudTop');if(t)$('#mmw').style.top=(t.offsetHeight+30)+'px';}
+{const _uh=updateHud;updateHud=function(){_uh();if(!R)return;if(R.v51){const te=$('#hTimer');te.textContent='⏱ '+fmtT(R.elapsed);te.classList.remove('low');te.title='Time Explored';const c=clearInfo();$('#hClear').textContent=(R.cleared?'🏆 ✓':'🏆 '+c.pct+'%');$('#hObj').textContent=objectiveText();
+  R.mmT=(R.mmT||0)-1/60;if(R.mmT<=0){R.mmT=.25;drawMinimap($('#mm'),false);v51HudMode();}}
+ const hp=$('#hPet');if(hp){if(R.pet){const P_=R.pet;const k=P_.cdMax?1-P_.cd/P_.cdMax:1;hp.style.display='';hp.innerHTML=`<span class="pc" style="--p:${Math.round(k*100)}%"><i>${PETS[P_.pid].type==='mine'?'🐾':'✦'}</i></span><span>${esc(PETS[P_.pid].st[P_.stage])}<br><b>${k>=1?'READY':Math.ceil(P_.cd)+'s'}</b></span>`;}else hp.style.display='none';}};}
+{const _ub=updateHudButtons;updateHudButtons=function(){_ub();if(!R)return;const sm=window.innerWidth<520;const be=$('#bExtract');if(R.v51){be.textContent=sm?'🏠 Return':'🏠 Return to Workshop';be.classList.remove('going');const M=MODE_N[R.mode]||MODE_N.nearest;$('#bMode').textContent=sm?M[0]+' '+M[1]:M[0]+' '+M[1];$('#bAuto').textContent=R.auto?(sm?'🤖 ON':'🤖 Auto Explore: ON'):(sm?'🕹 OFF':'🕹 Auto: OFF');
+  $('#bDescend').classList.toggle('hidden',!(R.type==='endless'&&R.floorDone&&!(R.deep&&R.deep.floor>=DEEP_FLOORS)));}};}
+function drawMinimap(cv,big){if(!cv||!R||!R.v51)return;const c=cv.getContext('2d');const w=W,h=H;if(!R.mmImg||R.mmImg.width!==w){R.mmCv=document.createElement('canvas');R.mmCv.width=w;R.mmCv.height=h;R.mmImg=R.mmCv.getContext('2d').createImageData(w,h);}
+ const d=R.mmImg.data;const g=R.map.g,ra=R.map.roomAt;const RC={};for(const k in RT){const hx=RT[k].c;RC[k]=[parseInt(hx.slice(1,3),16),parseInt(hx.slice(3,5),16),parseInt(hx.slice(5,7),16)];}
+ for(let i=0;i<w*h;i++){const o=i*4;if(!R.fog[i]){d[o]=8;d[o+1]=10;d[o+2]=18;d[o+3]=255;continue;}const t=g[i];if(t===T_WALL||t===T_SECRET){d[o]=40;d[o+1]=46;d[o+2]=62;d[o+3]=255;continue;}
+  let col=[96,110,140];if(t===T_LAVA)col=[220,90,30];else if(t===T_SLOW)col=[70,120,70];else if(ra[i]>=0){const rm=R.map.rooms[ra[i]];const rc=RC[rm.type];const vis=R.visited.has(rm.id);col=rc.map((v,k)=>Math.round(v*(vis?.55:.35)+[96,110,140][k]*(vis?.25:.35)));}
+  if(R.oreAt[i]&&!R.oreAt[i].hidden&&!R.oreAt[i].secret){const oi=ORE_INFO[R.oreAt[i].name];if(oi){const hx=oi.c1;col=[parseInt(hx.slice(1,3),16),parseInt(hx.slice(3,5),16),parseInt(hx.slice(5,7),16)].map(v=>Math.round(v*.8));}}d[o]=col[0];d[o+1]=col[1];d[o+2]=col[2];d[o+3]=255;}
+ R.mmCv.getContext('2d').putImageData(R.mmImg,0,0);const cw=cv.width,ch=cv.height;const sc=Math.min(cw/w,ch/h);const ox=(cw-w*sc)/2,oy=(ch-h*sc)/2;c.clearRect(0,0,cw,ch);c.imageSmoothingEnabled=false;c.drawImage(R.mmCv,ox,oy,w*sc,h*sc);
+ const P=(x,y)=>[ox+(x+.5)*sc,oy+(y+.5)*sc];
+ for(const rm of R.map.rooms){if(!R.known.has(rm.id))continue;if(R.visited.has(rm.id)&&rm.type==='ore')continue;const[x,y]=P(rm.cx,rm.cy);c.font=`${Math.max(9,sc*2.6)}px sans-serif`;c.textAlign='center';c.textBaseline='middle';if(!R.visited.has(rm.id)||rm.type!=='start')c.fillText(RT[rm.type].i,x,y);}
+ for(const it of R.inter){if(!R.fog[it.y*W+it.x])continue;const[x,y]=P(it.x,it.y);c.fillStyle=it.used&&it.k!=='chest'?'#5a6478':it.k==='event'?'#ff9df0':it.k==='altar'?'#c066ff':it.k==='station'?'#52e08a':'#ffd84a';circ(c,x,y,Math.max(2.5,sc*.9));c.fill();}
+ for(const o of R.ores){if((o.prism||o.id===R.markOre||(hasRel('scout')&&o.tier===R.d.tiers[R.d.tiers.length-1]&&!o.hidden))&&R.fog[o.y*W+o.x]){const[x,y]=P(o.x,o.y);c.fillStyle='#ffe14a';circ(c,x,y,Math.max(2,sc*.8));c.fill();}}
+ const[gx,gy]=P(R.g.x-.5,R.g.y-.5);c.fillStyle='#ffffff';circ(c,gx,gy,Math.max(3,sc*1.1));c.fill();c.strokeStyle='#3fe0ff';c.lineWidth=1.5;c.stroke();
+ if(big){const vx0=-R.cam.x/DV.T,vy0=-R.cam.y/DV.T;c.strokeStyle='rgba(255,255,255,.35)';c.strokeRect(ox+vx0*sc,oy+vy0*sc,DV.w/DV.T*sc,(DV.h)/DV.T*sc);}return{ox,oy,sc};}
+function openMap51(){if(!R||!R.v51)return;const c=clearInfo();runModal('🗺 DUNGEON MAP',`<div class="hint">แตะห้องที่ค้นพบแล้วเพื่อให้โกเลมเดินไป · ${R.map.rooms.length} ห้อง (ค้นพบ ${R.known.size}, สำรวจ ${R.visited.size}) · ${R.map.w}×${R.map.h}</div><canvas id="bigmap" class="mapcv" width="${R.map.w*8}" height="${R.map.h*8}"></canvas>
+ <div class="hint">${Object.entries(RT).map(([k,v])=>`${v.i} ${v.n}`).join(' · ')} · ⚪ โกเลม · 🟡 แร่ที่ Pet/Relic ตรวจพบ</div>${clearHtml(c)}`);const cv=$('#bigmap');const geo=drawMinimap(cv,true);
+ cv.onclick=ev=>{const r=cv.getBoundingClientRect();const x=(ev.clientX-r.left)*cv.width/r.width,y=(ev.clientY-r.top)*cv.height/r.height;const tx=Math.floor((x-geo.ox)/geo.sc),ty=Math.floor((y-geo.oy)/geo.sc);if(tx<0||ty<0||tx>=W||ty>=H)return;const ra=R.map.roomAt[ty*W+tx];
+  if(ra<0||!R.known.has(ra)){toast('ยังไม่รู้จักห้องนั้น — สำรวจก่อน','err');return;}const rm=R.map.rooms[ra];closeModal();R.auto=false;updateHudButtons();if(goTo(rm.cx,rm.cy,true)){toast(`🧭 เดินไป ${RT[rm.type].n} (Auto ปิดชั่วคราว — เปิดใหม่ได้)`,'ok');}else toast('ยังเดินไปห้องนั้นไม่ได้ (ทางถูกแร่ขวาง)','err');};}
+function clearHtml(c){return `<table class="t" style="margin-top:6px"><tr><td>🏆 Dungeon Clear Progress</td><td><b>${c.pct}%</b>${R.cleared?' ✅':''}</td></tr><tr><td>🗺 Rooms</td><td>${c.rv}/${c.rt}</td></tr><tr><td>⛏ Required Ore</td><td>${c.ore}/${c.ot}</td></tr><tr><td>❓ Main Events</td><td>${c.ev}/${c.et}</td></tr>
+ <tr><td>🎯 ภารกิจหลัก: สายแร่หลัก</td><td>${c.mis>=1?'✅':`เหลือ ${c.misLeft} ก้อน`}</td></tr><tr><td>✨ Optional Secrets</td><td>${c.sec}/${c.st}</td></tr><tr><td>🔮 Relics</td><td>${R.relics.map(k=>RELICS51[k].i+' '+RELICS51[k].n).join(', ')||'-'}</td></tr></table>`;}
+function openClearInfo(){if(!R||!R.v51)return;runModal('🏆 Dungeon Clear Progress',clearHtml(clearInfo())+`<div class="hint">ไม่บังคับขุดแร่ที่ Power ไม่พอ · ไม่บังคับห้องลับ · ไม่ต้องเก็บแร่ทุกก้อนเข้ากระเป๋า</div>`,true);}
+/* pause / suspend */
+function openPause51(){if(!R||R.ended||!R.v51)return;runModal('⏸ PAUSED',`<div class="row2" style="flex-direction:column;align-items:stretch;gap:8px"><button class="btn pri big" data-act="closeModal">▶ Continue</button><button class="btn big" data-act="suspend51">💾 Save & Return to Menu <span class="hint">(พัก Run — ยังไม่รับรางวัล)</span></button><button class="btn gold big" data-act="exitAsk">🏠 Extract & End Run</button></div>
+ <div class="hint" style="margin-top:8px">⏱ Time Explored ${fmtT(R.elapsed)} · Seed ${R.mapSeed||R.map.seed} · Run ${R.runId}</div>`,true);}
+/* ---------- SUSPEND & RESUME (seed + state differences) ---------- */
+function rle(a){let o=[],v=a[0],n=0;for(let i=0;i<a.length;i++){if(a[i]===v)n++;else{o.push(v,n);v=a[i];n=1;}}o.push(v,n);return o.join(',');}
+function unrle(s,N){const a=new Uint8Array(N);const p=s.split(',').map(Number);let i=0;for(let k=0;k<p.length;k+=2){a.fill(p[k],i,i+p[k+1]);i+=p[k+1];}return a;}
+function suspendSnapshot(auto){if(!R||!R.v51||R.ended||R.exiting)return null;const m=R.map;const alive=new Set(R.ores.map(o=>o.id));
+ const sn={v:1,auto:!!auto,runId:R.runId,type:R.type,did:R.d.id,seed:R.seed,mapSeed:m.seed,genOpt:R.genOpt||m.genOpt,floor:R.floor||0,startFloor:R.startFloor||0,deep:R.deep?Object.assign({},R.deep):null,mods:R.mods,valMul:R.valMul,modId:R.modId,
+  gone:m.oresOrig.filter(id=>!alive.has(id)),hp:R.ores.filter(o=>o.hp<o.maxHp&&!o.spawned).map(o=>[o.id,Math.round(o.hp)]),rev:R.ores.filter(o=>!o.hidden&&o.hiddenOrig).map(o=>o.id),sec:R.ores.filter(o=>o.secret&&o.revealed).map(o=>o.id),
+  spawned:(R.spawned||[]).filter(s=>alive.has(s.id)).map(s=>{const o=R.ores.find(x=>x.id===s.id);return Object.assign({},s,{hp:o?Math.round(o.hp):s.hp});}),tiles:R.tileDiff||{},
+  fog:rle(R.fog),visited:[...R.visited],known:[...R.known],used:R.inter.filter(i=>i.used).map(i=>i.id),stCap:R.inter.filter(i=>i.cap).map(i=>[i.id,i.cap]),relics:R.relics,buffs:R.buffs51,loot:R.loot,chestBonus:R.chestBonus,hazMul:R.hazMul,curse:[R.curseLeft,R.curseRoom],
+  bag:R.bag,exp:R.exp,v5bonus:R.v5bonus,elapsed:R.elapsed,mined:R.mined,cm:R.cm,collected:R.collectedCount,cleared:R.cleared,chestKey:R.chestKey,g:[R.g.x,R.g.y],goal:R.goal,floorMined:R.floorMined,floorDone:R.floorDone,pendShards:R.pendShards,mx:R.mx,auto:R.auto,mode:R.mode,tut:!!R.tutorial,at:Date.now()};
+ /* drops on the floor are never lost: they go into the bag (or expedition storage) */
+ sn.bag=JSON.parse(JSON.stringify(R.bag));sn.exp=JSON.parse(JSON.stringify(R.exp||{items:{},val:0}));sn.loot=JSON.parse(JSON.stringify(R.loot));sn.mx=JSON.parse(JSON.stringify(R.mx||{}));
+ for(const d of R.drops){const tgt=sn.bag.w+TIERS[d.tier].w<=R.st.C?sn.bag:null;if(tgt){const it=tgt.items[d.name]||(tgt.items[d.name]={tier:d.tier,count:0});it.count++;tgt.w+=TIERS[d.tier].w;tgt.val+=TIERS[d.tier].price*R.valMul;}else{const e=sn.exp.items[d.name]||(sn.exp.items[d.name]={tier:d.tier,count:0});e.count++;sn.exp.val+=TIERS[d.tier].price*R.valMul;}}
+ S.suspended=JSON.parse(JSON.stringify(sn));if(!auto)save();else saveSoon();return sn;}
+function suspend51(){const sn=suspendSnapshot(false);if(!sn)return;R.pauseModal=false;closeModal();R.ended=true;toast('💾 พักการสำรวจแล้ว — กลับมาเล่นต่อได้จากหน้า Home','gold');save();exitDungeon();}
+function resume51(){const sn=S.suspended;if(!sn){toast('ไม่มีการสำรวจที่พักไว้','err');return;}closeModal();try{
+ const st=calcStats(S.equip);let d;const go=Object.assign({},sn.genOpt||{});
+ if(sn.type==='endless'){R={deep:sn.deep,type:'endless'};d=endlessDef(sn.floor);R=null;}else d=DMAP[sn.did];
+ const m=genBig(d,sn.mapSeed,go);m.genOpt=go;m.oresOrig=m.ores.map(o=>o.id);const gone=new Set(sn.gone);
+ for(const o of m.ores.slice())if(gone.has(o.id)){m.oreAt[o.y*m.w+o.x]=null;if(o.secret)m.g[o.y*m.w+o.x]=T_FLOOR;}m.ores=m.ores.filter(o=>!gone.has(o.id));
+ const hp=new Map(sn.hp);for(const o of m.ores){if(hp.has(o.id))o.hp=hp.get(o.id);if(sn.rev.includes(o.id)){o.hidden=false;o.hiddenOrig=true;}if(sn.sec.includes(o.id))o.revealed=true;}
+ for(const k in sn.tiles)m.g[+k]=sn.tiles[k];
+ for(const s of sn.spawned){const T_=TIERS[s.tier];const o=Object.assign({id:s.id,x:s.x,y:s.y,tier:s.tier,hp:s.hp,maxHp:Math.round(T_.hp*(s.o.cursed?2:1)),name:T_.ores[0][0],hidden:false,hot:false,seed:.5,hitT:0,room:m.roomAt[s.y*m.w+s.x],spawned:1},s.o);m.ores.push(o);m.oreAt[s.y*m.w+s.x]=o;}
+ for(const it of m.inter){if(sn.used.includes(it.id))it.used=true;const c=sn.stCap.find(x=>x[0]===it.id);if(c)it.cap=c[1];}
+ initRun(sn.type,d,m,st,{seed:sn.seed,mods:sn.mods,valMul:sn.valMul,time:0,runId:sn.runId});
+ Object.assign(R,{genOpt:go,mapSeed:sn.mapSeed,modId:sn.modId,relics:sn.relics,buffs51:sn.buffs||{},loot:sn.loot,chestBonus:sn.chestBonus||0,hazMul:sn.hazMul||1,curseLeft:sn.curse[0],curseRoom:sn.curse[1],bag:sn.bag,exp:sn.exp,v5bonus:sn.v5bonus||0,elapsed:sn.elapsed,mined:sn.mined,cm:sn.cm,collectedCount:sn.collected,cleared:sn.cleared,chestKey:sn.chestKey,auto:sn.auto,mode:sn.mode,spawned:sn.spawned,tileDiff:sn.tiles||{},oreSeq:Math.max(1000,...sn.spawned.map(s=>s.id),0)+1});
+ if(sn.mx)R.mx=sn.mx;R.fog=unrle(sn.fog,W*H);R.visited=new Set(sn.visited);R.known=new Set(sn.known);R.g.x=sn.g[0];R.g.y=sn.g[1];R.tutorial=sn.tut;
+ if(sn.type==='endless'){Object.assign(R,{floor:sn.floor,startFloor:sn.startFloor,deep:sn.deep,goal:sn.goal,floorMined:sn.floorMined,floorDone:sn.floorDone,pendShards:sn.pendShards,wantBig:true});R.d=d;}
+ R.v51=true;R.timed=false;applyRunStats();R.lastTile=-1;fogUpdate(true);
+ enterView((sn.type==='endless'?(sn.deep?'🧭 Deep ':'🕳 Endless ')+'B'+sn.floor:'⛏ '+d.name)+' · Resumed');toast('▶ กลับมาสำรวจต่อ — ทุกอย่างอยู่ที่เดิม','ok');resizeDungeon();}
+ catch(e){console.error(e);toast('ไม่สามารถโหลดการสำรวจที่พักไว้ได้ — กำลังกู้คืนรางวัลแบบปลอดภัย','err');recoverSuspended();}}
+/* recovery: a broken snapshot is converted into ONE pending claim of the ores it holds (never re-generates loot) */
+function recoverSuspended(){const sn=S.suspended;if(!sn)return;S.suspended=null;const it={};for(const src of[sn.bag&&sn.bag.items,sn.exp&&sn.exp.items])if(src)for(const k in src)it[k]=(it[k]||0)+src[k].count;if(Object.keys(it).length)createPending('dungeon',it,1,{title:'กู้คืนการสำรวจ ('+(sn.did||'run')+')'});save();renderWorkshop();}
+function abandonAsk(){confirmBox('สิ้นสุดการสำรวจที่พักไว้?<br><span class="hint">ระบบจะ Extract แร่ที่เก็บไว้ให้ (100%) — ไม่ได้รับรางวัลซ้ำ</span>',()=>{resume51();setTimeout(()=>{if(R&&R.v51){R.paused=false;exitConfirm();}},80);},'🏠 Extract','Extract Suspended Run');}
+/* ---------- run starts: Standard Expedition with difficulty ---------- */
+function diffMaxOf(did){const v=S.v51.diffMax[did];return v==null?1:v;}
+function diffSelOf(did){return clamp(S.v51.diffSel[did]==null?1:S.v51.diffSel[did],0,diffMaxOf(did));}
+function startRun(did,seed){const d=DMAP[did];if(!d||!S.unlocked[did]){toast('ยังไม่ปลดล็อก','err');return;}if(S.suspended){openResume51();return;}
+ const st=calcStats(S.equip);seed=(seed||Math.floor(Math.random()*1e9))>>>0;const diff=diffSelOf(did);const mod=dungeonMod(did);let mods=mod==='normal'||diff===0?[]:[mod];
+ const pool=['heavy','rush','hidden','heat','rare','gravity','vault','machine','distort','dark'].filter(k=>!mods.includes(k));const rng=mulberry32(seed^0x5151);while(mods.length<DIFF[diff].mods)mods.push(pool.splice(Math.floor(rng()*pool.length),1)[0]);
+ const go={kind:'std',diff,mods,maxTier:st.maxTier};const m=genBigChecked(d,seed,go);
+ initRun('normal',d,m,st,{seed,mods,valMul:mods.reduce((a,k)=>a*MODS[k].coin,1),time:0});R.modId=mod;R.genOpt=m.genOpt;R.mapSeed=m.seed;
+ enterView(`⛏ ${d.name} · ${DIFF[diff].i} ${DIFF[diff].n}${mods.length?' · '+mods.map(k=>MODS[k].icon).join(''):''}`);resizeDungeon();
+ toast(`🧭 สำรวจ ${d.name} (${m.w}×${m.h}, ${m.rooms.length} ห้อง) — ไม่มีเวลาจำกัด ออกได้ทุกเมื่อ`,'ok');tip51('fog','🗺 พื้นที่มืดคือ Fog of War — เดินสำรวจเพื่อเปิดแผนที่ · กด 🗺 / M ดูแผนที่ใหญ่');suspendSnapshot(true);return R;}
+function openResume51(){const sn=S.suspended;if(!sn)return;openModal('💾 มีการสำรวจที่พักไว้',`<div class="hint">${sn.type==='endless'?(sn.deep?'Deep Expedition':'Endless')+' ชั้น '+sn.floor:DMAP[sn.did].name} · ⏱ ${fmtT(sn.elapsed)} · ขุด ${sn.mined} ก้อน · Relic ${sn.relics.length}</div>
+ <div class="row2" style="justify-content:center;margin-top:8px"><button class="btn gold big" data-act="resume51">▶ สำรวจต่อ</button><button class="btn" data-act="abandon51">🏠 Extract & End Run</button></div>`,null,true);}
+/* Quick Mining selection → Standard Expedition (difficulty, pre-activity info) */
+function openDungeons(){const render=()=>{const st=curStats();let h=`<div class="hint" style="margin-bottom:8px">⛏ <b>Standard Expedition</b> — แผนที่ ${MAPSZ.std.join('×')} · 10–18 ห้อง · <b>ไม่มีเวลาจำกัด</b> · 🏠 ออกได้ทันทีทุกจุด (ได้แร่ 100%) · เคลียร์ครบ = 🎁 Treasure Chest</div>${S.suspended?`<div class="v5note gold"><span class="ic">💾</span><span class="tx">มีการสำรวจที่พักไว้</span><button class="btn sm gold" data-act="resume51">▶ ต่อ</button></div>`:''}<div class="dgrid">`;
+ for(const d of DUNGEONS){const un=S.unlocked[d.id];const th=d.th1;const ds=diffSelOf(d.id),dm=diffMaxOf(d.id);const ct=CHEST51[chestTierFor(d.id,ds,1,'std')];
+  h+=`<div class="dcard" style="background:linear-gradient(160deg,${th.wall},${th.bg});border-color:${th.acc}"><h4 style="color:${th.acc}">${d.name}</h4><div class="hint" style="color:#cfd8ee">${d.th}</div>${modHtml(d)}
+  <div class="ores">${d.tiers.map(ti=>TIERS[ti].ores.map(o=>`<span class="tag" style="color:${o[1]}">T${ti} ${o[0]}</span>`).join('')).join('')}</div>
+  <div class="diffs">${DIFF.map(D=>`<button class="${ds===D.id?'on':''}" style="--dc:${D.col}" data-act="diffSel" data-arg="${d.id}|${D.id}" ${D.id<=dm&&un?'':'disabled'} title="${D.d}">${D.i} ${D.n}${D.id>dm?'<br>🔒':''}</button>`).join('')}</div><div class="hint">${DIFF[ds].d}${dm<3?` · ปลดล็อกระดับถัดไป: เคลียร์ ${DIFF[dm].n}`:''}</div>
+  ${preInfo([['P แนะนำ',TIERS[d.tiers[d.tiers.length-1]].req],['ของคุณ',`${st.P} (T${st.maxTier})`],['🐾',petLine('mine')],['🎁',`<span style="color:${ct.c}">${ct.n}</span>`]])}
+  <div class="sp"></div>${un?`<div class="row2"><button class="btn gold" data-act="quickRun" data-arg="${d.id}">🧭 เริ่มสำรวจ</button><button class="btn" data-act="startDeep" data-arg="${d.id}">⛰ Deep</button></div>`:`<div class="hint">🔒 ปลดล็อก: Power ≥ ${d.reqP} · 🪙 ${fmt(d.cost)}</div><button class="btn pri" data-act="unlockDungeon" data-arg="${d.id}" ${st.P>=d.reqP&&S.coins>=d.cost?'':'disabled'}>🔓 Unlock (🪙${fmt(d.cost)})</button>`}</div>`;}
+ $('#mbody').innerHTML=h+'</div>';};openModal('⛏ Mining Expedition','',render);render();}
+function quickRun(did){closeModal();startRun(did);}
+/* ---------- Deep / Endless integration ---------- */
+function endlessBreak(){R.floorMined++;if(R.deep)return;if(!R.floorDone&&R.floorMined>=R.goal)floorComplete();}
+{const _lf=loadEndlessFloor;loadEndlessFloor=function(){const f=R.floor||1;const deep=!!R.deep;const prev={relics:R.relics,buffs51:R.buffs51,loot:R.loot,chestBonus:R.chestBonus,hazMul:R.hazMul,exp:R.exp,runId:R.runId,st0:R.st0,skills0:R.skills0};
+ GEN51.on=true;GEN51.opt={kind:deep?'deep':'std',size:deep?MAPSZ.deep:(f<=40?MAPSZ.std:MAPSZ.deep),diff:R.diff||(deep?1:1)};try{_lf();}finally{GEN51.on=false;GEN51.opt=null;}
+ if(R.map.big){Object.assign(R,prev);R.genOpt=R.map.genOpt;R.mapSeed=R.map.seed;
+  R.cleared=false;R.chestKey=null;R.spawned=[];R.tileDiff={};R.inter=null;R.visited=null;R.v51=false;v51Init(R,{runId:R.runId});R.bgChunks={};R.bgKey='';resizeDungeon();R.cam.init=false;}};}
+/* tile changes (frostpup, events) are recorded so a resumed run sees the same map */
+{const _tt=typeof tempTile==='function'?tempTile:null;}
+{const _sd=startDeep;startDeep=function(did){if(S.suspended){openResume51();return;}_sd(did);if(R){R.diff=1;suspendSnapshot(true);}};}
+{const _se=startEndless;startEndless=function(f,force){if(S.suspended){openResume51();return;}_se(f,force);if(R&&R.v51)suspendSnapshot(true);};}
+{const _ds=descend;descend=function(){if(R&&R.v51&&R.cleared===false&&R.deep){toast('Deep Expedition: ต้องเคลียร์ชั้นนี้ก่อนลงชั้นถัดไป','err');return;}_ds();if(R&&R.v51)suspendSnapshot(true);};}
+{const _sb=startBoss;startBoss=function(id,force){if(S.suspended&&!force){openResume51();return;}return _sb(id,force);};}
+/* Contract A (time-based "12 ores within 90 s") → "clear 3 rooms in the given dungeon" (no time limit any more) */
+CT[0].name='Room Explorer';CT[0].icon='🗺';CT[0].desc='สำรวจห้องใหม่ 3 ห้อง ในดันเจี้ยนที่กำหนด';CT[0].need=3;CT[0].rec='Auto Explore + Movement สูง';
+{const _ce=ctEvent;ctEvent=function(kind,v){_ce(kind,v);if(kind==='room'&&S&&S.contracts&&R){let ch=false;for(const a of S.contracts.active){if(a.done||a.id!=='A'||!R.d||R.d.id!==a.dg)continue;a.prog=(a.prog||0)+1;ch=true;if(a.prog>=CTM.A.need){a.prog=CTM.A.need;a.done=true;toast('📋 Contract สำเร็จ: Room Explorer','gold');}}if(ch)saveSoon();}};}
+/* daily pool: exploration contracts (no time requirements) */
+DAILY_POOL.push({id:'d_rooms',n:'สำรวจห้อง 8 ห้อง',k:'room',goal:8,rw:{coins:350,bpf:1}},{id:'d_chest',n:'เปิด Treasure Chest 1 กล่อง',k:'chest',goal:1,rw:{coins:500,petTreat:1}},{id:'d_relic',n:'เลือก Roguelite Relic 2 ครั้ง',k:'relic',goal:2,rw:{coins:300,bpf:1}},{id:'d_event',n:'ผ่านเหตุการณ์ในดันเจี้ยน 2 ครั้ง',k:'event',goal:2,rw:{coins:350,petShard:1}},{id:'d_clear',n:'เคลียร์ดันเจี้ยน 1 ครั้ง',k:'clear',goal:1,rw:{coins:600,bpf:2}});
+/* ---------- actions / keys ---------- */
+ACT.extract0=ACT.extract;
+Object.assign(ACT,{extract:()=>{if(R&&R.v51)openExit51();else ACT.extract0();},exitAsk:()=>{if(R){R.pauseModal=false;closeModal();}setTimeout(openExit51,30);},exitConfirm:()=>exitConfirm(),relicPick:a=>relicPick(a),relicLater:()=>{if(R){R.lastAltar=R.altarIt&&R.altarIt.id;R.altarSkip=true;R.altarIt=null;}closeModal();},
+ evPick:a=>evPick(a),chestOpen:a=>{if(R&&R.pauseModal){R.pauseModal=false;closeModal();}openChest51(a);},chestSkip:()=>{if(CHA){CHA.t=CHA.dur;showChestCards();}},chestClaim:a=>{const t=giveChest(a);if(t){toast('🎁 '+t,'gold');}closeModal();CHA=null;v5Render&&v5Render();},
+ openMap51:()=>openMap51(),pause51:()=>openPause51(),suspend51:()=>suspend51(),resume51:()=>resume51(),abandon51:()=>abandonAsk(),clearInfo:()=>openClearInfo(),diffSel:a=>{const[d,k]=a.split('|');S.v51.diffSel[d]=+k;save();if(modalRefresh)modalRefresh();},
+ quickRun:a=>quickRun(a),openDungeons:()=>openDungeons(),descendC:()=>{if(R&&R.pauseModal){R.pauseModal=false;closeModal();}descend();},openChestHome:a=>openChest51(a),
+ toggleMode:()=>{if(!R)return;if(R.v51){R.mode=MODES51[(MODES51.indexOf(R.mode)+1)%MODES51.length];S.settings.mode=R.mode;}else R.mode=R.mode==='nearest'?'value':'nearest';R.g.idleWait=0;R.g.tgt=null;R.g.state='idle';updateHudButtons();toast('โหมด: '+(MODE_N[R.mode]||['',R.mode]).join(' '),'ok');}});
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||!R||R.ended||!R.v51)return;if(e.key==='m'||e.key==='M'){if($('#modal').classList.contains('hidden'))openMap51();else closeModal();}if(e.key==='p'||e.key==='P'||e.key==='Escape'){if($('#modal').classList.contains('hidden'))openPause51();}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&R&&R.v51&&!R.ended){suspendSnapshot(true);save();}});
+window.addEventListener('beforeunload',()=>{if(R&&R.v51&&!R.ended){suspendSnapshot(true);try{localStorage.setItem(SAVE_KEY,JSON.stringify(S));}catch(e){}}});
+
+/* tap an interactable (altar / event / station / chest) to use it */
+{const _dc=dungeonClick;dungeonClick=function(ev){if(R&&R.v51&&!R.ended&&!R.paused){const rect=$('#dcv').getBoundingClientRect();const wx=(ev.clientX-rect.left-R.cam.x)/DV.T,wy=(ev.clientY-rect.top-R.cam.y)/DV.T;
+  const it=R.inter.find(q=>Math.hypot(q.x+.5-wx,q.y+.3-wy)<.8&&R.fog[q.y*W+q.x]);if(it){const d=Math.hypot(it.x+.5-R.g.x,it.y+.5-R.g.y);if(d<=1.8){if(it.k==='altar'&&!it.used){R.altarSkip=false;openAltar(it);}else if(it.k==='event'&&!it.used)openEvent(it);else if(it.k==='station')stationDeposit(it,true);else if(it.k==='chest'&&R.cleared&&R.chestKey)openChest51(R.chestKey);else if(it.k==='chest')toast('🔒 กล่องเปิดได้เมื่อเคลียร์ดันเจี้ยน — ดู 🏆','err');}
+   else{if(it.k==='altar')R.altarSkip=false;goTo(it.x,it.y,true);sfx('click');}return;}}return _dc(ev);};}
+{const _hn=homeNotes;homeNotes=function(){const N=_hn();if(!S.v51)return N;const add=[];if(S.suspended)add.push({hot:1,ic:'💾',tx:`มีการสำรวจที่พักไว้ (⏱ ${fmtT(S.suspended.elapsed)})`,act:'resume51',btn:'▶ ต่อ'});
+ for(const k of S.v51.pendingChest){const c=S.v51.chests[k];if(c&&c.st!=='claimed')add.push({hot:1,ic:'🎁',tx:`${CHEST51[c.tier].n} รอเปิด`,act:'openChestHome',arg:k,btn:'เปิด'});}return add.concat(N);};}
+
+/* =====================================================================
+   V5.1 INFINITE DUNGEON (4/4) — interactive tutorial (GEARLY — Workshop Assistant) + contextual tips
+   Every step waits for the real action (no text slideshow). Saved per step, skippable, replayable.
+   ===================================================================== */
+const TUT=[
+ {id:'golem',t:'ยินดีต้อนรับสู่ <b>Build a Golem</b>! ฉันชื่อ <b>GEARLY</b> 🤖 นี่คือโกเลมของคุณ — ชิ้นส่วน 6 ช่องกำหนด <b>Mining Power</b> (ขุดแร่ Tier ไหนได้) และ <b>Capacity</b> (กระเป๋า) · ลอง<b>แตะช่องชิ้นส่วน</b>ดูสักชิ้น',sel:()=>GA.open?null:'#slot_core',where:'ws'},
+ {id:'enter',t:'เยี่ยม! ต่อไปลง<b>ดันเจี้ยนแรก</b> — ดันเจี้ยนนี้<b>ไม่มีเวลาจำกัด</b> เดินสำรวจได้อิสระ · กดปุ่ม <b>⛏ Quick Mining</b>',sel:()=>GA.open?'[data-act="closeGarage"]':'#v5body [data-act="quickRun"]',where:'ws'},
+ {id:'mine3',t:'แตะแร่เพื่อสั่งขุด (หรือปล่อย 🤖 Auto ขุดให้) · แถบสีเหนือแร่คือ <b>Ore HP</b> · ป้าย T1/T2 คือ <b>Tier</b> · 🎒 ด้านบนคือ <b>Bag Capacity</b> — ขุดแร่ให้ได้ <b>3 ก้อน</b>',sel:()=>'#hudTop .bagw',where:'run'},
+ {id:'skill',t:'โกเลมมี<b>สกิลขุด</b>จากแขน! เดินเข้าใกล้แร่แล้วกด <b>Skill 1</b> (หรือปุ่ม 1)',sel:()=>'#sk0',where:'run'},
+ {id:'room',t:'พื้นที่มืดคือ <b>Fog of War</b> · <b>Minimap</b> มุมขวาบนบอกห้องที่ค้นพบ · <b>🤖 Auto Explore</b> จะเดินหาห้องใหม่ให้ — ไปที่<b>ห้องใหม่</b> 1 ห้อง',sel:()=>'#mmw',where:'run'},
+ {id:'relic',t:'ไปที่ <b>🔮 แท่น Relic</b> (จุดสีม่วงบน Minimap) แล้วเลือก <b>Relic 1 จาก 3</b> — <b>พลังนี้อยู่เฉพาะรอบสำรวจปัจจุบัน</b>',sel:()=>'#mmw',where:'run'},
+ {id:'clear',t:'ดู <b>🏆 Clear Progress</b> ด้านบน (แตะเพื่อดูรายละเอียด) — สำรวจห้องหลักให้ครบ ขุดแร่ตามเป้า และทำภารกิจหลัก แล้วจะได้ <b>DUNGEON CLEARED!</b>',sel:()=>'#hClear',where:'run'},
+ {id:'chest',t:'🎁 เปิด <b>Treasure Chest</b>! กล่องรับได้ <b>ครั้งเดียวต่อรอบ</b> เมื่อเคลียร์ครบ · ให้รางวัลการันตี + Bonus แบบสุ่ม (ดู Drop Pool ได้) — แต่ชิ้นส่วนหลักยังคราฟต์เองได้เสมอ',sel:()=>$('#chClaim')&&!$('#chClaim').classList.contains('hidden')?'#chClaim':'[data-act="chestOpen"]',where:'run'},
+ {id:'exit',t:'กด <b>🏠 Return to Workshop</b> — ออกได้<b>ทันทีจากทุกจุด</b> ไม่ต้องเดินกลับ (ได้แร่ 100%)',sel:()=>$('[data-act="exitConfirm"]')?'[data-act="exitConfirm"]':'#bExtract',where:'run'},
+ {id:'claim',t:'เลือกว่าจะ <b>SELL</b> (ขายเป็นเงิน) / <b>STORE</b> (เก็บไว้คราฟต์) / <b>SPLIT</b> (แบ่ง) — แนะนำ <b>STORE</b> เพื่อใช้คราฟต์',sel:()=>'#mbody [data-act="claimAll"]',where:'ws'},
+ {id:'craft',t:'แร่ใน Ore Storage ใช้<b>คราฟต์ชิ้นส่วน</b>ได้แน่นอน (ไม่มีสุ่ม) · ไปที่ <b>⚒ Assembly Forge</b> แล้วกด <b>ASSEMBLE</b> ชิ้นใดก็ได้ที่วัสดุครบ (ชิ้น Epic+ ต้องใช้ 📜 Blueprint)',sel:()=>$('[data-act="fgCraft"]')?'[data-act="fgCraft"]':'#v5body [data-act="openForge"]',where:'ws'},
+ {id:'equip',t:'สุดท้าย! เปิด <b>🧍 Garage</b> แล้วติดตั้งชิ้นส่วนใหม่บนโกเลม (เลือกช่อง → แตะชิ้น → ✅ Confirm)',sel:()=>GA.open?(GA.prev?'[data-act="gconfirm"]':'#gRight .wlist button'):'#v5body [data-act="openGarage"]',where:'ws'}];
+const TUT_RW={coins:800,bpf:3,petTreat:2};
+function tutOn(){return S&&S.v51&&S.v51.tut.started&&!S.v51.tut.done;}
+function tutCur(){return tutOn()?TUT[S.v51.tut.step]:null;}
+function tutStart(force){if(typeof GA!=='undefined'&&GA.open)closeGarage();const T=S.v51.tut;T.started=true;T.done=false;T.skipped=false;T.step=0;T.saw=false;T.exited=false;T.chestKey=null;T.crafted=null;if(force)T.replay=true;V5.tab='home';save();renderWorkshop();tutShow();}
+function tutAdvance(id){const T=S.v51.tut;if(!tutOn()||TUT[T.step].id!==id)return;T.step++;sfx('upgrade');if(TUT[T.step]&&TUT[T.step].id==='craft'&&!T.gift){T.gift=true;S.oreStorage.Stone=(S.oreStorage.Stone||0)+30;S.oreStorage.Copper=(S.oreStorage.Copper||0)+15;S.coins+=400;toast('🤖 GEARLY: ให้วัสดุเริ่มต้น ◆Stone 30 · Copper 15 · 🪙400 (ครั้งเดียว)','gold');}if(TUT[T.step]&&TUT[T.step].where==='ws'&&typeof v5SetTab==='function'&&!R){V5.tab='home';v5Render();}if(T.step>=TUT.length){T.done=true;tutFinish();}save();tutShow();}
+function tutFinish(){const T=S.v51.tut;tutHide();if(!T.rewarded){T.rewarded=true;const t=giveV5(TUT_RW);toast('🎓 จบ Tutorial! รางวัล: '+t,'gold');}else toast('🎓 จบ Tutorial (ดูซ้ำ — ไม่มีรางวัลซ้ำ)','ok');save();renderWorkshop();}
+function tutSkip(){const T=S.v51.tut;T.done=true;T.skipped=true;save();tutHide();toast('ข้าม Tutorial — ดูซ้ำได้ที่ ⚙ Settings / 📘 Help · จะมีคำแนะนำสั้น ๆ เมื่อพบระบบใหม่','ok');}
+/* each step completes when its real-game condition is true (robust to doing things out of order) */
+const TUT_DONE={golem:()=>GA.open||!!$('#mbody .inspR')||S.v51.tut.saw,enter:()=>!!(R&&R.tutorial),mine3:()=>!!(R&&R.tutorial&&R.mined>=3),skill:()=>!!(R&&R.tutorial&&R.tutSkill),room:()=>!!(R&&R.tutorial&&R.visited&&R.visited.size>=2),
+ relic:()=>!!(R&&R.tutorial&&R.relics&&R.relics.length),clear:()=>!!(R&&R.tutorial&&R.cleared)||!!S.v51.tut.chestKey,chest:()=>!!S.v51.tut.chestKey&&chestState(S.v51.tut.chestKey)==='claimed',exit:()=>!!S.v51.tut.exited&&!R,
+ claim:()=>!!S.v51.tut.exited&&!S.pendingExtraction.length,craft:()=>!!S.v51.tut.crafted,equip:()=>!!S.v51.tut.crafted&&SLOTS.some(sl=>S.equip[sl]===S.v51.tut.crafted)};
+function tutCheck(){let n=0;while(tutOn()&&n<TUT.length){const c=tutCur();if(!TUT_DONE[c.id]())break;tutAdvance(c.id);n++;}}
+function tutEvent(k){if(k==='golem'&&tutOn())S.v51.tut.saw=true;if(k==='skill'&&R)R.tutSkill=true;if(k==='clear'&&R&&R.tutorial)S.v51.tut.chestKey=R.chestKey;if(k==='exit'&&R&&R.tutorial)S.v51.tut.exited=true;if(tutOn())setTimeout(tutCheck,30);}
+{const _og=openGarage;openGarage=function(sl,uid){_og(sl,uid);tutEvent('golem');};}
+{const _op=openPart;openPart=function(uid){_op(uid);tutEvent('golem');};}
+{const _ce=claimExtraction;claimExtraction=function(id,m){const r=_ce(id,m);if(r)tutEvent('claim');return r;};}
+{const _cp=craftPart;craftPart=function(pid,mode,qty){const out=_cp(pid,mode,qty);if(out&&out.length){S.v51.tut.crafted=out[0];tutEvent('craft');}return out;};}
+{const _gc=garageConfirmMine;garageConfirmMine=function(){_gc();const u=S.v51.tut.crafted;if(u&&SLOTS.some(sl=>S.equip[sl]===u))tutEvent('equip');else if(tutCur()&&tutCur().id==='equip'&&SLOTS.some(sl=>{const i=invGet(S.equip[sl]);return i&&i.crafted;}))tutEvent('equip');};}
+/* tutorial dungeon: small fixed-seed map (start · ore · relic · rich · treasure) on Explorer rules */
+const TUT_SEED=20261019;
+{const _sr=startRun;startRun=function(did,seed){const c=tutCur();if(c&&!S.suspended&&['enter','mine3','skill','room','relic','clear'].includes(c.id)){return startTutDungeon();}return _sr(did,seed);};}
+function startTutDungeon(){const d=DMAP.quarry;const st=calcStats(S.equip);const go={kind:'tut',diff:0,mods:[],maxTier:st.maxTier};const m=genBigChecked(d,TUT_SEED,go);
+ initRun('normal',d,m,st,{seed:TUT_SEED,mods:[],valMul:1,time:0});R.tutorial=true;R.genOpt=m.genOpt;R.mapSeed=m.seed;R.clear.oreTarget=Math.min(R.clear.oreTarget,10);const alt=R.inter.find(i=>i.k==='altar');if(alt)R.clear.events.push(alt.id);/* tutorial: the relic choice is part of the clear */
+ enterView('🎓 Tutorial Mine');resizeDungeon();tutCheck();return R;}
+/* GEARLY overlay */
+const TUTCSS=`#gearly{position:fixed;z-index:140;left:50%;transform:translateX(-50%);width:min(560px,94vw);display:flex;gap:10px;align-items:flex-start;background:linear-gradient(180deg,#16244a,#0d1530);border:2px solid #3fe0ff;border-radius:18px;padding:10px 12px;box-shadow:0 10px 40px rgba(0,0,0,.6),0 0 24px rgba(63,224,255,.25);pointer-events:auto}
+#gearly canvas{width:64px;height:64px;flex-shrink:0}#gearly .gt{flex:1;font-size:13.5px;line-height:1.45}#gearly .gn{font-weight:900;color:#3fe0ff;font-size:11px;letter-spacing:1px}#gearly .gb{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}#gearly .gb button{min-height:36px}
+#gearly.top{top:calc(env(safe-area-inset-top) + 74px)}#gearly.bot{bottom:calc(env(safe-area-inset-bottom) + 96px)}
+#tutHL{position:fixed;z-index:139;pointer-events:none;border:3px solid #ffd84a;border-radius:14px;box-shadow:0 0 0 4000px rgba(0,0,0,.28),0 0 22px #ffd84a;transition:all .25s;animation:hlp 1.2s infinite}@keyframes hlp{50%{border-color:#fff4b0;box-shadow:0 0 0 4000px rgba(0,0,0,.28),0 0 34px #ffd84a}}
+#tutHL.none{display:none}#tip51{position:fixed;z-index:138;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 150px);max-width:min(460px,92vw);background:#16244a;border:1px solid #3fe0ff;border-radius:14px;padding:8px 12px;font-size:12.5px;display:flex;gap:8px;align-items:center;box-shadow:0 8px 30px rgba(0,0,0,.5);opacity:0;transition:opacity .3s;pointer-events:none}#tip51.show{opacity:1}`;
+function drawGearly(cv,t){const c=cv.getContext('2d');c.clearRect(0,0,128,128);c.save();c.translate(64,70+Math.sin(t*2.4)*5);c.scale(1.6,1.6);
+ c.strokeStyle='#9fb0c3';c.lineWidth=2;c.beginPath();c.moveTo(0,-22);c.lineTo(0,-30);c.stroke();c.save();c.translate(0,-31);c.scale(1,.25);c.rotate(t*20);c.fillStyle='rgba(200,220,240,.7)';for(let k=0;k<2;k++){c.rotate(Math.PI);c.fillRect(0,-3,22,6);}c.restore();
+ c.fillStyle='rgba(0,0,0,.25)';ell(c,0,30,16,4);c.fill();rr(c,-20,-22,40,36,14);fs(c,lg(c,-22,14,'#e8eef6','#8a98ac'),2);rr(c,-15,-15,30,18,8);c.fillStyle='#0b1428';c.fill();
+ const bl=(t%3.3)<.12?.2:1;for(const s of[-1,1]){glow(c,s*7,-6,10,'#3fe0ff',.7);c.fillStyle='#7ff4ff';ell(c,s*7,-6,4,5*bl);c.fill();}
+ for(const s of[-1,1]){c.save();c.translate(s*21,0);c.rotate(s*(.3+Math.sin(t*3)*.25));rr(c,-3,-2,6,14,3);fs(c,'#9fb0c3',1.4);c.restore();}c.fillStyle='#3fe0ff';rr(c,-6,6,12,3,1.5);c.fill();c.restore();}
+function tutShow(){if(!tutOn()){tutHide();return;}if(!$('#tutcss')){const s=document.createElement('style');s.id='tutcss';s.textContent=TUTCSS;document.head.appendChild(s);}
+ let g=$('#gearly');if(!g){g=document.createElement('div');g.id='gearly';g.innerHTML='<canvas width="128" height="128"></canvas><div class="gt"><div class="gn">GEARLY · WORKSHOP ASSISTANT</div><div id="gtx"></div><div class="gb"><span class="hint" id="gstep"></span><button class="btn sm" data-act="tutSkip">⏭ Skip Tutorial</button></div></div>';document.body.appendChild(g);
+  const hl=document.createElement('div');hl.id='tutHL';document.body.appendChild(hl);const loop=()=>{if(!$('#gearly'))return;drawGearly(g.querySelector('canvas'),GT);tutPlace();requestAnimationFrame(loop);};requestAnimationFrame(loop);}
+ const c=tutCur();$('#gtx').innerHTML=c.t;$('#gstep').textContent=`ขั้นที่ ${S.v51.tut.step+1}/${TUT.length}`;}
+function tutHide(){const g=$('#gearly');if(g)g.remove();const h=$('#tutHL');if(h)h.remove();}
+let TPT=0;function tutPlace(){if(performance.now()-TPT>=180)tutCheck();const c=tutCur();const g=$('#gearly'),hl=$('#tutHL');if(!c||!g){return;}const now=performance.now();if(now-TPT<180)return;TPT=now;
+ const inRun=!!R&&!$('#dungeon').classList.contains('hidden');const lost=c.where==='run'&&!inRun&&!['chest','exit'].includes(c.id);const wrong=c.where==='ws'&&inRun&&c.id!=='claim';g.style.display=wrong?'none':'';if(lost){$('#gtx').innerHTML='กลับเข้า <b>🎓 Tutorial Mine</b> เพื่อทำต่อ — กด <b>⛏ Quick Mining</b>';}else $('#gtx').innerHTML=c.t;
+ let el=null;try{const s=lost?'#v5body [data-act="quickRun"]':c.sel();el=s?document.querySelector(s):null;}catch(e){}if(el&&el.offsetParent===null&&!el.getClientRects().length)el=null;
+ if(!el||wrong){hl.classList.add('none');g.className=inRun?'top':'bot';return;}const r=el.getBoundingClientRect();hl.classList.remove('none');Object.assign(hl.style,{left:(r.left-6)+'px',top:(r.top-6)+'px',width:(r.width+12)+'px',height:(r.height+12)+'px'});
+ g.className=(r.top+r.height/2)>window.innerHeight*.5?'top':'bot';}
+/* contextual tips for players who skipped / finished the tutorial */
+let TIPT=null;function tip51(id,html){if(!S||!S.v51||tutOn()||S.v51.tips[id])return;S.v51.tips[id]=1;saveSoon();if(!$('#tutcss')){const s=document.createElement('style');s.id='tutcss';s.textContent=TUTCSS;document.head.appendChild(s);}
+ let t=$('#tip51');if(!t){t=document.createElement('div');t.id='tip51';document.body.appendChild(t);}t.innerHTML='<span style="font-size:20px">🤖</span><span>'+html+'</span>';t.classList.add('show');clearTimeout(TIPT);TIPT=setTimeout(()=>t.classList.remove('show'),6500);}
+/* migration + boot: new saves start the tutorial; existing players are never forced */
+function v51Migrate(){if(!S.v51){S.v51=v51Defaults();const veteran=(S.stats&&(S.stats.runs>0||S.stats.mined>0))||S.inv.length>6||(S.endless&&S.endless.best>0)||(S.combatInventory&&S.combatInventory.length>0)||(S.petInventory&&S.petInventory.length>0);if(veteran){S.v51.tut.done=true;S.v51.tut.skipped=true;S.v51.tut.started=true;}}
+ const d=v51Defaults();for(const k in d)if(S.v51[k]===undefined)S.v51[k]=d[k];for(const k in d.tut)if(S.v51.tut[k]===undefined)S.v51.tut[k]=d.tut[k];for(const k in d.stats)if(S.v51.stats[k]===undefined)S.v51.stats[k]=d.stats[k];
+ if(S.suspended===undefined)S.suspended=null;if(S.settings.mode&&!MODES51.includes(S.settings.mode))S.settings.mode='nearest';S.migrationVersion=Math.max(S.migrationVersion||0,51);}
+Object.assign(ACT,{tutSkip:()=>tutSkip(),tutStart:()=>{closeModal();tutStart(true);}});
+{const _os=openSettings;openSettings=function(){_os();const r0=modalRefresh;const add=()=>{const b=$('#mbody');if(!b||b.querySelector('.v51help'))return;const d=document.createElement('div');d.className='card v51help';d.style.marginTop='10px';d.innerHTML=`<h3>📘 Help · Tutorial</h3><div class="hint">เล่น Tutorial แบบลงมือทำอีกครั้ง (รางวัล Tutorial ได้ครั้งเดียว)</div><button class="btn pri" data-act="tutStart">🎓 เริ่ม Tutorial ใหม่</button>`;b.insertBefore(d,b.firstChild);};add();modalRefresh=()=>{if(r0)r0();add();};};}
+ACT.openSettings=()=>openSettings();
+setTimeout(()=>{try{v51Migrate();if(S.v51.tut.started&&!S.v51.tut.done)tutShow();else if(!S.v51.tut.started&&!window.__noTut){setTimeout(()=>{if(S.v51&&!S.v51.tut.started)tutStart(false);},900);}}catch(e){console.error('v51 boot',e);}},10);
 
 
 /* ========================= LOOP ========================= */
