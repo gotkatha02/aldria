@@ -9983,6 +9983,1021 @@ function v10DevPanel(){const render=()=>{const s=V10UI.sim;const row=(a,b,n)=>`<
  openModal('🧪 DEV — Grind Simulation','',render);$('#mbox').classList.add('wide');render();}
 window.v10DevPanel=v10DevPanel;
 
+/* Canonical V7 Passive Tree data — imported verbatim (ids, names, descriptions, positions, links) from Build_a_Golem_V7_Skill_Tree_Active_Evolution_240.html (DATA, V7 Core Skills + Evolution / balanced v2) */
+const SR_TREE={"v":"V7 Core Skills + Evolution / balanced v2","nodes":[{"id":"U0","n":"GOLEM CORE","d":"แกนกลางของต้นไม้สกิล จุดเริ่มต้นของทุก Build ไม่ใช้แต้ม","r":"universal","t":"root","x":0,"y":0,"th":"","b":"Start","s":"any","ti":""},{"id":"U1","n":"Energy Circuit","d":"Maximum Energy +2%","r":"universal","t":"small","x":0,"y":-98,"th":"CORE","b":"","s":"any","ti":""},{"id":"U2","n":"Alloy Balance","d":"Maximum HP +2%","r":"universal","t":"small","x":69.3,"y":-69.3,"th":"CORE","b":"","s":"any","ti":""},{"id":"U3","n":"Micro Servo","d":"Movement Speed +1.5%","r":"universal","t":"small","x":98,"y":0,"th":"CORE","b":"","s":"any","ti":""},{"id":"U4","n":"Flux Divider","d":"Skill Cooldown Recovery +1.5%","r":"universal","t":"small","x":69.3,"y":69.3,"th":"CORE","b":"","s":"any","ti":""},{"id":"U5","n":"Servo Calibration","d":"Attack Speed +1.5%","r":"universal","t":"small","x":0,"y":98,"th":"CORE","b":"","s":"any","ti":""},{"id":"U6","n":"Reactive Plating","d":"Damage Reduction +1%","r":"universal","t":"small","x":-69.3,"y":69.3,"th":"CORE","b":"","s":"any","ti":""},{"id":"U7","n":"Mining Relay","d":"Mining Speed +1.5%","r":"universal","t":"small","x":-98,"y":0,"th":"CORE","b":"","s":"any","ti":""},{"id":"U8","n":"Precision Sensor","d":"Critical Chance +0.75 จุดเปอร์เซ็นต์","r":"universal","t":"small","x":-69.3,"y":-69.3,"th":"CORE","b":"","s":"any","ti":""},{"id":"U9","n":"Balanced Reactor","d":"Maximum Energy +4%","r":"universal","t":"notable","x":0,"y":-205,"th":"CORE","b":"","s":"any","ti":""},{"id":"U10","n":"Impact Dampener","d":"Damage taken −1.5%","r":"universal","t":"small","x":83.4,"y":-187.3,"th":"CORE","b":"","s":"any","ti":""},{"id":"U11","n":"Rapid Pistons","d":"Attack Speed +2%","r":"universal","t":"small","x":152.3,"y":-137.2,"th":"CORE","b":"","s":"any","ti":""},{"id":"U12","n":"Core Stabilizer","d":"Maximum HP +4%","r":"universal","t":"small","x":195,"y":-63.3,"th":"CORE","b":"","s":"any","ti":""},{"id":"U13","n":"Quantum Bearings","d":"Dodge Recovery +2%","r":"universal","t":"notable","x":203.9,"y":21.4,"th":"CORE","b":"","s":"any","ti":""},{"id":"U14","n":"Reinforced Frame","d":"Armor +4%","r":"universal","t":"small","x":177.5,"y":102.5,"th":"CORE","b":"","s":"any","ti":""},{"id":"U15","n":"Arcane Relay","d":"Magic Damage +2%","r":"universal","t":"small","x":120.5,"y":165.9,"th":"CORE","b":"","s":"any","ti":""},{"id":"U16","n":"Kinetic Alignment","d":"Melee Damage +2%","r":"universal","t":"small","x":42.6,"y":200.5,"th":"CORE","b":"","s":"any","ti":""},{"id":"U17","n":"Field Scanner","d":"Ore Discovery +1.5%","r":"universal","t":"notable","x":-42.6,"y":200.5,"th":"CORE","b":"","s":"any","ti":""},{"id":"U18","n":"Deep Battery","d":"Mining Skill Energy Efficiency +3%","r":"universal","t":"small","x":-120.5,"y":165.9,"th":"CORE","b":"","s":"any","ti":""},{"id":"U19","n":"Servo Pressure","d":"Mining Power +3%","r":"universal","t":"small","x":-177.5,"y":102.5,"th":"CORE","b":"","s":"any","ti":""},{"id":"U20","n":"Extraction Control","d":"Bag Capacity +3%","r":"universal","t":"small","x":-203.9,"y":21.4,"th":"CORE","b":"","s":"any","ti":""},{"id":"U21","n":"Overclock Fuse","d":"Skill Cooldown Recovery +2%","r":"universal","t":"notable","x":-195,"y":-63.3,"th":"CORE","b":"","s":"any","ti":""},{"id":"U22","n":"Thermal Jacket","d":"Elemental Resistance +2%","r":"universal","t":"small","x":-152.3,"y":-137.2,"th":"CORE","b":"","s":"any","ti":""},{"id":"U23","n":"Core Optimizer","d":"Basic Attack Damage +2%","r":"universal","t":"small","x":-83.4,"y":-187.3,"th":"CORE","b":"","s":"any","ti":""},{"id":"W0","n":"Iron Bastion — Initiation","d":"Guard Effectiveness +1.5%","r":"warrior","t":"small","x":-237.2,"y":185.3,"th":"Iron Bastion","b":"Guard Effectiveness","s":"warrior","ti":"1"},{"id":"W1","n":"Iron Bastion — Measured Flow","d":"Guard Effectiveness +1.5%","r":"warrior","t":"small","x":-295.5,"y":219.3,"th":"Iron Bastion","b":"Guard Effectiveness","s":"warrior","ti":"1"},{"id":"W2","n":"Iron Bastion — Reinforcement","d":"Guard Effectiveness +3.5% และเพิ่มความเสถียรของ Iron Bastion เมื่อใช้ชิ้นส่วนที่รองรับ","r":"warrior","t":"notable","x":-353.2,"y":253.9,"th":"Iron Bastion","b":"Guard Effectiveness","s":"warrior","ti":"1"},{"id":"W3","n":"Iron Bastion — Steady Rhythm","d":"Guard Effectiveness +1.5%","r":"warrior","t":"small","x":-407.6,"y":293.1,"th":"Iron Bastion","b":"Guard Effectiveness","s":"warrior","ti":"1"},{"id":"W4","n":"Battle Awareness","d":"เพิ่มความผ่อนปรนของ Perfect Guard เล็กน้อย (หน้าต่างรับจังหวะ +0.08 วินาที ไม่เพิ่มระยะอมตะ)","r":"warrior","t":"evolution","x":-456.8,"y":339.3,"th":"Iron Bastion","b":"ต้องใช้สกิล/ชิ้นส่วนที่รองรับ","s":"helm","ti":"1"},{"id":"W5","n":"Iron Bastion — Adaptation","d":"Guard Effectiveness +1.5%","r":"warrior","t":"small","x":-501,"y":391.7,"th":"Iron Bastion","b":"Guard Effectiveness","s":"warrior","ti":"1"},{"id":"W6","n":"Iron Fortress","d":"สร้างเกราะป้องกัน ลดความเสียหายที่ได้รับ 18% เป็นเวลา 4 วินาที (อยู่ภายใต้เพดาน Damage Reduction รวม 60%)","r":"warrior","t":"active","x":-543,"y":446.5,"th":"Iron Bastion","b":"Cooldown 36s","s":"core-active","ti":"1"},{"id":"W7","n":"Iron Bastion — Full Calibration","d":"Guard Effectiveness +2%","r":"warrior","t":"small","x":-587.3,"y":497.9,"th":"Iron Bastion","b":"Guard Effectiveness","s":"warrior","ti":"1"},{"id":"W8","n":"Iron Bastion — Apex Protocol","d":"Guard ลดความเสียหายเพิ่ม 14% แต่ Dodge Cooldown +15% (ไม่นับเกินเพดาน Damage Reduction)","r":"warrior","t":"keystone","x":-638.6,"y":541.1,"th":"Iron Bastion","b":"Guard Effectiveness","s":"warrior","ti":"1"},{"id":"W9","n":"Juggernaut — Initiation","d":"Maximum HP +1.5%","r":"warrior","t":"small","x":-279.9,"y":110.7,"th":"Juggernaut","b":"Maximum HP","s":"warrior","ti":"2"},{"id":"W10","n":"Juggernaut — Measured Flow","d":"Maximum HP +1.5%","r":"warrior","t":"small","x":-344.2,"y":130.2,"th":"Juggernaut","b":"Maximum HP","s":"warrior","ti":"2"},{"id":"W11","n":"Juggernaut — Reinforcement","d":"Maximum HP +3.5% และเพิ่มความเสถียรของ Juggernaut เมื่อใช้ชิ้นส่วนที่รองรับ","r":"warrior","t":"notable","x":-406.9,"y":153.9,"th":"Juggernaut","b":"Maximum HP","s":"warrior","ti":"2"},{"id":"W12","n":"Juggernaut — Steady Rhythm","d":"Maximum HP +1.5%","r":"warrior","t":"small","x":-466.7,"y":184.8,"th":"Juggernaut","b":"Maximum HP","s":"warrior","ti":"2"},{"id":"W13","n":"Controlled Impact","d":"Ultimate ดาเมจลด 8% แต่เพิ่มผล Stagger 12% เฉพาะท่าที่สร้าง Stagger ได้","r":"warrior","t":"evolution","x":-523.7,"y":222.5,"th":"Juggernaut","b":"ต้องใช้สกิล/ชิ้นส่วนที่รองรับ","s":"chest","ti":"2"},{"id":"W14","n":"Juggernaut — Adaptation","d":"Maximum HP +1.5%","r":"warrior","t":"small","x":-579.1,"y":263,"th":"Juggernaut","b":"Maximum HP","s":"warrior","ti":"2"},{"id":"W15","n":"Juggernaut — Signature Protocol","d":"เมื่อ HP ต่ำกว่า 35% ได้รับ Damage Reduction 8% นาน 4 วินาที (คูลดาวน์ 16 วิ)","r":"warrior","t":"notable","x":-635.6,"y":300.3,"th":"Juggernaut","b":"Maximum HP","s":"warrior","ti":"2"},{"id":"W16","n":"Juggernaut — Full Calibration","d":"Maximum HP +2%","r":"warrior","t":"small","x":-696.3,"y":328.7,"th":"Juggernaut","b":"Maximum HP","s":"warrior","ti":"2"},{"id":"W17","n":"Juggernaut — Apex Protocol","d":"เมื่อ HP ต่ำกว่า 35% ได้รับ Damage Reduction 8% นาน 4 วินาที (คูลดาวน์ 16 วิ)","r":"warrior","t":"notable","x":-762.4,"y":345.5,"th":"Juggernaut","b":"Maximum HP","s":"warrior","ti":"2"},{"id":"W18","n":"Earthbreaker — Initiation","d":"Stagger Power +1.5%","r":"warrior","t":"small","x":-299.5,"y":30,"th":"Earthbreaker","b":"Stagger Power","s":"warrior","ti":"3"},{"id":"W19","n":"Earthbreaker — Measured Flow","d":"Stagger Power +1.5%","r":"warrior","t":"small","x":-366.2,"y":36.7,"th":"Earthbreaker","b":"Stagger Power","s":"warrior","ti":"3"},{"id":"W20","n":"Earthbreaker — Reinforcement","d":"Stagger Power +3.5% และเพิ่มความเสถียรของ Earthbreaker เมื่อใช้ชิ้นส่วนที่รองรับ","r":"warrior","t":"notable","x":-432.1,"y":50,"th":"Earthbreaker","b":"Stagger Power","s":"warrior","ti":"3"},{"id":"W21","n":"Earthbreaker — Steady Rhythm","d":"Stagger Power +1.5%","r":"warrior","t":"small","x":-497.1,"y":70,"th":"Earthbreaker","b":"Stagger Power","s":"warrior","ti":"3"},{"id":"W22","n":"Armor Rend","d":"สกิลแขนซ้ายที่โจมตีโดนจะลด Defense ของเป้าหมาย 5% เป็นเวลา 4 วินาที ไม่ซ้อนจาก Evolution เดียวกัน","r":"warrior","t":"evolution","x":-561.3,"y":93.2,"th":"Earthbreaker","b":"ต้องใช้สกิล/ชิ้นส่วนที่รองรับ","s":"gL","ti":"3"},{"id":"W23","n":"Earthbreaker — Adaptation","d":"Stagger Power +1.5%","r":"warrior","t":"small","x":-625.8,"y":113.6,"th":"Earthbreaker","b":"Stagger Power","s":"warrior","ti":"3"},{"id":"W24","n":"Seismic Breaker","d":"ทุบพื้นสร้างคลื่นกระแทก ดาเมจ 160% ของ Basic Attack มาตรฐาน พร้อมเพิ่ม Stagger เล็กน้อย มีจังหวะง้างและ Hitbox จริง","r":"warrior","t":"active","x":-691.7,"y":125.4,"th":"Earthbreaker","b":"Cooldown 28s","s":"core-active","ti":"3"},{"id":"W25","n":"Earthbreaker — Full Calibration","d":"Stagger Power +2%","r":"warrior","t":"small","x":-759.7,"y":125.5,"th":"Earthbreaker","b":"Stagger Power","s":"warrior","ti":"3"},{"id":"W26","n":"Earthbreaker — Apex Protocol","d":"Stagger +24% แต่ Attack Speed −12%","r":"warrior","t":"keystone","x":-828.9,"y":115.9,"th":"Earthbreaker","b":"Stagger Power","s":"warrior","ti":"3"},{"id":"W27","n":"Berserker Drive — Initiation","d":"Melee Damage +1.5%","r":"warrior","t":"small","x":-296.2,"y":-53.7,"th":"Berserker Drive","b":"Melee Damage","s":"warrior","ti":"4"},{"id":"W28","n":"Berserker Drive — Measured Flow","d":"Melee Damage +1.5%","r":"warrior","t":"small","x":-363.1,"y":-60.1,"th":"Berserker Drive","b":"Melee Damage","s":"warrior","ti":"4"},{"id":"W29","n":"Berserker Drive — Reinforcement","d":"Melee Damage +3.5% และเพิ่มความเสถียรของ Berserker Drive เมื่อใช้ชิ้นส่วนที่รองรับ","r":"warrior","t":"notable","x":-430.8,"y":-60.4,"th":"Berserker Drive","b":"Melee Damage","s":"warrior","ti":"4"},{"id":"W30","n":"Berserker Drive — Steady Rhythm","d":"Melee Damage +1.5%","r":"warrior","t":"small","x":-498.7,"y":-57.4,"th":"Berserker Drive","b":"Melee Damage","s":"warrior","ti":"4"},{"id":"W31","n":"Heavy Rhythm","d":"การโจมตีพื้นฐานด้วยมือขวาครั้งที่ 5 สร้างดาเมจเพิ่ม 25% ใน Hit นั้น (มีการรีเซ็ตเมื่อหยุดคอมโบ)","r":"warrior","t":"evolution","x":-566.2,"y":-56.6,"th":"Berserker Drive","b":"ต้องใช้สกิล/ชิ้นส่วนที่รองรับ","s":"gR","ti":"4"},{"id":"W32","n":"Berserker Drive — Adaptation","d":"Melee Damage +1.5%","r":"warrior","t":"small","x":-632.8,"y":-63.5,"th":"Berserker Drive","b":"Melee Damage","s":"warrior","ti":"4"},{"id":"W33","n":"Berserker Drive — Signature Protocol","d":"โจมตีต่อเนื่อง 5 ครั้ง เพิ่ม Melee Damage 6% นาน 3 วิ (ไม่ซ้อน)","r":"warrior","t":"notable","x":-698.3,"y":-81,"th":"Berserker Drive","b":"Melee Damage","s":"warrior","ti":"4"},{"id":"W34","n":"Berserker Drive — Full Calibration","d":"Melee Damage +2%","r":"warrior","t":"small","x":-762.4,"y":-107.7,"th":"Berserker Drive","b":"Melee Damage","s":"warrior","ti":"4"},{"id":"W35","n":"Berserker Drive — Apex Protocol","d":"โจมตีต่อเนื่อง 5 ครั้ง เพิ่ม Melee Damage 6% นาน 3 วิ (ไม่ซ้อน)","r":"warrior","t":"notable","x":-825.6,"y":-137.4,"th":"Berserker Drive","b":"Melee Damage","s":"warrior","ti":"4"},{"id":"W36","n":"Counterguard — Initiation","d":"Parry Window +1.5%","r":"warrior","t":"small","x":-274.1,"y":-124.3,"th":"Counterguard","b":"Parry Window","s":"warrior","ti":"5"},{"id":"W37","n":"Counterguard — Measured Flow","d":"Parry Window +1.5%","r":"warrior","t":"small","x":-338.8,"y":-143.7,"th":"Counterguard","b":"Parry Window","s":"warrior","ti":"5"},{"id":"W38","n":"Counterguard — Reinforcement","d":"Parry Window +3.5% และเพิ่มความเสถียรของ Counterguard เมื่อใช้ชิ้นส่วนที่รองรับ","r":"warrior","t":"notable","x":-404.5,"y":-159.9,"th":"Counterguard","b":"Parry Window","s":"warrior","ti":"5"},{"id":"W39","n":"Counterguard — Steady Rhythm","d":"Parry Window +1.5%","r":"warrior","t":"small","x":-469.6,"y":-177.5,"th":"Counterguard","b":"Parry Window","s":"warrior","ti":"5"},{"id":"W40","n":"Anchor Step","d":"หลบสำเร็จได้ Damage Reduction 8% นาน 1.5 วินาที อยู่ใต้เพดานรวม 60%","r":"warrior","t":"evolution","x":-532.2,"y":-201.4,"th":"Counterguard","b":"ต้องใช้สกิล/ชิ้นส่วนที่รองรับ","s":"legs","ti":"5"},{"id":"W41","n":"Counterguard — Adaptation","d":"Parry Window +1.5%","r":"warrior","t":"small","x":-591.3,"y":-234.3,"th":"Counterguard","b":"Parry Window","s":"warrior","ti":"5"},{"id":"W42","n":"Counter Pulse","d":"เข้าสู่ท่ารอ Counter 2 วินาที หาก Guard สำเร็จจะปล่อยคลื่นโจมตีสวนกลับ 1 ครั้ง หากไม่ถูกโจมตีจะไม่เกิดดาเมจ","r":"warrior","t":"active","x":-646.9,"y":-275.1,"th":"Counterguard","b":"Cooldown 25s","s":"core-active","ti":"5"},{"id":"W43","n":"Counterguard — Full Calibration","d":"Parry Window +2%","r":"warrior","t":"small","x":-701,"y":-318.7,"th":"Counterguard","b":"Parry Window","s":"warrior","ti":"5"},{"id":"W44","n":"Counterguard — Apex Protocol","d":"เมื่อ Guard สำเร็จ สะท้อน 12% ของความเสียหายที่ได้รับ (ไม่กระตุ้น On-hit เพิ่ม) แต่ Max Energy −20%","r":"warrior","t":"keystone","x":-756.7,"y":-357.7,"th":"Counterguard","b":"Parry Window","s":"warrior","ti":"5"},{"id":"W45","n":"Forge Sentinel — Initiation","d":"Damage Reflection +1.5%","r":"warrior","t":"small","x":-237.3,"y":-185.2,"th":"Forge Sentinel","b":"Damage Reflection","s":"warrior","ti":"6"},{"id":"W46","n":"Forge Sentinel — Measured Flow","d":"Damage Reflection +1.5%","r":"warrior","t":"small","x":-295.5,"y":-219.2,"th":"Forge Sentinel","b":"Damage Reflection","s":"warrior","ti":"6"},{"id":"W47","n":"Forge Sentinel — Reinforcement","d":"Damage Reflection +3.5% และเพิ่มความเสถียรของ Forge Sentinel เมื่อใช้ชิ้นส่วนที่รองรับ","r":"warrior","t":"notable","x":-353.2,"y":-253.9,"th":"Forge Sentinel","b":"Damage Reflection","s":"warrior","ti":"6"},{"id":"W48","n":"Forge Sentinel — Steady Rhythm","d":"Damage Reflection +1.5%","r":"warrior","t":"small","x":-407.5,"y":-293.1,"th":"Forge Sentinel","b":"Damage Reflection","s":"warrior","ti":"6"},{"id":"W49","n":"Reactive Guard","d":"เมื่อ Guard สำเร็จ ฟื้น Energy 3% โดยมีคูลดาวน์ภายใน 12 วินาที","r":"warrior","t":"evolution","x":-456.7,"y":-339.4,"th":"Forge Sentinel","b":"ต้องใช้สกิล/ชิ้นส่วนที่รองรับ","s":"back","ti":"6"},{"id":"W50","n":"Forge Sentinel — Adaptation","d":"Damage Reflection +1.5%","r":"warrior","t":"small","x":-500.9,"y":-391.9,"th":"Forge Sentinel","b":"Damage Reflection","s":"warrior","ti":"6"},{"id":"W51","n":"Forge Sentinel — Signature Protocol","d":"ได้รับความเสียหายขณะ Guard ส่งคลื่นสวนกลับได้ทุก 5 วิ","r":"warrior","t":"notable","x":-542.9,"y":-446.6,"th":"Forge Sentinel","b":"Damage Reflection","s":"warrior","ti":"6"},{"id":"W52","n":"Forge Sentinel — Full Calibration","d":"Damage Reflection +2%","r":"warrior","t":"small","x":-587.3,"y":-498,"th":"Forge Sentinel","b":"Damage Reflection","s":"warrior","ti":"6"},{"id":"W53","n":"Forge Sentinel — Apex Protocol","d":"ได้รับความเสียหายขณะ Guard ส่งคลื่นสวนกลับได้ทุก 5 วิ","r":"warrior","t":"notable","x":-638.7,"y":-541,"th":"Forge Sentinel","b":"Damage Reflection","s":"warrior","ti":"6"},{"id":"M0","n":"Runic Circuit — Initiation","d":"Rune Damage +1.5%","r":"mage","t":"small","x":-185.3,"y":-237.2,"th":"Runic Circuit","b":"Rune Damage","s":"mage","ti":"1"},{"id":"M1","n":"Runic Circuit — Measured Flow","d":"Rune Damage +1.5%","r":"mage","t":"small","x":-219.3,"y":-295.5,"th":"Runic Circuit","b":"Rune Damage","s":"mage","ti":"1"},{"id":"M2","n":"Runic Circuit — Reinforcement","d":"Rune Damage +3.5% และเพิ่มความเสถียรของ Runic Circuit เมื่อใช้ชิ้นส่วนที่รองรับ","r":"mage","t":"notable","x":-253.9,"y":-353.2,"th":"Runic Circuit","b":"Rune Damage","s":"mage","ti":"1"},{"id":"M3","n":"Runic Circuit — Steady Rhythm","d":"Rune Damage +1.5%","r":"mage","t":"small","x":-293.1,"y":-407.6,"th":"Runic Circuit","b":"Rune Damage","s":"mage","ti":"1"},{"id":"M4","n":"Spell Focus","d":"โจมตีด้วยเวทใส่เป้าหมายเดิมครบ 3 ครั้ง เวทถัดไปดาเมจ +8% มีคูลดาวน์ภายใน","r":"mage","t":"evolution","x":-339.3,"y":-456.8,"th":"Runic Circuit","b":"ต้องใช้สกิล/ชิ้นส่วนที่รองรับ","s":"helm","ti":"1"},{"id":"M5","n":"Runic Circuit — Adaptation","d":"Rune Damage +1.5%","r":"mage","t":"small","x":-391.7,"y":-501,"th":"Runic Circuit","b":"Rune Damage","s":"mage","ti":"1"},{"id":"M6","n":"Arcane Nova","d":"ปล่อยพลังเวทรอบตัว สร้างความเสียหาย 160% ของ Basic Attack มาตรฐาน ผลักได้เฉพาะศัตรูทั่วไป ไม่ผลักบอสจนกลไกเสีย","r":"mage","t":"active","x":-446.5,"y":-543,"th":"Runic Circuit","b":"Cooldown 26s","s":"core-active","ti":"1"},{"id":"M7","n":"Runic Circuit — Full Calibration","d":"Rune Damage +2%","r":"mage","t":"small","x":-497.9,"y":-587.3,"th":"Runic Circuit","b":"Rune Damage","s":"mage","ti":"1"},{"id":"M8","n":"Runic Circuit — Apex Protocol","d":"Rune Skill Damage +18% แต่ Basic Attack ที่ไม่ใช่ Rune −15%","r":"mage","t":"keystone","x":-541,"y":-638.6,"th":"Runic Circuit","b":"Rune Damage","s":"mage","ti":"1"},{"id":"M9","n":"Crystal Orbit — Initiation","d":"Projectile Damage +1.5%","r":"mage","t":"small","x":-110.7,"y":-279.9,"th":"Crystal Orbit","b":"Projectile Damage","s":"mage","ti":"2"},{"id":"M10","n":"Crystal Orbit — Measured Flow","d":"Projectile Damage +1.5%","r":"mage","t":"small","x":-130.2,"y":-344.2,"th":"Crystal Orbit","b":"Projectile Damage","s":"mage","ti":"2"},{"id":"M11","n":"Crystal Orbit — Reinforcement","d":"Projectile Damage +3.5% และเพิ่มความเสถียรของ Crystal Orbit เมื่อใช้ชิ้นส่วนที่รองรับ","r":"mage","t":"notable","x":-153.9,"y":-406.9,"th":"Crystal Orbit","b":"Projectile Damage","s":"mage","ti":"2"},{"id":"M12","n":"Crystal Orbit — Steady Rhythm","d":"Projectile Damage +1.5%","r":"mage","t":"small","x":-184.8,"y":-466.7,"th":"Crystal Orbit","b":"Projectile Damage","s":"mage","ti":"2"},{"id":"M13","n":"Focused Cataclysm","d":"Ultimate แบบพื้นที่ ลดขนาดพื้นที่ลง 15% แต่ดาเมจ +8%","r":"mage","t":"evolution","x":-222.5,"y":-523.7,"th":"Crystal Orbit","b":"ต้องใช้สกิล/ชิ้นส่วนที่รองรับ","s":"chest","ti":"2"},{"id":"M14","n":"Crystal Orbit — Adaptation","d":"Projectile Damage +1.5%","r":"mage","t":"small","x":-263,"y":-579.1,"th":"Crystal Orbit","b":"Projectile Damage","s":"mage","ti":"2"},{"id":"M15","n":"Crystal Orbit — Signature Protocol","d":"Crystal Satellites ยิงเสริมอีก 1 นัดทุก 10 วิ (ยิงเสริมไม่ทำให้เกิด Proc ใหม่)","r":"mage","t":"notable","x":-300.3,"y":-635.6,"th":"Crystal Orbit","b":"Projectile Damage","s":"mage","ti":"2"},{"id":"M16","n":"Crystal Orbit — Full Calibration","d":"Projectile Damage +2%","r":"mage","t":"small","x":-328.7,"y":-696.3,"th":"Crystal Orbit","b":"Projectile Damage","s":"mage","ti":"2"},{"id":"M17","n":"Crystal Orbit — Apex Protocol","d":"Crystal Satellites ยิงเสริมอีก 1 นัดทุก 10 วิ (ยิงเสริมไม่ทำให้เกิด Proc ใหม่)","r":"mage","t":"notable","x":-345.5,"y":-762.4,"th":"Crystal Orbit","b":"Projectile Damage","s":"mage","ti":"2"},{"id":"M18","n":"Elemental Conflux — Initiation","d":"Elemental Damage +1.5%","r":"mage","t":"small","x":-30,"y":-299.5,"th":"Elemental Conflux","b":"Elemental Damage","s":"mage","ti":"3"},{"id":"M19","n":"Elemental Conflux — Measured Flow","d":"Elemental Damage +1.5%","r":"mage","t":"small","x":-36.7,"y":-366.2,"th":"Elemental Conflux","b":"Elemental Damage","s":"mage","ti":"3"},{"id":"M20","n":"Elemental Conflux — Reinforcement","d":"Elemental Damage +3.5% และเพิ่มความเสถียรของ Elemental Conflux เมื่อใช้ชิ้นส่วนที่รองรับ","r":"mage","t":"notable","x":-50,"y":-432.1,"th":"Elemental Conflux","b":"Elemental Damage","s":"mage","ti":"3"},{"id":"M21","n":"Elemental Conflux — Steady Rhythm","d":"Elemental Damage +1.5%","r":"mage","t":"small","x":-70,"y":-497.1,"th":"Elemental Conflux","b":"Elemental Damage","s":"mage","ti":"3"},{"id":"M22","n":"Arcane Modification","d":"สกิลแขนซ้ายประเภท Projectile ทะลุได้เพิ่ม 1 เป้าหมาย; Trap เพิ่มรัศมีตรวจจับ 8%; ประเภทอื่นไม่ทำงาน","r":"mage","t":"evolution","x":-93.2,"y":-561.3,"th":"Elemental Conflux","b":"ต้องใช้สกิล/ชิ้นส่วนที่รองรับ","s":"gL","ti":"3"},{"id":"M23","n":"Elemental Conflux — Adaptation","d":"Elemental Damage +1.5%","r":"mage","t":"small","x":-113.6,"y":-625.8,"th":"Elemental Conflux","b":"Elemental Damage","s":"mage","ti":"3"},{"id":"M24","n":"Aether Ward","d":"สร้างบาเรียรับความเสียหาย 10% ของ HP สูงสุด 4 วินาที หรือจนแตก บาเรียทับซ้อนไม่ได้","r":"mage","t":"active","x":-125.4,"y":-691.7,"th":"Elemental Conflux","b":"Cooldown 36s","s":"core-active","ti":"3"},{"id":"M25","n":"Elemental Conflux — Full Calibration","d":"Elemental Damage +2%","r":"mage","t":"small","x":-125.5,"y":-759.7,"th":"Elemental Conflux","b":"Elemental Damage","s":"mage","ti":"3"},{"id":"M26","n":"Elemental Conflux — Apex Protocol","d":"Elemental Reaction Damage +20% แต่ความเสียหายที่ไม่ใช่ธาตุ −18%; ปฏิกิริยาจาก Echo ห้ามกระตุ้นซ้ำ","r":"mage","t":"keystone","x":-115.9,"y":-828.9,"th":"Elemental Conflux","b":"Elemental Damage","s":"mage","ti":"3"},{"id":"M27","n":"Arcane Geometry — Initiation","d":"Area Effect +1.5%","r":"mage","t":"small","x":53.7,"y":-296.2,"th":"Arcane Geometry","b":"Area Effect","s":"mage","ti":"4"},{"id":"M28","n":"Arcane Geometry — Measured Flow","d":"Area Effect +1.5%","r":"mage","t":"small","x":60.1,"y":-363.1,"th":"Arcane Geometry","b":"Area Effect","s":"mage","ti":"4"},{"id":"M29","n":"Arcane Geometry — Reinforcement","d":"Area Effect +3.5% และเพิ่มความเสถียรของ Arcane Geometry เมื่อใช้ชิ้นส่วนที่รองรับ","r":"mage","t":"notable","x":60.4,"y":-430.8,"th":"Arcane Geometry","b":"Area Effect","s":"mage","ti":"4"},{"id":"M30","n":"Arcane Geometry — Steady Rhythm","d":"Area Effect +1.5%","r":"mage","t":"small","x":57.4,"y":-498.7,"th":"Arcane Geometry","b":"Area Effect","s":"mage","ti":"4"},{"id":"M31","n":"Arcane Sequence","d":"การโจมตีพื้นฐานเวทครั้งที่ 4 สร้าง Echo 25% โดย Echo ไม่สร้าง Echo ซ้ำ","r":"mage","t":"evolution","x":56.6,"y":-566.2,"th":"Arcane Geometry","b":"ต้องใช้สกิล/ชิ้นส่วนที่รองรับ","s":"gR","ti":"4"},{"id":"M32","n":"Arcane Geometry — Adaptation","d":"Area Effect +1.5%","r":"mage","t":"small","x":63.5,"y":-632.8,"th":"Arcane Geometry","b":"Area Effect","s":"mage","ti":"4"},{"id":"M33","n":"Arcane Geometry — Signature Protocol","d":"กับดัก Rune Trap ที่เชื่อมกันปล่อยคลื่น AoE เพิ่ม 1 ครั้ง (คูลดาวน์ 9 วิ)","r":"mage","t":"notable","x":81,"y":-698.3,"th":"Arcane Geometry","b":"Area Effect","s":"mage","ti":"4"},{"id":"M34","n":"Arcane Geometry — Full Calibration","d":"Area Effect +2%","r":"mage","t":"small","x":107.7,"y":-762.4,"th":"Arcane Geometry","b":"Area Effect","s":"mage","ti":"4"},{"id":"M35","n":"Arcane Geometry — Apex Protocol","d":"กับดัก Rune Trap ที่เชื่อมกันปล่อยคลื่น AoE เพิ่ม 1 ครั้ง (คูลดาวน์ 9 วิ)","r":"mage","t":"notable","x":137.4,"y":-825.6,"th":"Arcane Geometry","b":"Area Effect","s":"mage","ti":"4"},{"id":"M36","n":"Construct Command — Initiation","d":"Summon Duration +1.5%","r":"mage","t":"small","x":124.3,"y":-274.1,"th":"Construct Command","b":"Summon Duration","s":"mage","ti":"5"},{"id":"M37","n":"Construct Command — Measured Flow","d":"Summon Duration +1.5%","r":"mage","t":"small","x":143.7,"y":-338.8,"th":"Construct Command","b":"Summon Duration","s":"mage","ti":"5"},{"id":"M38","n":"Construct Command — Reinforcement","d":"Summon Duration +3.5% และเพิ่มความเสถียรของ Construct Command เมื่อใช้ชิ้นส่วนที่รองรับ","r":"mage","t":"notable","x":159.9,"y":-404.5,"th":"Construct Command","b":"Summon Duration","s":"mage","ti":"5"},{"id":"M39","n":"Construct Command — Steady Rhythm","d":"Summon Duration +1.5%","r":"mage","t":"small","x":177.5,"y":-469.6,"th":"Construct Command","b":"Summon Duration","s":"mage","ti":"5"},{"id":"M40","n":"Shimmer Step","d":"หลัง Dodge สร้างสนามชะลอศัตรูทั่วไป 10% นาน 1 วินาที; บอสไม่ถูกล็อก","r":"mage","t":"evolution","x":201.4,"y":-532.2,"th":"Construct Command","b":"ต้องใช้สกิล/ชิ้นส่วนที่รองรับ","s":"legs","ti":"5"},{"id":"M41","n":"Construct Command — Adaptation","d":"Summon Duration +1.5%","r":"mage","t":"small","x":234.3,"y":-591.3,"th":"Construct Command","b":"Summon Duration","s":"mage","ti":"5"},{"id":"M42","n":"Rune Relay","d":"สกิลแขนครั้งถัดไปที่รองรับจะเกิด Echo เพิ่ม 1 ครั้งด้วยพลัง 30% Echo ไม่สามารถกระตุ้น Echo ซ้ำ และไม่ใช้กับ Ultimate","r":"mage","t":"active","x":275.1,"y":-646.9,"th":"Construct Command","b":"Cooldown 34s","s":"core-active","ti":"5"},{"id":"M43","n":"Construct Command — Full Calibration","d":"Summon Duration +2%","r":"mage","t":"small","x":318.7,"y":-701,"th":"Construct Command","b":"Summon Duration","s":"mage","ti":"5"},{"id":"M44","n":"Construct Command — Apex Protocol","d":"Construct Damage +20% แต่ความเสียหายจากผู้เล่นเอง −14%; การโจมตีของ Construct ห้ามกระตุ้นตัวเอง","r":"mage","t":"keystone","x":357.7,"y":-756.7,"th":"Construct Command","b":"Summon Duration","s":"mage","ti":"5"},{"id":"M45","n":"Void Weaver — Initiation","d":"Gravity Effect +1.5%","r":"mage","t":"small","x":185.2,"y":-237.3,"th":"Void Weaver","b":"Gravity Effect","s":"mage","ti":"6"},{"id":"M46","n":"Void Weaver — Measured Flow","d":"Gravity Effect +1.5%","r":"mage","t":"small","x":219.3,"y":-295.5,"th":"Void Weaver","b":"Gravity Effect","s":"mage","ti":"6"},{"id":"M47","n":"Void Weaver — Reinforcement","d":"Gravity Effect +3.5% และเพิ่มความเสถียรของ Void Weaver เมื่อใช้ชิ้นส่วนที่รองรับ","r":"mage","t":"notable","x":253.9,"y":-353.2,"th":"Void Weaver","b":"Gravity Effect","s":"mage","ti":"6"},{"id":"M48","n":"Void Weaver — Steady Rhythm","d":"Gravity Effect +1.5%","r":"mage","t":"small","x":293.1,"y":-407.5,"th":"Void Weaver","b":"Gravity Effect","s":"mage","ti":"6"},{"id":"M49","n":"Extended Conduit","d":"เพิ่มระยะเวลาของสกิล Support จากหลัง 8% เมื่อสกิลนั้นมี Duration","r":"mage","t":"evolution","x":339.4,"y":-456.7,"th":"Void Weaver","b":"ต้องใช้สกิล/ชิ้นส่วนที่รองรับ","s":"back","ti":"6"},{"id":"M50","n":"Void Weaver — Adaptation","d":"Gravity Effect +1.5%","r":"mage","t":"small","x":391.9,"y":-500.9,"th":"Void Weaver","b":"Gravity Effect","s":"mage","ti":"6"},{"id":"M51","n":"Void Weaver — Signature Protocol","d":"Gravity Well ที่หมดเวลาปล่อย Void Shock เล็ก ๆ (คูลดาวน์ 11 วิ)","r":"mage","t":"notable","x":446.7,"y":-542.9,"th":"Void Weaver","b":"Gravity Effect","s":"mage","ti":"6"},{"id":"M52","n":"Void Weaver — Full Calibration","d":"Gravity Effect +2%","r":"mage","t":"small","x":498,"y":-587.3,"th":"Void Weaver","b":"Gravity Effect","s":"mage","ti":"6"},{"id":"M53","n":"Void Weaver — Apex Protocol","d":"Gravity Well ที่หมดเวลาปล่อย Void Shock เล็ก ๆ (คูลดาวน์ 11 วิ)","r":"mage","t":"notable","x":541,"y":-638.7,"th":"Void Weaver","b":"Gravity Effect","s":"mage","ti":"6"},{"id":"A0","n":"Precision Hunter — Initiation","d":"Critical Chance +1 จุดเปอร์เซ็นต์","r":"assassin","t":"small","x":237.2,"y":-185.3,"th":"Precision Hunter","b":"Critical Chance","s":"assassin","ti":"1"},{"id":"A1","n":"Precision Hunter — Measured Flow","d":"Critical Chance +1 จุดเปอร์เซ็นต์","r":"assassin","t":"small","x":295.5,"y":-219.3,"th":"Precision Hunter","b":"Critical Chance","s":"assassin","ti":"1"},{"id":"A2","n":"Precision Hunter — Reinforcement","d":"Critical Chance +2 จุดเปอร์เซ็นต์ และเพิ่มความเสถียรของ Precision Hunter เมื่อใช้ชิ้นส่วนที่รองรับ","r":"assassin","t":"notable","x":353.2,"y":-253.9,"th":"Precision Hunter","b":"Critical Chance","s":"assassin","ti":"1"},{"id":"A3","n":"Precision Hunter — Steady Rhythm","d":"Critical Chance +1 จุดเปอร์เซ็นต์","r":"assassin","t":"small","x":407.6,"y":-293.1,"th":"Precision Hunter","b":"Critical Chance","s":"assassin","ti":"1"},{"id":"A4","n":"Weakpoint Vision","d":"โจมตีเป้าหมายที่มี Mark เพิ่ม Critical Chance 3 จุดเปอร์เซ็นต์ (ยังติดเพดาน Crit 55%)","r":"assassin","t":"evolution","x":456.8,"y":-339.3,"th":"Precision Hunter","b":"ต้องใช้สกิล/ชิ้นส่วนที่รองรับ","s":"helm","ti":"1"},{"id":"A5","n":"Precision Hunter — Adaptation","d":"Critical Chance +1 จุดเปอร์เซ็นต์","r":"assassin","t":"small","x":501,"y":-391.7,"th":"Precision Hunter","b":"Critical Chance","s":"assassin","ti":"1"},{"id":"A6","n":"Shadow Rush","d":"พุ่งโจมตี 3 จังหวะ ดาเมจรวม 180% ของ Basic Attack มาตรฐาน พร้อม i-frame สั้น ๆ เฉพาะช่วงเริ่มพุ่ง","r":"assassin","t":"active","x":543,"y":-446.5,"th":"Precision Hunter","b":"Cooldown 28s","s":"core-active","ti":"1"},{"id":"A7","n":"Precision Hunter — Full Calibration","d":"Critical Chance +1.5 จุดเปอร์เซ็นต์","r":"assassin","t":"small","x":587.3,"y":-497.9,"th":"Precision Hunter","b":"Critical Chance","s":"assassin","ti":"1"},{"id":"A8","n":"Precision Hunter — Apex Protocol","d":"Critical Damage +25% แต่ Normal Hit Damage −14%","r":"assassin","t":"keystone","x":638.6,"y":-541,"th":"Precision Hunter","b":"Critical Chance","s":"assassin","ti":"1"},{"id":"A9","n":"Venom Alchemist — Initiation","d":"Poison Damage +1.5%","r":"assassin","t":"small","x":279.9,"y":-110.7,"th":"Venom Alchemist","b":"Poison Damage","s":"assassin","ti":"2"},{"id":"A10","n":"Venom Alchemist — Measured Flow","d":"Poison Damage +1.5%","r":"assassin","t":"small","x":344.2,"y":-130.2,"th":"Venom Alchemist","b":"Poison Damage","s":"assassin","ti":"2"},{"id":"A11","n":"Venom Alchemist — Reinforcement","d":"Poison Damage +3.5% และเพิ่มความเสถียรของ Venom Alchemist เมื่อใช้ชิ้นส่วนที่รองรับ","r":"assassin","t":"notable","x":406.9,"y":-153.9,"th":"Venom Alchemist","b":"Poison Damage","s":"assassin","ti":"2"},{"id":"A12","n":"Venom Alchemist — Steady Rhythm","d":"Poison Damage +1.5%","r":"assassin","t":"small","x":466.7,"y":-184.8,"th":"Venom Alchemist","b":"Poison Damage","s":"assassin","ti":"2"},{"id":"A13","n":"Precision Execution","d":"Ultimate ลดพื้นที่โจมตีลง 20% แต่เพิ่มดาเมจต่อเป้าหมายหลัก 10%","r":"assassin","t":"evolution","x":523.7,"y":-222.5,"th":"Venom Alchemist","b":"ต้องใช้สกิล/ชิ้นส่วนที่รองรับ","s":"chest","ti":"2"},{"id":"A14","n":"Venom Alchemist — Adaptation","d":"Poison Damage +1.5%","r":"assassin","t":"small","x":579.1,"y":-263,"th":"Venom Alchemist","b":"Poison Damage","s":"assassin","ti":"2"},{"id":"A15","n":"Venom Alchemist — Signature Protocol","d":"พิษครบ 5 Stack ระเบิดเป็น Toxic Echo ได้ทุก 9 วิ (Echo ไม่เรียก Echo ซ้ำ)","r":"assassin","t":"notable","x":635.6,"y":-300.3,"th":"Venom Alchemist","b":"Poison Damage","s":"assassin","ti":"2"},{"id":"A16","n":"Venom Alchemist — Full Calibration","d":"Poison Damage +2%","r":"assassin","t":"small","x":696.3,"y":-328.7,"th":"Venom Alchemist","b":"Poison Damage","s":"assassin","ti":"2"},{"id":"A17","n":"Venom Alchemist — Apex Protocol","d":"พิษครบ 5 Stack ระเบิดเป็น Toxic Echo ได้ทุก 9 วิ (Echo ไม่เรียก Echo ซ้ำ)","r":"assassin","t":"notable","x":762.4,"y":-345.5,"th":"Venom Alchemist","b":"Poison Damage","s":"assassin","ti":"2"},{"id":"A18","n":"Shadowstep — Initiation","d":"Dodge Recovery +1.5%","r":"assassin","t":"small","x":299.5,"y":-30,"th":"Shadowstep","b":"Dodge Recovery","s":"assassin","ti":"3"},{"id":"A19","n":"Shadowstep — Measured Flow","d":"Dodge Recovery +1.5%","r":"assassin","t":"small","x":366.2,"y":-36.7,"th":"Shadowstep","b":"Dodge Recovery","s":"assassin","ti":"3"},{"id":"A20","n":"Shadowstep — Reinforcement","d":"Dodge Recovery +3.5% และเพิ่มความเสถียรของ Shadowstep เมื่อใช้ชิ้นส่วนที่รองรับ","r":"assassin","t":"notable","x":432.1,"y":-50,"th":"Shadowstep","b":"Dodge Recovery","s":"assassin","ti":"3"},{"id":"A21","n":"Shadowstep — Steady Rhythm","d":"Dodge Recovery +1.5%","r":"assassin","t":"small","x":497.1,"y":-70,"th":"Shadowstep","b":"Dodge Recovery","s":"assassin","ti":"3"},{"id":"A22","n":"Lingering Mark","d":"Mark หรือ Poison ที่มาจากสกิลแขนซ้ายมีระยะเวลาเพิ่ม 10% ไม่เพิ่มจำนวน Stack สูงสุด","r":"assassin","t":"evolution","x":561.3,"y":-93.2,"th":"Shadowstep","b":"ต้องใช้สกิล/ชิ้นส่วนที่รองรับ","s":"gL","ti":"3"},{"id":"A23","n":"Shadowstep — Adaptation","d":"Dodge Recovery +1.5%","r":"assassin","t":"small","x":625.8,"y":-113.6,"th":"Shadowstep","b":"Dodge Recovery","s":"assassin","ti":"3"},{"id":"A24","n":"Marked Opening","d":"ทำเครื่องหมายศัตรู 1 ตัว ทำให้ผู้เล่นสร้างดาเมจต่อเป้าหมายนั้นเพิ่ม 8% เป็นเวลา 4 วินาที Mark ซ้อนจากสกิลนี้ไม่ได้","r":"assassin","t":"active","x":691.7,"y":-125.4,"th":"Shadowstep","b":"Cooldown 32s","s":"core-active","ti":"3"},{"id":"A25","n":"Shadowstep — Full Calibration","d":"Dodge Recovery +2%","r":"assassin","t":"small","x":759.7,"y":-125.5,"th":"Shadowstep","b":"Dodge Recovery","s":"assassin","ti":"3"},{"id":"A26","n":"Shadowstep — Apex Protocol","d":"Dodge Cooldown −15% แต่ Armor −16%; ใช้เพดาน Cooldown Reduction รวม","r":"assassin","t":"keystone","x":828.9,"y":-115.9,"th":"Shadowstep","b":"Dodge Recovery","s":"assassin","ti":"3"},{"id":"A27","n":"Momentum Striker — Initiation","d":"Combo Damage +1.5%","r":"assassin","t":"small","x":296.2,"y":53.7,"th":"Momentum Striker","b":"Combo Damage","s":"assassin","ti":"4"},{"id":"A28","n":"Momentum Striker — Measured Flow","d":"Combo Damage +1.5%","r":"assassin","t":"small","x":363.1,"y":60.1,"th":"Momentum Striker","b":"Combo Damage","s":"assassin","ti":"4"},{"id":"A29","n":"Momentum Striker — Reinforcement","d":"Combo Damage +3.5% และเพิ่มความเสถียรของ Momentum Striker เมื่อใช้ชิ้นส่วนที่รองรับ","r":"assassin","t":"notable","x":430.8,"y":60.4,"th":"Momentum Striker","b":"Combo Damage","s":"assassin","ti":"4"},{"id":"A30","n":"Momentum Striker — Steady Rhythm","d":"Combo Damage +1.5%","r":"assassin","t":"small","x":498.7,"y":57.4,"th":"Momentum Striker","b":"Combo Damage","s":"assassin","ti":"4"},{"id":"A31","n":"Combo Echo","d":"โจมตีพื้นฐานครบ 5 ครั้ง ปล่อยการโจมตีเสริมดาเมจ 20% มีคูลดาวน์ภายใน","r":"assassin","t":"evolution","x":566.2,"y":56.6,"th":"Momentum Striker","b":"ต้องใช้สกิล/ชิ้นส่วนที่รองรับ","s":"gR","ti":"4"},{"id":"A32","n":"Momentum Striker — Adaptation","d":"Combo Damage +1.5%","r":"assassin","t":"small","x":632.8,"y":63.5,"th":"Momentum Striker","b":"Combo Damage","s":"assassin","ti":"4"},{"id":"A33","n":"Momentum Striker — Signature Protocol","d":"คอมโบครบ 4 ครั้งคืน Dash Charge 1 ครั้ง (คูลดาวน์ 16 วิ)","r":"assassin","t":"notable","x":698.3,"y":81,"th":"Momentum Striker","b":"Combo Damage","s":"assassin","ti":"4"},{"id":"A34","n":"Momentum Striker — Full Calibration","d":"Combo Damage +2%","r":"assassin","t":"small","x":762.4,"y":107.7,"th":"Momentum Striker","b":"Combo Damage","s":"assassin","ti":"4"},{"id":"A35","n":"Momentum Striker — Apex Protocol","d":"คอมโบครบ 4 ครั้งคืน Dash Charge 1 ครั้ง (คูลดาวน์ 16 วิ)","r":"assassin","t":"notable","x":825.7,"y":137.4,"th":"Momentum Striker","b":"Combo Damage","s":"assassin","ti":"4"},{"id":"A36","n":"Phantom Legion — Initiation","d":"Clone Duration +1.5%","r":"assassin","t":"small","x":274.1,"y":124.3,"th":"Phantom Legion","b":"Clone Duration","s":"assassin","ti":"5"},{"id":"A37","n":"Phantom Legion — Measured Flow","d":"Clone Duration +1.5%","r":"assassin","t":"small","x":338.8,"y":143.7,"th":"Phantom Legion","b":"Clone Duration","s":"assassin","ti":"5"},{"id":"A38","n":"Phantom Legion — Reinforcement","d":"Clone Duration +3.5% และเพิ่มความเสถียรของ Phantom Legion เมื่อใช้ชิ้นส่วนที่รองรับ","r":"assassin","t":"notable","x":404.5,"y":159.9,"th":"Phantom Legion","b":"Clone Duration","s":"assassin","ti":"5"},{"id":"A39","n":"Phantom Legion — Steady Rhythm","d":"Clone Duration +1.5%","r":"assassin","t":"small","x":469.6,"y":177.5,"th":"Phantom Legion","b":"Clone Duration","s":"assassin","ti":"5"},{"id":"A40","n":"Shadow Pivot","d":"Dodge สำเร็จทิ้งภาพลวงตา 1 วินาที เพื่อเบี่ยงเบนศัตรูทั่วไป (ไม่สร้างดาเมจ)","r":"assassin","t":"evolution","x":532.2,"y":201.4,"th":"Phantom Legion","b":"ต้องใช้สกิล/ชิ้นส่วนที่รองรับ","s":"legs","ti":"5"},{"id":"A41","n":"Phantom Legion — Adaptation","d":"Clone Duration +1.5%","r":"assassin","t":"small","x":591.3,"y":234.3,"th":"Phantom Legion","b":"Clone Duration","s":"assassin","ti":"5"},{"id":"A42","n":"Smoke Break","d":"ปล่อยควันและภาพลวงตา 2.5 วินาที ช่วยเบี่ยงเบนการล็อกเป้าหมายของศัตรูทั่วไป โดยไม่หยุดบอสถาวร","r":"assassin","t":"active","x":646.9,"y":275.1,"th":"Phantom Legion","b":"Cooldown 34s","s":"core-active","ti":"5"},{"id":"A43","n":"Phantom Legion — Full Calibration","d":"Clone Duration +2%","r":"assassin","t":"small","x":701,"y":318.7,"th":"Phantom Legion","b":"Clone Duration","s":"assassin","ti":"5"},{"id":"A44","n":"Phantom Legion — Apex Protocol","d":"Clone Damage +18% แต่ Max HP −18%; ร่างเงาสร้าง Proc ต่อเนื่องไม่ได้","r":"assassin","t":"keystone","x":756.7,"y":357.7,"th":"Phantom Legion","b":"Clone Duration","s":"assassin","ti":"5"},{"id":"A45","n":"Abyss Execution — Initiation","d":"Marked Target Damage +1.5%","r":"assassin","t":"small","x":237.3,"y":185.2,"th":"Abyss Execution","b":"Marked Target Damage","s":"assassin","ti":"6"},{"id":"A46","n":"Abyss Execution — Measured Flow","d":"Marked Target Damage +1.5%","r":"assassin","t":"small","x":295.6,"y":219.3,"th":"Abyss Execution","b":"Marked Target Damage","s":"assassin","ti":"6"},{"id":"A47","n":"Abyss Execution — Reinforcement","d":"Marked Target Damage +3.5% และเพิ่มความเสถียรของ Abyss Execution เมื่อใช้ชิ้นส่วนที่รองรับ","r":"assassin","t":"notable","x":353.2,"y":253.9,"th":"Abyss Execution","b":"Marked Target Damage","s":"assassin","ti":"6"},{"id":"A48","n":"Abyss Execution — Steady Rhythm","d":"Marked Target Damage +1.5%","r":"assassin","t":"small","x":407.5,"y":293.1,"th":"Abyss Execution","b":"Marked Target Damage","s":"assassin","ti":"6"},{"id":"A49","n":"Silent Mechanism","d":"Energy Cost ของสกิล Support จากหลังลดลง 8% เมื่อสกิลนั้นมีการใช้ Energy","r":"assassin","t":"evolution","x":456.7,"y":339.4,"th":"Abyss Execution","b":"ต้องใช้สกิล/ชิ้นส่วนที่รองรับ","s":"back","ti":"6"},{"id":"A50","n":"Abyss Execution — Adaptation","d":"Marked Target Damage +1.5%","r":"assassin","t":"small","x":500.9,"y":391.9,"th":"Abyss Execution","b":"Marked Target Damage","s":"assassin","ti":"6"},{"id":"A51","n":"Abyss Execution — Signature Protocol","d":"โจมตี Abyss Mark ครบ 5 ครั้งเปิด Finisher Window 1.5 วิ","r":"assassin","t":"notable","x":542.9,"y":446.7,"th":"Abyss Execution","b":"Marked Target Damage","s":"assassin","ti":"6"},{"id":"A52","n":"Abyss Execution — Full Calibration","d":"Marked Target Damage +2%","r":"assassin","t":"small","x":587.3,"y":498,"th":"Abyss Execution","b":"Marked Target Damage","s":"assassin","ti":"6"},{"id":"A53","n":"Abyss Execution — Apex Protocol","d":"โจมตี Abyss Mark ครบ 5 ครั้งเปิด Finisher Window 1.5 วิ","r":"assassin","t":"notable","x":638.7,"y":541,"th":"Abyss Execution","b":"Marked Target Damage","s":"assassin","ti":"6"},{"id":"N0","n":"Titan Drill — Initiation","d":"Mining Power +1.5%","r":"mining","t":"small","x":185.3,"y":237.2,"th":"Titan Drill","b":"Mining Power","s":"mining","ti":"1"},{"id":"N1","n":"Titan Drill — Measured Flow","d":"Mining Power +1.5%","r":"mining","t":"small","x":227.7,"y":306.7,"th":"Titan Drill","b":"Mining Power","s":"mining","ti":"1"},{"id":"N2","n":"Titan Drill — Reinforcement","d":"Mining Power +3.5% และเพิ่มความเสถียรของ Titan Drill เมื่อใช้ชิ้นส่วนที่รองรับ","r":"mining","t":"notable","x":270.3,"y":375.9,"th":"Titan Drill","b":"Mining Power","s":"mining","ti":"1"},{"id":"N3","n":"Titan Drill — Steady Rhythm","d":"Mining Power +1.5%","r":"mining","t":"small","x":317.6,"y":441.7,"th":"Titan Drill","b":"Mining Power","s":"mining","ti":"1"},{"id":"N4","n":"Spectrum Lens","d":"แสดงชนิดแร่ที่ตรวจพบในระยะใกล้ผ่าน Scanner (ไม่เพิ่มแร่)","r":"mining","t":"evolution","x":372.7,"y":501.8,"th":"Titan Drill","b":"ต้องใช้สกิล/ชิ้นส่วนที่รองรับ","s":"head","ti":"1"},{"id":"N5","n":"Titan Drill — Adaptation","d":"Mining Power +1.5%","r":"mining","t":"small","x":434.9,"y":556.2,"th":"Titan Drill","b":"Mining Power","s":"mining","ti":"1"},{"id":"N6","n":"Titan Drill — Signature Protocol","d":"Mining Power +14% แต่ Mining Speed −12%","r":"mining","t":"keystone","x":499.9,"y":607.9,"th":"Titan Drill","b":"Mining Power","s":"mining","ti":"1"},{"id":"N7","n":"Rapid Extraction — Initiation","d":"Mining Speed +1.5%","r":"mining","t":"small","x":110.7,"y":279.9,"th":"Rapid Extraction","b":"Mining Speed","s":"mining","ti":"2"},{"id":"N8","n":"Rapid Extraction — Measured Flow","d":"Mining Speed +1.5%","r":"mining","t":"small","x":135.1,"y":357.3,"th":"Rapid Extraction","b":"Mining Speed","s":"mining","ti":"2"},{"id":"N9","n":"Rapid Extraction — Reinforcement","d":"Mining Speed +3.5% และเพิ่มความเสถียรของ Rapid Extraction เมื่อใช้ชิ้นส่วนที่รองรับ","r":"mining","t":"notable","x":163.8,"y":433.1,"th":"Rapid Extraction","b":"Mining Speed","s":"mining","ti":"2"},{"id":"N10","n":"Rapid Extraction — Steady Rhythm","d":"Mining Speed +1.5%","r":"mining","t":"small","x":200.3,"y":505.8,"th":"Rapid Extraction","b":"Mining Speed","s":"mining","ti":"2"},{"id":"N11","n":"Efficient Reactor","d":"ขุดแร่สำเร็จครบ 3 ก้อน ฟื้น Energy 4% โดยมีคูลดาวน์ภายใน","r":"mining","t":"evolution","x":244.4,"y":575.2,"th":"Rapid Extraction","b":"ต้องใช้สกิล/ชิ้นส่วนที่รองรับ","s":"core","ti":"2"},{"id":"N12","n":"Rapid Extraction — Adaptation","d":"Mining Speed +1.5%","r":"mining","t":"small","x":292,"y":642.8,"th":"Rapid Extraction","b":"Mining Speed","s":"mining","ti":"2"},{"id":"N13","n":"Drill Overdrive","d":"เพิ่ม Mining Speed 18% เป็นเวลา 7 วินาที แลกกับ Energy Cost เพิ่มขึ้น 20% และยังขุดแร่ที่พลังขุดไม่ถึงไม่ได้","r":"mining","t":"active","x":336.2,"y":711.6,"th":"Rapid Extraction","b":"Cooldown 42s","s":"core-active","ti":"2"},{"id":"N14","n":"Ore Prospector — Initiation","d":"Ore Discovery +1.5%","r":"mining","t":"small","x":30,"y":299.5,"th":"Ore Prospector","b":"Ore Discovery","s":"mining","ti":"3"},{"id":"N15","n":"Ore Prospector — Measured Flow","d":"Ore Discovery +1.5%","r":"mining","t":"small","x":38.1,"y":380.1,"th":"Ore Prospector","b":"Ore Discovery","s":"mining","ti":"3"},{"id":"N16","n":"Ore Prospector — Reinforcement","d":"Ore Discovery +3.5% และเพิ่มความเสถียรของ Ore Prospector เมื่อใช้ชิ้นส่วนที่รองรับ","r":"mining","t":"notable","x":53.2,"y":459.9,"th":"Ore Prospector","b":"Ore Discovery","s":"mining","ti":"3"},{"id":"N17","n":"Ore Prospector — Steady Rhythm","d":"Ore Discovery +1.5%","r":"mining","t":"small","x":75.9,"y":538.7,"th":"Ore Prospector","b":"Ore Discovery","s":"mining","ti":"3"},{"id":"N18","n":"Split Drill","d":"สกิลแขนซ้ายที่ขุดโดนแร่ ส่งแรงกระแทก 30% ไปยังแร่ใกล้เคียง 1 ก้อน ต้องผ่านกฎ Mining Power เดิม","r":"mining","t":"evolution","x":102.4,"y":616.6,"th":"Ore Prospector","b":"ต้องใช้สกิล/ชิ้นส่วนที่รองรับ","s":"armL","ti":"3"},{"id":"N19","n":"Ore Prospector — Adaptation","d":"Ore Discovery +1.5%","r":"mining","t":"small","x":126.1,"y":694.6,"th":"Ore Prospector","b":"Ore Discovery","s":"mining","ti":"3"},{"id":"N20","n":"Ore Prospector — Signature Protocol","d":"โอกาสเจอ Rare Ore +6% แต่ Capacity −15%","r":"mining","t":"keystone","x":140.3,"y":774.4,"th":"Ore Prospector","b":"Ore Discovery","s":"mining","ti":"3"},{"id":"N21","n":"Deep Explorer — Initiation","d":"Hazard Resistance +1.5%","r":"mining","t":"small","x":-53.7,"y":296.2,"th":"Deep Explorer","b":"Hazard Resistance","s":"mining","ti":"4"},{"id":"N22","n":"Deep Explorer — Measured Flow","d":"Hazard Resistance +1.5%","r":"mining","t":"small","x":-62.4,"y":376.9,"th":"Deep Explorer","b":"Hazard Resistance","s":"mining","ti":"4"},{"id":"N23","n":"Deep Explorer — Reinforcement","d":"Hazard Resistance +3.5% และเพิ่มความเสถียรของ Deep Explorer เมื่อใช้ชิ้นส่วนที่รองรับ","r":"mining","t":"notable","x":-64.3,"y":458.5,"th":"Deep Explorer","b":"Hazard Resistance","s":"mining","ti":"4"},{"id":"N24","n":"Deep Explorer — Steady Rhythm","d":"Hazard Resistance +1.5%","r":"mining","t":"small","x":-62.2,"y":540.4,"th":"Deep Explorer","b":"Hazard Resistance","s":"mining","ti":"4"},{"id":"N25","n":"Precision Mining","d":"แขนขวาขุดแร่ก้อนเดิมต่อเนื่องครบ 3 ครั้ง การโจมตีถัดไปดาเมจขุด +8%","r":"mining","t":"evolution","x":-62.2,"y":621.9,"th":"Deep Explorer","b":"ต้องใช้สกิล/ชิ้นส่วนที่รองรับ","s":"armR","ti":"4"},{"id":"N26","n":"Deep Explorer — Adaptation","d":"Hazard Resistance +1.5%","r":"mining","t":"small","x":-70.5,"y":702.5,"th":"Deep Explorer","b":"Hazard Resistance","s":"mining","ti":"4"},{"id":"N27","n":"Seismic Scanner","d":"ส่งคลื่นสแกน เปิดเผยแร่ใกล้เคียงเป็นเวลา 12 วินาที ไม่มีการสร้างแร่เพิ่มหรือเพิ่ม Loot","r":"mining","t":"active","x":-90.7,"y":781.8,"th":"Deep Explorer","b":"Cooldown 30s","s":"core-active","ti":"4"},{"id":"N28","n":"Cargo Engineer — Initiation","d":"Bag Capacity +1.5%","r":"mining","t":"small","x":-124.3,"y":274.1,"th":"Cargo Engineer","b":"Bag Capacity","s":"mining","ti":"5"},{"id":"N29","n":"Cargo Engineer — Measured Flow","d":"Bag Capacity +1.5%","r":"mining","t":"small","x":-149.1,"y":351.7,"th":"Cargo Engineer","b":"Bag Capacity","s":"mining","ti":"5"},{"id":"N30","n":"Cargo Engineer — Reinforcement","d":"Bag Capacity +3.5% และเพิ่มความเสถียรของ Cargo Engineer เมื่อใช้ชิ้นส่วนที่รองรับ","r":"mining","t":"notable","x":-170.2,"y":430.6,"th":"Cargo Engineer","b":"Bag Capacity","s":"mining","ti":"5"},{"id":"N31","n":"Cargo Engineer — Steady Rhythm","d":"Bag Capacity +1.5%","r":"mining","t":"small","x":-192.4,"y":508.9,"th":"Cargo Engineer","b":"Bag Capacity","s":"mining","ti":"5"},{"id":"N32","n":"Expedition Stride","d":"เพิ่ม Movement Speed 8% ขณะไม่ได้ขุด และนับรวมเพดาน Passive","r":"mining","t":"evolution","x":-221.2,"y":584.6,"th":"Cargo Engineer","b":"ต้องใช้สกิล/ชิ้นส่วนที่รองรับ","s":"legs","ti":"5"},{"id":"N33","n":"Cargo Engineer — Adaptation","d":"Bag Capacity +1.5%","r":"mining","t":"small","x":-260.1,"y":656.3,"th":"Cargo Engineer","b":"Bag Capacity","s":"mining","ti":"5"},{"id":"N34","n":"Cargo Engineer — Signature Protocol","d":"Bag Capacity +16% แต่ Move Speed −10% เมื่อ Bag เกิน 75%","r":"mining","t":"keystone","x":-308,"y":724.2,"th":"Cargo Engineer","b":"Bag Capacity","s":"mining","ti":"5"},{"id":"N35","n":"Chain Excavator — Initiation","d":"Multi-Mine Chance +1.5%","r":"mining","t":"small","x":-185.2,"y":237.3,"th":"Chain Excavator","b":"Multi-Mine Chance","s":"mining","ti":"6"},{"id":"N36","n":"Chain Excavator — Measured Flow","d":"Multi-Mine Chance +1.5%","r":"mining","t":"small","x":-227.6,"y":306.8,"th":"Chain Excavator","b":"Multi-Mine Chance","s":"mining","ti":"6"},{"id":"N37","n":"Chain Excavator — Reinforcement","d":"Multi-Mine Chance +3.5% และเพิ่มความเสถียรของ Chain Excavator เมื่อใช้ชิ้นส่วนที่รองรับ","r":"mining","t":"notable","x":-270.2,"y":376,"th":"Chain Excavator","b":"Multi-Mine Chance","s":"mining","ti":"6"},{"id":"N38","n":"Chain Excavator — Steady Rhythm","d":"Multi-Mine Chance +1.5%","r":"mining","t":"small","x":-317.7,"y":441.6,"th":"Chain Excavator","b":"Multi-Mine Chance","s":"mining","ti":"6"},{"id":"N39","n":"Compact Cargo","d":"เพิ่ม Bag Capacity 6% ไม่ช่วยให้ขุดเกิน Mining Power","r":"mining","t":"evolution","x":-372.8,"y":501.6,"th":"Chain Excavator","b":"ต้องใช้สกิล/ชิ้นส่วนที่รองรับ","s":"back","ti":"6"},{"id":"N40","n":"Chain Excavator — Adaptation","d":"Multi-Mine Chance +1.5%","r":"mining","t":"small","x":-435,"y":556,"th":"Chain Excavator","b":"Multi-Mine Chance","s":"mining","ti":"6"},{"id":"N41","n":"Magnetic Collector","d":"ดูดเฉพาะแร่ที่ขุดสำเร็จและตกอยู่ในระยะใกล้เข้า Bag โดยติดข้อจำกัด Capacity เดิม ไม่ดึงแร่ที่ยังไม่ขุด","r":"mining","t":"active","x":-500,"y":607.7,"th":"Chain Excavator","b":"Cooldown 35s","s":"core-active","ti":"6"},{"id":"H0","n":"Arcane Plating","d":"Armor +4% และ Magic Resistance +3%","r":"hybrid","t":"small","x":-243.9,"y":-243.9,"th":"WAR/MAGE","b":"","s":"any","ti":""},{"id":"H1","n":"Rune Counterstrike","d":"Guard สำเร็จทำให้ Magic Skill ครั้งถัดไปแรงขึ้น 7% (คูลดาวน์ 8 วิ)","r":"hybrid","t":"small","x":-360.6,"y":-360.6,"th":"WAR/MAGE","b":"","s":"any","ti":""},{"id":"H2","n":"Battlemage Converter","d":"Melee Hit ฟื้น Energy 2 หน่วย (คูลดาวน์ 3 วิ); Magic Damage +4%","r":"hybrid","t":"notable","x":-477.3,"y":-477.3,"th":"WAR/MAGE","b":"","s":"any","ti":""},{"id":"H3","n":"Spellblade Relay","d":"Critical Chance +1.5 จุดเปอร์เซ็นต์ สำหรับ Magic Projectile","r":"hybrid","t":"small","x":244,"y":-243.9,"th":"MAGE/ASSASSIN","b":"","s":"any","ti":""},{"id":"H4","n":"Rune Ambush","d":"การโจมตีเวทหลัง Dodge ได้โบนัส +7% หนึ่งครั้ง (คูลดาวน์ 6 วิ)","r":"hybrid","t":"small","x":360.6,"y":-360.6,"th":"MAGE/ASSASSIN","b":"","s":"any","ti":""},{"id":"H5","n":"Dimensional Cut","d":"เมื่อโจมตีศัตรูติด Rune Mark ด้วย Blade Skill เกิด Echo Slash (คูลดาวน์ 12 วิ; Echo ไม่สร้าง Echo ซ้ำ)","r":"hybrid","t":"notable","x":477.3,"y":-477.3,"th":"MAGE/ASSASSIN","b":"","s":"any","ti":""},{"id":"H6","n":"Swift Excavator","d":"Movement Speed +2% และ Mining Speed +2%","r":"hybrid","t":"small","x":244,"y":244,"th":"ASSASSIN/MINING","b":"","s":"any","ti":""},{"id":"H7","n":"Shadow Salvage","d":"หลบสำเร็จเพิ่ม Mining Power +6% นาน 5 วินาที","r":"hybrid","t":"small","x":360.6,"y":360.6,"th":"ASSASSIN/MINING","b":"","s":"any","ti":""},{"id":"H8","n":"Shatter Rush","d":"ทำลายแร่แล้วได้บัฟ Combo Speed +4% สำหรับ Combat ครั้งถัดไปในรอบ (ไม่สะสม)","r":"hybrid","t":"notable","x":477.3,"y":477.3,"th":"ASSASSIN/MINING","b":"","s":"any","ti":""},{"id":"H9","n":"Heavy Core","d":"Mining Power +3% และ Armor +3%","r":"hybrid","t":"small","x":-243.9,"y":244,"th":"MINING/WARRIOR","b":"","s":"any","ti":""},{"id":"H10","n":"Bulwark Miner","d":"ขณะใช้ Mining Skill ลด Damage Taken 5%","r":"hybrid","t":"small","x":-360.6,"y":360.6,"th":"MINING/WARRIOR","b":"","s":"any","ti":""},{"id":"H11","n":"Titan Forge","d":"การขุดแร่สำเร็จฟื้น Guard Energy 3 หน่วย (คูลดาวน์ 8 วิ)","r":"hybrid","t":"notable","x":-477.3,"y":477.3,"th":"MINING/WARRIOR","b":"","s":"any","ti":""}],"links":[["A0","A1"],["A0","U11"],["A1","A2"],["A1","H3"],["A10","A11"],["A10","A9"],["A11","A12"],["A11","A2"],["A11","A20"],["A12","A13"],["A13","A14"],["A14","A15"],["A14","A23"],["A14","A5"],["A15","A16"],["A16","A17"],["A17","A26"],["A17","A8"],["A18","A19"],["A18","U13"],["A19","A20"],["A2","A3"],["A20","A21"],["A20","A29"],["A21","A22"],["A22","A23"],["A23","A24"],["A23","A32"],["A24","A25"],["A25","A26"],["A26","A35"],["A27","A28"],["A27","U13"],["A28","A29"],["A29","A30"],["A29","A38"],["A3","A4"],["A3","H4"],["A30","A31"],["A31","A32"],["A32","A33"],["A32","A41"],["A33","A34"],["A34","A35"],["A35","A44"],["A36","A37"],["A36","U14"],["A37","A38"],["A38","A39"],["A38","A47"],["A39","A40"],["A4","A5"],["A40","A41"],["A41","A42"],["A41","A50"],["A42","A43"],["A43","A44"],["A44","A53"],["A45","A46"],["A45","U14"],["A46","A47"],["A46","H6"],["A47","A48"],["A48","A49"],["A48","H7"],["A49","A50"],["A5","A6"],["A50","A51"],["A51","A52"],["A51","H8"],["A52","A53"],["A6","A7"],["A6","H5"],["A7","A8"],["A9","U12"],["H0","H1"],["H0","M1"],["H0","W46"],["H1","H2"],["H1","M3"],["H1","W48"],["H10","H11"],["H10","H9"],["H10","N37"],["H10","W3"],["H11","N40"],["H11","W6"],["H2","M6"],["H2","W51"],["H3","H4"],["H3","M46"],["H4","H5"],["H4","M48"],["H5","M51"],["H6","H7"],["H6","N0"],["H7","H8"],["H7","N2"],["H8","N5"],["H9","N35"],["H9","W1"],["M0","M1"],["M0","U22"],["M1","M2"],["M10","M11"],["M10","M9"],["M11","M12"],["M11","M2"],["M11","M20"],["M12","M13"],["M13","M14"],["M14","M15"],["M14","M23"],["M14","M5"],["M15","M16"],["M16","M17"],["M17","M26"],["M17","M8"],["M18","M19"],["M18","U9"],["M19","M20"],["M2","M3"],["M20","M21"],["M20","M29"],["M21","M22"],["M22","M23"],["M23","M24"],["M23","M32"],["M24","M25"],["M25","M26"],["M26","M35"],["M27","M28"],["M27","U9"],["M28","M29"],["M29","M30"],["M29","M38"],["M3","M4"],["M30","M31"],["M31","M32"],["M32","M33"],["M32","M41"],["M33","M34"],["M34","M35"],["M35","M44"],["M36","M37"],["M36","U10"],["M37","M38"],["M38","M39"],["M38","M47"],["M39","M40"],["M4","M5"],["M40","M41"],["M41","M42"],["M41","M50"],["M42","M43"],["M43","M44"],["M44","M53"],["M45","M46"],["M45","U11"],["M46","M47"],["M47","M48"],["M48","M49"],["M49","M50"],["M5","M6"],["M50","M51"],["M51","M52"],["M52","M53"],["M6","M7"],["M7","M8"],["M9","U23"],["N0","N1"],["N0","U15"],["N1","N2"],["N10","N11"],["N10","N9"],["N11","N12"],["N12","N13"],["N12","N19"],["N12","N5"],["N13","N20"],["N13","N6"],["N14","N15"],["N14","U16"],["N15","N16"],["N16","N17"],["N16","N23"],["N16","N9"],["N17","N18"],["N18","N19"],["N19","N20"],["N19","N26"],["N2","N3"],["N2","N9"],["N20","N27"],["N21","N22"],["N21","U17"],["N22","N23"],["N23","N24"],["N23","N30"],["N24","N25"],["N25","N26"],["N26","N27"],["N26","N33"],["N27","N34"],["N28","N29"],["N28","U18"],["N29","N30"],["N3","N4"],["N30","N31"],["N30","N37"],["N31","N32"],["N32","N33"],["N33","N34"],["N33","N40"],["N34","N41"],["N35","N36"],["N35","U18"],["N36","N37"],["N37","N38"],["N38","N39"],["N39","N40"],["N4","N5"],["N40","N41"],["N5","N6"],["N7","N8"],["N7","U16"],["N8","N9"],["U0","U1"],["U0","U2"],["U0","U3"],["U0","U4"],["U0","U5"],["U0","U6"],["U0","U7"],["U0","U8"],["U1","U2"],["U1","U8"],["U1","U9"],["U10","U11"],["U10","U2"],["U10","U9"],["U11","U12"],["U11","U2"],["U12","U13"],["U12","U3"],["U13","U14"],["U13","U3"],["U14","U15"],["U14","U4"],["U15","U16"],["U15","U4"],["U16","U17"],["U16","U5"],["U17","U18"],["U17","U5"],["U18","U19"],["U18","U6"],["U19","U20"],["U19","U6"],["U19","W0"],["U19","W9"],["U2","U3"],["U20","U21"],["U20","U7"],["U20","W18"],["U21","U22"],["U21","U7"],["U21","W27"],["U21","W36"],["U22","U23"],["U22","U8"],["U22","W45"],["U23","U8"],["U23","U9"],["U3","U4"],["U4","U5"],["U5","U6"],["U6","U7"],["U7","U8"],["W0","W1"],["W1","W2"],["W10","W11"],["W10","W9"],["W11","W12"],["W11","W2"],["W11","W20"],["W12","W13"],["W13","W14"],["W14","W15"],["W14","W23"],["W14","W5"],["W15","W16"],["W16","W17"],["W17","W26"],["W17","W8"],["W18","W19"],["W19","W20"],["W2","W3"],["W20","W21"],["W20","W29"],["W21","W22"],["W22","W23"],["W23","W24"],["W23","W32"],["W24","W25"],["W25","W26"],["W26","W35"],["W27","W28"],["W28","W29"],["W29","W30"],["W29","W38"],["W3","W4"],["W30","W31"],["W31","W32"],["W32","W33"],["W32","W41"],["W33","W34"],["W34","W35"],["W35","W44"],["W36","W37"],["W37","W38"],["W38","W39"],["W38","W47"],["W39","W40"],["W4","W5"],["W40","W41"],["W41","W42"],["W41","W50"],["W42","W43"],["W43","W44"],["W44","W53"],["W45","W46"],["W46","W47"],["W47","W48"],["W48","W49"],["W49","W50"],["W5","W6"],["W50","W51"],["W51","W52"],["W52","W53"],["W6","W7"],["W7","W8"]],"caps":{"critChance":55,"damageReduction":60,"cooldownReduction":35,"passiveAttackSpeed":30,"passiveMiningSpeed":25,"passiveMiningPower":12},"bal":{"pts":75,"ks":3,"status":"design/prototype only; not integrated into game combat formulas","adjusted":235,"capsB":{"totalCritChancePct":55,"totalDamageReductionPct":60,"totalCooldownReductionPct":35,"passiveAttackSpeedBonusPct":35,"eligiblePassiveDamageBonusPctPerHit":40}}};
+
+/* =====================================================================
+   V7 SKILL REVOLUTION (1/6) — core engine
+   Canonical tree validation · Core Level / Core EXP (Lv.70, 69 level points + 6 milestone points = 75) ·
+   allocation / refund / respec with path validation from U0 · structured Passive Effect Registry (all 240 ids) ·
+   one centralized stat pipeline for Combat and Mining with hard caps · legacy Mastery archived (no stat stacking)
+   Namespace: SR_* / sr* (no collision with V7_* / v7* of V6.1 or v10* of V7 Grinding)
+   ===================================================================== */
+const SR_VER=80,SR_LVMAX=70,SR_PTS=75,SR_KS=3;
+const SR_CAP={cc:55,dr:60,cdr:35,aspd:30,move:25,mspd:25,mpow:12,dmg:40};
+const SR={byId:{},adj:{},valid:null};
+(function(){for(const n of SR_TREE.nodes){SR.byId[n.id]=n;SR.adj[n.id]=[];}for(const[a,b]of SR_TREE.links){SR.adj[a].push(b);SR.adj[b].push(a);}
+ const reg={},typ={};for(const n of SR_TREE.nodes){reg[n.r]=(reg[n.r]||0)+1;typ[n.t]=(typ[n.t]||0)+1;}
+ const uniq=new Set(SR_TREE.links.map(l=>[...l].sort().join('|')));const bad=SR_TREE.links.filter(([a,b])=>!SR.byId[a]||!SR.byId[b]||a===b);
+ const seen=new Set(['U0']),q=['U0'];while(q.length){const x=q.pop();for(const y of SR.adj[x])if(!seen.has(y)){seen.add(y);q.push(y);}}
+ SR.valid={nodes:SR_TREE.nodes.length,links:SR_TREE.links.length,uniqueLinks:uniq.size,badLinks:bad.length,reachable:seen.size,reg,typ,
+  ok:SR_TREE.nodes.length===240&&uniq.size===342&&!bad.length&&seen.size===240&&reg.warrior===54&&reg.mage===54&&reg.assassin===54&&reg.mining===42&&reg.universal===24&&reg.hybrid===12&&!!SR.byId.U0};
+ if(!SR.valid.ok)console.error('SR tree validation failed',SR.valid);})();
+/* ---------- Passive Effect Registry: every node id → structured effect ---------- */
+const SR_STAT={'Maximum HP':'hp','Maximum Energy':'en','Critical Chance':'cc','Dodge Recovery':'dodge','Melee Damage':'melee','Mining Speed':'mspd','Ore Discovery':'disc','Mining Power':'mpow','Bag Capacity':'cap',
+ 'Guard Effectiveness':'guard','Stagger Power':'stg','Parry Window':'parry','Damage Reflection':'reflect','Rune Damage':'rune','Projectile Damage':'proj','Elemental Damage':'elem','Area Effect':'aoe','Summon Duration':'summon',
+ 'Gravity Effect':'grav','Poison Damage':'poison','Combo Damage':'combo','Clone Duration':'clone','Marked Target Damage':'marked','Hazard Resistance':'hazard','Multi-Mine Chance':'multi','Skill Cooldown Recovery':'cdr','Attack Speed':'aspd',
+ 'Movement Speed':'move','Damage Reduction':'drp','Armor':'armor','Magic Damage':'magic','Mining Skill Energy Efficiency':'meff','Elemental Resistance':'eres','Basic Attack Damage':'basic','Magic Resistance':'mres'};
+/* drawback fields of each keystone (softened by its Reinforcement notable) */
+const SR_KSDRAW={W8:['dodgecd'],W26:['aspd'],W44:['en'],M8:['nonrune'],M26:['nonelem'],M44:['self'],A8:['normal'],A26:['armor'],A44:['hp'],N6:['mspd'],N20:['cap'],N34:['heavyMove']};
+const SR_KEYSTAB={W2:'W8',W20:'W26',W38:'W44',M2:'M8',M20:'M26',M38:'M44',A2:'A8',A20:'A26',A38:'A44',N2:'N6',N16:'N20',N30:'N34'};
+function srParse(n){const fx=[];const d=n.d;let m;
+ const re=/([A-Za-z][A-Za-z\- ]+?) ([+−-])([0-9.]+)(%| จุดเปอร์เซ็นต์)/g;
+ if(n.t==='small'||n.t==='notable'){while((m=re.exec(d))){const k=SR_STAT[m[1].trim()];if(k)fx.push({k,v:(m[2]==='+'?1:-1)*parseFloat(m[3])});}
+  if(/Damage taken −([0-9.]+)%/.test(d))fx.push({k:'taken',v:-parseFloat(RegExp.$1)});}
+ return fx;}
+const SR_FX={};for(const n of SR_TREE.nodes)SR_FX[n.id]=srParse(n);
+/* structured special effects (conditional notables · hybrid triggers · keystones) — numbers taken from the canonical descriptions */
+const SR_SPEC={W15:{k:'lowhp',hp:35,dr:8,dur:4,cd:16},W17:{k:'lowhp',hp:35,dr:8,dur:4,cd:16},W33:{k:'chain5',n:5,melee:6,dur:3},W35:{k:'chain5',n:5,melee:6,dur:3},W51:{k:'gcounter',cd:5},W53:{k:'gcounter',cd:5},
+ M15:{k:'satx',cd:10},M17:{k:'satx',cd:10},M33:{k:'trapx',cd:9},M35:{k:'trapx',cd:9},M51:{k:'gravx',cd:11},M53:{k:'gravx',cd:11},A15:{k:'toxic',n:5,cd:9},A17:{k:'toxic',n:5,cd:9},A33:{k:'dashref',n:4,cd:16},A35:{k:'dashref',n:4,cd:16},A51:{k:'abyssfin',n:5,dur:1.5},A53:{k:'abyssfin',n:5,dur:1.5},
+ H1:{k:'h1',v:7,cd:8},H2:{k:'h2',en:2,cd:3,magic:4},H3:{k:'h3',cc:1.5},H4:{k:'h4',v:7,cd:6},H5:{k:'h5',cd:12},H6:{k:'h6',move:2,mspd:2},H7:{k:'h7',mpow:6,dur:5},H8:{k:'h8',v:4},H9:{k:'h9',mpow:3,armor:3},H10:{k:'h10',v:5},H11:{k:'h11',v:3,cd:8},
+ W8:{k:'ks',guard:14,dodgecd:15},W26:{k:'ks',stg:24,aspd:-12},W44:{k:'ks',greflect:12,en:-20},M8:{k:'ks',rune:18,nonrune:-15},M26:{k:'ks',react:20,nonelem:-18},M44:{k:'ks',construct:20,self:-14},
+ A8:{k:'ks',critd:25,normal:-14},A26:{k:'ks',dodge:15,armor:-16},A44:{k:'ks',clonedmg:18,hp:-18},N6:{k:'ks',mpow:14,mspd:-12},N20:{k:'ks',rare:6,cap:-15},N34:{k:'ks',cap:16,heavyMove:-10}};
+SR_FX.H0=[{k:'armor',v:4},{k:'mres',v:3}];SR_FX.H6=[{k:'move',v:2},{k:'mspd',v:2}];SR_FX.H9=[{k:'mpow',v:3},{k:'armor',v:3}];SR_FX.H2=[{k:'magic',v:4}];
+/* ---------- Core EXP ---------- */
+function srNeed(L){return Math.round(160*Math.pow(L,1.3));}
+const SR_MS=[{id:'ms_gilded',n:'ไปถึง Gilded Crystal Vein (Underdeep ภูมิภาค 3)',chk:()=>typeof v10Reach==='function'&&v10Reach()>=2},
+ {id:'ms_boss',n:'ชนะบอสใน Boss Arena 1 ครั้ง',chk:()=>Object.keys(S.combatCodex&&S.combatCodex.kills||{}).length>0||(S.combatStats&&S.combatStats.wins>0)||(S.sr&&S.sr.flags.bossWin)},
+ {id:'ms_codex',n:'Mineral Codex สำเร็จ 10 รายการ',chk:()=>S.v10&&Object.keys(S.v10.codex.done).length>=10},
+ {id:'ms_relic',n:'ประกอบ Relic ชิ้นแรก',chk:()=>S.v10&&Object.keys(S.v10.relic.done).length>=1},
+ {id:'ms_proj',n:'ทำ Excavation Project สำเร็จ 1 งาน',chk:()=>S.v10&&Object.values(S.v10.proj).some(p=>p.done)},
+ {id:'ms_guard',n:'ล้ม Rare Guardian 1 ตัว',chk:()=>S.v10&&Object.keys(S.v10.guard.first).length>=1}];
+function srDefaults(){return{ver:SR_VER,lv:1,exp:0,totalExp:0,ms:{},alloc:['U0'],core:{combat:'',mining:''},evo:{combat:[],mining:[]},sel:{},unlock:{},prog:{},presets:[null,null,null],expBy:{},flags:{},migrated:0,archive:null,icd:{}};}
+function srEarned(){return Math.min(SR_PTS,(S.sr.lv-1)+Object.keys(S.sr.ms).length);}
+function srSpent(){return S.sr.alloc.length-1;}
+function srAvail(){return srEarned()-srSpent();}
+function srAddExp(n,src){if(!S||!S.sr||!(n>0))return 0;n=Math.round(n);const P=S.sr;P.expBy[src]=(P.expBy[src]||0)+n;if(P.lv>=SR_LVMAX){P.totalExp+=0;return 0;}P.exp+=n;P.totalExp+=n;let up=0;
+ while(P.lv<SR_LVMAX&&P.exp>=srNeed(P.lv)){P.exp-=srNeed(P.lv);P.lv++;up++;}if(P.lv>=SR_LVMAX)P.exp=0;
+ if(up){const t=`⭐ Core Level ${P.lv}! (+${up} Passive Point)`;toast(t,'gold');try{sfx('upgrade');}catch(e){}if(S.notes)S.notes.push({t:Date.now(),k:'sr',txt:t});srSaveSoon();}return n;}
+function srMilestones(){if(!S||!S.sr)return;for(const m of SR_MS){if(S.sr.ms[m.id])continue;let ok=false;try{ok=m.chk();}catch(e){}if(ok){S.sr.ms[m.id]=Date.now();toast(`🏅 Core Milestone: ${m.n} — +1 Passive Point`,'gold');srSaveSoon();}}}
+function srSaveSoon(){try{saveSoon();}catch(e){}}
+/* ---------- allocation (graph rules identical to the canonical prototype) ---------- */
+function srIs(id){return S.sr.alloc.includes(id);}
+function srKsCount(extra){const set=new Set(S.sr.alloc.concat(extra||[]));let n=0;for(const id of set)if(SR.byId[id]&&SR.byId[id].t==='keystone')n++;return n;}
+function srPath(target){if(!SR.byId[target])return null;if(srIs(target))return[];const act=new Set(S.sr.alloc);const start=srKsCount();const queue=[],seen=new Set(),prev=new Map();
+ for(const id of act){const key=id+'|'+start;queue.push({id,k:start,key});seen.add(key);}
+ for(let i=0;i<queue.length;i++){const it=queue[i];for(const nx of SR.adj[it.id]){if(act.has(nx))continue;const k=it.k+(SR.byId[nx].t==='keystone'?1:0);if(k>SR_KS)continue;const key=nx+'|'+k;if(seen.has(key))continue;seen.add(key);prev.set(key,it.key);
+  if(nx===target){const path=[];let s=key;while(s&&!act.has(s.split('|')[0])){path.push(s.split('|')[0]);s=prev.get(s);}return path.reverse();}queue.push({id:nx,k,key});}}return null;}
+function srAlloc(target){const p=srPath(target);if(p===null)return{ok:false,why:'ไม่มีเส้นทางเชื่อมจาก U0 (หรือ Keystone เกิน 3)'};if(!p.length)return{ok:false,why:'ปลดล็อกแล้ว'};
+ if(p.length>srAvail())return{ok:false,why:`แต้มไม่พอ (ต้องใช้ ${p.length} · มี ${srAvail()})`};if(srKsCount(p)>SR_KS)return{ok:false,why:'Keystone สูงสุด 3 จุด'};
+ S.sr.alloc.push(...p);srDirty();save();return{ok:true,n:p.length};}
+function srConnected(set){if(!set.has('U0'))return false;const seen=new Set(['U0']),q=['U0'];while(q.length){const x=q.pop();for(const y of SR.adj[x])if(set.has(y)&&!seen.has(y)){seen.add(y);q.push(y);}}return seen.size===set.size;}
+function srRefund(id){if(id==='U0'||!srIs(id))return{ok:false,why:'คืนไม่ได้'};if(!srSafeArea())return{ok:false,why:'คืนแต้มได้เฉพาะใน Golem Camp หรือ Outpost'};const set=new Set(S.sr.alloc);set.delete(id);
+ if(!srConnected(set))return{ok:false,why:'จะทำให้จุดอื่นขาดการเชื่อมต่อจาก U0 — คืนจุดปลายทางก่อน'};S.sr.alloc=S.sr.alloc.filter(x=>x!==id);srUnequipInvalid();srDirty();save();return{ok:true};}
+function srRespec(){if(!srSafeArea())return false;S.sr.alloc=['U0'];S.sr.core={combat:'',mining:''};S.sr.evo={combat:[],mining:[]};srDirty();save();return true;}
+function srSafeArea(){if(CB)return false;if(R&&R.ud)return typeof udInSafe==='function'&&udInSafe();return !R;}
+function srMode(id){const n=SR.byId[id];return n&&n.r==='mining'?'mining':'combat';}
+function srEquipCore(id){const n=SR.byId[id];if(!n||n.t!=='active'||!srIs(id))return false;const m=srMode(id);S.sr.core[m]=S.sr.core[m]===id?'':id;srDirty();save();return true;}
+function srEquipEvo(id){const n=SR.byId[id];if(!n||n.t!=='evolution'||!srIs(id))return false;const m=srMode(id);const L=S.sr.evo[m];const i=L.indexOf(id);if(i>=0)L.splice(i,1);else{if(L.length>=2)return false;L.push(id);}srDirty();save();return true;}
+function srUnequipInvalid(){for(const m of['combat','mining']){if(S.sr.core[m]&&!srIs(S.sr.core[m]))S.sr.core[m]='';S.sr.evo[m]=S.sr.evo[m].filter(id=>srIs(id));}}
+/* ---------- aggregation (additive, then capped) ---------- */
+let SR_AGG=null;function srDirty(){SR_AGG=null;}
+function srAgg(){if(SR_AGG)return SR_AGG;const A={stat:{},spec:{},ks:{},cnt:{},stab:{}};if(!S||!S.sr)return A;
+ for(const id of S.sr.alloc){for(const f of SR_FX[id]||[])A.stat[f.k]=(A.stat[f.k]||0)+f.v;const sp=SR_SPEC[id];if(sp){if(sp.k==='ks')A.ks[id]=Object.assign({},sp);else{A.spec[sp.k]=Object.assign({},sp,{n2:(A.spec[sp.k]?A.spec[sp.k].n2+1:1)});}}if(SR_KEYSTAB[id])A.stab[SR_KEYSTAB[id]]=(A.stab[SR_KEYSTAB[id]]||0)+1;}
+ /* notables that stabilise their keystone soften its drawback by 25% each (bounded to 50%) */
+ for(const k in A.ks){const s=Math.min(.5,.25*(A.stab[k]||0));for(const f of SR_KSDRAW[k]||[])if(typeof A.ks[k][f]==='number')A.ks[k][f]=Math.round(A.ks[k][f]*(1-s)*10)/10;}
+ const K=A.ks;const add=(k,v)=>{A.stat[k]=(A.stat[k]||0)+v;};
+ if(K.W8){add('guard',K.W8.guard);add('dodgecdUp',K.W8.dodgecd);}if(K.W26){add('stg',K.W26.stg);add('aspd',K.W26.aspd);}if(K.W44){add('en',K.W44.en);}
+ if(K.A26){add('dodge',K.A26.dodge);add('armor',K.A26.armor);}if(K.A44){add('hp',K.A44.hp);}if(K.N6){add('mpow',K.N6.mpow);add('mspd',K.N6.mspd);}if(K.N20){add('disc',K.N20.rare);add('cap',K.N20.cap);}if(K.N34){add('cap',K.N34.cap);}
+ A.cap={aspd:Math.min(SR_CAP.aspd,A.stat.aspd||0),move:Math.min(SR_CAP.move,A.stat.move||0),mspd:Math.min(SR_CAP.mspd,A.stat.mspd||0),mpow:Math.min(SR_CAP.mpow,A.stat.mpow||0)};
+ return SR_AGG=A;}
+function srS(k){return srAgg().stat[k]||0;}
+/* ---------- Core Level base growth (replaces the archived Mastery multipliers) ---------- */
+function srLvMul(){return 1+.01*((S&&S.sr?S.sr.lv:1)-1);}
+/* ---------- centralized Combat pipeline: Base → Equipment+Quality → Sets → (Core Lv) → Passive → Caps → Derived skills ---------- */
+{const _cc=calcCombat;calcCombat=function(eq){const o=_cc(eq);if(!S||!S.sr)return o;try{srCombatPost(o);}catch(e){console.warn('srCombatPost',e);}return o;};}
+function srCombatPost(o){const A=srAgg(),s=k=>A.stat[k]||0;const lm=srLvMul();o.srBase={hp:o.hp,atk:o.atk,def:o.def};
+ o.hp=Math.round(o.hp*lm*(1+s('hp')/100));o.atk=Math.round(o.atk*lm);o.def=Math.round(o.def*lm*(1+(s('armor')+s('mres')*.5)/100));
+ o.as=Math.round((o.as+A.cap.aspd)*10)/10;o.aps=1+o.as/100;o.ms=Math.round((o.ms+A.cap.move)*10)/10;o.move=4.2*(1+o.ms/100);
+ o.cc=Math.min(SR_CAP.cc,o.cc+s('cc'));o.res=o.res+s('eres');o.stg=Math.round(o.stg*(1+s('stg')/100));
+ const cdr0=o.cdr;o.cdr=Math.min(SR_CAP.cdr,o.cdr+s('cdr'));const f=(1-o.cdr/100)/Math.max(.01,1-cdr0/100);
+ for(const sk of o.skills)if(sk)sk.cdEff=Math.max(1.5,Math.round(sk.cdEff*f*10)/10);if(o.guard){o.guard.cdEff=Math.max(2,Math.round(o.guard.cdEff*f*10)/10);o.guard.pow=(o.guard.pow||1)*(1+s('guard')/100);}
+ if(o.dodge){const dm=Math.max(1-SR_CAP.cdr/100,1-s('dodge')/100)*(1+s('dodgecdUp')/100);o.dodge.cdEff=Math.max(.25,Math.round(o.dodge.cdEff*dm*100)/100);}
+ if(o.ult){const e=s('en');o.ult.en=Math.max(50,Math.round(o.ult.en/(1+e/100)));}
+ o.dr=Math.min(SR_CAP.dr/100,o.def/(o.def+150)+s('drp')/100);o.srTaken=1+Math.min(0,s('taken'))/100;
+ o.cp=Math.round(o.hp*.12+o.atk*3+o.def*2+o.as*2.2+o.cc*2.5+(o.cd-150)*.8+o.ms*1.5+o.cdr*2.5+o.stg*1.5+o.res*1.2+o.setFx.size*12+srSpent()*6);return o;}
+/* ---------- centralized Mining pipeline ---------- */
+{const _cs=calcStats;calcStats=function(eq){const o=_cs(eq);if(!S||!S.sr)return o;try{srMiningPost(o);}catch(e){console.warn('srMiningPost',e);}return o;};}
+function srMiningPost(o){const A=srAgg(),s=k=>A.stat[k]||0;const lm=srLvMul();const pm=1+A.cap.mpow/100;
+ o.rawP=Math.max(10,o.rawP*lm*pm);o.P=Math.max(10,Math.round(o.P*lm*pm));o.S=Math.round((o.S+A.cap.mspd)*10)/10;o.C=Math.max(5,Math.round(o.C*(1+s('cap')/100)));
+ o.M=Math.round((o.M+A.cap.move)*10)/10;o.interval=clamp(1.2/(o.S/100),.35,2.5);o.move=2.4*o.M/100;
+ o.maxTier=0;for(let t=1;t<=6;t++)if(o.P>=TIERS[t].req)o.maxTier=t;o.srMeff=Math.min(SR_CAP.cdr,s('meff'));
+ for(const sk of o.skills||[])if(sk)sk.cdEff=Math.max(3,Math.round(sk.cdEff*(1-o.srMeff/100)*10)/10);return o;}
+/* ---------- legacy Mastery: archived, no longer adds stats or skill power ---------- */
+mastMul=function(){return 1;};mGM=function(){return null;};mPath=function(){return null;};v7SpecLv=function(){return 0;};amB=function(){return 0;};
+if(typeof v7ClassPow==='function')v7ClassPow=function(){return 1;};if(typeof v7PathK==='function')v7PathK=function(){return 0;};
+addMastExp=function(){return 0;};addAM=function(){};v7AddDisc=function(){return 0;};
+/* ---------- save schema + one-time migration ---------- */
+function srMigrate(){if(!S)return;if(!S.sr){try{const raw=localStorage.getItem(SAVE_KEY);if(raw&&!localStorage.getItem('buildAGolem_backup_pre_skillrev'))localStorage.setItem('buildAGolem_backup_pre_skillrev',raw);}catch(e){}
+  S.sr=srDefaults();
+  /* archive every legacy mastery record (kept for history; no longer applied) */
+  S.sr.archive={at:Date.now(),partMastery:JSON.parse(JSON.stringify(S.partMastery||{})),specs:JSON.parse(JSON.stringify(S.masterySpecializations||{})),activity:JSON.parse(JSON.stringify(S.activityMastery||{})),disc:S.v7?JSON.parse(JSON.stringify(S.v7.disc||{})):{}};
+  /* deterministic one-time conversion: the legacy Mastery EXP actually earned (levels + current EXP, using the old level curves) becomes Core EXP 1:1,
+     capped at the EXP for Core Lv.35 — no points beyond the new caps, no double conversion */
+  const sumC=(lv,a,b)=>{let t=0;for(let L=1;L<Math.max(1,lv|0);L++)t+=a+b*L;return t;};let lvls=0,disc=0,am=0,lx=0;
+  for(const k in S.sr.archive.partMastery){const r=S.sr.archive.partMastery[k];lvls+=Math.max(0,(r.lv||1)-1);lx+=sumC(Math.min(30,r.lv||1),40,20)+(r.exp||0);}
+  for(const c in S.sr.archive.disc){const r=S.sr.archive.disc[c];disc+=Math.max(0,(r.lv||1)-1);lx+=sumC(r.lv||1,120,30)+(r.exp||0);}
+  for(const k in S.sr.archive.activity){const r=S.sr.archive.activity[k];am+=Math.max(0,(r.lv||1)-1);lx+=sumC(r.lv||1,60,40)+(r.exp||0);}
+  let cap=0;for(let L=1;L<35;L++)cap+=srNeed(L);const conv=Math.min(cap,Math.round(lx));S.sr.migrated={at:Date.now(),legacyPartLv:lvls,legacyDiscLv:disc,legacyAmLv:am,legacyExp:Math.round(lx),exp:conv};
+  if(conv>0)srAddExp(conv,'legacy');}
+ const d=srDefaults();for(const k in d)if(S.sr[k]===undefined)S.sr[k]=d[k];
+ /* validate saved tree state against the canonical graph (unknown ids dropped, disconnected nodes refunded, points clamped) */
+ S.sr.alloc=['U0'].concat(S.sr.alloc.filter(id=>id!=='U0'&&SR.byId[id]));if(!srConnected(new Set(S.sr.alloc))||srSpent()>srEarned()||srKsCount()>SR_KS){S.sr.alloc=['U0'];S.sr.flags.resetBadTree=Date.now();}
+ S.sr.lv=clamp(S.sr.lv|0,1,SR_LVMAX);srUnequipInvalid();srDirty();S.migrationVersion=Math.max(S.migrationVersion||0,SR_VER);}
+{const _m=v51Migrate;v51Migrate=function(){_m.apply(this,arguments);srMigrate();};}
+
+/* =====================================================================
+   V7 SKILL REVOLUTION (2/6) — EQUIPMENT SKILL LIBRARY · COMBAT
+   24 families × 5 slots × 2 choices = 240 combat choices.
+   A = the existing skill of that piece (108 legacy entries kept 1:1, IDs unchanged)
+   B = a new skill (132 new; Warrior right gauntlet has two NEW options because the legacy Warrior
+       right-hand skill is the same GSK entry as the left hand — keeping it would be an alias).
+   Every new skill is a data definition executed by one engine: shape (hit geometry / delivery) +
+   riders (statuses / self effects). Uniqueness is validated at load: no two new skills may share
+   the same behaviour signature (shape + rider set), names are unique, and all hits go through
+   hitEnemy() (real hitboxes, real damage, caps of the V6.1 object system apply).
+   ===================================================================== */
+const SR_SLOTS=['gL','gR','chest','legs','back'];
+const SR_SLOTN={gL:'แขนซ้าย (สกิล 1)',gR:'แขนขวา (สกิล 2)',chest:'Chest Core (Ultimate)',legs:'ขา (Mobility)',back:'หลัง (Utility)'};
+const SR_FEL={magma:'fire',frostbound:'ice',thunder:'shock',void:'void',astral:'void'};
+const SRL={},SRL_BY={};
+/* ---------- new skill definitions (fam, slot, option, name, icon, def) ---------- */
+const SR_NEW=[
+ /* ---- Warrior ---- */
+ ['scrap','gL','B','Scrap Hook','🪝',{sh:'hook',m:1.4,cd:6,rd:['stun']}],
+ ['scrap','gR','A','Junk Toss','🧱',{sh:'bolt',m:1.5,boom:1.4,sp:11,cd:5,rd:['shred']}],
+ ['scrap','gR','B','Rivet Spray','🔩',{sh:'fan',k:5,spread:.9,m:.5,cd:6,rd:[]}],
+ ['scrap','chest','B','Scrapstorm','🌪',{sh:'spin',n:8,r:2.6,gap:.18,m:.7,en:100,rd:['shred','dr']}],
+ ['scrap','legs','B','Tumble Guard','🛡',{mode:'roll',d:3,cd:2.4,inv:.35,rd:['shield']}],
+ ['scrap','back','B','Patch Kit','🩹',{kind:'heal',f:.14,cd:16,rd:[]}],
+ ['stoneguard','gL','B','Rampart Slam','🧱',{sh:'leap',r:2.2,m:1.8,cd:8,rd:['stun','shield']}],
+ ['stoneguard','gR','A','Pebble Volley','🪨',{sh:'fan',k:3,spread:.5,m:.8,cd:5,rd:['knock']}],
+ ['stoneguard','gR','B','Shield Rush','🛡',{sh:'dash',d:3.5,m:1.4,cd:6,rd:['shield']}],
+ ['stoneguard','chest','B','Bastion Quake','⛰',{sh:'quake',k:4,m:1.1,en:100,rd:['stun','dr']}],
+ ['stoneguard','legs','B','Stone Skin Step','🪨',{mode:'phase',cd:2.8,inv:.5,rd:['dr']}],
+ ['stoneguard','back','B','Granite Wall','🧱',{kind:'barrier',v:.25,dur:3,cd:15,rd:[]}],
+ ['coppergear','gL','B','Gear Saw','⚙️',{sh:'boomer',m:1.1,cd:5,rd:['as']}],
+ ['coppergear','gR','A','Cog Turret','🔧',{sh:'turret',dur:8,int:.7,m:.45,cd:10,rd:[]}],
+ ['coppergear','gR','B','Piston Jab','🔩',{sh:'flurry',n:6,gap:.08,range:2.2,m:.32,cd:5,rd:['cdcut']}],
+ ['coppergear','chest','B','Clockwork Barrage','⏱',{sh:'rain',k:10,r:2.5,m:.6,en:100,rd:['as']}],
+ ['coppergear','legs','B','Spring Coil','🌀',{mode:'dashhit',d:3.6,m:.8,cd:2.2,inv:.3,rd:['as']}],
+ ['coppergear','back','B','Overclock Relay','⚡',{kind:'reset',v:4,cd:16,rd:['en']}],
+ ['zephyr','gL','B','Gale Cutter','🌬',{sh:'wave',k:4,step:1.3,m:.7,cd:6,rd:['knock']}],
+ ['zephyr','gR','A','Wind Lance','💨',{sh:'line',len:6,w:1,m:1.6,cd:5,rd:['haste']}],
+ ['zephyr','gR','B','Cyclone Step','🌀',{sh:'dash',d:4,m:1,cd:6,rd:['inv','haste']}],
+ ['zephyr','chest','B','Tempest Spiral','🌪',{sh:'vortex',r:3,dur:3,m:.4,en:100,rd:['slow']}],
+ ['zephyr','legs','B','Tailwind','🍃',{mode:'slide',d:5.5,cd:1.8,inv:.3,rd:['haste']}],
+ ['zephyr','back','B','Gale Barrier','🌬',{kind:'pulse',r:3,m:.6,cd:12,rd:['slow']}],
+ ['drilltech','gL','B','Bore Lance','🔩',{sh:'beam',len:5,w:.8,m:1.8,cd:6,rd:['ab']}],
+ ['drilltech','gR','A','Auger Spin','🌀',{sh:'spin',n:5,r:1.8,gap:.14,m:.4,cd:6,rd:['ab']}],
+ ['drilltech','gR','B','Pile Driver','🔨',{sh:'flurry',n:4,gap:.15,range:2,m:.6,cd:6,rd:['stun']}],
+ ['drilltech','chest','B','Excavator Rampage','🚜',{sh:'dash',d:6,m:2.2,en:100,rd:['ab','stun']}],
+ ['drilltech','legs','B','Burrow','🕳',{mode:'emerge',r:2,m:.8,cd:2.6,inv:.5,rd:['ab']}],
+ ['drilltech','back','B','Drill Drone Mk2','🛸',{kind:'drone',dur:10,en:15,cd:16,rd:['ab']}],
+ ['titanstone','gL','B','Colossus Stomp','🦶',{sh:'nova',r:3,m:2,cd:8,rd:['stun']}],
+ ['titanstone','gR','A','Boulder Hurl','🪨',{sh:'bolt',m:2.4,boom:2,sp:9,cd:7,rd:['stun']}],
+ ['titanstone','gR','B','Titan Grip','✊',{sh:'hook',m:1.8,cd:7,rd:['ab']}],
+ ['titanstone','chest','B','Mountain Fall','🏔',{sh:'meteor',k:1,r:3.5,m:6,delay:.8,en:110,rd:['stun']}],
+ ['titanstone','legs','B','Seismic Leap','🦘',{mode:'leapslam',d:3.5,r:1.8,m:1.2,cd:3,inv:.45,rd:['stun']}],
+ ['titanstone','back','B','Monolith Totem','🗿',{kind:'totem',dur:8,int:.9,m:.5,en:15,cd:16,rd:[]}],
+ ['magnetite','gL','B','Polarity Lash','🧲',{sh:'pull',r:4,m:1.2,cd:7,rd:['shield']}],
+ ['magnetite','gR','A','Magnet Mine','💣',{sh:'trap',k:2,m:1,cd:7,rd:[]}],
+ ['magnetite','gR','B','Iron Orbit','🔘',{sh:'sat',k:3,dur:9,int:.8,m:.35,cd:12,rd:[]}],
+ ['magnetite','chest','B','Magnetic Collapse','🌀',{sh:'vortex',r:4,dur:2.5,m:.5,en:110,rd:['shield']}],
+ ['magnetite','legs','B','Repel Dash','↔',{mode:'backstep',d:3,cd:2,inv:.33,rd:['knock']}],
+ ['magnetite','back','B','Flux Shield','🛡',{kind:'shield',f:.18,cd:14,rd:['reflect']}],
+ ['prism','gL','B','Refraction Fan','🔷',{sh:'fan',k:7,spread:1.2,m:.38,cd:6,rd:['crit']}],
+ ['prism','gR','A','Prism Lance','💎',{sh:'beam',len:8,w:.6,m:2.2,cd:6,rd:['vuln']}],
+ ['prism','gR','B','Mirror Shards','🪞',{sh:'orb',m:1.6,cd:6,rd:['crit']}],
+ ['prism','chest','B','Spectrum Cascade','🌈',{sh:'chain',k:8,range:5,m:1.1,en:100,rd:['crit','vuln']}],
+ ['prism','legs','B','Light Step','✨',{mode:'blink',d:3.6,cd:1.8,inv:.35,rd:['nextx']}],
+ ['prism','back','B','Halo Ward','😇',{kind:'sat',k:3,dur:10,int:.8,m:.3,en:15,cd:16,rd:['shield']}],
+ ['frostbound','gL','B','Frost Fang','❄',{sh:'arc',r:2.2,half:1,n:2,gap:.15,m:.9,cd:5,rd:['chill']}],
+ ['frostbound','gR','A','Ice Lance','🧊',{sh:'bolt',m:1.6,pierce:3,sp:14,cd:5,rd:['chill']}],
+ ['frostbound','gR','B','Glacier Field','🏔',{sh:'zone',r:2.4,dur:4,tick:.5,m:.25,cd:9,rd:['chill','slow']}],
+ ['frostbound','chest','B','Permafrost','❄',{sh:'nova',r:6,m:3,en:110,rd:['chill','stun']}],
+ ['frostbound','legs','B','Glacial Skate','⛸',{mode:'slide',d:5,cd:2,inv:.3,rd:['chill']}],
+ ['frostbound','back','B','Frost Ward','🧊',{kind:'shield',f:.2,cd:14,rd:['chill']}],
+ ['magma','gL','B','Ember Cleave','🔥',{sh:'arc',r:2.4,half:1.2,n:1,gap:.1,m:1.6,cd:5,rd:['burn']}],
+ ['magma','gR','A','Lava Bomb','🌋',{sh:'bolt',m:1.4,boom:2.2,sp:8,cd:6,rd:['burn']}],
+ ['magma','gR','B','Magma Pool','♨',{sh:'zone',r:2.2,dur:5,tick:.5,m:.3,cd:9,rd:['burn']}],
+ ['magma','chest','B','Eruption','🌋',{sh:'meteor',k:6,r:1.8,m:1.4,delay:.6,en:100,rd:['burn']}],
+ ['magma','legs','B','Cinder Dash','🔥',{mode:'dashhit',d:3.8,m:.6,cd:2,inv:.3,rd:['burn']}],
+ ['magma','back','B','Cinder Shroud','🔥',{kind:'pulse',r:2.6,m:.8,cd:12,rd:['burn']}],
+ ['thunder','gL','B','Static Arc','⚡',{sh:'chain',k:4,range:4,m:.9,cd:5,rd:['shock']}],
+ ['thunder','gR','A','Thunder Clap','🌩',{sh:'nova',r:2.6,m:1.3,cd:6,rd:['shock']}],
+ ['thunder','gR','B','Volt Spear','🔱',{sh:'line',len:7,w:.9,m:1.7,cd:6,rd:['shock','stun']}],
+ ['thunder','chest','B','Storm Call','⛈',{sh:'rain',k:12,r:3,m:.55,en:100,rd:['shock']}],
+ ['thunder','legs','B','Volt Step','⚡',{mode:'blink',d:4.2,cd:1.6,inv:.25,rd:['shock']}],
+ ['thunder','back','B','Capacitor','🔋',{kind:'rally',v:40,cd:18,rd:[]}],
+ ['void','gL','B','Rift Tear','🌌',{sh:'mark',delay:1.2,m:3,cd:7,rd:['vuln']}],
+ ['void','gR','A','Void Orb','🔮',{sh:'orb',m:1.8,cd:6,rd:['grav']}],
+ ['void','gR','B','Null Cross','✖',{sh:'cross',len:5,m:1.2,cd:7,rd:[]}],
+ ['void','chest','B','Singularity','🕳',{sh:'vortex',r:3.5,dur:3,m:.6,en:120,rd:['vuln']}],
+ ['void','legs','B','Umbral Flank','🌀',{mode:'behind',d:4,cd:2.4,inv:.4,rd:[]}],
+ ['void','back','B','Event Shroud','🌑',{kind:'decoy',dur:3,cd:18,rd:[]}],
+ /* ---- Mage ---- */
+ ['runesmith','gL','B','Rune Snare','🔵',{sh:'trap',k:1,m:1.3,cd:6,rd:['slow']}],
+ ['runesmith','gR','B','Glyph Bolt','💠',{sh:'bolt',m:1.3,sp:13,cd:4,rd:['mkR']}],
+ ['runesmith','chest','B','Rune Storm','🔷',{sh:'rain',k:8,r:2.5,m:.7,en:100,rd:['mkR']}],
+ ['runesmith','legs','B','Rune Hop','↗',{mode:'blink',d:3.2,cd:2,inv:.32,rd:['trap']}],
+ ['runesmith','back','B','Ward Glyph','🛡',{kind:'ward',dur:5,f:.02,en:15,cd:16,rd:[]}],
+ ['crystalc','gL','B','Shard Orbit','✴',{sh:'sat',k:2,dur:9,int:.7,m:.32,cd:11,rd:['shield']}],
+ ['crystalc','gR','B','Crystal Spike','💎',{sh:'beam',len:6,w:.7,m:1.9,cd:6,rd:[]}],
+ ['crystalc','chest','B','Prism Prison','🔶',{sh:'zone',r:3,dur:3,tick:.5,m:.5,en:100,rd:['stun']}],
+ ['crystalc','legs','B','Glass Step','🔹',{mode:'roll',d:3.6,cd:1.8,inv:.35,rd:['sat']}],
+ ['crystalc','back','B','Crystal Bulwark','💠',{kind:'shield',f:.16,cd:14,rd:['sat']}],
+ ['runic','gL','B','Rune Lattice','⛓',{sh:'trap',k:3,m:.9,cd:8,rd:['vuln']}],
+ ['runic','gR','B','Sigil Cross','🔯',{sh:'cross',len:4.5,m:1,cd:6,rd:['mkR']}],
+ ['runic','chest','B',"Architect's Grid",'▦',{sh:'cross',len:8,m:2.4,en:100,rd:['stun']}],
+ ['runic','legs','B','Glyph Skip','◇',{mode:'dashhit',d:3.8,m:.5,cd:2,inv:.3,rd:['mkR']}],
+ ['runic','back','B','Sigil Ward','🔰',{kind:'totem',dur:8,int:1,m:.45,en:15,cd:16,rd:['mkR']}],
+ ['elemental','gL','B','Flux Bolt','☄',{sh:'fan',k:3,spread:.45,m:.8,cd:5,rd:['burn','chill','shock']}],
+ ['elemental','gR','B','Reactor Pulse','☢',{sh:'nova',r:2.8,m:1.2,cd:6,rd:['burn','shock']}],
+ ['elemental','chest','B','Elemental Cataclysm','🌋',{sh:'meteor',k:3,r:2.5,m:2,delay:.7,en:110,rd:['burn','chill','shock']}],
+ ['elemental','legs','B','Prism Flicker','🔥',{mode:'blink',d:3.8,cd:1.9,inv:.3,rd:['burn','chill']}],
+ ['elemental','back','B','Reactor Shell','☢',{kind:'shield',f:.18,cd:14,rd:['shock']}],
+ ['arcanist','gL','B','Arcane Sentry','🗿',{sh:'turret',dur:10,int:1,m:.6,cd:11,rd:['vuln']}],
+ ['arcanist','gR','B','Ancient Ray','✨',{sh:'beam',len:7,w:1,m:1.6,cd:6,rd:['slow']}],
+ ['arcanist','chest','B','Colossus Battery','🗿',{sh:'turret',dur:12,int:.6,m:.8,en:100,rd:['shield']}],
+ ['arcanist','legs','B','Guardian Step','🛡',{mode:'roll',d:3.4,cd:2.1,inv:.35,rd:['dr']}],
+ ['arcanist','back','B','Repair Aura','🔧',{kind:'ward',dur:6,f:.018,en:15,cd:16,rd:['shield']}],
+ ['astral','gL','B','Graviton Snare','🕳',{sh:'vortex',r:2.5,dur:3,m:.25,cd:9,rd:['grav']}],
+ ['astral','gR','B','Star Lance','🌠',{sh:'line',len:8,w:.7,m:1.8,cd:6,rd:['grav']}],
+ ['astral','chest','B','Collapsing Star','💫',{sh:'mark',delay:2,m:8,en:120,rd:['grav','vuln']}],
+ ['astral','legs','B','Starfold Gate','🌀',{mode:'gate',d:6,cd:2.4,inv:.35,rd:[]}],
+ ['astral','back','B','Orbital Shield','🪐',{kind:'sat',k:3,dur:10,int:.8,m:.28,en:15,cd:16,rd:[]}],
+ /* ---- Assassin ---- */
+ ['stalker','gL','B','Shiv Flurry','🔪',{sh:'flurry',n:5,gap:.07,range:1.9,m:.4,cd:5,rd:[]}],
+ ['stalker','gR','B','Ambush Leap','🐆',{sh:'leap',r:1.6,m:2,cd:6,rd:['crit']}],
+ ['stalker','chest','B',"Scrapper's Frenzy",'⚔',{sh:'flurry',n:12,gap:.08,range:2.4,m:.4,en:100,rd:['as']}],
+ ['stalker','legs','B','Shadow Roll','🌫',{mode:'roll',d:2.8,cd:1.6,inv:.32,rd:['stealth']}],
+ ['stalker','back','B','Smoke Bomb','💨',{kind:'smoke',dur:3,cd:15,rd:[]}],
+ ['mantis','gL','B','Toxin Spit','🧪',{sh:'bolt',m:1,sp:12,cd:4,rd:['poi3']}],
+ ['mantis','gR','B','Mantis Scythe','🦗',{sh:'arc',r:2,half:1.4,n:3,gap:.12,m:.6,cd:6,rd:['poi1']}],
+ ['mantis','chest','B','Venom Garden','☣',{sh:'zone',r:3,dur:5,tick:.5,m:.2,en:100,rd:['poi1','slow']}],
+ ['mantis','legs','B','Venom Trail','🟢',{mode:'slide',d:4.5,cd:2,inv:.3,rd:['poi1']}],
+ ['mantis','back','B','Antitoxin','💉',{kind:'cleanse',f:.06,cd:14,rd:[]}],
+ ['velocity','gL','B','Rapid Lunge','⚡',{sh:'dash',d:3,m:1.2,cd:4,rd:['as']}],
+ ['velocity','gR','B','Sonic Edge','💨',{sh:'wave',k:3,step:1.2,m:.9,cd:5,rd:['haste']}],
+ ['velocity','chest','B','Mach Rush','🏎',{sh:'chain',k:6,range:6,m:1.3,en:100,rd:['as','haste']}],
+ ['velocity','legs','B','Afterburner','🔥',{mode:'dashhit',d:4,m:.7,cd:1.6,inv:.25,rd:['haste']}],
+ ['velocity','back','B','Adrenal Surge','💉',{kind:'haste',v:.3,dur:4,cd:14,rd:['as']}],
+ ['phantom','gL','B','Ghost Needle','👻',{sh:'bolt',m:1.2,pierce:2,sp:15,cd:4,rd:['mkP']}],
+ ['phantom','gR','B','Phantom Lunge','🌑',{sh:'blink',m:2,cd:6,rd:['mkP']}],
+ ['phantom','chest','B','Thousand Masks','🎭',{sh:'shade',k:3,dur:5,int:.6,m:.55,en:100,rd:['mkP']}],
+ ['phantom','legs','B','Fade Step','🌫',{mode:'phase',cd:1.8,inv:.55,rd:['stealth']}],
+ ['phantom','back','B','Mirror Decoy','🪞',{kind:'decoy',dur:3,cd:15,rd:['stealth']}],
+ ['spectral','gL','B','Soul Reap','💀',{sh:'arc',r:2.4,half:.9,n:1,gap:.1,m:1.8,cd:6,rd:['mkD']}],
+ ['spectral','gR','B','Wraith Chain','⛓',{sh:'chain',k:3,range:4,m:1.2,cd:6,rd:['mkD']}],
+ ['spectral','chest','B','Requiem','☠',{sh:'mark',delay:1.5,m:6,en:110,rd:['mkD']}],
+ ['spectral','legs','B','Spirit Dash','👤',{mode:'dashhit',d:4.5,m:.6,cd:2.2,inv:.3,rd:['shade']}],
+ ['spectral','back','B','Spectral Guard','👻',{kind:'shade',k:2,dur:8,int:.7,m:.45,en:15,cd:16,rd:[]}],
+ ['nightreaper','gL','B','Abyss Hook','🦇',{sh:'hook',m:1.6,cd:6,rd:['mkA']}],
+ ['nightreaper','gR','B','Night Scythe','🌘',{sh:'spin',n:3,r:2.2,gap:.16,m:.8,cd:6,rd:['mkA']}],
+ ['nightreaper','chest','B','Eclipse','🌑',{sh:'nova',r:5,m:4,en:120,rd:['mkA','vuln']}],
+ ['nightreaper','legs','B','Abyss Flank','🌌',{mode:'behind',d:4.2,cd:2,inv:.38,rd:['mkA']}],
+ ['nightreaper','back','B','Umbral Pact','🌑',{kind:'rally',v:30,cd:16,rd:['mkA']}]];
+/* ---------- descriptions are generated from the definition (what you read is what runs) ---------- */
+const SR_RDN={burn:'Burn',chill:'Chill 2',shock:'Shock',poi1:'Poison 1',poi3:'Poison 3',vuln:'Vulnerable (+20% ดาเมจที่ได้รับ 6 วิ)',ab:'Armor Break',stun:'Stun 0.6 วิ (ศัตรูต้าน Stun ไม่ติด)',slow:'Slow 30% 2 วิ',knock:'ผลักศัตรูทั่วไป',shred:'Shred (DEF −3%/ชั้น สูงสุด 5)',
+ mkR:'Rune Mark',mkP:'Phantom Mark',mkA:'Abyss Mark',mkD:'Death Mark',grav:'Gravity',crit:'คริติคอลแน่นอน',
+ shield:'โล่ 10% HP',heal:'ฟื้น HP 6%',as:'Attack Speed +20% 4 วิ',dr:'ลดดาเมจ 15% 3 วิ (ใต้เพดาน 60%)',haste:'Move +25% 3 วิ',cdcut:'ลดคูลดาวน์สกิลแขนอีกข้าง 2 วิ',en:'Energy +15',inv:'อมตะ 0.3 วิ',stealth:'พรางตัว 1.5 วิ',
+ nextx:'การโจมตีถัดไป +30%',trap:'ทิ้ง Rune Trap ที่จุดเดิม',sat:'เรียก Satellite 1 ดวง 6 วิ',shade:'ทิ้งร่างเงา 4 วิ',reflect:'สะท้อนดาเมจ 30% 4 วิ'};
+const SR_SELF=new Set(['shield','heal','as','dr','haste','cdcut','en','inv','stealth','nextx','trap','sat','shade','reflect']);
+function srPct(m){return Math.round(m*100)+'%';}
+function srDescOf(L){const d=L.def,U=L.slot==='chest';const m=d.m!=null?srPct(d.m)+' ATK':'';let s='';
+ if(L.slot==='legs'){const md={roll:`กลิ้งหลบ ${d.d} ช่อง`,blink:`วาร์ปหลบ ${d.d} ช่อง`,dashhit:`พุ่งหลบ ${d.d} ช่อง ฟันศัตรูตามแนว ${m}`,leapslam:`กระโดดหลบ ${d.d} ช่อง ลงกระแทกรัศมี ${d.r} ${m}`,phase:`ร่างโปร่ง อยู่กับที่ อมตะ ${d.inv} วิ`,slide:`สไลด์ยาว ${d.d} ช่อง`,
+   backstep:`ถอยหนีจากศัตรูใกล้สุด ${d.d} ช่อง`,emerge:`มุดดิน อมตะ ${d.inv} วิ แล้วโผล่กระแทกรัศมี ${d.r} ${m}`,behind:`วาร์ปไปด้านหลังศัตรูใกล้สุด (ระยะ ${d.d})`,gate:`เปิดประตูวาร์ปไกล ${d.d} ช่อง`}[d.mode];s=md+` · อมตะ ${d.inv} วิ · CD ${d.cd} วิ`;}
+ else if(L.slot==='back'){const kd={heal:`ฟื้น HP ${srPct(d.f)} ทันที`,barrier:`ลดดาเมจ ${srPct(d.v)} ${d.dur} วิ (ใต้เพดาน 60%)`,reset:`ลดคูลดาวน์สกิลแขนทั้งสอง ${d.v} วิ + รีเซ็ต Dodge`,pulse:`คลื่นรอบตัวรัศมี ${d.r} ${m}`,drone:`โดรนเจาะเกราะ ${d.dur} วิ`,
+   totem:`ตั้งโทเท็มยิง ${m} ทุก ${d.int} วิ นาน ${d.dur} วิ`,shield:`โล่ ${srPct(d.f)} HP`,sat:`Satellite ${d.k} ดวง ยิง ${m} ${d.dur} วิ`,rally:`Energy +${d.v}`,decoy:`ทิ้งตัวล่อ ${d.dur} วิ (บอสเล็งตัวล่อ)`,ward:`วงฟื้นฟู ${d.dur} วิ ฟื้น HP ${srPct(d.f)}/0.5 วิ ขณะยืนในวง`,
+   smoke:`ม่านควัน ${d.dur} วิ + ตัวล่อ + พรางตัว`,cleanse:`ล้าง Burn/Slow/Stun + ฟื้น HP ${srPct(d.f)}`,haste:`Move +${srPct(d.v)} ${d.dur} วิ`,shade:`เรียกร่างเงา ${d.k} ร่าง ${d.dur} วิ ฟัน ${m}`}[d.kind];s=kd+(d.en?` · ใช้ Energy ${d.en}`:'')+` · CD ${d.cd} วิ`;}
+ else{const n=d.n||d.k;const sd={arc:`ฟันกรวยด้านหน้า ${n} ครั้ง × ${m} (ระยะ ${d.r})`,line:`แทงแนวตรง ${d.len} ช่อง ${m}`,nova:`คลื่นรอบตัวรัศมี ${d.r} ${m}`,leap:`กระโดดเข้าหาเป้า ลงกระแทกรัศมี ${d.r} ${m}`,dash:`พุ่งไปข้างหน้า ${d.d} ช่อง ฟันตามแนว ${m}`,
+   blink:`วาร์ปไปด้านหลังเป้าแล้วแทง ${m} (Weak Point)`,bolt:`ยิงกระสุน ${m}${d.pierce?` ทะลุ ${d.pierce} เป้า`:''}${d.boom?` ระเบิดรัศมี ${d.boom} (50%)`:''}`,fan:`ยิงกระสุน ${d.k} นัดแบบพัด นัดละ ${m}`,beam:`ชาร์จ 0.3 วิ แล้วยิงลำแสง ${d.len} ช่อง ${m}`,
+   chain:`สายพลังกระโดด ${d.k} เป้า (ระยะ ${d.range}) เป้าละ ${m}`,zone:`สร้างสนามรัศมี ${d.r} ${d.dur} วิ ${m}/${d.tick} วิ`,trap:`วาง Rune Trap ${d.k} อัน (พลัง ${srPct(d.m)})`,orb:`ลูกพลังติดตามเป้า ทะลุ 4 เป้า ${m}`,turret:`ตั้งป้อม ${d.dur} วิ ยิง ${m} ทุก ${d.int} วิ`,
+   meteor:`เตือนแล้วตกกระแทก ${d.k} จุด รัศมี ${d.r} จุดละ ${m}`,flurry:`โจมตีรัว ${d.n} ครั้ง × ${m}`,pull:`ดูดศัตรูรัศมี ${d.r} เข้าหาตัว (บอสขยับเล็กน้อย) แล้วกระแทก ${m}`,boomer:`ขว้างใบมีดไป-กลับ ทะลุ ${m} ทั้งสองทาง`,
+   wave:`คลื่นกระแทกเดินหน้า ${d.k} ระลอก ระลอกละ ${m}`,mark:`ฝังรอยระเบิดบนเป้า ระเบิดหลัง ${d.delay} วิ ${m}`,spin:`หมุนรอบตัว ${d.n} รอบ รัศมี ${d.r} รอบละ ${m}`,shade:`เรียกร่างเงา ${d.k} ร่าง ${d.dur} วิ ฟัน ${m}`,sat:`Satellite ${d.k} ดวง ${d.dur} วิ ยิง ${m} ทุก ${d.int} วิ`,
+   quake:`คลื่นแผ่นดินไหว ${d.k} วง ขยายออก วงละ ${m}`,rain:`โจมตีจากฟ้า ${d.k} ครั้ง รอบเป้า รัศมี ${d.r} ครั้งละ ${m}`,hook:`เกี่ยวเป้าเข้ามา (บอส: พุ่งเข้าหา) แล้วฟัน ${m}`,cross:`กากบาท 4 ทิศ ยาว ${d.len} ${m}`,vortex:`หลุมดูดรัศมี ${d.r} ${d.dur} วิ ${m}/0.5 วิ`}[d.sh];
+  s=sd+(U?` · Energy ${d.en}`:` · CD ${d.cd} วิ`);}
+ const rd=(d.rd||[]).map(k=>SR_RDN[k]).filter(Boolean);if(rd.length)s+=' · '+rd.join(' · ');return s;}
+/* ---------- build the registry (legacy A + new) ---------- */
+(function(){const famsOf=['warrior','mage','assassin'].flatMap(c=>CLASS_FAMS[c]);
+ for(const f of famsOf){const cls=famClass(f);
+  const add=(slot,opt,o)=>{const id=`c_${slot}_${f}_${opt}`;const L=Object.assign({id,slot,fam:f,cls,opt},o);SRL[id]=L;(SRL_BY[slot+':'+f]=SRL_BY[slot+':'+f]||[]).push(id);return L;};
+  add('gL','A',{legacy:1,n:GSK[f].n,i:GSK[f].i,cd:GSK[f].cd,d:GSK[f].desc});
+  if(cls!=='warrior')add('gR','A',{legacy:1,n:GSKR[f].n,i:GSKR[f].i,cd:GSKR[f].cd,d:GSKR[f].desc});
+  add('chest','A',{legacy:1,n:ULT[f].n,i:ULT[f].i,en:ULT[f].en,d:ULT[f].desc});
+  add('legs','A',{legacy:1,n:DODGE[f].n,i:DODGE[f].i,cd:DODGE[f].cd,d:DODGE[f].v7?V7_DODGE_DESC[DODGE[f].v7]:`หลบ ${DODGE[f].d} ช่อง · อมตะ ${DODGE[f].inv} วิ`});
+  add('back','A',{legacy:1,n:GUARD[f].n,i:GUARD[f].i,cd:GUARD[f].cd,d:GUARD[f].desc});}
+ for(const[f,slot,opt,n,i,def]of SR_NEW){const id=`c_${slot}_${f}_${opt}`;const L={id,slot,fam:f,cls:famClass(f),opt,n,i,def,cd:def.cd,en:def.en};L.d=srDescOf(L);SRL[id]=L;(SRL_BY[slot+':'+f]=SRL_BY[slot+':'+f]||[]).push(id);}
+ for(const k in SRL_BY)SRL_BY[k].sort();})();
+function srSig(L){const d=L.def;const head=L.slot==='legs'?'D:'+d.mode:L.slot==='back'?'G:'+d.kind:'S:'+d.sh;return head+'|'+[...(d.rd||[])].sort().join('+');}
+const SR_LIBCHK=(function(){const ids=Object.keys(SRL);const neu=ids.filter(id=>!SRL[id].legacy);const sig={},dupSig=[],names={},dupName=[];
+ for(const id of neu){const s=srSig(SRL[id]);if(sig[s])dupSig.push([sig[s],id]);else sig[s]=id;}
+ for(const id of ids){const nm=SRL[id].n.toLowerCase();if(names[nm]&&!(SRL[names[nm]].legacy&&SRL[id].legacy))dupName.push([names[nm],id]);else names[nm]=names[nm]||id;}
+ const per={};for(const k in SRL_BY)per[k]=SRL_BY[k].length;const bad=Object.entries(per).filter(([k,v])=>v!==2);
+ const r={total:ids.length,legacy:ids.length-neu.length,neu:neu.length,dupSig,dupName,badSlots:bad,ok:ids.length===240&&neu.length===132&&!dupSig.length&&!dupName.length&&!bad.length};
+ if(!r.ok)console.error('SR combat library check failed',r);return r;})();
+/* ---------- selection / unlocks ---------- */
+function srFamTier(f){if(CFAM[f])return CFAM[f].tier;const i=FAM_ORDER.indexOf(f);return Math.max(1,Math.ceil((i+1)/2));}
+function srDefaultOpt(slot,f){return 'A';}
+function srUnlockReq(id){const L=SRL[id]||SRM[id];if(!L)return null;if(L.legacy||(L.slot==='gR'&&L.cls==='warrior'&&L.opt==='A')||(L.mslot==='mR'&&L.opt==='D'))return null;const t=L.mslot?srMFamTier(L.fam):srFamTier(L.fam);const V=S.v10||{stats:{},codex:{done:{}}};const st=V.stats||{};
+ const key=L.mslot?L.mslot+L.opt:L.slot+(L.slot==='gR'&&L.cls==='warrior'?'w':'');
+ const R_={gL:['codex',t,'Mineral Codex สำเร็จ'],gR:['boss',t,'ชนะบอสใน Boss Arena'],gRw:['contracts',2*t,'Contract Board สำเร็จ'],chest:['guard',t,'ล้ม Rare Guardian'],legs:['mutMined',3*t,'ขุดแร่ Mutated Vein'],back:['relicFrags',2*t,'เก็บ Relic Fragment'],
+  mLB:['codex',t,'Mineral Codex สำเร็จ'],mLC:['proj',Math.ceil(t/2),'Excavation Project สำเร็จ'],mRE:['contracts',2*t,'Contract Board สำเร็จ'],mRF:['bounties',t,'Underdeep Bounty สำเร็จ']}[key];
+ if(!R_)return null;const have=R_[0]==='codex'?Object.keys((V.codex&&V.codex.done)||{}).length:R_[0]==='boss'?((S.sr&&S.sr.prog.boss)||0):(st[R_[0]]||0);const alt=8*t+4;
+ return{k:R_[0],need:R_[1],have,alt,txt:`${R_[2]} ${Math.min(have,R_[1])}/${R_[1]} หรือ Core Lv ${alt} (ทางสำรองรับประกัน)`};}
+function srUnlocked(id){if(S.sr.unlock[id])return true;const r=srUnlockReq(id);if(!r)return true;if(r.have>=r.need||S.sr.lv>=r.alt){S.sr.unlock[id]=Date.now();return true;}return false;}
+function srSelId(slot,f){const L=SRL_BY[slot+':'+f];if(!L)return null;const opt=(S.sr&&S.sr.sel[slot+':'+f])||srDefaultOpt(slot,f);const id=`c_${slot}_${f}_${opt}`;return SRL[id]&&srUnlocked(id)?id:`c_${slot}_${f}_${srDefaultOpt(slot,f)}`;}
+function srSelect(slot,f,opt){const id=`c_${slot}_${f}_${opt}`;if(!SRL[id]&&!SRM[id])return{ok:false,why:'ไม่มีสกิลนี้'};if(!srUnlocked(id))return{ok:false,why:'ยังไม่ปลดล็อก'};if(CB)return{ok:false,why:'เปลี่ยนสกิลระหว่างการต่อสู้ไม่ได้'};
+ S.sr.sel[slot+':'+f]=opt;srDirty();save();return{ok:true};}
+/* ---------- apply the selection to the combat snapshot (after the central pipeline) ---------- */
+{const _cc=calcCombat;calcCombat=function(eq){const o=_cc(eq);if(!S||!S.sr)return o;try{srLibApply(o);}catch(e){console.warn('srLibApply',e);}return o;};}
+function srLibApply(o){
+ for(let i=0;i<2;i++){const sk=o.skills[i];if(!sk)continue;const slot=i?'gR':'gL';const id=srSelId(slot,sk.fam);const L=SRL[id];if(!L)continue;sk.srId=id;if(L.legacy)continue;
+  const ratio=sk.cdEff/Math.max(.1,sk.cd);o.skills[i]=Object.assign({fam:sk.fam,slot:sk.slot,enh:sk.enh,pow:sk.pow,up6:sk.up6,mw:sk.mw},{n:L.n,i:L.i,cd:L.cd,desc:L.d,srId:id,srNew:1,cdEff:Math.max(1.5,Math.round(L.cd*ratio*10)/10)});}
+ if(o.ult){const id=srSelId('chest',o.ult.fam);const L=SRL[id];if(L){o.ult.srId=id;if(!L.legacy){const k=o.ult.en/Math.max(1,ULT[o.ult.fam].en);o.ult=Object.assign({fam:o.ult.fam,enh:o.ult.enh,pow:o.ult.pow,up6:o.ult.up6,mw:o.ult.mw},{n:L.n,i:L.i,desc:L.d,srId:id,srNew:1,en:Math.max(50,Math.round(L.en*k))});}}}
+ if(o.dodge&&o.dodge.fam){const id=srSelId('legs',o.dodge.fam);const L=SRL[id];if(L){o.dodge.srId=id;if(!L.legacy){const ratio=o.dodge.cdEff/Math.max(.1,DODGE[o.dodge.fam].cd);o.dodge=Object.assign({fam:o.dodge.fam,mw:o.dodge.mw},{n:L.n,i:L.i,d:L.def.d||0,inv:L.def.inv,srId:id,srNew:1,cd:L.def.cd,cdEff:Math.max(.5,Math.round(L.def.cd*ratio*100)/100)});}}}
+ if(o.guard){const id=srSelId('back',o.guard.fam);const L=SRL[id];if(L){o.guard.srId=id;if(!L.legacy){const ratio=o.guard.cdEff/Math.max(.1,GUARD[o.guard.fam].cd);o.guard=Object.assign({fam:o.guard.fam,enh:o.guard.enh,pow:o.guard.pow,up6:o.guard.up6,mw:o.guard.mw},{n:L.n,i:L.i,desc:L.d,srId:id,srNew:1,en:L.def.en||0,cd:L.def.cd,cdEff:Math.max(2,Math.round(L.def.cd*ratio*10)/10)});}}}
+ return o;}
+/* =====================================================================
+   EXECUTION ENGINE (combat)
+   ===================================================================== */
+let SRCTX=null;
+/* run fn with a cast context; timers created inside inherit it (so delayed hits still know their slot) */
+function srCtx(c,fn){const prev=SRCTX;SRCTX=c;const T=CB&&CB.timers;let wrapped=false;
+ if(T&&!Object.prototype.hasOwnProperty.call(T,'push')){wrapped=true;T.push=function(...a){for(const tm of a){const f=tm.fn;tm.fn=function(){return srCtx(c,()=>f.apply(this,arguments));};}return Array.prototype.push.apply(T,a);};}
+ try{return fn();}finally{SRCTX=prev;if(wrapped)delete T.push;}}
+{const _vp=v7Proj;v7Proj=function(o){const q=_vp(o);if(SRCTX&&q)q.srCtx=SRCTX;return q;};}
+{const _ph=v7ProjHit;v7ProjHit=function(q,e){if(q&&q.srCtx)return srCtx(q.srCtx,()=>_ph(q,e));return _ph(q,e);};}
+function srEl(f,k){if(f==='elemental')return['fire','ice','shock'][k%3];return SR_FEL[f]||null;}
+function srCol(f){return AGL[f]||'#ffffff';}
+/* per-target riders */
+function srRideT(rd,e,ctx){if(!e||e.dead)return;const boss=e===CB.boss;
+ for(const k of rd){switch(k){case'burn':addStatus(e,'burn',1);break;case'chill':addStatus(e,'chill',2);break;case'shock':addStatus(e,'shock',1);break;
+  case'poi1':v7Poison(e,1);break;case'poi3':v7Poison(e,3);break;case'vuln':addStatus(e,'vuln');break;case'ab':addStatus(e,'ab');break;
+  case'stun':if(!e.noStun)e.stunT=Math.max(e.stunT||0,boss?.35:.6);break;case'slow':e.srSlowT=Math.max(e.srSlowT||0,2);break;
+  case'knock':if(!boss){const a=angTo(CB.p,e);e.x=clamp(e.x+Math.cos(a)*1.2,.8,AW-.8);e.y=clamp(e.y+Math.sin(a)*1.2,1,AH-.7);}break;
+  case'shred':e.shred=Math.min(5,(e.shred||0)+1);break;case'mkR':v7Mark(e,'rune',5);break;case'mkP':v7Mark(e,'phantom',6);break;case'mkA':v7Mark(e,'abyss',8);break;case'mkD':v7Mark(e,'death',8);break;
+  case'grav':e.v7grav=Math.max(e.v7grav||0,2);break;}}}
+/* self riders (once per cast) */
+function srRideS(rd,pw,x0,y0){const p=CB.p,st=CB.st;
+ for(const k of rd){switch(k){case'shield':giveShield(.1);break;case'heal':p.hp=Math.min(p.mhp,p.hp+p.mhp*.06);break;case'as':buff('srAS',4,.2);break;case'dr':buff('srDR',3,.15);break;case'haste':buff('srHaste',3,.25);break;
+  case'cdcut':p.cds=p.cds.map((c,i)=>SRCTX&&SRCTX.slot===(i?'gR':'gL')?c:Math.max(0,c-2));break;case'en':p.en=Math.min(250,p.en+15);break;case'inv':p.inv=Math.max(p.inv,.3);break;case'stealth':p.v7.stealth=Math.max(p.v7.stealth||0,1.5);break;
+  case'nextx':p.nextAtkBonus=Math.max(p.nextAtkBonus||0,.3);break;case'trap':v7PlaceTrap(x0!=null?x0:p.x,y0!=null?y0:p.y,pw,false);break;
+  case'sat':v7Obj({kind:'sat',x:p.x,y:p.y,ang:Math.random()*6.28,int:.8,cd:.3,m:.3*pw,dur:6});break;
+  case'shade':v7Obj({kind:'shade',x:x0!=null?x0:p.x,y:y0!=null?y0:p.y,dur:4,int:.7,cd:.3,m:.4*pw,face:p.face});break;case'reflect':buff('srReflect',4,.3);break;}}}
+function srCastDef(L,pw,src){const p=CB.p,st=CB.st,d=L.def,f=L.fam,col=srCol(f),U=src==='ult';const rd=d.rd||[];const tr=rd.filter(k=>!SR_SELF.has(k)&&k!=='crit');const crit=rd.includes('crit');
+ const e=v7Tgt(14)||nearestEnemy(14);const fa=v7Face(e);let elk=0;const cls=L.cls;const scale=U?1.15:1;
+ const H=(x,m,o={})=>{if(!x||x.dead)return 0;const r=hitEnemy(x,Object.assign({m:m*pw,src:o.src||src,stg:o.stg!=null?o.stg:(U?20:12),el:o.el!==undefined?o.el:srEl(f,elk++),cls,crit:crit||o.crit,wp:o.wp,proj:o.proj,srAoe:o.aoe},o.h||{}));if(tr.length)srRideT(tr,x,L);return r;};
+ const at=(t,fn)=>CB.timers.push({t,fn:()=>{if(CB&&!CB.ended)fn();}});const R0=x=>x.r||.8;const px0=p.x,py0=p.y;
+ srRideS(rd.filter(k=>SR_SELF.has(k)),pw,px0,py0);
+ switch(d.sh){
+  case'arc':v7Seq(d.n,.05,d.gap,k=>{const a=e?angTo(p,e):fa;v7Cone(a,d.r*scale,d.half,x=>H(x,d.m,{aoe:1}));fxAdd({type:'slash',x:p.x,y:p.y,tx:p.x+Math.cos(a)*d.r,ty:p.y+Math.sin(a)*d.r,t:0,dur:.16,col,hand:k%2?1:-1});sfx('blade',2);});break;
+  case'line':at(.12,()=>{enemiesIn(x=>geo_rect(x.x,x.y,p.x,p.y,fa,d.len*scale,d.w+R0(x)*2)).forEach(x=>H(x,d.m));fxAdd({type:'beam',x:p.x,y:p.y,a:fa,len:d.len*scale,t:0,dur:.3,col});sfx('blade');});break;
+  case'nova':at(U?.35:.2,()=>{const r=d.r*scale;enemiesIn(x=>dist(x,p)<=r+R0(x)).forEach(x=>H(x,d.m,{aoe:1}));fxAdd({type:'nova',x:p.x,y:p.y,r,t:0,dur:.5,col});CB.shake=Math.max(CB.shake,U?.5:.25);sfx('rock');});break;
+  case'leap':{if(e&&dist(p,e)<=8){v7DashTo(e,'front',.22);}at(.26,()=>{const r=d.r*scale;enemiesIn(x=>dist(x,p)<=r+R0(x)).forEach(x=>H(x,d.m,{aoe:1}));fxAdd({type:'quake',x:p.x,y:p.y,r,t:0,dur:.5,col});CB.shake=Math.max(CB.shake,.35);sfx('rock');});break;}
+  case'dash':{const dd=d.d*scale;const x0=p.x,y0=p.y;p.dash={a:fa,v:dd/.2,t:.2};p.inv=Math.max(p.inv,.22);fxAdd({type:'dash',x:x0,y:y0,tx:x0+Math.cos(fa)*dd,ty:y0+Math.sin(fa)*dd,t:0,dur:.3,col});
+   at(.21,()=>{enemiesIn(x=>geo_rect(x.x,x.y,x0,y0,fa,dd+.5,1.6+R0(x))).forEach(x=>H(x,d.m));sfx('blade');});break;}
+  case'blink':{if(!e)break;const a=e.faceA!=null?e.faceA+Math.PI:angTo(e,p);const q=v7SafePos(e.x+Math.cos(a)*(R0(e)+.9),e.y+Math.sin(a)*(R0(e)+.9));const x0=p.x,y0=p.y;p.x=q.x;p.y=q.y;p.inv=Math.max(p.inv,.3);fxAdd({type:'blink',x:x0,y:y0,tx:p.x,ty:p.y,t:0,dur:.35});p.face=e.x<p.x?-1:1;
+   at(.18,()=>{H(e,d.m,{wp:true});fxAdd({type:'vslash',x:e.x,y:e.y,t:0,dur:.3});sfx('blade');});break;}
+  case'bolt':v7Proj({a:e?undefined:fa,tx:e?e.x:undefined,ty:e?e.y:undefined,sp:d.sp||12,life:1.3,m:d.m*pw,stg:U?14:8,pierce:d.pierce||1,col,kind:cls==='mage'?'rune':'shard',r:d.boom?.34:.26,src,cls,el:srEl(f,0),crit,
+    onHit:(x,q)=>{if(tr.length)srRideT(tr,x,L);if(d.boom){enemiesIn(y=>y!==x&&dist(y,x)<=d.boom+R0(y)).forEach(y=>H(y,d.m*.5,{src:'proc',aoe:1}));fxAdd({type:'boom',x:x.x,y:x.y,r:d.boom,t:0,dur:.35,col});}}});sfx('zap',2);break;
+  case'fan':for(let k=0;k<d.k;k++){const a=fa+(k-(d.k-1)/2)*(d.spread/Math.max(1,d.k-1))*2;const ek=k;const rk=f==='elemental'?[['burn','chill','shock'][k%3]]:tr;
+    v7Proj({a,sp:13,life:.9,m:d.m*pw,stg:6,pierce:1,col,kind:'shard',r:.22,src,cls,el:srEl(f,ek),crit,onHit:x=>{if(rk.length)srRideT(rk,x,L);}});}sfx('crystal',2);break;
+  case'beam':fxAdd({type:'ring',x:p.x,y:p.y,r:.8,t:0,dur:.3,col});at(.3,()=>{const a=e&&!e.dead?angTo(p,e):fa;enemiesIn(x=>geo_rect(x.x,x.y,p.x,p.y,a,d.len*scale,d.w+R0(x)*2)).forEach(x=>H(x,d.m));fxAdd({type:'beam',x:p.x,y:p.y,a,len:d.len*scale,t:0,dur:.35,col});sfx('crystal');});break;
+  case'chain':{if(!e)break;const hit=[];let cur=e,px=p.x,py=p.y;for(let k=0;k<d.k&&cur;k++){hit.push(cur);const c=cur,ax=px,ay=py;at(.06+k*.08,()=>{H(c,d.m);fxAdd({type:'bolt',x:ax,y:ay,tx:c.x,ty:c.y,t:0,dur:.18,col});sfx('zap',3);});px=cur.x;py=cur.y;
+    const nx=enemiesIn(x=>!hit.includes(x)&&dist(x,cur)<=d.range+R0(x)).sort((a,b)=>dist(a,cur)-dist(b,cur))[0];cur=nx||(hit.length<d.k&&d.k>=4?cur:null);if(cur&&hit.includes(cur)&&cur!==CB.boss)cur=null;}break;}
+  case'zone':case'vortex':{const c=e&&dist(p,e)<=9?{x:e.x,y:e.y}:{x:p.x+Math.cos(fa)*2,y:p.y+Math.sin(fa)*2};const r=d.r*scale;const z=v7Zone({x:c.x,y:c.y,r,dur:d.dur,tick:99,m:0,col,style:d.sh==='vortex'?'gravity':(rd.includes('poi1')?'poison':'rune'),pull:d.sh==='vortex'?2.6:0,bossPull:.35,slow:rd.includes('slow')?.3:0,grav:d.sh==='vortex'||rd.includes('grav')});
+   const tick=d.tick||.5;const n=Math.floor(d.dur/tick);v7Seq(n,tick,tick,()=>{if(z.dead)return;enemiesIn(x=>Math.hypot(x.x-z.x,x.y-z.y)<=r+R0(x)*.6).forEach(x=>H(x,d.m,{src:U?'ult':'dot',stg:3,aoe:1,h:{noEn:1}}));if(!CB.sim)fxAdd({type:'ring',x:z.x,y:z.y,r,t:0,dur:.3,col});});break;}
+  case'trap':{const c=e?{x:e.x,y:e.y}:{x:p.x+Math.cos(fa)*2.5,y:p.y+Math.sin(fa)*2.5};for(let k=0;k<d.k;k++){const a=k*2.1+fa;const T=v7PlaceTrap(c.x+(d.k>1?Math.cos(a)*1.4:0),c.y+(d.k>1?Math.sin(a)*1.4:0),d.m*pw,false);if(T)T.srRide=tr;}sfx('equip');break;}
+  case'orb':v7Proj({tx:e?e.x:p.x+Math.cos(fa)*5,ty:e?e.y:p.y+Math.sin(fa)*5,sp:6.5,life:2.4,m:d.m*pw,stg:10,pierce:4,col,kind:'void',r:.42,src,cls,el:srEl(f,0),crit,home:e,turn:2.2,onHit:x=>{if(tr.length)srRideT(tr,x,L);}});sfx('zap');break;
+  case'turret':{const q=v7SafePos(p.x+p.face*1.2,p.y-.3);const T=v7Obj({kind:'turret',x:q.x,y:q.y,int:999,cd:999,m:0,dur:d.dur});const n=Math.floor(d.dur/d.int);
+   v7Seq(n,.3,d.int,()=>{if(T.dead)return;const x=enemiesIn(y=>dist(y,T)<7+R0(y)).sort((a,b)=>dist(a,T)-dist(b,T))[0];if(!x)return;v7Proj({x:T.x,y:T.y-.2,tx:x.x,ty:x.y,sp:12,life:.9,m:d.m*pw,stg:2,col,kind:'orb',r:.2,src:U?'ult':'skill',construct:1,cls,onHit:y=>{if(tr.length)srRideT(tr,y,L);}});});sfx('equip');break;}
+  case'meteor':{const c=e?{x:e.x,y:e.y}:{x:p.x+Math.cos(fa)*3,y:p.y+Math.sin(fa)*3};for(let k=0;k<d.k;k++){const a=k*2.4,rr=d.k>1?1.2+((k*37)%10)/10:0;const x=clamp(c.x+Math.cos(a)*rr,.8,AW-.8),y=clamp(c.y+Math.sin(a)*rr,1,AH-.7);const t=d.delay+k*.15;
+    fxAdd({type:'ring',x,y,r:d.r,t:0,dur:t,col});at(t,()=>{enemiesIn(z=>Math.hypot(z.x-x,z.y-y)<=d.r+R0(z)).forEach(z=>H(z,d.m,{aoe:1}));fxAdd({type:'boom',x,y,r:d.r,t:0,dur:.45,col});CB.shake=Math.max(CB.shake,.35);sfx('rock',2);});}break;}
+  case'flurry':v7Seq(d.n,.05,d.gap,k=>{const x=nearestEnemy(d.range+.6);if(x){p.face=x.x<p.x?-1:1;H(x,d.m,{stg:4});fxAdd({type:'slash',x:p.x,y:p.y,tx:x.x,ty:x.y,t:0,dur:.12,col,hand:k%2?1:-1});}sfx('blade',4);});break;
+  case'pull':{const r=d.r*scale;const L2=enemiesIn(x=>dist(x,p)<=r+R0(x));for(const x of L2){const a=angTo(x,p);const k=x===CB.boss?.6:Math.max(0,dist(x,p)-R0(x)-.9);x.x+=Math.cos(a)*k;x.y+=Math.sin(a)*k;}fxAdd({type:'ring',x:p.x,y:p.y,r,t:0,dur:.45,col,inward:true});
+   at(.15,()=>{L2.forEach(x=>H(x,d.m,{aoe:1}));sfx('zap');});break;}
+  case'boomer':v7Proj({a:e?angTo(p,e):fa,sp:11,life:1.2,retAt:.6,ret:true,pierce:3,pierce0:3,m:d.m*pw,stg:6,col,kind:'blade',r:.32,src,cls,crit,onHit:x=>{if(tr.length)srRideT(tr,x,L);}});sfx('blade');break;
+  case'wave':v7Seq(d.k,.05,.12,k=>{const cx=px0+Math.cos(fa)*d.step*(k+1),cy=py0+Math.sin(fa)*d.step*(k+1);enemiesIn(x=>Math.hypot(x.x-cx,x.y-cy)<=1.2+R0(x)).forEach(x=>H(x,d.m,{aoe:1}));fxAdd({type:'boom',x:cx,y:cy,r:1.2,t:0,dur:.3,col});sfx('rock',3);});break;
+  case'mark':{if(!e)break;const x=e;x.srDet=(x.srDet||0)+1;floatTxtC(x.x,x.y-2.6,'◎','#ffffff',1.2);fxAdd({type:'ring',x:x.x,y:x.y,r:1.6,t:0,dur:d.delay,col});
+   at(d.delay,()=>{x.srDet=Math.max(0,(x.srDet||1)-1);H(x,d.m,{stg:U?40:20});enemiesIn(y=>y!==x&&dist(y,x)<=1.8+R0(y)).forEach(y=>H(y,d.m*.4,{src:'proc',aoe:1}));fxAdd({type:'rift',x:x.x,y:x.y,r:1.8,t:0,dur:.6});CB.shake=Math.max(CB.shake,.45);sfx('mythic',2);});break;}
+  case'spin':v7Seq(d.n,.05,d.gap,k=>{const r=d.r*scale;enemiesIn(x=>dist(x,p)<=r+R0(x)).forEach(x=>H(x,d.m,{stg:4,aoe:1}));fxAdd({type:'ring',x:p.x,y:p.y,r,t:0,dur:.2,col});sfx('blade',4);});break;
+  case'shade':for(let k=0;k<d.k;k++){const a=k*2.1;v7Obj({kind:U?'uclone':'shade',loop:1,x:clamp(p.x+Math.cos(a)*1.4,.8,AW-.8),y:clamp(p.y+Math.sin(a)*1.4,1,AH-.7),dur:d.dur,int:d.int,cd:.2+k*.1,m:d.m*pw,face:p.face});}if(e&&tr.length)srRideT(tr,e,L);sfx('blade');break;
+  case'sat':for(let k=0;k<d.k;k++)v7Obj({kind:'sat',x:p.x,y:p.y,ang:k*2.1,int:d.int,cd:.3+k*.2,m:d.m*pw,dur:d.dur});sfx('crystal');break;
+  case'quake':v7Seq(d.k,.1,.2,k=>{const r=1.3*(k+1)*scale;enemiesIn(x=>Math.abs(dist(x,p)-r)<=.9+R0(x)*.5||dist(x,p)<=r&&k===0).forEach(x=>H(x,d.m,{aoe:1}));fxAdd({type:'quake',x:px0,y:py0,r,t:0,dur:.4,col});CB.shake=Math.max(CB.shake,.3);sfx('rock',3);});break;
+  case'rain':{const c=e?e:{x:p.x+Math.cos(fa)*3,y:p.y+Math.sin(fa)*3};v7Seq(d.k,.1,.12,k=>{const a=k*2.39,rr=(k%4)/4*d.r;const cx=c.dead?c.x:c.x;const x=clamp(cx+Math.cos(a)*rr,.8,AW-.8),y=clamp(c.y+Math.sin(a)*rr,1,AH-.7);
+   enemiesIn(z=>Math.hypot(z.x-x,z.y-y)<=.9+R0(z)).forEach(z=>H(z,d.m,{stg:4,aoe:1}));fxAdd({type:'bolt',x,y:y-6,tx:x,ty:y,t:0,dur:.18,col});fxAdd({type:'boom',x,y,r:.9,t:0,dur:.25,col});sfx('zap',4);});break;}
+  case'hook':{if(!e)break;if(e===CB.boss||e.heavy)v7DashTo(e,'front',.16);else{const q=v7SafePos(p.x+Math.cos(fa)*(R0(e)+.9),p.y+Math.sin(fa)*(R0(e)+.9));fxAdd({type:'bolt',x:p.x,y:p.y,tx:e.x,ty:e.y,t:0,dur:.2,col});e.x=q.x;e.y=q.y;}
+   at(.18,()=>{H(e,d.m);fxAdd({type:'slash',x:p.x,y:p.y,tx:e.x,ty:e.y,t:0,dur:.15,col,hand:1});sfx('blade');});break;}
+  case'cross':at(.12,()=>{const c=e&&dist(p,e)<=d.len?e:p;const hitS=new Set();for(let k=0;k<4;k++){const a=k*Math.PI/2+(c===p?fa:0);enemiesIn(x=>geo_rect(x.x,x.y,c.x-Math.cos(a)*.01,c.y-Math.sin(a)*.01,a,d.len*scale,1+R0(x)*2)).forEach(x=>hitS.add(x));fxAdd({type:'beam',x:c.x,y:c.y,a,len:d.len*scale,t:0,dur:.3,col});}
+   hitS.forEach(x=>H(x,d.m,{aoe:1}));sfx('crystal');});break;}
+ return true;}
+/* ---------- skill dispatch (outermost for library skills; legacy skills fall through untouched) ---------- */
+{const _us=useCSkill;useCSkill=function(i){const sk=CB&&CB.st&&CB.st.skills[i];if(!sk||!sk.srNew)return _us(i);const p=CB.p;if(CB.ended||CB.lo!=='combat')return;if(p.cds[i]>0||!pCanAct())return;const L=SRL[sk.srId];if(!L)return _us(i);
+ p.cds[i]=sk.cdEff;CB.stats.skillUse++;if(CB.v5)CB.v5.mx.skill++;p.en=Math.min(250,p.en+6);const pw=sk.pow*(sk.up6?1.1:1)*(sk.mw?1.1:1)*(p.prismReady?1.5:1);p.prismReady=false;setPState('skill',.5);sfx('skill');if(CB.st.setFx.has('coppergear4'))buff('copper4',4);
+ if(typeof v7Anim==='function')v7Anim(L.cls==='mage'?'channel':'slash',.4);floatTxtC(p.x,p.y-2.6,L.i+' '+L.n,srCol(L.fam),.95);srCastDef(L,pw,'skill');};}
+{const _uu=useUlt;useUlt=function(){const U=CB&&CB.st&&CB.st.ult;if(!U||!U.srNew)return _uu();const p=CB.p,st=CB.st;if(CB.ended||CB.lo!=='combat')return;if(p.en<U.en||!pCanAct())return;const L=SRL[U.srId];if(!L)return _uu();
+ p.en-=U.en;CB.stats.ults++;if(!CB.sim)cEvent('ult',1);const pw=U.pow*(U.up6?1.1:1)*(U.mw?1.1:1);setPState('ult',.9);sfx('legend');CB.flashScr=.35;CB.shake=.5;floatTxtC(p.x,p.y-2.8,U.n.toUpperCase()+'!',srCol(L.fam),1.5);srCastDef(L,pw,'ult');srUltSetFx(U);};}
+function srUltSetFx(U){const st=CB.st,p=CB.p;const at=(t,fn)=>CB.timers.push({t,fn});
+ if(st.setFx.has('titanstone6'))at(1,()=>giveShield(.3));if(st.setFx.has('thunder6'))at(.1,()=>buff('storm6',6));if(st.setFx.has('void6'))buff('abyss6',8);
+ if(st.setFx.has('magma6'))at(.5,()=>{const t2=nearestEnemy(14);const x=t2?t2.x:p.x,y=t2?t2.y:p.y;CB.haz.push({kind:'circle',x,y,r:2.6,dur:8,t:0,friendly:true,dps:1*st.atk,el:'fire',zone:'lava6',col:'#ff6a1a'});});}
+{const _ud=useDodge;useDodge=function(dx,dy){const D=CB&&CB.st&&CB.st.dodge;if(!D||!D.srNew||CB.lo==='mine')return _ud(dx,dy);const p=CB.p,st=CB.st;if(CB.ended||p.dead||p.stun>0||p.dcd>0||p.st==='dodge'||CB.intro>0)return;const L=SRL[D.srId];if(!L)return _ud(dx,dy);const d=L.def;
+ let a;if(dx||dy)a=Math.atan2(dy,dx);else{const v=moveVec();a=v.x||v.y?Math.atan2(v.y,v.x):(p.face>0?0:Math.PI);}
+ p.dcd=D.cdEff;p.inv=D.inv;p.dodgeSaved=false;CB.stats.dodges++;sfx('blade');const x0=p.x,y0=p.y;const col=srCol(L.fam);const pw=1;const tr=(d.rd||[]).filter(k=>!SR_SELF.has(k)&&k!=='crit');
+ const area=(r,m)=>enemiesIn(x=>dist(x,p)<=r+(x.r||.8)).forEach(x=>{if(m)hitEnemy(x,{m,src:'skill',stg:8,cls:L.cls,el:srEl(L.fam,0)});if(tr.length)srRideT(tr,x,L);});
+ const near=nearestEnemy(d.d+2);
+ switch(d.mode){
+  case'roll':p.dash={a,v:d.d/.26,t:.26};setPState('dodge',.26);p.roll=true;break;
+  case'blink':v7Blink(a,d.d);setPState('dodge',.2);p.dash=null;CB.timers.push({t:.05,fn:()=>area(1.6,0)});break;
+  case'dashhit':p.dash={a,v:d.d/.24,t:.24};setPState('dodge',.24);CB.timers.push({t:.25,fn:()=>{enemiesIn(x=>geo_rect(x.x,x.y,x0,y0,a,d.d+.4,1.4+(x.r||.8))).forEach(x=>{hitEnemy(x,{m:d.m,src:'skill',stg:8,cls:L.cls,el:srEl(L.fam,0)});if(tr.length)srRideT(tr,x,L);});}});fxAdd({type:'dash',x:x0,y:y0,tx:x0+Math.cos(a)*d.d,ty:y0+Math.sin(a)*d.d,t:0,dur:.3,col});break;
+  case'leapslam':p.dash={a,v:d.d/.35,t:.35};setPState('dodge',.35);CB.timers.push({t:.36,fn:()=>{area(d.r,d.m);fxAdd({type:'quake',x:p.x,y:p.y,r:d.r,t:0,dur:.4,col});CB.shake=Math.max(CB.shake,.3);sfx('rock');}});break;
+  case'phase':setPState('dodge',.3);fxAdd({type:'ring',x:p.x,y:p.y,r:1.2,t:0,dur:.4,col});break;
+  case'slide':p.dash={a,v:d.d/.32,t:.32,trail:L.fam==='frostbound'?'frost':null};setPState('dodge',.32);p.roll=false;if(tr.length)v7Seq(4,.06,.08,()=>area(1,0));break;
+  case'backstep':{const b=near?angTo(near,p):a;area(2,0);p.dash={a:b,v:d.d/.24,t:.24};setPState('dodge',.24);break;}
+  case'emerge':setPState('dodge',.45);fxAdd({type:'ring',x:p.x,y:p.y,r:1,t:0,dur:.45,col,inward:true});CB.timers.push({t:.46,fn:()=>{area(d.r,d.m);fxAdd({type:'quake',x:p.x,y:p.y,r:d.r,t:0,dur:.4,col});sfx('rock');}});break;
+  case'behind':if(near&&dist(p,near)<=d.d+2){const b=near.faceA!=null?near.faceA+Math.PI:angTo(near,p);const q=v7SafePos(near.x+Math.cos(b)*((near.r||.8)+.9),near.y+Math.sin(b)*((near.r||.8)+.9));p.x=q.x;p.y=q.y;fxAdd({type:'blink',x:x0,y:y0,tx:p.x,ty:p.y,t:0,dur:.35});p.face=near.x<p.x?-1:1;if(tr.length)srRideT(tr,near,L);}else v7Blink(a,d.d*.75);setPState('dodge',.2);p.dash=null;break;
+  case'gate':v7Blink(a,d.d);setPState('dodge',.2);p.dash=null;fxAdd({type:'rift',x:x0,y:y0,r:1,t:0,dur:.5});break;}
+ srCtx({slot:'legs',fam:L.fam,cls:L.cls,lib:L.id},()=>srRideS((d.rd||[]).filter(k=>SR_SELF.has(k)),pw,x0,y0));
+ CB.timers.push({t:p.inv+.02,fn:()=>{if(p.dodgeSaved)dodgeSuccess();}});};}
+{const _ug=useGuard;useGuard=function(){const G=CB&&CB.st&&CB.st.guard;if(!G||!G.srNew)return _ug();const p=CB.p,st=CB.st;if(CB.ended||CB.lo!=='combat'||p.gcd>0||p.dead||p.stun>0||CB.intro>0)return;const L=SRL[G.srId];if(!L)return _ug();const d=L.def;
+ const cost=Math.round((G.en||0)*(srEvoOn('A49')?.92:1));if(cost&&p.en<cost){floatTxtC(p.x,p.y-2.2,'Energy ไม่พอ','#ff9aa8',.9);return;}p.en-=cost;
+ p.gcd=G.cdEff;const pw=G.pow*(G.up6?1.1:1);setPState('guard',.45);sfx('equip');const col=srCol(L.fam);const tr=(d.rd||[]).filter(k=>!SR_SELF.has(k)&&k!=='crit');const dm=srEvoOn('M49')?1.08:1;
+ const area=(r,m)=>enemiesIn(x=>dist(x,p)<=r+(x.r||.8)).forEach(x=>{if(m)hitEnemy(x,{m:m*pw,src:'guard',stg:10,cls:L.cls,el:srEl(L.fam,0)});if(tr.length)srRideT(tr,x,L);});
+ switch(d.kind){
+  case'heal':p.hp=Math.min(p.mhp,p.hp+p.mhp*d.f*pw);floatTxtC(p.x,p.y-2.2,'+'+Math.round(p.mhp*d.f*pw),'#7dff9a',1);break;
+  case'barrier':buff('srDR',d.dur*dm,d.v);fxAdd({type:'ring',x:p.x,y:p.y,r:1.4,t:0,dur:.5,col});break;
+  case'reset':p.cds=p.cds.map(c=>Math.max(0,c-d.v*pw));p.dcd=0;fxAdd({type:'ring',x:p.x,y:p.y,r:1.6,t:0,dur:.4,col});break;
+  case'pulse':area(d.r,d.m);fxAdd({type:'nova',x:p.x,y:p.y,r:d.r,t:0,dur:.45,col});break;
+  case'drone':{const dr={x:p.x,y:p.y-1,t:d.dur*dm,cd:0,kind:'drill',pw};CB.drones.push(dr);v7Seq(Math.floor(d.dur*dm/3),.5,3,()=>{if(dr.t<=0)return;const x=enemiesIn(y=>dist(y,dr)<7+(y.r||.8))[0];if(x&&tr.length){srRideT(tr,x,L);fxAdd({type:'drill',x:x.x,y:x.y,t:0,dur:.3});}});break;}
+  case'totem':{const q=v7SafePos(p.x-p.face*1.2,p.y);const T=v7Obj({kind:'turret',x:q.x,y:q.y,int:999,cd:999,m:0,dur:d.dur*dm});v7Seq(Math.floor(d.dur*dm/d.int),.3,d.int,()=>{if(T.dead)return;const x=enemiesIn(y=>dist(y,T)<7+(y.r||.8)).sort((a,b)=>dist(a,T)-dist(b,T))[0];if(!x)return;
+   v7Proj({x:T.x,y:T.y-.2,tx:x.x,ty:x.y,sp:12,life:.9,m:d.m*pw,stg:2,col,kind:'orb',r:.2,src:'skill',construct:1,cls:L.cls,onHit:y=>{if(tr.length)srRideT(tr,y,L);}});});break;}
+  case'shield':giveShield(d.f*pw);if(tr.length)area(2.4,0);break;
+  case'sat':for(let k=0;k<d.k;k++)v7Obj({kind:'sat',x:p.x,y:p.y,ang:k*2.1,int:d.int,cd:.3+k*.2,m:d.m*pw,dur:d.dur*dm});break;
+  case'rally':p.en=Math.min(250,p.en+d.v);floatTxtC(p.x,p.y-2.2,'+'+d.v+' EN','#ffe08a',1);if(tr.length){const x=nearestEnemy(9);if(x)srRideT(tr,x,L);}break;
+  case'decoy':p.v7.decoy={x:p.x,y:p.y,t:d.dur*dm};break;
+  case'ward':{const z=v7Zone({x:p.x,y:p.y,r:2,dur:d.dur*dm,tick:99,m:0,col,style:'rune'});v7Seq(Math.floor(d.dur*dm/.5),.5,.5,()=>{if(z.dead)return;if(Math.hypot(p.x-z.x,p.y-z.y)<=z.r)p.hp=Math.min(p.mhp,p.hp+p.mhp*d.f);});break;}
+  case'smoke':p.v7.decoy={x:p.x,y:p.y,t:d.dur*dm};p.v7.stealth=Math.max(p.v7.stealth||0,1.5);v7Zone({x:p.x,y:p.y,r:2.2,dur:d.dur*dm,tick:99,m:0,col:'#9aa3b2',style:'smoke',smoke:1});break;
+  case'cleanse':p.burnT=0;p.slowT=0;p.stun=0;p.hp=Math.min(p.mhp,p.hp+p.mhp*d.f);floatTxtC(p.x,p.y-2.2,'CLEANSE','#7dff9a',1);break;
+  case'haste':buff('srHaste',d.dur*dm,d.v);break;
+  case'shade':for(let k=0;k<d.k;k++)v7Obj({kind:'shade',x:clamp(p.x+(k?1:-1)*1.2,.8,AW-.8),y:p.y,dur:d.dur*dm,int:d.int,cd:.3+k*.2,m:d.m*pw,face:p.face});break;}
+ srCtx({slot:'back',fam:L.fam,cls:L.cls,lib:L.id},()=>srRideS((d.rd||[]).filter(k=>SR_SELF.has(k)),pw,p.x,p.y));
+ };}
+/* trap riders */
+{const _tb=v7TrapBoom;v7TrapBoom=function(T,mul,chain){const rd=T&&T.srRide;const x=T&&T.x,y=T&&T.y;_tb(T,mul,chain);if(rd&&rd.length&&CB)enemiesIn(e=>Math.hypot(e.x-x,e.y-y)<=1.9+(e.r||.8)).forEach(e=>srRideT(rd,e,null));};}
+/* slow rider: feeds the V6.1 slow channel every frame while active */
+{const _cs=cbStep;cbStep=function(dt){if(CB&&!CB.paused)for(const e of enemiesIn(()=>true)){if((e.srSlowT||0)>0){e.srSlowT-=dt;e.v7slowF=Math.max(e.v7slowF||0,e===CB.boss?.18:.3);}}return _cs(dt);};}
+
+/* =====================================================================
+   V7 SKILL REVOLUTION (3/6) — EQUIPMENT SKILL LIBRARY · MINING
+   12 mining families × (left arm 3 + right arm 3) = 72 choices, chosen independently per arm.
+   Left A = the existing arm skill (12 legacy, unchanged) · Left B/C + Right D/E/F = 60 new skills.
+   Every new skill damages ore only through damageOre()/hitList() → the Mining Power rule
+   (ore above Mining Power takes 0 damage) cannot be bypassed. No skill creates ore or loot.
+   ===================================================================== */
+const SRM={},SRM_BY={};
+const SR_MNEW=[
+ ['scrap','mL','B','Double Knock','🔨',{sh:'echo',m:.6,cd:14,rd:[]}],
+ ['scrap','mL','C','Scrap Sweep','🧹',{sh:'cleave',m:.55,r:2,cd:16,rd:[]}],
+ ['scrap','mR','D','Steady Grip','✊',{sh:'focus',n:3,v:.35,cd:18,rd:[]}],
+ ['scrap','mR','E','Scavenger Swing','🧲',{sh:'seek',k:2,r:4,m:.5,cd:18,rd:['mag']}],
+ ['scrap','mR','F','Junk Rain','🌧',{sh:'scatter',k:4,r:3,m:.45,cd:20,rd:[]}],
+ ['stoneguard','mL','B','Stone Cross','✚',{sh:'cross',len:2,m:.8,cd:18,rd:[]}],
+ ['stoneguard','mL','C','Bedrock Brace','🛡',{sh:'guard',dur:8,cd:24,rd:[]}],
+ ['stoneguard','mR','D','Pillar Strike','🗿',{sh:'column',len:3,m:.8,cd:18,rd:[]}],
+ ['stoneguard','mR','E','Stoneheart Quake','⛰',{sh:'quake',k:3,m:.7,cd:24,rd:['guard']}],
+ ['stoneguard','mR','F','Fault Finder','🔎',{sh:'weak',dur:8,v:.3,m:.4,cd:20,rd:[]}],
+ ['coppergear','mL','B','Gear Ramp','⚙️',{sh:'drill',n:4,m:.35,ramp:.15,cd:20,rd:['spd']}],
+ ['coppergear','mL','C','Cog Relay','🔁',{sh:'overcharge',v:5,m:.5,cd:18,rd:[]}],
+ ['coppergear','mR','D','Piston Pulses','💢',{sh:'pulse',n:3,r:1.6,m:.4,cd:22,rd:[]}],
+ ['coppergear','mR','E','Spring Boots','👢',{sh:'haste',v:25,dur:8,cd:22,rd:[]}],
+ ['coppergear','mR','F','Conveyor Strike','➡',{sh:'row',len:3,m:.7,cd:20,rd:['cd']}],
+ ['zephyr','mL','B','Gust Drill','🌬',{sh:'burrow',tiles:5,m:1,cd:20,rd:[]}],
+ ['zephyr','mL','C','Wind Sweep','🍃',{sh:'sweep',r:2.2,m:.6,cd:18,rd:['mv']}],
+ ['zephyr','mR','D','Tailwind Rig','💨',{sh:'haste',v:20,dur:8,cd:24,rd:['spd']}],
+ ['zephyr','mR','E','Air Scout','🪁',{sh:'seek',k:3,r:5,m:.4,cd:20,rd:[]}],
+ ['zephyr','mR','F','Cyclone Scatter','🌀',{sh:'scatter',k:5,r:3,m:.4,cd:22,rd:['mv']}],
+ ['drilltech','mL','B','Bore Through','🔩',{sh:'pierce',k:3,len:5,m:.9,cd:20,rd:[]}],
+ ['drilltech','mL','C','Spiral Bore','🌀',{sh:'drill',n:6,m:.3,ramp:.1,cd:22,rd:[]}],
+ ['drilltech','mR','D','Thermal Drill','🔥',{sh:'heat',n:6,m:.25,cd:20,rd:[]}],
+ ['drilltech','mR','E','Precision Bit','🎯',{sh:'focus',n:4,v:.3,cd:22,rd:['spd']}],
+ ['drilltech','mR','F','Shaft Sink','⬇',{sh:'column',len:4,m:.7,cd:22,rd:['cd']}],
+ ['titanstone','mL','B','Titan Drop','☄',{sh:'meteor',m:2.2,r:1,delay:.8,cd:26,rd:[]}],
+ ['titanstone','mL','C','Tremor Rings','〰',{sh:'quake',k:3,m:.8,cd:26,rd:[]}],
+ ['titanstone','mR','D','Crack Point','💥',{sh:'weak',dur:8,v:.35,m:.5,cd:22,rd:['focus']}],
+ ['titanstone','mR','E','Shockwave','🌊',{sh:'nova2',r:3.5,m:1,cd:28,rd:[]}],
+ ['titanstone','mR','F','Aftershock','🔁',{sh:'echo',m:.9,cd:24,rd:['guard']}],
+ ['magnetite','mL','B','Polar Bounce','🧲',{sh:'bounce',k:4,m:.8,fall:.2,cd:22,rd:['mag']}],
+ ['magnetite','mL','C','Lodestone Sense','🧭',{sh:'reveal',r:5,cd:24,rd:['mag']}],
+ ['magnetite','mR','D','Magnetic Sweep','🌀',{sh:'sweep',r:2.4,m:.55,cd:20,rd:['mag']}],
+ ['magnetite','mR','E','Iron Anchor','⚓',{sh:'guard',dur:6,cd:22,rd:['mag']}],
+ ['magnetite','mR','F','Flux Pulses','💫',{sh:'pulse',n:3,r:1.8,m:.35,cd:24,rd:['mag']}],
+ ['prism','mL','B','Refract Bounce','🔷',{sh:'bounce',k:5,m:.75,fall:.15,cd:24,rd:[]}],
+ ['prism','mL','C','Lens Flash','🔆',{sh:'reveal',r:6,cd:26,rd:[]}],
+ ['prism','mR','D','Prism Snipe','🎯',{sh:'lance',r:5,m:1.6,cd:22,rd:[]}],
+ ['prism','mR','E','Spectrum Cross','✳',{sh:'cross',len:3,m:.6,cd:24,rd:['rev']}],
+ ['prism','mR','F','Glitter Burst','✨',{sh:'scatter',k:4,r:4,m:.45,cd:24,rd:['rev']}],
+ ['frostbound','mL','B','Brittle Frost','❄',{sh:'weak',dur:10,v:.25,m:.3,cd:22,rd:['cd']}],
+ ['frostbound','mL','C','Frost Line','➖',{sh:'row',len:4,m:.75,cd:24,rd:[]}],
+ ['frostbound','mR','D','Cold Snap','🥶',{sh:'nova2',r:3,m:.9,cd:26,rd:['guard']}],
+ ['frostbound','mR','E','Ice Echo','🧊',{sh:'echo',m:.8,cd:24,rd:['cd']}],
+ ['frostbound','mR','F','Icicle Bore','🧊',{sh:'pierce',k:2,len:4,m:1,cd:22,rd:['cd']}],
+ ['magma','mL','B','Magma Core','🔥',{sh:'heat',n:8,m:.25,cd:26,rd:['spd']}],
+ ['magma','mL','C','Lava Drop','🌋',{sh:'meteor',m:1.6,r:1.6,delay:.7,cd:30,rd:['spd']}],
+ ['magma','mR','D','Eruptive Pulses','💥',{sh:'pulse',n:4,r:1.8,m:.4,cd:28,rd:['spd']}],
+ ['magma','mR','E','Heat Bloom','🌺',{sh:'nova2',r:3,m:1,cd:30,rd:['spd']}],
+ ['magma','mR','F','Lava Tunnel','🕳',{sh:'burrow',tiles:6,m:1.2,cd:26,rd:['spd']}],
+ ['thunder','mL','B','Arc Bounce','⚡',{sh:'bounce',k:5,m:.7,fall:.1,cd:26,rd:['spd']}],
+ ['thunder','mL','C','Thunder Scatter','🌩',{sh:'scatter',k:5,r:3.5,m:.5,cd:26,rd:['cd']}],
+ ['thunder','mR','D','Static Seeker','🔌',{sh:'seek',k:3,r:5,m:.5,cd:24,rd:['spd']}],
+ ['thunder','mR','E','Capacitor Burst','🔋',{sh:'overcharge',v:6,m:.6,cd:24,rd:['en']}],
+ ['thunder','mR','F','Thunder Echo','🔊',{sh:'echo',m:.85,cd:26,rd:['spd']}],
+ ['void','mL','B','Void Snipe','🎯',{sh:'lance',r:6,m:2,cd:30,rd:['rev']}],
+ ['void','mL','C','Phase Tunnel','🌀',{sh:'burrow',tiles:7,m:1.4,cd:30,rd:['rev']}],
+ ['void','mR','D','Rift Sight','👁',{sh:'reveal',r:7,cd:28,rd:['cd']}],
+ ['void','mR','E','Collapse','🕳',{sh:'meteor',m:2.6,r:1.5,delay:.9,cd:34,rd:['guard']}],
+ ['void','mR','F','Nullgrid Strike','✖',{sh:'cross',len:3,m:.9,cd:30,rd:['cd']}]];
+const SR_MRDN={mag:'ดูดแร่ที่ขุดแล้วรอบจุดโจมตีเข้า Bag (ติดความจุ)',rev:'เปิดเผยแร่ซ่อนรัศมี 3 รอบจุดโจมตี',cd:'ลดคูลดาวน์สกิลแขนอีกข้าง 3 วิ',spd:'Mining Speed +15% 5 วิ',mv:'Move +20% 5 วิ',guard:'กันมึน/อันตรายจากพื้นที่ 4 วิ',focus:'ขุดปกติ 2 ครั้งถัดไป +40%',en:'Mining Energy +10'};
+function srMDesc(L){const d=L.def;const m=d.m!=null?`${Math.round(d.m*100)}% Power`:'';
+ const s={echo:`ขุดเป้า ${m} แล้วซ้ำอีกครั้งหลัง 1 วิ`,cleave:`ฟาดเป้า+แร่ข้างหน้าในกรวยระยะ ${d.r} ช่อง ${m}`,focus:`ขุดปกติ ${d.n} ครั้งถัดไปแรงขึ้น ${Math.round(d.v*100)}%`,seek:`ยิงไปยังแร่ที่ขุดได้ใกล้สุด ${d.k} ก้อน (ระยะ ${d.r}) ${m}`,scatter:`โปรยหินใส่แร่สุ่ม ${d.k} ก้อนในรัศมี ${d.r} ${m}`,
+  cross:`ทุบกากบาทรอบเป้า ยาว ${d.len} ช่อง ${m}`,guard:`เกราะชั้นหิน ${d.dur} วิ: กันมึนและลดอันตรายจากพื้นที่`,column:`ทุบแนวตั้งผ่านเป้า ${d.len} ช่อง ${m}`,row:`ทุบแนวนอนผ่านเป้า ${d.len} ช่อง ${m}`,quake:`คลื่นแผ่นดินไหว ${d.k} วงจากตัว (วงละ ${m} ลดลงตามระยะ)`,
+  weak:`ขุดเป้า ${m} และทำ Weak Spot ${d.dur} วิ (ดาเมจขุดใส่ก้อนนั้น +${Math.round(d.v*100)}%)`,drill:`เจาะรัว ${d.n} ครั้ง เริ่ม ${m} แรงขึ้น +${Math.round(d.ramp*100)}% ต่อครั้ง`,overcharge:`ขุดเป้า ${m} และลดคูลดาวน์สกิลแขนอีกข้าง ${d.v} วิ`,pulse:`คลื่นรอบตัว ${d.n} ครั้ง รัศมี ${d.r} ครั้งละ ${m}`,
+  haste:`Move +${d.v}% ${d.dur} วิ`,burrow:`มุดพุ่งไปยังแร่เป้าหมาย (ไม่เกิน ${d.tiles} ช่อง) แล้วทุบ ${m}`,sweep:`กวาดครึ่งวงกลมด้านหน้า รัศมี ${d.r} ${m}`,pierce:`เจาะทะลุแนวตรง ${d.len} ช่อง โดนแร่ ${d.k} ก้อนแรก ${m}`,heat:`ความร้อนสะสม ${d.n} จังหวะ (0.4 วิ) จังหวะละ ${m}`,
+  meteor:`ทำเครื่องหมายแล้วทุบลงหลัง ${d.delay} วิ ${m} + รอบ ${d.r} ช่อง 50%`,nova2:`คลื่นใหญ่รัศมี ${d.r} ${m} ลดลงตามระยะ`,bounce:`กระเด้งระหว่างแร่ ${d.k} ครั้ง เริ่ม ${m} ลด ${Math.round(d.fall*100)}%/ครั้ง`,reveal:`สแกนเปิดเผยแร่ซ่อน/ผนังลับรัศมี ${d.r} (ไม่สร้างแร่ใหม่)`,lance:`ยิงไกลไปยังแร่ที่ขุดได้ไกลสุดในระยะ ${d.r} ${m}`}[d.sh];
+ const rd=(d.rd||[]).map(k=>SR_MRDN[k]).filter(Boolean);return s+` · CD ${d.cd} วิ`+(rd.length?' · '+rd.join(' · '):'');}
+function srMFamTier(f){return Math.max(1,Math.ceil((FAM_ORDER.indexOf(f)+1)/2));}
+(function(){for(const f of FAM_ORDER){const pid=f+'_arm';const S0=SKILLS[pid];if(!S0)continue;const id=`m_mL_${f}_A`;SRM[id]={id,mslot:'mL',fam:f,opt:'A',legacy:1,n:S0.name,i:S0.icon,cd:S0.cd,d:S0.desc};(SRM_BY['mL:'+f]=SRM_BY['mL:'+f]||[]).push(id);}
+ for(const[f,ms,opt,n,i,def]of SR_MNEW){const id=`m_${ms}_${f}_${opt}`;const L={id,mslot:ms,fam:f,opt,n,i,def,cd:def.cd};L.d=srMDesc(L);SRM[id]=L;(SRM_BY[ms+':'+f]=SRM_BY[ms+':'+f]||[]).push(id);}
+ for(const k in SRM_BY)SRM_BY[k].sort();})();
+const SR_MLIBCHK=(function(){const ids=Object.keys(SRM);const neu=ids.filter(id=>!SRM[id].legacy);const sig={},dupSig=[];const legacyT=new Set(Object.values(SKILLS).map(s=>s.type));
+ for(const id of neu){const d=SRM[id].def;const s=d.sh+'|'+[...d.rd].sort().join('+');if(sig[s])dupSig.push([sig[s],id]);else sig[s]=id;if(legacyT.has(d.sh))dupSig.push(['legacy-type',id]);}
+ const names={},dupName=[];for(const id of ids){const nm=SRM[id].n.toLowerCase();if(names[nm])dupName.push([names[nm],id]);else names[nm]=id;}
+ const bad=Object.entries(SRM_BY).filter(([k,v])=>v.length!==3);const r={total:ids.length,legacy:ids.length-neu.length,neu:neu.length,dupSig,dupName,badSlots:bad,ok:ids.length===72&&neu.length===60&&!dupSig.length&&!dupName.length&&!bad.length};
+ if(!r.ok)console.error('SR mining library check failed',r);return r;})();
+function srMSelId(ms,f){const def=ms==='mL'?'A':'D';const opt=(S.sr&&S.sr.sel[ms+':'+f])||def;const id=`m_${ms}_${f}_${opt}`;return SRM[id]&&srUnlocked(id)?id:`m_${ms}_${f}_${def}`;}
+/* ---------- apply per-arm selection to the mining snapshot ---------- */
+{const _cs=calcStats;calcStats=function(eq){const o=_cs(eq);if(!S||!S.sr)return o;try{srMLibApply(o);}catch(e){console.warn('srMLibApply',e);}return o;};}
+function srMLibApply(o){for(let i=0;i<2;i++){const sk=o.skills&&o.skills[i];if(!sk)continue;const ms=i?'mR':'mL';const id=srMSelId(ms,sk.fam);const L=SRM[id];if(!L)continue;sk.srId=id;if(L.legacy)continue;
+  const ratio=sk.cdEff/Math.max(.1,sk.cd);o.skills[i]=Object.assign({pid:sk.pid,fam:sk.fam,slot:sk.slot},L.def,{name:L.n,icon:L.i,desc:L.d,type:'sr_'+L.def.sh,cd:L.def.cd,cdEff:Math.max(3,Math.round(L.def.cd*ratio*10)/10),srId:id,srNew:1});}return o;}
+/* ---------- engine ---------- */
+function srMNeed(sk,range){const o=skillTarget(range||1.6);if(!o){notify('nt','ไม่มีแร่ในระยะ — เข้าใกล้แร่ก่อน','err',1);return null;}return o;}
+function srMCol(sk){return (FAMS[sk.fam]&&FAMS[sk.fam].c3)||'#ffffff';}
+function srMHit(list,mult){return hitList(list.filter(Boolean),R.st.rawP*mult);}
+function srMLater(t,fn){R.timers.push({t,fn:()=>{if(!R||R.ended)return;R.inSkill=true;try{fn();}finally{R.inSkill=false;}}});}
+function srMRide(sk,cx,cy){const rd=sk.rd||[];const other=sk.slot==='armR'?0:1;
+ for(const k of rd){switch(k){case'mag':{let n=0;for(const d of R.drops){if(!d.fly&&Math.hypot(d.x-cx,d.y-cy)<=3&&bagFits(d.tier)){d.fly=true;n++;}}break;}
+  case'rev':for(const o of R.ores){if(Math.hypot(o.x+.5-cx,o.y+.5-cy)<=3){if(o.hidden)revealHidden(o);if(o.secret&&!o.revealed){o.revealed=true;floatTxt(o.x+.5,o.y+.2,'พบผนังลับ!','#ff9df0');}}}break;
+  case'cd':R.cds[other]=Math.max(0,R.cds[other]-3);break;case'spd':R.srMS={t:5,v:15};break;case'mv':R.srMv={t:5,v:20};break;case'guard':R.srGuard=Math.max(R.srGuard||0,4);break;
+  case'focus':R.srFocus={n:2,v:.4};break;case'en':R.srEn=Math.min(100,(R.srEn||0)+10);break;}}}
+function srMDir(o){let dx=o.x+.5-R.g.x,dy=o.y+.5-R.g.y;const l=Math.hypot(dx,dy)||1;return[dx/l,dy/l];}
+function srMVisible(o){return oreVisible(o);}
+const SR_MSH={
+ echo(sk){const o=srMNeed(sk);if(!o)return false;srMHit([o],sk.m);srMLater(1,()=>{if(R.ores.includes(o)){srMHit([o],sk.m);R.efx.push({type:'burst',x:o.x+.5,y:o.y+.5,t:0,dur:.35,col:srMCol(sk),r:.9});}});R.efx.push({type:'burst',x:o.x+.5,y:o.y+.5,t:0,dur:.4,col:srMCol(sk),r:1});return o;},
+ cleave(sk){const o=srMNeed(sk);if(!o)return false;const[dx,dy]=srMDir(o);const L=R.ores.filter(x=>srMVisible(x)&&Math.hypot(x.x+.5-R.g.x,x.y+.5-R.g.y)<=sk.r+.3&&((x.x+.5-R.g.x)*dx+(x.y+.5-R.g.y)*dy)/Math.max(.01,Math.hypot(x.x+.5-R.g.x,x.y+.5-R.g.y))>.35);
+  if(!L.includes(o))L.push(o);srMHit(L,sk.m);R.efx.push({type:'ring',x:R.g.x+dx,y:R.g.y+dy,r:sk.r*.7,t:0,dur:.35,col:srMCol(sk)});return o;},
+ focus(sk){R.srFocus={n:sk.n,v:sk.v};for(let k=0;k<12;k++)part(R.g.x,R.g.y-.5,srMCol(sk),3,3);return{x:R.g.x-.5,y:R.g.y-.5};},
+ seek(sk){const L=R.ores.filter(x=>srMVisible(x)&&canMine(x)&&Math.hypot(x.x+.5-R.g.x,x.y+.5-R.g.y)<=sk.r).sort((a,b)=>Math.hypot(a.x-R.g.x,a.y-R.g.y)-Math.hypot(b.x-R.g.x,b.y-R.g.y)).slice(0,sk.k);
+  if(!L.length){notify('nt','ไม่มีแร่ที่ขุดได้ในระยะ','err',1);return false;}for(const x of L)R.efx.push({type:'beam',x0:R.g.x,y0:R.g.y-.6,x1:x.x+.5,y1:x.y+.5,t:0,dur:.35,col:srMCol(sk)});srMHit(L,sk.m);return L[0];},
+ scatter(sk){const L=R.ores.filter(x=>srMVisible(x)&&Math.hypot(x.x+.5-R.g.x,x.y+.5-R.g.y)<=sk.r);if(!L.length){notify('nt','ไม่มีแร่ในรัศมี','err',1);return false;}
+  const pick=[];for(let k=0;k<sk.k&&L.length;k++){const i=Math.floor(Math.random()*L.length);pick.push(L.splice(i,1)[0]);}
+  pick.forEach((x,k)=>srMLater(.1+k*.12,()=>{srMHit([x],sk.m);R.efx.push({type:'burst',x:x.x+.5,y:x.y+.5,t:0,dur:.3,col:srMCol(sk),r:.7});}));return pick[0];},
+ cross(sk){const o=srMNeed(sk,2.4);if(!o)return false;const L=R.ores.filter(x=>(x.x===o.x&&Math.abs(x.y-o.y)<=sk.len)||(x.y===o.y&&Math.abs(x.x-o.x)<=sk.len));srMHit(L,sk.m);
+  for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]])R.efx.push({type:'beam',x0:o.x+.5,y0:o.y+.5,x1:o.x+.5+dx*sk.len,y1:o.y+.5+dy*sk.len,t:0,dur:.3,col:srMCol(sk)});return o;},
+ guard(sk){R.srGuard=Math.max(R.srGuard||0,sk.dur);R.g.stun=0;R.efx.push({type:'ring',x:R.g.x,y:R.g.y,r:1.3,t:0,dur:.6,col:srMCol(sk)});return{x:R.g.x-.5,y:R.g.y-.5};},
+ column(sk){const o=srMNeed(sk,2.4);if(!o)return false;const L=R.ores.filter(x=>x.x===o.x&&Math.abs(x.y-o.y)<=sk.len);srMHit(L,sk.m);R.efx.push({type:'beam',x0:o.x+.5,y0:o.y+.5-sk.len,x1:o.x+.5,y1:o.y+.5+sk.len,t:0,dur:.35,col:srMCol(sk)});return o;},
+ row(sk){const o=srMNeed(sk,2.4);if(!o)return false;const L=R.ores.filter(x=>x.y===o.y&&Math.abs(x.x-o.x)<=sk.len);srMHit(L,sk.m);R.efx.push({type:'beam',x0:o.x+.5-sk.len,y0:o.y+.5,x1:o.x+.5+sk.len,y1:o.y+.5,t:0,dur:.35,col:srMCol(sk)});return o;},
+ quake(sk){const gx=R.g.x,gy=R.g.y;let any=false;for(let k=0;k<sk.k;k++){const r1=k+.3,r2=k+1.3;const L=R.ores.filter(x=>{const d=Math.hypot(x.x+.5-gx,x.y+.5-gy);return d>=r1&&d<r2;});if(L.length)any=true;
+   srMLater(.05+k*.25,()=>{srMHit(L,sk.m*(1-.2*k));R.efx.push({type:'ring',x:gx,y:gy,r:r2,t:0,dur:.35,col:srMCol(sk)});});}R.shake=.25;if(!any)notify('nt','คลื่นแผ่ออกแต่ไม่มีแร่ในระยะ','',1);return{x:gx-.5,y:gy-.5};},
+ weak(sk){const o=srMNeed(sk);if(!o)return false;o.srWeakT=R.elapsed+sk.dur;o.srWeakV=sk.v;srMHit([o],sk.m);floatTxt(o.x+.5,o.y-.2,'Weak Spot!','#ffd84a',.9);return o;},
+ drill(sk){const o=srMNeed(sk);if(!o)return false;for(let k=0;k<sk.n;k++)srMLater(k*.14,()=>{if(R.ores.includes(o)){srMHit([o],sk.m*(1+sk.ramp*k));R.efx.push({type:'spin',x:o.x+.5,y:o.y+.5,t:0,dur:.18,col:srMCol(sk)});}});return o;},
+ overcharge(sk){const o=srMNeed(sk);if(!o)return false;srMHit([o],sk.m);const other=sk.slot==='armR'?0:1;R.cds[other]=Math.max(0,R.cds[other]-sk.v);R.efx.push({type:'burst',x:o.x+.5,y:o.y+.5,t:0,dur:.4,col:srMCol(sk),r:.9});return o;},
+ pulse(sk){const gx=R.g.x,gy=R.g.y;for(let k=0;k<sk.n;k++)srMLater(k*.35,()=>{srMHit(oresIn(R.g.x,R.g.y,sk.r),sk.m);R.efx.push({type:'ring',x:R.g.x,y:R.g.y,r:sk.r+.4,t:0,dur:.3,col:srMCol(sk)});});return{x:gx-.5,y:gy-.5};},
+ haste(sk){R.srMv={t:sk.dur,v:sk.v};for(let k=0;k<12;k++)part(R.g.x,R.g.y,'#e8fffb',4,3);return{x:R.g.x-.5,y:R.g.y-.5};},
+ burrow(sk){const o=skillTarget(sk.tiles);if(!o){notify('nt',`ไม่มีแร่ในระยะ ${sk.tiles} ช่อง`,'err',1);return false;}const[dx,dy]=srMDir(o);const g=R.g;const nx=o.x+.5-dx*.9,ny=o.y+.5-dy*.9;const ti=ix(Math.floor(nx),Math.floor(ny));
+  if(walkable(ti)){R.efx.push({type:'beam',x0:g.x,y0:g.y,x1:nx,y1:ny,t:0,dur:.3,col:srMCol(sk)});g.x=nx;g.y=ny;g.path=[];g.state='idle';g.idleWait=.05;}
+  srMHit([o],sk.m);R.efx.push({type:'burst',x:o.x+.5,y:o.y+.5,t:0,dur:.4,col:srMCol(sk),r:1});return o;},
+ sweep(sk){const o=skillTarget(sk.r)||null;const[dx,dy]=o?srMDir(o):[R.g.face||1,0];const L=R.ores.filter(x=>srMVisible(x)&&Math.hypot(x.x+.5-R.g.x,x.y+.5-R.g.y)<=sk.r+.3&&((x.x+.5-R.g.x)*dx+(x.y+.5-R.g.y)*dy)>=0);
+  if(!L.length){notify('nt','ไม่มีแร่ด้านหน้า','err',1);return false;}srMHit(L,sk.m);R.efx.push({type:'ring',x:R.g.x+dx*.6,y:R.g.y+dy*.6,r:sk.r,t:0,dur:.35,col:srMCol(sk)});return L[0];},
+ pierce(sk){const o=srMNeed(sk,sk.len);if(!o)return false;const[dx,dy]=srMDir(o);const L=[];for(let s=.5;s<=sk.len&&L.length<sk.k;s+=.25){const x=Math.floor(R.g.x+dx*s),y=Math.floor(R.g.y+dy*s);const q=R.oreAt[ix(x,y)];if(q&&!L.includes(q))L.push(q);}
+  srMHit(L,sk.m);R.efx.push({type:'beam',x0:R.g.x,y0:R.g.y,x1:R.g.x+dx*sk.len,y1:R.g.y+dy*sk.len,t:0,dur:.35,col:srMCol(sk)});return o;},
+ heat(sk){const o=srMNeed(sk);if(!o)return false;for(let k=0;k<sk.n;k++)srMLater(.1+k*.4,()=>{if(R.ores.includes(o)){srMHit([o],sk.m);for(let j=0;j<4;j++)part(o.x+.5,o.y+.5,'#ff8a2a',3,2);}});return o;},
+ meteor(sk){const o=skillTarget(3)||srMNeed(sk);if(!o)return false;const cx=o.x+.5,cy=o.y+.5;R.efx.push({type:'ring',x:cx,y:cy,r:sk.r+.5,t:0,dur:sk.delay,col:srMCol(sk)});
+  srMLater(sk.delay,()=>{if(R.ores.includes(o))srMHit([o],sk.m);srMHit(oresIn(cx,cy,sk.r).filter(x=>x!==o),sk.m*.5);R.efx.push({type:'burst',x:cx,y:cy,t:0,dur:.5,col:srMCol(sk),r:sk.r+.6});R.shake=.3;});return o;},
+ nova2(sk){const gx=R.g.x,gy=R.g.y;const L=oresIn(gx,gy,sk.r);if(!L.length)notify('nt','ไม่มีแร่ในรัศมี','',1);for(const x of L){const d=Math.hypot(x.x+.5-gx,x.y+.5-gy);srMHit([x],sk.m*Math.max(.35,1-d/(sk.r+1)));}
+  R.efx.push({type:'ring',x:gx,y:gy,r:sk.r+.5,t:0,dur:.6,col:srMCol(sk),fill:true});R.shake=.3;return{x:gx-.5,y:gy-.5};},
+ bounce(sk){let cur=srMNeed(sk,2.4);if(!cur)return false;const hit=[cur];let px=R.g.x,py=R.g.y-.6;for(let k=0;k<sk.k&&cur;k++){const c=cur,m=sk.m*Math.max(.2,1-sk.fall*k),ax=px,ay=py;srMLater(k*.12,()=>{srMHit([c],m);R.efx.push({type:'bolt',x0:ax,y0:ay,x1:c.x+.5,y1:c.y+.5,t:0,dur:.3,col:srMCol(sk)});});px=cur.x+.5;py=cur.y+.5;
+   const nx=R.ores.filter(x=>!hit.includes(x)&&srMVisible(x)&&Math.hypot(x.x-cur.x,x.y-cur.y)<=2.5).sort((a,b)=>Math.hypot(a.x-cur.x,a.y-cur.y)-Math.hypot(b.x-cur.x,b.y-cur.y))[0];if(nx)hit.push(nx);cur=nx;}return hit[0];},
+ reveal(sk){let n=0;for(const o of R.ores){if(Math.hypot(o.x+.5-R.g.x,o.y+.5-R.g.y)<=sk.r){if(o.hidden){revealHidden(o);n++;}if(o.secret&&!o.revealed){o.revealed=true;n++;floatTxt(o.x+.5,o.y+.2,'พบผนังลับ!','#ff9df0');}}}
+  R.efx.push({type:'ring',x:R.g.x,y:R.g.y,r:sk.r,t:0,dur:.8,col:srMCol(sk)});if(!n)notify('nt','สแกนแล้ว ไม่พบแร่ซ่อนในรัศมี','',1);return{x:R.g.x-.5,y:R.g.y-.5};},
+ lance(sk){const L=R.ores.filter(x=>srMVisible(x)&&canMine(x)&&Math.hypot(x.x+.5-R.g.x,x.y+.5-R.g.y)<=sk.r).sort((a,b)=>Math.hypot(b.x-R.g.x,b.y-R.g.y)-Math.hypot(a.x-R.g.x,a.y-R.g.y));const o=L[0];
+  if(!o){notify('nt','ไม่มีแร่ที่ขุดได้ในระยะ','err',1);return false;}srMHit([o],sk.m);R.efx.push({type:'beam',x0:R.g.x,y0:R.g.y-.6,x1:o.x+.5,y1:o.y+.5,t:0,dur:.4,col:srMCol(sk)});return o;}};
+for(const sh in SR_MSH)SKILL_FX['sr_'+sh]=function(sk){const r=SR_MSH[sh](sk);if(r===false||r==null)return false;srMRide(sk,r.x+.5,r.y+.5);};
+/* mining buffs: speed (via the shared speed channel), move (tile factor), stun guard, focus / weak spot (damage only — the power check still runs first) */
+{const _f=v5SpdAdd;v5SpdAdd=function(){let a=_f();if(R){if(R.srMS&&R.srMS.t>0)a+=R.srMS.v;if(R.srOD>0)a+=18;}return a;};}
+{const _t=tileF;tileF=function(i){let k=_t(i);if(R&&R.srMv&&R.srMv.t>0)k*=1+R.srMv.v/100;return k;};}
+{const _d=damageOre;damageOre=function(o,amt,src){if(R&&o&&R.ores.indexOf(o)>=0&&canMine(o)&&!o.hidden){if(o.srWeakT&&o.srWeakT>R.elapsed)amt*=1+(o.srWeakV||0);if(!R.inSkill&&R.srFocus&&R.srFocus.n>0){amt*=1+R.srFocus.v;R.srFocus.n--;}}return _d(o,amt,src);};}
+{const _rt=runTick;runTick=function(dt){if(R&&!R.ended&&!R.paused){if(R.srMS)R.srMS.t-=dt;if(R.srMv)R.srMv.t-=dt;if(R.srGuard>0){R.srGuard-=dt;R.g.stun=0;}}return _rt(dt);};}
+
+/* =====================================================================
+   V7 SKILL REVOLUTION (4/6) — RUNTIME
+   Passive effects in play (per-hit tag bonuses with the +40% passive cap, conditional notables,
+   hybrids, keystones and their drawbacks) · Evolutions (24, max 2 per mode, slot/tag checked) ·
+   12 Core Actives (key F + HUD button in Combat and Mining) · Core EXP from real activities with
+   duplicate protection · Core milestones.
+   Echo / proc safety: echoes run under SR_ECHO and never create echoes; after-hit triggers only
+   react to main hits (basic/skill/ult/guard) — never to dot/proc — so no infinite loops.
+   ===================================================================== */
+let SR_ECHO=false,SR_RX=false;
+const SR_ACT={W6:{cd:36,cls:'warrior',cen:20},W24:{cd:28,cls:'warrior',cen:25},W42:{cd:25,cls:'warrior',cen:15},M6:{cd:26,cls:'mage',cen:25},M24:{cd:36,cls:'mage',cen:20},M42:{cd:34,cls:'mage',cen:20},
+ A6:{cd:28,cls:'assassin',cen:25},A24:{cd:32,cls:'assassin',cen:15},A42:{cd:34,cls:'assassin',cen:20},N13:{cd:42,en:36},N27:{cd:30,en:30},N41:{cd:35,en:30}};
+const SR_ACD={combat:0,mining:0};
+/* ---------- evolutions: equipped + allocated + compatible ---------- */
+function srEvoNode(id){return SR.byId[id];}
+function srEqClass(sl){const eq=S.combatEquip||{};const inst=eq[sl]?cinvGet(eq[sl]):null;return inst&&ARMOR[inst.aid]?famClass(ARMOR[inst.aid].fam):null;}
+function srEqFam(sl){const eq=S.combatEquip||{};const inst=eq[sl]?cinvGet(eq[sl]):null;return inst&&ARMOR[inst.aid]?ARMOR[inst.aid].fam:null;}
+function srClassCount(cls){let n=0;for(const sl of CSLOTS)if(srEqClass(sl)===cls)n++;return n;}
+function srSelDef(slot,f){const id=srSelId(slot,f);return id?SRL[id]:null;}
+const SR_EVO_TAG={
+ M22:f=>{const L=srSelDef('gL',f);if(!L)return false;if(L.legacy)return['runesmith','crystalc','runic','elemental'].includes(f);return['bolt','fan','orb','boomer','trap'].includes(L.def.sh);},
+ A22:f=>{const L=srSelDef('gL',f);if(!L)return false;if(L.legacy)return['mantis','phantom','nightreaper'].includes(f);return(L.def.rd||[]).some(k=>/^poi|^mk/.test(k));},
+ M13:f=>{const L=srSelDef('chest',f);if(!L)return false;if(L.legacy)return f!=='arcanist';return['rain','zone','cross','meteor','nova','vortex','quake'].includes(L.def.sh);},
+ M49:f=>{const L=srSelDef('back',f);if(!L)return false;if(L.legacy)return true;return['barrier','drone','totem','sat','decoy','ward','smoke','haste','shade'].includes(L.def.kind);},
+ A49:f=>{const L=srSelDef('back',f);return!!(L&&!L.legacy&&L.def.en>0);}};
+function srEvoCompat(id){const n=SR.byId[id];if(!n||n.t!=='evolution')return{ok:false,why:'ไม่ใช่ Evolution'};
+ if(n.r==='mining'){const eq=S.equip||{};return eq[n.s]?{ok:true}:{ok:false,why:`ต้องติดตั้งชิ้นส่วนขุดช่อง ${n.s}`};}
+ const cls={warrior:'warrior',mage:'mage',assassin:'assassin'}[n.r];const sl=n.s;const c=srEqClass(sl);if(c!==cls)return{ok:false,why:`ต้องสวม ${CLASS_INFO[cls].n} ที่ช่อง ${sl}`};
+ const tg=SR_EVO_TAG[id];if(tg&&!tg(srEqFam(sl)))return{ok:false,why:'สกิลที่เลือกในช่องนี้ไม่รองรับ Evolution นี้'};return{ok:true};}
+function srEvoOn(id){if(!S||!S.sr)return false;const m=srMode(id);return S.sr.evo[m].includes(id)&&srIs(id)&&srEvoCompat(id).ok;}
+function srDup(k){const sp=srAgg().spec[k];return sp?sp.n2:0;}
+function srIcd(k,cd){const now=CB?CB.t:(R?R.elapsed:0);const I=CB?(CB.srIcd=CB.srIcd||{}):(R?(R.srIcd=R.srIcd||{}):{});if((I[k]||-1e9)>now)return false;I[k]=now+cd;return true;}
+function srSpecCd(k){const sp=srAgg().spec[k];return sp?sp.cd*(sp.n2>=2?.75:1):0;}
+/* ---------- direct damage that never re-enters hit hooks (reflect / keystone adjustments) ---------- */
+function srDirect(e,amt,col,label){if(!e||e.dead||!(amt>0))return 0;amt=Math.round(amt);e.hp-=amt;CB.stats.dmg+=amt;if(label&&!CB.sim)floatTxtC(e.x,e.y-2,label+fmt(amt),col||'#d6a8ff',.95);if(e.hp<=0)enemyDie(e);return amt;}
+/* ---------- passive damage pipeline (outermost hitEnemy) ---------- */
+{const _vr=v7React;v7React=function(e,el){if(SR_ECHO&&srAgg().ks.M26)return;const p=SR_RX;SR_RX=true;try{return _vr(e,el);}finally{SR_RX=p;}};}
+let SR_DEPTH=0;
+{const _he=hitEnemy;hitEnemy=function(e,o){if(!CB||!e||!S||!S.sr||e.dead||e.hp<=0)return _he(e,o);o=Object.assign({},o);o.evId=CB.srEvN=(CB.srEvN||0)+1;o.srcId=(SRCTX&&SRCTX.lib)||o.src;if(SR_DEPTH>=3){CB.srDeep=(CB.srDeep||0)+1;return _he(e,o);}const A=srAgg(),s=k=>A.stat[k]||0,K=A.ks,p=CB.p,st=CB.st,C=SRCTX||{};
+ const src=o.src,main=src==='basic'||src==='skill'||src==='ult'||src==='guard';const fam=C.fam||o.hand||null;const cls=o.cls||(o.hand?famClass(o.hand):C.cls)||null;
+ const proj=!!o.proj,magic=cls==='mage',melee=main&&!proj&&!magic&&!o.construct&&!o.shade;const rune=fam==='runesmith'||fam==='runic'||!!o.trap;const el=!!o.el&&o.el!=='phys';
+ const aoe=!!o.srAoe||src==='ult';const marked=!!(e.v7m&&(e.v7m.rune>0||e.v7m.phantom>0||e.v7m.abyss>0||e.v7m.death>0))||(e.srMarkT||0)>CB.t;const basic=src==='basic';
+ let b=0;if(melee)b+=s('melee');if(magic&&main)b+=s('magic');if(proj)b+=s('proj');if(rune)b+=s('rune');if(el)b+=s('elem');if(aoe)b+=s('aoe');if(o.poison)b+=s('poison');if(main&&(p.combo||0)>=3)b+=s('combo');if(marked)b+=s('marked');if(basic)b+=s('basic');if((e.v7grav||0)>0)b+=s('grav');
+ if(melee&&hasB('srBers'))b+=6;
+ if(magic&&main&&p.srH1){b+=7;p.srH1=0;}if(magic&&main&&p.srH4){b+=7;p.srH4=0;}if(magic&&(src==='skill')&&p.srM4){b+=8;p.srM4=0;}
+ if(basic&&p.srW31>CB.t&&C.hand==='R'){b+=25;p.srW31=0;}
+ if(K.M8&&rune&&(src==='skill'||src==='ult'))b+=K.M8.rune;if(K.M26&&SR_RX)b+=K.M26.react;if(K.M44&&o.construct)b+=K.M44.construct;if(K.A44&&o.shade)b+=K.A44.clonedmg;
+ if(src==='ult'&&srEvoOn('M13'))b+=8;if(src==='ult'&&srEvoOn('A13')&&CB.srUltMain===e)b+=10;
+ b=Math.min(SR_CAP.dmg,b);let k=1;
+ if(K.M8&&basic&&!rune)k*=1+K.M8.nonrune/100;if(K.M26&&!el&&main)k*=1+K.M26.nonelem/100;if(K.M44&&main&&!o.construct)k*=1+K.M44.self/100;if(K.A8&&main)k*=1+K.A8.normal/100;
+ if(src==='ult'&&srEvoOn('W13')){k*=.92;o.stg=(o.stg!=null?o.stg:st.stg*.5)*1.12;}
+ let act=1;if((e.srMarkT||0)>CB.t&&main)act*=1.08;
+ o.m=(o.m==null?1:o.m)*(1+b/100)*k*act;
+ let ccb=0;if(srEvoOn('A4')&&marked)ccb+=3;if(A.spec.h3&&magic&&proj)ccb+=1.5;ccb=Math.max(0,Math.min(ccb,SR_CAP.cc-st.cc));if(ccb>0)o.ccb=(o.ccb||0)+ccb;
+ const c0=CB.stats.crits;SR_DEPTH++;let d;try{d=_he(e,o);}finally{SR_DEPTH--;}if(!(d>0))return d;const crit=CB.stats.crits>c0;e.srLastEv=o.evId;CB.srLastB=b;
+ if(K.A8&&main&&crit)srDirect(e,d*((st.cd+K.A8.critd)/st.cd/(1+K.A8.normal/100)-1));
+ if(main&&!SR_ECHO){SR_DEPTH++;try{srAfterHit(e,o,d,{melee,magic,crit,basic,C,fam});}finally{SR_DEPTH--;}}
+ return d;};}
+function srAfterHit(e,o,d,f){const p=CB.p,st=CB.st,A=srAgg(),SP=A.spec;
+ /* W33/W35 — 5 consecutive hits: Melee +6% 3 s (no stack) */
+ if(SP.chain5&&f.melee){if(CB.t-(p.srChT||0)>1.5)p.srChN=0;p.srChT=CB.t;p.srChN=(p.srChN||0)+1;if(p.srChN>=5){p.srChN=0;if(!hasB('srBers')){buff('srBers',3);if(!CB.sim)floatTxtC(p.x,p.y-2.4,'BERSERK','#ff9a3c',.9);}}}
+ /* H2 — melee hit restores 2 energy (3 s) */
+ if(SP.h2&&f.melee&&srIcd('h2',3))p.en=Math.min(250,p.en+2);
+ /* H5 — blade skill on Rune-marked target → Echo Slash (12 s, echo cannot echo) */
+ if(SP.h5&&o.src==='skill'&&!f.magic&&e.v7m&&e.v7m.rune>0&&srIcd('h5',srSpecCd('h5'))){SR_ECHO=true;try{hitEnemy(e,{m:.6,src:'proc',stg:6,cls:f.C.cls});}finally{SR_ECHO=false;}if(!CB.sim)fxAdd({type:'slash',x:e.x,y:e.y,tx:e.x+1,ty:e.y,t:0,dur:.2,col:'#5fc8ff',hand:1});}
+ /* A15/A17 — 5 poison stacks → Toxic Echo */
+ if(SP.toxic&&(e.v7poi||0)>=5&&srIcd('toxic',srSpecCd('toxic'))){SR_ECHO=true;try{enemiesIn(x=>dist(x,e)<=2+(x.r||.8)).forEach(x=>hitEnemy(x,{m:.15*e.v7poi,src:'proc',stg:4,cls:'assassin'}));}finally{SR_ECHO=false;}if(!CB.sim){fxAdd({type:'boom',x:e.x,y:e.y,r:2,t:0,dur:.4,col:'#9cff5a'});floatTxtC(e.x,e.y-2.4,'TOXIC ECHO','#9cff5a',1);}}
+ /* A51/A53 — 5 hits on Abyss Mark → Finisher Window 1.5 s */
+ if(SP.abyssfin&&e.v7m&&e.v7m.abyss>0){e.srAbN=(e.srAbN||0)+1;if(e.srAbN>=5){e.srAbN=0;e.wpOpen=Math.max(e.wpOpen||0,1.5);if(!CB.sim)floatTxtC(e.x,e.y-2.6,'FINISHER WINDOW','#d35cff',1);}}
+ /* A33/A35 — combo 4 → refund 1 Dash Charge (16 s) */
+ if(SP.dashref&&(p.combo||0)>=4&&p.v7&&p.v7.dch<3&&srIcd('dashref',srSpecCd('dashref'))){p.v7.dch=Math.min(3,p.v7.dch+1);if(!CB.sim)floatTxtC(p.x,p.y-2.4,'+DASH','#4ad8ff',.9);}
+ /* W22 — left-arm skill hit: Armor Rend −5% DEF 4 s (no stacking from the same evolution) */
+ if(f.C.slot==='gL'&&o.src==='skill'&&srEvoOn('W22'))e.srRendT=CB.t+4;
+ /* M4 — 3 spell hits on the same target → next spell +8% (internal cd 6 s) */
+ if(f.magic&&srEvoOn('M4')){if(p.srM4e===e)p.srM4n=(p.srM4n||0)+1;else{p.srM4e=e;p.srM4n=1;}if(p.srM4n>=3&&srIcd('m4',6)){p.srM4n=0;p.srM4=1;}}}
+{const _ed=enemyDef;enemyDef=function(e){let d=_ed(e);if(CB&&e&&(e.srRendT||0)>CB.t)d*=.95;return d;};}
+/* ---------- defense / speed hooks ---------- */
+{const _p=pDR;pDR=function(){let k=_p();if(!S||!S.sr)return k;const st=CB.st;let add=0;const b1=hasB('srDR');if(b1)add+=b1.v;if(hasB('srFort'))add+=.18;if(hasB('srAnchor'))add+=.08;if(hasB('srLowHP'))add+=.08;
+ if(add>0){const base=1-st.dr;const nb=Math.max(1-SR_CAP.dr/100,base*(1-add));k*=nb/Math.max(.01,base);}return Math.max(.05,k);};}
+{const _m=pMS;pMS=function(){let m=_m();const h=CB&&hasB('srHaste');if(h&&CB.lo!=='mine')m*=1+h.v;return m;};}
+{const _ba=basicAttack;basicAttack=function(e){const p=CB.p,st=CB.st;const hand=p.hand;const right=hand>0;
+ if(right&&srEvoOn('W31')){if(CB.t-(p.srW31T||0)>2)p.srW31N=0;p.srW31T=CB.t;p.srW31N=(p.srW31N||0)+1;if(p.srW31N>=5){p.srW31N=0;p.srW31=CB.t+.8;}}
+ const r=srCtx({slot:'basic',hand:right?'R':'L',fam:right?st.handR:st.handL,cls:famClass(right?st.handR:st.handL)},()=>_ba(e));
+ const as=hasB('srAS');let m=1;if(as)m*=1+as.v;if(CB.srH8)m*=1.04;if(m>1)p.atkCd/=m;
+ if(st.at&&st.at.proj&&srEvoOn('M31')){p.srM31N=(p.srM31N||0)+1;if(p.srM31N>=4){p.srM31N=0;CB.timers.push({t:.18,fn:()=>{if(!e||e.dead)return;SR_ECHO=true;try{hitEnemy(e,{m:.25*(st.at.mult||1),src:'proc',stg:2,cls:'mage',proj:1});}finally{SR_ECHO=false;}if(!CB.sim)fxAdd({type:'ring',x:e.x,y:e.y,r:.9,t:0,dur:.3,col:'#7fb8ff'});}});}}
+ if(srEvoOn('A31')){p.srA31N=(p.srA31N||0)+1;if(p.srA31N>=5&&srIcd('a31',3)){p.srA31N=0;CB.timers.push({t:.12,fn:()=>{if(!e||e.dead)return;SR_ECHO=true;try{hitEnemy(e,{m:.2*(st.at.mult||1),src:'proc',stg:2,cls:'assassin'});}finally{SR_ECHO=false;}if(!CB.sim)fxAdd({type:'slash',x:p.x,y:p.y,tx:e.x,ty:e.y,t:0,dur:.12,col:'#c58bff',hand:1});}});}}
+ return r;};}
+/* ---------- context wrappers (outermost) + guard window + Rune Relay ---------- */
+{const _us=useCSkill;useCSkill=function(i){if(!CB||!CB.st)return _us(i);const p=CB.p,sk=CB.st.skills[i];if(!sk)return _us(i);const cd0=p.cds[i];
+ const r=srCtx({slot:i?'gR':'gL',fam:sk.fam,cls:famClass(sk.fam),lib:sk.srId},()=>_us(i));
+ if(p.cds[i]>cd0&&p.srRelay&&!SR_ECHO){p.srRelay=0;CB.timers.push({t:.4,fn:()=>srEchoSkill(i)});}return r;};}
+function srEchoSkill(i){if(!CB||CB.ended)return;const p=CB.p,sk=CB.st.skills[i];if(!sk)return;SR_ECHO=true;const st0={st:p.st,stK:p.stK,stDur:p.stDur},cd0=p.cds[i],en0=p.en,use0=CB.stats.skillUse;
+ try{if(!CB.sim)floatTxtC(p.x,p.y-2.8,'RUNE RELAY ECHO','#7fb8ff',1);if(sk.srNew){srCtx({slot:i?'gR':'gL',fam:sk.fam,cls:famClass(sk.fam),lib:sk.srId,echo:1},()=>srCastDef(SRL[sk.srId],sk.pow*.3,'skill'));}
+  else{const pw0=sk.pow;sk.pow=pw0*.3;p.cds[i]=0;p.st='idle';try{srCtx({slot:i?'gR':'gL',fam:sk.fam,cls:famClass(sk.fam),lib:sk.srId,echo:1},()=>useCSkill(i));}finally{sk.pow=pw0;}}}
+ finally{SR_ECHO=false;p.cds[i]=cd0;p.en=en0;CB.stats.skillUse=use0;p.st=st0.st;p.stK=st0.stK;p.stDur=st0.stDur;}}
+{const _uu=useUlt;useUlt=function(){if(!CB||!CB.st||!CB.st.ult)return _uu();const U=CB.st.ult;const e=nearestEnemy(14);const en0=CB.p.en;const r=srCtx({slot:'chest',fam:U.fam,cls:famClass(U.fam),lib:U.srId},()=>_uu());if(CB&&CB.p.en<en0)CB.srUltMain=e;return r;};}
+{const _ug=useGuard;useGuard=function(){if(!CB||!CB.st||!CB.st.guard)return _ug();const p=CB.p,G=CB.st.guard;const g0=p.gcd;const r=srCtx({slot:'back',fam:G.fam,cls:famClass(G.fam),lib:G.srId},()=>_ug());
+ if(CB&&p.gcd>g0){const par=srS('parry');p.srGuardT=CB.t+.5*(1+par/100)+(srEvoOn('W4')?.08:0);p.srGuardHit=0;}return r;};}
+{const _ud=useDodge;useDodge=function(dx,dy){if(!CB||!CB.st)return _ud(dx,dy);const D=CB.st.dodge||{};if(CB.p.srCounterT>CB.t&&CB.p.dcd<=0)CB.p.srCounterT=0;return srCtx({slot:'legs',fam:D.fam,cls:famClass(D.fam),lib:D.srId},()=>_ud(dx,dy));};}
+/* M49 — back-skill durations +8% (legacy buffs created inside a back skill) */
+{const _b=buff;buff=function(id,dur,v){if(SRCTX&&SRCTX.slot==='back'&&!(SRL[SRCTX.lib]&&!SRL[SRCTX.lib].legacy)&&srEvoOn('M49'))dur*=1.08;return _b(id,dur,v);};}
+/* summon / clone duration + A22 lingering marks */
+{const _o=v7Obj;v7Obj=function(o){if(o&&o.dur!=null&&S&&S.sr){const sm=srS('summon'),cl=srS('clone');if(['turret','guardian','sat','portal','gate'].includes(o.kind)&&sm)o.dur*=1+sm/100;if(['shade','wshade','uclone'].includes(o.kind)&&cl)o.dur*=1+cl/100;
+  if(SRCTX&&SRCTX.slot==='back'&&!(SRL[SRCTX.lib]&&!SRL[SRCTX.lib].legacy)&&srEvoOn('M49'))o.dur*=1.08;}return _o(o);};}
+{const _mk=v7Mark;v7Mark=function(e,k,dur){if(SRCTX&&SRCTX.slot==='gL'&&srEvoOn('A22'))dur*=1.1;return _mk(e,k,dur);};}
+{const _po=v7Poison;v7Poison=function(e,n){_po(e,n);if(e&&!e.dead&&SRCTX&&SRCTX.slot==='gL'&&srEvoOn('A22')&&e.v7poiT>0)e.v7poiT*=1.1;};}
+/* M22 — left-arm projectiles pierce +1 · traps detection radius +8% */
+{const _vp=v7Proj;v7Proj=function(o){if(SRCTX&&SRCTX.slot==='gL'&&o&&(o.src==='skill')&&srEvoOn('M22'))o=Object.assign({},o,{pierce:(o.pierce||1)+1});return _vp(o);};}
+{const _pt=v7PlaceTrap;v7PlaceTrap=function(x,y,pw,big){const T=_pt(x,y,pw,big);if(T&&SRCTX&&SRCTX.slot==='gL'&&srEvoOn('M22'))T.r*=1.08;return T;};}
+/* M33/M35 — linked Rune Traps release one extra AoE wave (9 s) */
+{const _tb=v7TrapBoom;v7TrapBoom=function(T,mul,chain){const x=T&&T.x,y=T&&T.y;const linked=T&&!T.dead&&CB&&CB.objs.some(o=>o!==T&&o.kind==='trap'&&!o.dead&&Math.hypot(o.x-x,o.y-y)<=4.5);srCtx(Object.assign({slot:'trap'},SRCTX||{},{fam:'runic',cls:'mage'}),()=>_tb(T,mul,chain));
+ if(linked&&S&&S.sr&&srAgg().spec.trapx&&srIcd('trapx',srSpecCd('trapx'))){SR_ECHO=true;try{enemiesIn(e=>Math.hypot(e.x-x,e.y-y)<=2.6+(e.r||.8)).forEach(e=>hitEnemy(e,{m:.8,src:'proc',stg:6,cls:'mage',trap:1}));}finally{SR_ECHO=false;}if(!CB.sim)fxAdd({type:'ring',x,y,r:2.6,t:0,dur:.4,col:'#c79bff'});}};}
+/* ---------- damage taken ---------- */
+{const _dp=damagePlayer;damagePlayer=function(raw,el,o={}){if(!CB||!S||!S.sr)return _dp(raw,el,o);const p=CB.p,st=CB.st,A=srAgg(),K=A.ks;if(p.dead||CB.ended)return _dp(raw,el,o);
+ let r=raw*(st.srTaken||1);const guard=(p.srGuardT||0)>CB.t,counter=(p.srCounterT||0)>CB.t;
+ if(guard||counter)r*=1-Math.min(.45,.2*(1+srS('guard')/100));
+ if(CB.lo==='mine'&&A.spec.h10)r*=.95;
+ if(p.srWard>0&&(p.srWardT||0)>CB.t&&p.inv<=0){const a=Math.min(p.srWard,r);p.srWard-=a;r-=a;if(!CB.sim&&a>0)floatTxtC(p.x,p.y-2.2,'WARD','#8fd3ff',.8);if(p.srWard<=0)p.srWardT=0;}
+ const hp0=p.hp;const d=_dp(r,el,o);if(!CB||p.dead)return d;const src=o.from||CB.boss;
+ if((guard||counter)&&(d>0||r>0)){srGuardSuccess(d,src);}
+ if(d>0){const rf=srS('reflect');if(rf>0&&src&&!src.dead&&srIcd('reflect',.5))srDirect(src,d*Math.min(30,rf)/100,'#d6a8ff','↩');const rb=hasB('srReflect');if(rb&&src&&!src.dead&&srIcd('srReflect',.5))srDirect(src,d*rb.v,'#d6a8ff','↩');
+  if(A.spec.lowhp&&p.hp<p.mhp*.35&&srIcd('lowhp',srSpecCd('lowhp'))){buff('srLowHP',4);if(!CB.sim)floatTxtC(p.x,p.y-2.6,'JUGGERNAUT','#ffb060',1);}}
+ return d;};}
+function srGuardSuccess(d,src){const p=CB.p,A=srAgg(),K=A.ks;if(p.srGuardHit)return;p.srGuardHit=1;if(!CB.sim)floatTxtC(p.x,p.y-2.8,'GUARD!','#8fd3ff',1.05);
+ if(K.W44&&src&&!src.dead&&d>0)srDirect(src,d*K.W44.greflect/100,'#ffb060','↩');
+ if(srEvoOn('W49')&&srIcd('w49',12))p.en=Math.min(250,p.en+7.5);
+ if(A.spec.h1&&srIcd('h1',A.spec.h1.cd))p.srH1=1;
+ if(A.spec.gcounter&&srIcd('gcounter',srSpecCd('gcounter'))){SR_ECHO=true;try{enemiesIn(x=>dist(x,p)<=2.6+(x.r||.8)).forEach(x=>hitEnemy(x,{m:1.2,src:'proc',stg:12,cls:'warrior'}));}finally{SR_ECHO=false;}if(!CB.sim)fxAdd({type:'nova',x:p.x,y:p.y,r:2.6,t:0,dur:.4,col:'#ffb060'});}
+ if((p.srCounterT||0)>CB.t){p.srCounterT=0;const at=CB.st.at;srCtx({slot:'core',fam:null,cls:'warrior'},()=>enemiesIn(x=>dist(x,p)<=3+(x.r||.8)).forEach(x=>hitEnemy(x,{m:2*(at.mult||1),src:'skill',stg:30,cls:'warrior'})));if(!CB.sim){fxAdd({type:'quake',x:p.x,y:p.y,r:3,t:0,dur:.5,col:'#ffb060'});floatTxtC(p.x,p.y-3,'COUNTER PULSE!','#ffb060',1.3);}CB.shake=.4;}}
+{const _ds=dodgeSuccess;dodgeSuccess=function(){_ds();if(!CB||!S||!S.sr)return;const p=CB.p,A=srAgg();
+ if(A.spec.h4&&srIcd('h4',A.spec.h4.cd))p.srH4=1;if(A.spec.h7&&R)R.srH7=(R.elapsed||0)+5;
+ if(srEvoOn('W40'))buff('srAnchor',1.5);if(srEvoOn('M40'))v7Zone({x:p.x,y:p.y,r:1.8,dur:1,tick:99,m:0,col:'#7fb8ff',style:'rune',slow:.1});if(srEvoOn('A40'))p.v7.decoy={x:p.x,y:p.y,t:1};};}
+/* M15/M17 — satellites fire 1 extra shot every 10 s · M51/M53 — expiring gravity wells release Void Shock */
+{const _cs=cbStep;cbStep=function(dt){if(!CB||CB.paused||!S||!S.sr)return _cs(dt);const A=srAgg();const before=A.spec.gravx?CB.objs.filter(o=>o.kind==='zone'&&!o.dead&&(o.grav||o.pull)):null;
+ _cs(dt);if(!CB)return;SR_ACD.combat=Math.max(0,SR_ACD.combat-dt);
+ if(A.spec.satx&&srIcd('satx',srSpecCd('satx'))){const sat=CB.objs.find(o=>o.kind==='sat'&&!o.dead);const e=sat&&nearestEnemy(8);if(sat&&e){SR_ECHO=true;try{v7Proj({x:sat.x,y:sat.y-.4,tx:e.x,ty:e.y,sp:15,life:.6,m:.35,stg:2,col:'#bff6ff',kind:'shard',r:.2,src:'proc',cls:'mage'});}finally{SR_ECHO=false;}}else CB.srIcd.satx=0;}
+ if(before)for(const z of before)if(z.dead&&srIcd('gravx',srSpecCd('gravx'))){SR_ECHO=true;try{enemiesIn(x=>Math.hypot(x.x-z.x,x.y-z.y)<=2+(x.r||.8)).forEach(x=>hitEnemy(x,{m:.8,src:'proc',stg:6,el:'void',cls:'mage'}));}finally{SR_ECHO=false;}if(!CB.sim)fxAdd({type:'rift',x:z.x,y:z.y,r:2,t:0,dur:.5});}
+ if((CB.p.srSmokeT||0)>CB.t)for(const a of CB.adds){if(a.step&&!a.srW){const f0=a.step;a.srW=1;a.step=function(a2,dt2){const p=CB.p;const dc=(p.srSmokeT||0)>CB.t&&p.v7&&p.v7.decoy&&p.v7.decoy.t>0?p.v7.decoy:null;if(!dc)return f0(a2,dt2);const sx=p.x,sy=p.y;p.x=dc.x;p.y=dc.y;try{return f0(a2,dt2);}finally{p.x=sx;p.y=sy;}};}}};}
+{const _sc=startCombat;startCombat=function(type,bid,o){const r=_sc(type,bid,o);if(CB&&S&&S.sr){CB.srIcd={};SR_ACD.combat=0;if(S.sr.flags.h8){S.sr.flags.h8=0;CB.srH8=1;}}return r;};}
+/* =====================================================================
+   CORE ACTIVES (key F)
+   ===================================================================== */
+function srCoreMode(){if(CB&&!CB.ended&&CB.lo==='combat')return'combat';if(R&&!R.ended&&!CB)return'mining';return null;}
+function srCoreCd(id){const a=SR_ACT[id];const cdr=Math.min(SR_CAP.cdr,srS('cdr'));return Math.round(a.cd*(1-cdr/100)*10)/10;}
+function srCoreEnCost(id){const a=SR_ACT[id];return Math.round((a.en||0)*(1-Math.min(SR_CAP.cdr,srS('meff'))/100));}
+function srCoreReady(mode){const id=S.sr.core[mode];if(!id)return{ok:false,why:'ยังไม่ได้ติดตั้ง Core Active'};if(!srIs(id))return{ok:false,why:'ยังไม่ได้ปลดล็อกใน Passive Tree'};const a=SR_ACT[id];
+ if(a.cls&&srClassCount(a.cls)<2)return{ok:false,why:`ต้องสวมชิ้นส่วน ${CLASS_INFO[a.cls].n} อย่างน้อย 2 ชิ้น`};if(SR_ACD[mode]>0)return{ok:false,why:`คูลดาวน์ ${Math.ceil(SR_ACD[mode])} วิ`};
+ if(mode==='mining'&&R&&(R.srEn||0)<srCoreEnCost(id))return{ok:false,why:`Mining Energy ไม่พอ (${Math.floor(R.srEn||0)}/${srCoreEnCost(id)})`};
+ if(mode==='combat'&&CB&&CB.p.en<(a.cen||0))return{ok:false,why:`Energy ไม่พอ (${Math.floor(CB.p.en)}/${a.cen})`};return{ok:true,id};}
+function srUseCore(){if(!S||!S.sr)return false;const mode=srCoreMode();if(!mode)return false;const c=srCoreReady(mode);if(!c.ok){if(mode==='combat'){if(!CB.sim)floatTxtC(CB.p.x,CB.p.y-2.4,c.why,'#ff9aa8',.8);}else notify('srcore',c.why,'err',1);return false;}
+ const id=c.id;let ok;if(mode==='combat'){if(!pCanAct()&&id!=='W6'&&id!=='M24')return false;ok=srCtx({slot:'core',fam:null,cls:SR_ACT[id].cls,lib:id},()=>SR_CORE[id]());}else ok=SR_CORE[id]();
+ if(ok===false)return false;SR_ACD[mode]=srCoreCd(id);if(mode==='combat'){CB.p.en=Math.max(0,CB.p.en-(SR_ACT[id].cen||0));CB.stats.srCore=(CB.stats.srCore||0)+1;}if(mode==='mining')R.srEn=Math.max(0,(R.srEn||0)-srCoreEnCost(id));try{srHudCore();}catch(e){}return true;}
+function srBasicM(){return(CB.st.at&&CB.st.at.mult)||1;}
+const SR_CORE={
+ W6(){const p=CB.p;buff('srFort',4);if(!CB.sim){fxAdd({type:'ring',x:p.x,y:p.y,r:1.6,t:0,dur:.6,col:'#ffb060'});floatTxtC(p.x,p.y-2.8,'IRON FORTRESS','#ffb060',1.2);}sfx('equip');},
+ W24(){const p=CB.p;const e=nearestEnemy(12);const fa=v7Face(e);setPState('skill',.6);if(!CB.sim)fxAdd({type:'ring',x:p.x,y:p.y,r:1.2,t:0,dur:.35,col:'#ffb060'});
+  const w0=CB.stats.dodges;CB.timers.push({t:.35,fn:()=>{if(p.stun>0||p.dead||CB.stats.dodges>w0){if(!CB.sim)floatTxtC(p.x,p.y-2.4,'CANCELLED','#9aa3b2',.8);return;}for(let k=0;k<3;k++){const cx=p.x+Math.cos(fa)*(1.4+k*1.4),cy=p.y+Math.sin(fa)*(1.4+k*1.4);CB.timers.push({t:k*.1,fn:()=>{enemiesIn(x=>Math.hypot(x.x-cx,x.y-cy)<=1.5+(x.r||.8)).forEach(x=>{if(x.srW24c===p.srW24id)return;x.srW24c=p.srW24id;hitEnemy(x,{m:1.6*srBasicM(),src:'skill',stg:Math.round(CB.st.stg*.5*1.25),cls:'warrior',srAoe:1});});if(!CB.sim)fxAdd({type:'quake',x:cx,y:cy,r:1.5,t:0,dur:.4,col:'#ffb060'});CB.shake=.35;sfx('rock',2);}});}}});p.srW24id=(p.srW24id||0)+1;},
+ W42(){const p=CB.p;p.srCounterT=CB.t+2;p.srGuardHit=0;setPState('guard',.5);if(!CB.sim)floatTxtC(p.x,p.y-2.8,'COUNTER STANCE','#ffb060',1);sfx('equip');},
+ M6(){const p=CB.p;setPState('skill',.45);CB.timers.push({t:.15,fn:()=>{enemiesIn(x=>dist(x,p)<=3.5+(x.r||.8)).forEach(x=>{hitEnemy(x,{m:1.6*srBasicM(),src:'skill',stg:12,cls:'mage',srAoe:1});if(x!==CB.boss&&!x.heavy){const a=angTo(p,x);x.x=clamp(x.x+Math.cos(a)*1.5,.8,AW-.8);x.y=clamp(x.y+Math.sin(a)*1.5,1,AH-.7);}});if(!CB.sim)fxAdd({type:'nova',x:p.x,y:p.y,r:3.5,t:0,dur:.5,col:'#7fb8ff'});sfx('crystal');}});},
+ M24(){const p=CB.p;p.srWard=p.mhp*.1;p.srWardT=CB.t+4;if(!CB.sim){fxAdd({type:'ring',x:p.x,y:p.y,r:1.5,t:0,dur:.5,col:'#8fd3ff'});floatTxtC(p.x,p.y-2.8,'AETHER WARD','#8fd3ff',1.1);}sfx('crystal');},
+ M42(){const p=CB.p;p.srRelay=1;if(!CB.sim)floatTxtC(p.x,p.y-2.8,'RUNE RELAY','#7fb8ff',1.1);CB.timers.push({t:10,fn:()=>{p.srRelay=0;}});},
+ A6(){const p=CB.p;const e=nearestEnemy(9);if(!e)return false;p.inv=Math.max(p.inv,.25);v7Seq(3,0,.16,k=>{if(e.dead)return;v7DashTo(e,k===1?'behind':'front',.12);CB.timers.push({t:.12,fn:()=>{if(!e.dead){hitEnemy(e,{m:.6*srBasicM(),src:'skill',stg:6,cls:'assassin'});if(!CB.sim)fxAdd({type:'slash',x:p.x,y:p.y,tx:e.x,ty:e.y,t:0,dur:.14,col:'#c58bff',hand:k%2?1:-1});sfx('blade',2);}}});});setPState('skill',.5);},
+ A24(){const e=nearestEnemy(12);if(!e)return false;e.srMarkT=CB.t+4;if(!CB.sim)floatTxtC(e.x,e.y-2.8,'MARKED +8%','#c58bff',1.1);sfx('zap');},
+ A42(){const p=CB.p;p.v7.decoy={x:p.x,y:p.y,t:2.5};p.srSmokeT=CB.t+2.5;v7Zone({x:p.x,y:p.y,r:2.4,dur:2.5,tick:99,m:0,col:'#9aa3b2',style:'smoke',smoke:1});if(!CB.sim)floatTxtC(p.x,p.y-2.8,'SMOKE BREAK','#c58bff',1.1);sfx('blade');},
+ N13(){R.srOD=7;for(let k=0;k<20;k++)part(R.g.x,R.g.y-.5,'#ffd08a',4,3);floatTxt(R.g.x,R.g.y-1.6,'⚙ Drill Overdrive','#ffd08a',1.1);},
+ N27(){let n=0,hid=0,clue=0;for(const o of R.ores){if(o.boss)continue;if(Math.hypot(o.x+.5-R.g.x,o.y+.5-R.g.y)<=8){o.srScanT=R.elapsed+12;if(o.secret||o.exc||o.proj)clue++;else{n++;if(o.hidden)hid++;}}}
+  R.efx.push({type:'ring',x:R.g.x,y:R.g.y,r:8,t:0,dur:1,col:'#7fffd4'});floatTxt(R.g.x,R.g.y-1.6,`📡 แร่ ${n} (ซ่อน ${hid}) · ร่องรอยขุดค้น ${clue}`,'#7fffd4',1);R.srScanN={n,hid,clue};},
+ N41(){let n=0;for(const d of R.drops){if(!d.fly&&Math.hypot(d.x-R.g.x,d.y-R.g.y)<=5&&bagFits(d.tier)){d.fly=true;n++;}}R.efx.push({type:'ring',x:R.g.x,y:R.g.y,r:5,t:0,dur:.6,col:'#ff4d6d',inward:true});if(!n){notify('nt','ไม่มีแร่ที่ขุดแล้วในระยะ (หรือ Bag เต็ม)','',1);}floatTxt(R.g.x,R.g.y-1.6,`🧲 +${n}`,'#ff4d6d',1);}};
+document.addEventListener('keydown',ev=>{if(ev.repeat||ev.ctrlKey||ev.metaKey||ev.altKey)return;const k=(ev.key||'').toLowerCase();if(k!=='f')return;const t=ev.target&&ev.target.tagName;if(t==='INPUT'||t==='TEXTAREA'||t==='SELECT')return;
+ if(!S||!S.sr||!srCoreMode())return;if(document.querySelector('.modal:not(.hidden)')&&!CB)return;ev.preventDefault();srUseCore();},true);
+/* =====================================================================
+   MINING RUNTIME — Mining Energy pool · overdrive · discovery · multi-mine · hazard · evolutions N*
+   ===================================================================== */
+{const _rt=runTick;runTick=function(dt){if(!R||R.ended||R.paused||!S||!S.sr)return _rt(dt);const st0=R.g.stun;if(R.srEn==null)R.srEn=50;
+ _rt(dt);if(!R||R.ended)return;R.srEn=Math.min(100,R.srEn+dt*2);if(R.srOD>0)R.srOD-=dt;if(!CB)SR_ACD.mining=Math.max(0,SR_ACD.mining-dt);
+ if(R.g.stun>st0){const hz=Math.min(50,srS('hazard'));if(hz>0)R.g.stun=st0+(R.g.stun-st0)*(1-hz/100);}
+ R.srDiscT=(R.srDiscT||0)+dt;if(R.srDiscT>=1){R.srDiscT=0;const dc=srS('disc');if(dc>0&&Math.random()*100<dc){const h=R.ores.find(o=>o.hidden&&Math.hypot(o.x+.5-R.g.x,o.y+.5-R.g.y)<=3);if(h){revealHidden(h);floatTxt(h.x+.5,h.y-.2,'🔎 Ore Discovery','#fff6a8',.8);}}}};}
+{const _us=useSkill;useSkill=function(i){if(R)R.srSlot={i,until:(R.elapsed||0)+1.2};const r=_us(i);if(R&&R.srSlot)R.srSlot.until=(R.elapsed||0)+1.2;return r;};}
+let SR_MLOCK=false;
+{const _d=damageOre;damageOre=function(o,amt,src){if(!R||!o||!S||!S.sr||SR_MLOCK)return _d(o,amt,src);const live=R.ores.indexOf(o)>=0&&!o.hidden&&canMine(o);
+ if(live){if(R.srH7&&R.elapsed<R.srH7)amt*=1.06;if(!R.inSkill&&srEvoOn('N25')){if(R.srN25o===o)R.srN25n=(R.srN25n||0)+1;else{R.srN25o=o;R.srN25n=1;}if(R.srN25r){amt*=1.08;R.srN25r=0;}if(R.srN25n>=3){R.srN25n=0;R.srN25r=1;}}}
+ const d=_d(o,amt,src);if(!(d>0))return d;
+ /* N18 — left-arm skill hit sends 30% to one adjacent ore (power rule re-checked by damageOre) */
+ if(R.inSkill&&R.srSlot&&R.srSlot.i===0&&R.elapsed<=R.srSlot.until&&srEvoOn('N18')){const adj=R.ores.find(x=>x!==o&&!x.hidden&&!x.secret&&Math.abs(x.x-o.x)<=1&&Math.abs(x.y-o.y)<=1);if(adj){SR_MLOCK=true;try{_d(adj,amt*.3,'n18');}finally{SR_MLOCK=false;}}}
+ /* Multi-Mine chance: basic hits also strike one adjacent ore for 50% (src 'multi', never recursive) */
+ if(!R.inSkill){const mm=srS('multi');if(mm>0&&Math.random()*100<mm){const adj=R.ores.find(x=>x!==o&&!x.hidden&&!x.secret&&Math.abs(x.x-o.x)<=1&&Math.abs(x.y-o.y)<=1&&canMine(x));if(adj){SR_MLOCK=true;try{_d(adj,amt*.5,'multi');}finally{SR_MLOCK=false;}}}}
+ return d;};}
+{const _t=tileF;tileF=function(i){let k=_t(i);if(R&&S&&S.sr){const K=srAgg().ks;if(K.N34&&R.bag&&bagLoadFrac()>.75)k*=1+K.N34.heavyMove/100;}return k;};}
+function bagLoadFrac(){try{return R.bag.w/Math.max(1,R.st.C);}catch(e){return 0;}}
+{const _cs=calcStats;calcStats=function(eq){const o=_cs(eq);if(!S||!S.sr)return o;try{const A=srAgg();if(srEvoOn('N32')){const room=Math.max(0,SR_CAP.move-A.cap.move);o.M=Math.round((o.M+Math.min(8,room))*10)/10;o.move=2.4*o.M/100;}if(srEvoOn('N39'))o.C=Math.round(o.C*1.06);}catch(e){}return o;};}
+/* drawn scan / spectrum lens */
+{const _dv=drawV2Overlay;drawV2Overlay=function(c,T,t,gx,gy){_dv(c,T,t,gx,gy);if(!R||!S||!S.sr)return;const lens=srEvoOn('N4');let near={};
+ for(const o of R.ores){if(o.srScanT&&o.srScanT>R.elapsed){const X=(o.x+.5)*T,Y=(o.y+.5)*T;c.strokeStyle=`rgba(127,255,212,${.55+.35*Math.sin(t*6)})`;c.lineWidth=2;circ(c,X,Y,T*.5);c.stroke();if(o.hidden||o.secret||o.exc||o.proj){c.font=`800 ${Math.max(10,T*.3)}px Kanit,sans-serif`;c.textAlign='center';c.fillStyle='#7fffd4';c.fillText(o.hidden?'?':'⛏',X,Y+T*.1);}}
+  if(lens&&!o.secret&&!o.boss&&Math.hypot(o.x+.5-R.g.x,o.y+.5-R.g.y)<=4)near[o.name]=(near[o.name]||0)+1;}
+ if(lens){const s=Object.entries(near).map(([n,k])=>`${n}×${k}`).join(' · ');if(s){c.font=`700 ${Math.max(10,T*.24)}px Kanit,sans-serif`;c.textAlign='center';c.lineWidth=3;c.strokeStyle='rgba(0,0,0,.8)';c.strokeText('🔬 '+s,gx,gy-T*1.6);c.fillStyle='#bff6ff';c.fillText('🔬 '+s,gx,gy-T*1.6);}}};}
+/* =====================================================================
+   CORE EXP — real activities only, each object counted once
+   ===================================================================== */
+function srExpOnce(obj,n,src){if(!obj||obj.srX)return 0;try{obj.srX=1;}catch(e){}return srAddExp(n,src);}
+{const _bo=breakOre;breakOre=function(o){const ok=o&&R&&!o.secret&&!o.boss&&!o.srX&&R.ores.includes(o);_bo(o);if(ok&&S&&S.sr){srExpOnce(o,2+2*(o.tier||1),'ore');const A=srAgg();
+  if(srEvoOn('N11')){R.srN11=(R.srN11||0)+1;if(R.srN11>=3&&srIcd('n11',10)){R.srN11=0;R.srEn=Math.min(100,(R.srEn||0)+4);}}
+  if(A.spec.h8)S.sr.flags.h8=1;if(A.spec.h11&&srIcd('h11',srSpecCd('h11'))){if(CB&&CB.p)CB.p.gcd=Math.max(0,CB.p.gcd-3);else R.srEn=Math.min(100,(R.srEn||0)+3);}}};}
+v10On((k,d)=>{if(!S||!S.sr)return;switch(k){
+ case'kill':{const m=d.m;if(!m)break;const t=m.tier||1;srExpOnce(m,15*t*(m.rare?10:m.elite||m.boss?3:1),'monster');break;}
+ case'disc':srExpOnce(d.d,80,'discovery');break;case'lm':srAddExp(150,'landmark');break;case'alc':srExpOnce(d.al,120,'alcove');break;
+ case'tiles':{S.sr.frac=(S.sr.frac||0)+.2*(d.n||0);const w=Math.floor(S.sr.frac);if(w>0){S.sr.frac-=w;srAddExp(w,'explore');}break;}
+ case'craft':srAddExp(20*(d.n||1),'craft');break;case'refine':srAddExp(10*(d.n||1),'refine');break;case'contract':srExpOnce(d.c,120,'contract');break;
+ case'puzzle':srExpOnce(d.d,80,'puzzle');break;case'machine':srExpOnce(d.d,60,'machine');break;case'cacheOpen':srAddExp(100,'cache');break;case'relicDone':srAddExp(200,'relic');break;
+ case'mutDone':srAddExp(80,'mutation');break;case'richDone':srAddExp(60,'rich');break;}
+ srMilestones();});
+{const _b=v10BountyClaim;v10BountyClaim=function(i){const c=S.v10&&S.v10.bounty.slots[i];const was=c&&c.claimed;const r=_b(i);if(c&&!was&&c.claimed)srExpOnce(c,400,'bounty');srMilestones();return r;};}
+{const _e=endCombat;endCombat=function(win,why){const C=CB;const r=_e(win,why);if(C&&!C.sim&&!C.srExp&&win&&S&&S.sr){C.srExp=1;
+  if(C.type==='boss'){const i=['sentinel','warlord','tyrant','colossus'].indexOf(C.bid);srAddExp(Math.min(1000,400+200*Math.max(0,i)),'boss');S.sr.flags.bossWin=1;S.sr.prog.boss=(S.sr.prog.boss||0)+1;}else if(C.type==='raid')srAddExp(250,'raid');}
+ if(S&&S.sr)srMilestones();return r;};}
+setInterval(()=>{try{if(S&&S.sr)srMilestones();}catch(e){}},4000);
+
+/* auto-combat (bot / sims) also uses the equipped Core Active when it is ready */
+{const _bt=botThink;botThink=function(){_bt();try{if(CB&&!CB.ended&&CB.lo==='combat'&&S&&S.sr&&S.sr.core.combat&&SR_ACD.combat<=0&&!CB.p.dead){const id=S.sr.core.combat;const e=nearestEnemy(id==='A6'?8:5);if((id==='W6'||id==='M24'||id==='W42')?(CB.boss&&CB.teles.length>0):!!e)srUseCore();}}catch(e){}};}
+/* archived mastery chips no longer suggest active power */
+mastChipHtml=function(){return'';};
+/* safety: a boss killed by reflected damage while enemy telegraphs are being processed used to empty CB.teles mid-loop
+   (pre-existing crash path, reachable through Magnetic Aegis and now Damage Reflection) → finish the defeat on the next frame */
+{const _st=stepTeles;stepTeles=function(dt){if(!CB)return _st(dt);CB.srInTeles=true;try{return _st(dt);}finally{if(CB)CB.srInTeles=false;}};}
+{const _bd=bossDefeated;bossDefeated=function(){if(CB&&CB.srInTeles){if(!CB.srBdQ){CB.srBdQ=1;CB.timers.push({t:0,fn:()=>{if(CB&&!CB.ended)_bd();}});}return;}return _bd();};}
+/* mining Core Active cooldown / energy start fresh with each expedition or Underdeep entry */
+{const _sr=startRun;startRun=function(){const r=_sr.apply(this,arguments);if(R){SR_ACD.mining=0;R.srEn=50;}return r;};}
+{const _ue=udEnter;udEnter=function(){const r=_ue.apply(this,arguments);if(R){SR_ACD.mining=0;if(R.srEn==null)R.srEn=50;}return r;};}
+
+/* =====================================================================
+   V7 SKILL REVOLUTION (5/6) — UI
+   Passive Tree (zoom · pan · pinch · hover · path preview · allocate · refund · respec) ·
+   Core Active / Evolution equip · Equipment Skill Library (Combat 240 · Mining 72) ·
+   3 Build Presets (switch only in safe areas) · HUD Core Active button (F) in Combat and Mining ·
+   legacy Mastery entry points now open the tree / the read-only archive.
+   ===================================================================== */
+(function(){const css=`
+#srTree{position:fixed;inset:0;z-index:60;background:radial-gradient(ellipse at 50% 45%,#141b2b,#06080e 75%);display:flex;flex-direction:column;color:#e8edf5;font-family:Kanit,sans-serif}
+#srTree.hidden{display:none}
+#srTree .srtop{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;padding:8px 12px;background:rgba(10,14,24,.92);border-bottom:1px solid #263248}
+#srTree .srtop b{color:#ffd36b}#srTree .srbar{flex:1 1 160px;min-width:120px;height:8px;background:#1d2638;border-radius:6px;overflow:hidden}#srTree .srbar i{display:block;height:100%;background:linear-gradient(90deg,#ffb060,#ffd36b)}
+#srTree .srbtn{background:#1c2536;border:1px solid #33425e;color:#e8edf5;border-radius:8px;padding:5px 10px;font:600 13px Kanit,sans-serif;cursor:pointer}#srTree .srbtn:hover{border-color:#ffd36b}#srTree .srbtn.gold{background:#5a4214;border-color:#ffd36b}#srTree .srbtn:disabled{opacity:.45;cursor:default}
+#srTree .srmain{position:relative;flex:1;min-height:0;display:flex}#srTree .srcvw{position:relative;flex:1;min-width:0;min-height:0;display:flex}#srCv{flex:1;min-width:0;width:100%;touch-action:none;cursor:grab;display:block}
+#srTree .srside{width:300px;max-width:42vw;overflow:auto;background:rgba(10,14,24,.9);border-left:1px solid #263248;padding:10px;font-size:13px}
+#srTree .srside h4{margin:10px 0 4px;color:#ffd36b;font-size:13px}#srTree .srcard{background:#121a29;border:1px solid #2a3750;border-radius:8px;padding:8px;margin:5px 0}#srTree .srcard.on{border-color:#ffd36b}
+#srTree .hint{color:#9aa8bf;font-size:12px}#srTree .srtip{position:absolute;pointer-events:none;background:rgba(8,11,19,.96);border:1px solid #3a4a68;border-radius:8px;padding:7px 9px;max-width:280px;font-size:12px;z-index:3}
+#srTree .srlegend{position:absolute;left:8px;bottom:8px;font-size:11px;color:#9aa8bf;background:rgba(8,11,19,.75);padding:5px 8px;border-radius:8px}
+@media (max-width:760px){#srTree .srlegend{font-size:10px;max-width:72%}#srTree .srmain{flex-direction:column}#srTree .srside{width:auto;max-width:none;max-height:38vh;border-left:0;border-top:1px solid #263248}}
+.srlib .srrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px;margin:6px 0 12px}.srlib .srsk{background:#121a29;border:1px solid #2a3750;border-radius:10px;padding:8px}.srlib .srsk.on{border-color:#ffd36b;box-shadow:0 0 0 1px #ffd36b inset}
+.srlib .srsk.lock{opacity:.6}.srlib h4{margin:10px 0 2px}.srlib .tag{display:inline-block;font-size:11px;border:1px solid #3a4a68;border-radius:6px;padding:0 5px;margin-right:4px;color:#9aa8bf}
+.askb.srcore{border-color:#ffd36b!important}.skill.srcore{border-color:#ffd36b!important}`;const st=document.createElement('style');st.textContent=css;document.head.appendChild(st);})();
+const SR_RCOL={universal:'#cfd8dc',warrior:'#ffb060',mage:'#7fb8ff',assassin:'#c58bff',mining:'#7fffd4',hybrid:'#ffd36b'};
+/* region labels placed outside each region's centroid (computed from the canonical coordinates) */
+const SR_RLAB=[['warrior','⚔ WARRIOR'],['mage','🔮 MAGE'],['assassin','🗡 ASSASSIN'],['mining','⛏ MINING'],['hybrid','✦ HYBRID']].map(([r,l])=>{const L=SR_TREE.nodes.filter(n=>n.r===r);let x=0,y=0;for(const n of L){x+=n.x;y+=n.y;}x/=L.length;y/=L.length;const d=Math.hypot(x,y)||1;const R_=Math.max(...L.map(n=>Math.hypot(n.x,n.y)))+60;return[r,l,x/d*R_,y/d*R_];});
+const SR_TNAME={root:'Core',small:'Small Node',notable:'Notable',evolution:'Evolution',active:'Core Active',keystone:'Keystone'};
+const SRUI={open:false,z:.55,x:0,y:0,hover:null,sel:null,ptr:new Map(),drag:null,pinch:null,raf:0,cv:null,dpr:1,lib:'combat',libFam:null};
+function srOpenTree(sel){if(!S.sr)return;let el=$('#srTree');if(!el){el=document.createElement('div');el.id='srTree';el.className='hidden';document.body.appendChild(el);
+  el.innerHTML=`<div class="srtop" id="srTop"></div><div class="srmain"><div class="srcvw"><canvas id="srCv"></canvas><div class="srtip hidden" id="srTip"></div><div class="srlegend">ลาก = เลื่อน · ล้อ/บีบนิ้ว = ซูม · แตะ = ดูรายละเอียด · ⬤ ปลดล็อก ◯ ปลดล็อกได้</div></div><div class="srside" id="srSide"></div></div>`;
+  srBindTree();}
+ el.classList.remove('hidden');SRUI.open=true;SRUI.sel=sel||SRUI.sel;srFit();srTreeRender();cancelAnimationFrame(SRUI.raf);const loop=()=>{if(!SRUI.open)return;srDrawTree();SRUI.raf=requestAnimationFrame(loop);};loop();}
+function srCloseTree(){SRUI.open=false;const el=$('#srTree');if(el)el.classList.add('hidden');cancelAnimationFrame(SRUI.raf);try{if(typeof renderWorkshop==='function'&&!R&&!CB)renderWorkshop();}catch(e){}}
+function srFit(){const cv=$('#srCv');if(!cv)return;const r=cv.getBoundingClientRect();const w=Math.max(200,r.width),h=Math.max(200,r.height);SRUI.z=Math.min(w,h)/1800;SRUI.x=0;SRUI.y=-20;}
+function srW2S(x,y){const cv=SRUI.cv;return[cv.clientWidth/2+(x-SRUI.x)*SRUI.z,cv.clientHeight/2+(y-SRUI.y)*SRUI.z];}
+function srS2W(sx,sy){const cv=SRUI.cv;return[(sx-cv.clientWidth/2)/SRUI.z+SRUI.x,(sy-cv.clientHeight/2)/SRUI.z+SRUI.y];}
+function srNodeR(n){return{root:20,small:8,notable:12,evolution:11,active:13,keystone:16}[n.t]||8;}
+function srPick(sx,sy){const[wx,wy]=srS2W(sx,sy);let best=null,bd=1e9;for(const n of SR_TREE.nodes){const d=Math.hypot(n.x-wx,n.y-wy);const r=srNodeR(n)+6/SRUI.z;if(d<r&&d<bd){bd=d;best=n;}}return best;}
+function srBindTree(){const cv=$('#srCv');SRUI.cv=cv;
+ const pos=e=>{const r=cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top];};
+ cv.addEventListener('pointerdown',e=>{try{cv.setPointerCapture(e.pointerId);}catch(_){}const p=pos(e);SRUI.ptr.set(e.pointerId,p);if(SRUI.ptr.size===1)SRUI.drag={sx:p[0],sy:p[1],x:SRUI.x,y:SRUI.y,moved:0};
+  else if(SRUI.ptr.size===2){const[a,b]=[...SRUI.ptr.values()];SRUI.pinch={d:Math.hypot(a[0]-b[0],a[1]-b[1]),z:SRUI.z};SRUI.drag=null;}});
+ cv.addEventListener('pointermove',e=>{const p=pos(e);if(SRUI.ptr.has(e.pointerId))SRUI.ptr.set(e.pointerId,p);
+  if(SRUI.pinch&&SRUI.ptr.size===2){const[a,b]=[...SRUI.ptr.values()];const d=Math.hypot(a[0]-b[0],a[1]-b[1]);srZoomAt((a[0]+b[0])/2,(a[1]+b[1])/2,SRUI.pinch.z*d/Math.max(1,SRUI.pinch.d));return;}
+  if(SRUI.drag){const dx=p[0]-SRUI.drag.sx,dy=p[1]-SRUI.drag.sy;SRUI.drag.moved=Math.max(SRUI.drag.moved,Math.hypot(dx,dy));if(SRUI.drag.moved>5){SRUI.x=SRUI.drag.x-dx/SRUI.z;SRUI.y=SRUI.drag.y-dy/SRUI.z;cv.style.cursor='grabbing';}return;}
+  const n=srPick(p[0],p[1]);if(n!==SRUI.hover){SRUI.hover=n;srTip(n,p);}else if(n)srTip(n,p);});
+ const up=e=>{const p=pos(e);const wasTap=SRUI.drag&&SRUI.drag.moved<=5&&SRUI.ptr.size===1;SRUI.ptr.delete(e.pointerId);if(SRUI.ptr.size<2)SRUI.pinch=null;cv.style.cursor='grab';
+  if(wasTap){const n=srPick(p[0],p[1]);SRUI.sel=n?n.id:null;SRUI.hover=n;srTreeRender();}SRUI.drag=null;};
+ cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);cv.addEventListener('pointerleave',()=>{if(!SRUI.drag){SRUI.hover=null;srTip(null);}});
+ cv.addEventListener('wheel',e=>{e.preventDefault();const p=pos(e);srZoomAt(p[0],p[1],SRUI.z*(e.deltaY<0?1.15:1/1.15));},{passive:false});
+ cv.addEventListener('contextmenu',e=>{e.preventDefault();const n=srPick(...pos(e));if(n&&srIs(n.id)){const r=srRefund(n.id);toast(r.ok?`คืนแต้ม ${n.n}`:r.why,r.ok?'ok':'err');srTreeRender();}});
+ document.addEventListener('keydown',e=>{if(!SRUI.open)return;if(e.key==='Escape'){srCloseTree();e.stopPropagation();}},true);}
+function srZoomAt(sx,sy,z){z=clamp(z,.18,3);const[wx,wy]=srS2W(sx,sy);SRUI.z=z;const[wx2,wy2]=srS2W(sx,sy);SRUI.x+=wx-wx2;SRUI.y+=wy-wy2;}
+function srTip(n,p){const t=$('#srTip');if(!t)return;if(!n){t.classList.add('hidden');return;}const path=srPath(n.id);const own=srIs(n.id);
+ t.innerHTML=`<b style="color:${SR_RCOL[n.r]}">${esc(n.n)}</b> <span class="hint">${SR_TNAME[n.t]} · ${n.id}</span><div>${esc(n.d)}</div>${n.b&&n.t!=='small'?`<div class="hint">${esc(n.b)}</div>`:''}<div class="hint" style="margin-top:3px">${own?'✅ ปลดล็อกแล้ว':path?`เส้นทาง ${path.length} จุด · ใช้ ${path.length} แต้ม (มี ${srAvail()})`:'🔒 ไม่มีเส้นทาง (หรือ Keystone ครบ 3)'}</div>`;
+ t.classList.remove('hidden');const W_=t.parentElement.clientWidth;t.style.left=Math.min(W_-290,p[0]+14)+'px';t.style.top=(p[1]+14)+'px';}
+function srDrawTree(){const cv=SRUI.cv;if(!cv)return;const dpr=Math.min(2,window.devicePixelRatio||1);const w=cv.clientWidth,h=cv.clientHeight;if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);}
+ const c=cv.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,w,h);const t=performance.now()/1000;const own=new Set(S.sr.alloc);
+ const hv=SRUI.hover||(SRUI.sel&&SR.byId[SRUI.sel]);const prev=new Set(hv&&!own.has(hv.id)?(srPath(hv.id)||[]):[]);
+ /* region labels */
+ c.font='700 13px Kanit,sans-serif';c.textAlign='center';
+ for(const[r,lab,x,y]of SR_RLAB){const[sx,sy]=srW2S(x,y);c.fillStyle=rgba(SR_RCOL[r],.5);c.fillText(lab,sx,sy);}
+ /* links */
+ for(const[a,b]of SR_TREE.links){const A=SR.byId[a],B=SR.byId[b];const[x1,y1]=srW2S(A.x,A.y),[x2,y2]=srW2S(B.x,B.y);const on=own.has(a)&&own.has(b);const pv=(prev.has(a)||own.has(a))&&(prev.has(b)||own.has(b))&&(prev.has(a)||prev.has(b));
+  c.strokeStyle=on?rgba(SR_RCOL[B.r==='universal'?A.r:B.r],.95):pv?'rgba(255,211,107,.85)':'rgba(120,135,160,.22)';c.lineWidth=on?3:pv?2.5:1.2;if(pv){c.setLineDash([6,5]);c.lineDashOffset=-t*20;}c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke();c.setLineDash([]);}
+ /* nodes */
+ const reach=new Set();for(const id of own)for(const y of SR.adj[id])if(!own.has(y))reach.add(y);
+ for(const n of SR_TREE.nodes){const[x,y]=srW2S(n.x,n.y);if(x<-40||y<-40||x>w+40||y>h+40)continue;const r=srNodeR(n)*Math.max(.6,Math.min(1.6,SRUI.z*1.6));const col=SR_RCOL[n.r];const o=own.has(n.id),pv=prev.has(n.id),av=reach.has(n.id);
+  c.save();c.translate(x,y);c.beginPath();
+  if(n.t==='keystone'){for(let i=0;i<8;i++){const a=i/8*Math.PI*2+Math.PI/8;c.lineTo(Math.cos(a)*r,Math.sin(a)*r);}c.closePath();}
+  else if(n.t==='evolution'){c.moveTo(0,-r);c.lineTo(r,0);c.lineTo(0,r);c.lineTo(-r,0);c.closePath();}
+  else if(n.t==='active'){for(let i=0;i<6;i++){const a=i/6*Math.PI*2;c.lineTo(Math.cos(a)*r,Math.sin(a)*r);}c.closePath();}
+  else c.arc(0,0,r,0,Math.PI*2);
+  c.fillStyle=o?col:pv?rgba('#ffd36b',.45):'rgba(20,26,40,.95)';c.fill();c.lineWidth=o?2.5:av||pv?2.2:1.2;c.strokeStyle=o?'#ffffff':pv?'#ffd36b':av?col:rgba(col,.45);c.stroke();
+  if(SRUI.sel===n.id){c.lineWidth=2;c.strokeStyle=`rgba(255,255,255,${.5+.4*Math.sin(t*5)})`;c.beginPath();c.arc(0,0,r+5,0,Math.PI*2);c.stroke();}
+  const eq=(S.sr.core.combat===n.id||S.sr.core.mining===n.id||S.sr.evo.combat.includes(n.id)||S.sr.evo.mining.includes(n.id));if(eq){c.fillStyle='#ffd36b';c.font='700 11px Kanit';c.fillText('★',0,-r-4);}
+  if(SRUI.z>.75&&n.t!=='small'){c.fillStyle=o?'#ffffff':'#9aa8bf';c.font=`600 ${Math.round(10+SRUI.z*2)}px Kanit,sans-serif`;c.textAlign='center';c.fillText(n.n.split(' — ')[0],0,r+13);}
+  c.restore();}}
+function srTreeRender(){const top=$('#srTop'),side=$('#srSide');if(!top)return;const P=S.sr,need=P.lv>=SR_LVMAX?0:srNeed(P.lv);const safe=srSafeArea();
+ top.innerHTML=`<span>🌳 <b>CORE SKILL TREE</b></span><span>Core Lv <b>${P.lv}</b>/${SR_LVMAX}</span><div class="srbar" title="Core EXP"><i style="width:${P.lv>=SR_LVMAX?100:clamp(P.exp/need*100,0,100)}%"></i></div><span class="hint">${P.lv>=SR_LVMAX?'MAX':fmt(P.exp)+'/'+fmt(need)+' EXP'}</span>
+ <span>แต้ม <b>${srAvail()}</b> ว่าง · ใช้ ${srSpent()}/${srEarned()} <span class="hint">(สูงสุด ${SR_PTS})</span></span><span>Keystone <b>${srKsCount()}</b>/${SR_KS}</span>
+ <button class="srbtn" data-act="srZoom" data-arg="1.25">＋</button><button class="srbtn" data-act="srZoom" data-arg="0.8">－</button><button class="srbtn" data-act="srFit">⤢</button>
+ <button class="srbtn" ${safe?'':'disabled title="รีเซ็ตได้เฉพาะในค่ายหรือ Outpost"'} data-act="srRespec">♻ Respec</button><button class="srbtn" data-act="srLib">📚 Skill Library</button><button class="srbtn gold" data-act="srClose">✕ ปิด</button>`;
+ const n=SRUI.sel&&SR.byId[SRUI.sel];let h='';
+ if(n){const own=srIs(n.id),path=srPath(n.id);h+=`<div class="srcard on"><b style="color:${SR_RCOL[n.r]}">${esc(n.n)}</b><div class="hint">${SR_TNAME[n.t]} · ${n.id} · ${n.r}${n.s&&n.s!=='any'?' · ช่อง '+n.s:''}</div><div style="margin:5px 0">${esc(n.d)}</div>`;
+  if(n.t==='active'){const a=SR_ACT[n.id];h+=`<div class="hint">Cooldown ${srCoreCd(n.id)} วิ${a.en?` · Mining Energy ${srCoreEnCost(n.id)}`:` · Energy ${a.cen}`}${a.cls?` · ต้องสวม ${CLASS_INFO[a.cls].n} ≥ 2 ชิ้น`:''} · กด <b>F</b></div>`;}
+  if(n.t==='evolution'){const cp=srEvoCompat(n.id);h+=`<div class="hint">${cp.ok?'✅ ชุดปัจจุบันรองรับ':'⚠ '+esc(cp.why)}</div>`;}
+  if(!own)h+=path?`<button class="srbtn gold" ${path.length<=srAvail()?'':'disabled'} data-act="srAlloc" data-arg="${n.id}">ปลดล็อก (${path.length} แต้ม)</button>`:'<div class="hint">🔒 ไม่มีเส้นทางจาก Core หรือ Keystone ครบ 3</div>';
+  else if(n.id!=='U0'){h+=`<button class="srbtn" ${safe?'':'disabled'} data-act="srRefund" data-arg="${n.id}">↩ คืนแต้ม</button> `;
+   if(n.t==='active'){const m=srMode(n.id);h+=`<button class="srbtn ${S.sr.core[m]===n.id?'gold':''}" data-act="srCoreEq" data-arg="${n.id}">${S.sr.core[m]===n.id?'ถอด':'ติดตั้ง'} Core Active (${m==='mining'?'Mining':'Combat'})</button>`;}
+   if(n.t==='evolution'){const m=srMode(n.id);const on=S.sr.evo[m].includes(n.id);h+=`<button class="srbtn ${on?'gold':''}" ${on||S.sr.evo[m].length<2?'':'disabled'} data-act="srEvoEq" data-arg="${n.id}">${on?'ถอด':'ใช้'} Evolution (${S.sr.evo[m].length}/2)</button>`;}}
+  if(!safe&&own)h+='<div class="hint">คืนแต้ม/Respec ได้เฉพาะใน Golem Camp หรือ Outpost</div>';h+='</div>';}
+ else h+='<div class="hint">แตะจุดบนต้นไม้เพื่อดูรายละเอียด · เส้นประสีทอง = เส้นทางที่จะปลดล็อก · คลิกขวา = คืนแต้ม</div>';
+ h+='<h4>⚡ Core Active (ปุ่ม F)</h4>';for(const m of['combat','mining']){const id=S.sr.core[m];h+=`<div class="srcard">${m==='combat'?'⚔ Combat':'⛏ Mining'}: ${id?`<b>${esc(SR.byId[id].n)}</b> <span class="hint">CD ${srCoreCd(id)} วิ</span>`:'<span class="hint">ว่าง — ปลดล็อก Core Active แล้วกดติดตั้ง</span>'}</div>`;}
+ h+='<h4>🧬 Evolutions (สูงสุด 2 ต่อโหมด)</h4>';for(const m of['combat','mining']){const L=S.sr.evo[m];h+=`<div class="srcard">${m==='combat'?'⚔':'⛏'} ${L.length?L.map(id=>{const cp=srEvoCompat(id);return`<b>${esc(SR.byId[id].n)}</b>${cp.ok?'':' <span class="hint">⚠ ไม่ทำงาน: '+esc(cp.why)+'</span>'}`;}).join('<br>'):'<span class="hint">ว่าง</span>'}</div>`;}
+ h+='<h4>🏅 Core Milestones (+1 แต้มต่อรายการ)</h4>';for(const m of SR_MS)h+=`<div class="hint">${S.sr.ms[m.id]?'✅':'▫'} ${esc(m.n)}</div>`;
+ h+=srPresetHtml();
+ const A=srAgg();const sl=Object.entries(A.stat).filter(([k,v])=>v).map(([k,v])=>`${k} ${v>0?'+':''}${Math.round(v*10)/10}`);h+=`<h4>📊 Passive รวม</h4><div class="hint">${sl.join(' · ')||'—'}</div><div class="hint">เพดาน: Crit 55% · DR 60% · CDR 35% · AS +30% · Move +25% · Mining Speed +25% · Mining Power +12% · ดาเมจต่อ Hit +40%</div>`;
+ if(S.sr.archive)h+=`<h4>🗄 Mastery เดิม (เก็บถาวร)</h4><div class="hint">แปลงเป็น Core EXP ครั้งเดียว: ${fmt(S.sr.migrated&&S.sr.migrated.exp||0)} EXP · ข้อมูลเดิมเก็บไว้ ไม่เพิ่มค่าพลังอีก</div>`;
+ side.innerHTML=h;}
+/* ---------- Build Presets (3) ---------- */
+function srPresetHtml(){const safe=srSafeArea();let h='<h4>💾 Build Presets</h4>';for(let i=0;i<3;i++){const P=S.sr.presets[i];h+=`<div class="srcard"><b>Preset ${i+1}</b> ${P?`<span class="hint">${P.alloc.length-1} แต้ม · ${new Date(P.at).toLocaleDateString()}</span>`:'<span class="hint">ว่าง</span>'}<br>
+ <button class="srbtn" data-act="srPreSave" data-arg="${i}">บันทึก</button> <button class="srbtn" ${P&&safe?'':'disabled'} data-act="srPreLoad" data-arg="${i}">โหลด</button> ${P?`<button class="srbtn" data-act="srPreDel" data-arg="${i}">ลบ</button>`:''}</div>`;}
+ if(!safe)h+='<div class="hint">สลับ Preset ได้เฉพาะในพื้นที่ปลอดภัย</div>';return h;}
+function srPresetSave(i){S.sr.presets[i]={at:Date.now(),alloc:S.sr.alloc.slice(),core:Object.assign({},S.sr.core),evo:{combat:S.sr.evo.combat.slice(),mining:S.sr.evo.mining.slice()},sel:Object.assign({},S.sr.sel)};save();return true;}
+function srPresetLoad(i){const P=S.sr.presets[i];if(!P)return{ok:false,why:'ว่าง'};if(!srSafeArea())return{ok:false,why:'สลับ Preset ได้เฉพาะใน Golem Camp หรือ Outpost'};
+ const al=['U0'].concat(P.alloc.filter(id=>id!=='U0'&&SR.byId[id]));const set=new Set(al);let ks=0;for(const id of set)if(SR.byId[id].t==='keystone')ks++;
+ if(!srConnected(set))return{ok:false,why:'Preset ไม่เชื่อมต่อกับ Core'};if(set.size-1>srEarned())return{ok:false,why:`แต้มไม่พอ (ต้องใช้ ${set.size-1} · มี ${srEarned()})`};if(ks>SR_KS)return{ok:false,why:'Keystone เกิน 3'};
+ S.sr.alloc=[...set];S.sr.core=Object.assign({combat:'',mining:''},P.core);S.sr.evo={combat:(P.evo.combat||[]).slice(0,2),mining:(P.evo.mining||[]).slice(0,2)};
+ const sel={};for(const k in P.sel){const[slot,f]=k.split(':');const id=slot[0]==='m'&&(slot==='mL'||slot==='mR')?`m_${slot}_${f}_${P.sel[k]}`:`c_${slot}_${f}_${P.sel[k]}`;if((SRL[id]||SRM[id])&&srUnlocked(id))sel[k]=P.sel[k];}S.sr.sel=sel;
+ srUnequipInvalid();srDirty();save();return{ok:true};}
+/* ---------- Equipment Skill Library ---------- */
+function srTags(L){const t=[];if(L.mslot){t.push('Mining',L.mslot==='mL'?'แขนซ้าย':'แขนขวา');if(L.def)t.push(L.def.sh,...(L.def.rd||[]));else t.push(SKILLS[L.fam+'_arm'].type);return t;}
+ t.push(CLASS_INFO[L.cls].n,SR_SLOTN[L.slot].split(' ')[0]);if(L.legacy)return t;const d=L.def;t.push(d.sh||d.mode||d.kind);for(const k of d.rd||[])t.push(k);if(L.slot==='chest')t.push('Energy '+d.en);else if(d.en)t.push('Energy '+d.en);return t;}
+const SR_EVO_SLOT={gL:'22',gR:'31',chest:'13',legs:'40',back:'49',mL:'18',mR:'25'};
+function srEvoHint(L){const sl=L.mslot||L.slot;const pre=L.mslot?'N':{warrior:'W',mage:'M',assassin:'A'}[L.cls];const id=pre+SR_EVO_SLOT[sl];const n=SR.byId[id];if(!n)return'';
+ let ok=true;const tg=SR_EVO_TAG[id];if(tg){const keep=S.sr.sel[(L.slot||L.mslot)+':'+L.fam];S.sr.sel[(L.slot||L.mslot)+':'+L.fam]=L.opt;try{ok=tg(L.fam);}finally{if(keep===undefined)delete S.sr.sel[(L.slot||L.mslot)+':'+L.fam];else S.sr.sel[(L.slot||L.mslot)+':'+L.fam]=keep;}}
+ return `<div class="hint">🧬 ${esc(n.n)}: ${ok?'รองรับ':'ไม่รองรับ'}</div>`;}
+function srLibOpen(tab){if(tab)SRUI.lib=tab;const render=()=>{const T_=SRUI.lib;const cOK=SR_LIBCHK,mOK=SR_MLIBCHK;
+  let h=`<div class="srlib"><div class="hint">Combat <b>${cOK.total}</b> ตัวเลือก (เดิม ${cOK.legacy} · ใหม่ ${cOK.neu}) · Mining <b>${mOK.total}</b> (เดิม ${mOK.legacy} · ใหม่ ${mOK.neu}) · Core Active <b>12</b> = <b>${cOK.total+mOK.total+12}</b> · เลือกได้ช่องละ 1 · เปลี่ยนได้นอกการต่อสู้</div>
+  <div class="v10tabs"><button class="${T_==='combat'?'on':''}" data-act="srLibTab" data-arg="combat">⚔ Combat (ชิ้นที่สวม)</button><button class="${T_==='mining'?'on':''}" data-act="srLibTab" data-arg="mining">⛏ Mining (แขนที่ใส่)</button><button class="${T_==='all'?'on':''}" data-act="srLibTab" data-arg="all">📖 ดูทุกตระกูล</button><button class="${T_==='core'?'on':''}" data-act="srLibTab" data-arg="core">⚡ Core Active</button></div>`;
+  const card=(L,on,can,slot,f,ms)=>{const req=srUnlockReq(L.id);const lk=!srUnlocked(L.id);return `<div class="srsk ${on?'on':''} ${lk?'lock':''}"><b>${L.i} ${esc(L.n)}</b> <span class="tag">${L.opt}</span>${L.legacy?'<span class="tag">เดิม</span>':'<span class="tag">ใหม่</span>'}<div class="hint" style="margin:4px 0">${esc(L.d)}</div><div>${srTags(L).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>${srEvoHint(L)}
+   ${lk?`<div class="hint">🔒 ${esc(req.txt)}</div>`:on?'<span class="hint">✅ ใช้อยู่</span>':can?`<button class="btn sm gold" data-act="srSel" data-arg="${slot}|${f}|${L.opt}">เลือก</button>`:''}</div>`;};
+  if(T_==='combat'){for(const sl of['gL','gR','chest','legs','back']){const f=srEqFam(sl);h+=`<h4>${SR_SLOTN[sl]}${f?` — ${esc(famReg(f).name||f)}`:''}</h4>`;if(!f){h+='<div class="hint">ไม่ได้สวมชิ้นส่วนช่องนี้</div>';continue;}
+    const cur=srSelId(sl,f);h+='<div class="srrow">'+SRL_BY[sl+':'+f].map(id=>card(SRL[id],cur===id,!CB,sl,f)).join('')+'</div>';}}
+  else if(T_==='mining'){const eq=S.equip||{};for(const[sl,ms]of[['armL','mL'],['armR','mR']]){const inst=eq[sl]?invGet(eq[sl]):null;const P_=inst&&PART[inst.pid];const f=P_&&P_.fam;
+    h+=`<h4>${sl==='armL'?'แขนซ้าย (สกิล 1)':'แขนขวา (สกิล 2)'}${f?' — '+esc(FAMS[f].name):''}</h4>`;if(!f){h+='<div class="hint">ไม่ได้ใส่แขนช่องนี้</div>';continue;}const cur=srMSelId(ms,f);h+='<div class="srrow">'+SRM_BY[ms+':'+f].map(id=>card(SRM[id],cur===id,!CB,ms,f)).join('')+'</div>';}}
+  else if(T_==='all'){const fams=ALL_FAMS;const f=SRUI.libFam||fams[0];h+=`<div class="v10tabs">${fams.map(x=>`<button class="${x===f?'on':''}" data-act="srLibFam" data-arg="${x}">${esc((famReg(x)||{}).name||x)}</button>`).join('')}</div>`;
+   for(const sl of['gL','gR','chest','legs','back'])h+=`<h4>${SR_SLOTN[sl]}</h4><div class="srrow">${SRL_BY[sl+':'+f].map(id=>card(SRL[id],srSelId(sl,f)===id,false,sl,f)).join('')}</div>`;
+   if(FAMS[f]&&!CFAM[f])for(const ms of['mL','mR'])h+=`<h4>⛏ ${ms==='mL'?'แขนขุดซ้าย':'แขนขุดขวา'}</h4><div class="srrow">${SRM_BY[ms+':'+f].map(id=>card(SRM[id],srMSelId(ms,f)===id,false,ms,f)).join('')}</div>`;}
+  else{h+='<div class="srrow">'+Object.keys(SR_ACT).map(id=>{const n=SR.byId[id];return`<div class="srsk ${srIs(id)?'on':''}"><b>${esc(n.n)}</b> <span class="tag">${id}</span><div class="hint">${esc(n.d)}</div><div class="hint">CD ${srCoreCd(id)} วิ · ${srIs(id)?'✅ ปลดล็อกแล้ว':'🔒 ปลดล็อกใน Passive Tree'}</div></div>`;}).join('')+'</div>';}
+  $('#mbody').innerHTML=h+'</div>';};
+ openModal('📚 EQUIPMENT SKILL LIBRARY','',render);$('#mbox').classList.add('wide');render();}
+Object.assign(ACT,{srCore:()=>srUseCore(),srTree:a=>srOpenTree(a),srClose:()=>srCloseTree(),srZoom:a=>{const cv=SRUI.cv;srZoomAt(cv.clientWidth/2,cv.clientHeight/2,SRUI.z*(+a));},srFit:()=>srFit(),
+ srAlloc:a=>{const r=srAlloc(a);toast(r.ok?`ปลดล็อก ${SR.byId[a].n} (${r.n} แต้ม)`:r.why,r.ok?'ok':'err');if(r.ok)sfx('upgrade');srTreeRender();},
+ srRefund:a=>{const r=srRefund(a);toast(r.ok?'คืนแต้มแล้ว':r.why,r.ok?'ok':'err');srTreeRender();},
+ srRespec:()=>{if(!confirm('รีเซ็ต Passive Tree ทั้งหมด? (คืนแต้มทั้งหมด ฟรี)'))return;toast(srRespec()?'Respec แล้ว — แต้มคืนทั้งหมด':'Respec ได้เฉพาะในพื้นที่ปลอดภัย',srSafeArea()?'ok':'err');srTreeRender();},
+ srCoreEq:a=>{srEquipCore(a);srTreeRender();},srEvoEq:a=>{if(!srEquipEvo(a))toast('ใช้ Evolution ได้สูงสุด 2 ต่อโหมด','err');srTreeRender();},
+ srPreSave:a=>{srPresetSave(+a);toast(`บันทึก Preset ${+a+1}`,'ok');srTreeRender();},srPreLoad:a=>{const r=srPresetLoad(+a);toast(r.ok?`โหลด Preset ${+a+1}`:r.why,r.ok?'ok':'err');srTreeRender();},srPreDel:a=>{S.sr.presets[+a]=null;save();srTreeRender();},
+ srLib:a=>{srCloseTree();srLibOpen(a);},srLibTab:a=>{SRUI.lib=a;modalRefresh&&modalRefresh();},srLibFam:a=>{SRUI.libFam=a;modalRefresh&&modalRefresh();},
+ srSel:a=>{const[sl,f,o]=a.split('|');const r=srSelect(sl,f,o);toast(r.ok?'เปลี่ยนสกิลแล้ว':r.why,r.ok?'ok':'err');if(r.ok&&R)try{R.st=calcStats(S.equip);R.skills=R.st.skills;updateSkillButtons();}catch(e){}modalRefresh&&modalRefresh();},
+ openMasteryList:()=>srOpenTree(),openMastery:a=>srArchiveView(a)});
+function srArchiveView(key){const A=S.sr.archive||{};const pm=A.partMastery||{};const r=pm[key];openModal('🗄 MASTERY เดิม (เก็บถาวร)',`<div class="hint">ระบบ Part Mastery / Specialization / Discipline ถูกเก็บถาวรใน V7 Skill Revolution — ไม่เพิ่มค่าพลังอีกแล้ว ความคืบหน้าเดิมถูกแปลงเป็น Core EXP ครั้งเดียว (${fmt(S.sr.migrated&&S.sr.migrated.exp||0)} EXP)</div>
+ ${r?`<div class="v10c" style="margin-top:8px"><b>${esc(key)}</b> · Lv.${r.lv||1}</div>`:''}<button class="btn gold" data-act="srTree" style="margin-top:10px">🌳 เปิด Core Skill Tree</button>`,null,true);}
+/* Golem pane: tree + library replace the archived mastery list */
+paneGolem=function(){const st=curStats();const cs=calcCombat(S.combatEquip);const P=S.sr;
+ let h=`<div class="v5sec"><h3>🤖 GOLEM</h3><div class="v5big"><button class="hot" data-act="openGarage"><span class="e">🧍</span>Mining Garage<small>P ${st.P} · Tier ${st.maxTier}</small></button>
+ <button class="red" data-act="openGarageC"><span class="e">🛡</span>Combat Loadout<small>CP ${cs.cp}</small></button><button data-act="openInventory"><span class="e">🎒</span>Mining Parts<small>${S.inv.length} ชิ้น</small></button>
+ <button data-act="openCInv"><span class="e">🗃</span>Combat Armor<small>${S.combatInventory.length} ชิ้น</small></button><button data-act="openPresets"><span class="e">💾</span>Presets</button>
+ <button class="hot" data-act="srTree"><span class="e">🌳</span>Core Skill Tree<small>Lv ${P.lv} · แต้มว่าง ${srAvail()}</small></button><button data-act="srLib"><span class="e">📚</span>Skill Library<small>324 ตัวเลือก</small></button></div></div>`;
+ h+=`<div class="v5sec"><h3>⭐ Core Level</h3><div class="v5note"><span class="ic">🌳</span><span class="tx"><b>Core Lv ${P.lv}/${SR_LVMAX}</b> · ${P.lv>=SR_LVMAX?'MAX':fmt(P.exp)+'/'+fmt(srNeed(P.lv))+' EXP'} · แต้ม ${srSpent()}/${srEarned()} · Keystone ${srKsCount()}/3
+  <span class="hint">Core EXP มาจากการขุด ต่อสู้ สำรวจ คราฟต์ Contract/Bounty จริงเท่านั้น · Core Active: ⚔ ${P.core.combat?esc(SR.byId[P.core.combat].n):'-'} · ⛏ ${P.core.mining?esc(SR.byId[P.core.mining].n):'-'}</span></span></div></div>`;return h;};
+/* ---------- HUD: Core Active button (combat + mining) ---------- */
+function srHudCore(){if(!S||!S.sr)return;if(CB&&CB.lo==='combat'){const b=$('#akF');if(!b)return;const id=S.sr.core.combat;const v=SR_ACD.combat,mx=id?srCoreCd(id):1;const q=b.querySelector('.cdv');q.style.setProperty('--p',v>0?v/mx:0);q.textContent=v>0?Math.ceil(v):'';b.classList.toggle('ready',!!id&&v<=0);}
+ else if(R&&!CB){const b=$('#skF');if(!b)return;const id=S.sr.core.mining;const v=SR_ACD.mining,mx=id?srCoreCd(id):1;const q=b.querySelector('.cdv');q.style.setProperty('--p',v>0?v/mx:0);q.textContent=v>0?Math.ceil(v):`⚡${Math.floor(R.srEn||0)}`;b.classList.toggle('none',!id);}}
+{const _hb=cbHudBuild;cbHudBuild=function(){_hb();if(!S||!S.sr||!CB||CB.lo!=='combat')return;const id=S.sr.core.combat;const n=id&&SR.byId[id];
+ $('#aSkills').insertAdjacentHTML('beforeend',`<button class="askb srcore ${n?'':'none'}" id="akF" data-act="srCore" title="${n?esc(n.d):'ยังไม่ได้ติดตั้ง Core Active'}"><kbd>F</kbd><span class="ic">✦</span><span class="nm">${n?esc(n.n):'Core Active'}</span><span class="cdv"></span></button>`);};}
+{const _hu=cbHudUpdate;cbHudUpdate=function(){_hu();try{srHudCore();}catch(e){}};}
+{const _us=updateSkillButtons;updateSkillButtons=function(){_us();if(!S||!S.sr)return;const bar=$('#sk1')&&$('#sk1').parentElement;if(!bar)return;let b=$('#skF');const id=S.sr.core.mining;const n=id&&SR.byId[id];
+ if(!b){bar.insertAdjacentHTML('beforeend',`<button class="skill srcore" id="skF" data-act="srCore"><kbd>F</kbd><span class="ic">✦</span><span class="nm"></span><span class="cdv"></span></button>`);b=$('#skF');}
+ b.querySelector('.nm').textContent=n?n.n:'Core Active';b.title=n?n.d:'ยังไม่ได้ติดตั้ง Core Active (Mining)';b.classList.toggle('none',!n);};}
+{const _uh=updateHud;updateHud=function(){_uh();try{if(R&&!CB&&(R.srHudT=(R.srHudT||0)-1)<=0){R.srHudT=6;srHudCore();}}catch(e){}};}
+
 
 /* ========================= LOOP ========================= */
 let GT=0,lastT=performance.now();
