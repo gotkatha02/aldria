@@ -8880,10 +8880,12 @@ function udNodeReady(v,k,now){const s=udVS(v);return !s||!s.r[k]||s.r[k]<=now;}
 function udRespawnMs(tier,v,k,gc){const R_=UD_RESPAWN[tier]||[180,240];const h=udRand(S.ud.seed,v.id,k,gc,'rs');return Math.round((R_[0]+(R_[1]-R_[0])*h)*1000);}
 function udVeinStage(v,now){now=now||Date.now();const s=udVS(v);if(!s)return 'rich';let down=0,grow=0;for(let k=0;k<v.nodes.length;k++){if(s.r[k]&&s.r[k]>now){down++;}}if(!down)return s.ref?'reformed':'rich';if(down===v.nodes.length)return 'depleted';return s.dep?'regrowth':'rich';}
 function udMkOre(v,k,x,y){const w=UD.world;const i=y*UD_W+x;const T_=TIERS[v.tier];const near=(()=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(w.g[(y+dy)*UD_W+x+dx]===T_LAVA)return true;return false;})();
- const hp=Math.round(T_.hp*(v.rich?1.15:1));const o={id:i,x,y,tier:v.tier,hp,maxHp:hp,name:v.name,hidden:v.kind==='crystal'&&udRand(S.ud.seed,v.id,k,'hid')<.25,hot:near,seed:udRand(S.ud.seed,v.id,k),hitT:0,ud:{v:v.id,k},rich:v.rich,unstable:v.kind==='unstable'};return o;}
+ const hp=Math.round(T_.hp*(v.rich?1.15:1));const o={id:i,x,y,tier:v.tier,hp,maxHp:hp,name:v.name,hidden:v.kind==='crystal'&&udRand(S.ud.seed,v.id,k,'hid')<.25,hot:near,seed:udRand(S.ud.seed,v.id,k),hitT:0,ud:{v:v.id,k},rich:v.rich,unstable:v.kind==='unstable'};if(typeof v10VeinMut==='function'&&S.v10)o.mut=v10VeinMut(v);return o;}
 function udPlaceOre(o){if(R.oreAt[o.id])return false;const t=R.map.g[o.id];if(t!==T_FLOOR&&t!==T_SLOW)return false;if(gTile()===o.id)return false;R.ores.push(o);R.oreAt[o.id]=o;return true;}
+/* place a node at its (possibly shifted) position; if that tile is occupied fall back to the anchor or another neighbouring spot */
+function udPlaceNode(v,k,x,y){const n=v.nodes[k];const C=[[x,y],[n.x,n.y],...n.alts];for(const[px,py]of C){const o=udMkOre(v,k,px,py);if(udPlaceOre(o))return o;}return null;}
 function udLoadChunk(c){const now=Date.now();const w=UD.world;
- for(const[v,k]of(UD.nodeIdx[c]||[])){if(!udNodeReady(v,k,now))continue;const[x,y]=udNodePos(v,k);if(UD.ck(x,y)!==c)continue;if(R.ores.some(o=>o.ud&&o.ud.v===v.id&&o.ud.k===k))continue;udPlaceOre(udMkOre(v,k,x,y));}
+ for(const[v,k]of(UD.nodeIdx[c]||[])){if(!udNodeReady(v,k,now))continue;const[x,y]=udNodePos(v,k);if(UD.ck(x,y)!==c)continue;if(R.ores.some(o=>o.ud&&o.ud.v===v.id&&o.ud.k===k))continue;udPlaceNode(v,k,x,y);}
  for(const e of(UD.excIdx[c]||[])){if(w.g[e.i]!==T_SECRET||R.oreAt[e.i])continue;const tier=UDR[e.r].tier;const hp=Math.round(240*Math.pow(tier,1.25));const o={id:e.i,x:e.i%UD_W,y:(e.i/UD_W)|0,tier,hp,maxHp:hp,name:'ผนังร้าว',secret:true,revealed:false,exc:e.al,hidden:false,seed:udRand(e.i),hitT:0};R.ores.push(o);R.oreAt[e.i]=o;}
  UD.chunks.add(c);udSpawnChunkMons(c);}
 function udUnloadChunk(c){for(let k=R.ores.length-1;k>=0;k--){const o=R.ores[k];if(UD.ck(o.x,o.y)!==c)continue;if(R.g.tgt&&R.g.tgt.o===o){R.g.tgt=null;R.g.state='idle';}R.oreAt[o.id]=null;R.ores.splice(k,1);}
@@ -8893,8 +8895,8 @@ function udStream(force){const gx=Math.floor(R.g.x),gy=Math.floor(R.g.y);const c
  for(const c of want)if(!UD.chunks.has(c))udLoadChunk(c);for(const c of[...UD.chunks])if(!want.has(c)){const x=c%UD.cw,y=Math.floor(c/UD.cw);if(Math.abs(x-cx)>3||Math.abs(y-cy)>3)udUnloadChunk(c);}}
 /* regrowth tick for loaded chunks — nodes come back at their anchor or a nearby valid position */
 function udRegrow(){const now=Date.now();let n=0;for(const c of UD.chunks)for(const[v,k]of(UD.nodeIdx[c]||[])){const s=udVS(v);if(!s||!s.r[k]||s.r[k]>now)continue;const[x,y]=udNodePos(v,k);if(UD.ck(x,y)!==c)continue;
-  if(Math.hypot(R.g.x-(x+.5),R.g.y-(y+.5))<1.2){s.r[k]=now+4000;continue;}const o=udMkOre(v,k,x,y);if(udPlaceOre(o)){s.r[k]=0;n++;R.efx.push({type:'ring',x:x+.5,y:y+.5,r:.9,t:0,dur:.6,col:UDR[v.r].pal.vein});
-   if(s.dep&&s.r.every(t=>!t||t<=now)){s.dep=0;s.ref=1;S.ud.stats.reformed++;if(Math.hypot(R.g.x-x,R.g.y-y)<12)floatTxt(x+.5,y-.6,'✨ Vein Reformed','#9fffd0',.9);}}else s.r[k]=now+5000;}
+  if(Math.hypot(R.g.x-(x+.5),R.g.y-(y+.5))<1.2){s.r[k]=now+4000;continue;}const o=udPlaceNode(v,k,x,y);if(o){s.r[k]=0;n++;R.efx.push({type:'ring',x:x+.5,y:y+.5,r:.9,t:0,dur:.6,col:UDR[v.r].pal.vein});
+   if(s.dep&&s.r.every(t=>!t||t<=now)){s.dep=0;s.ref=1;S.ud.stats.reformed++;if(typeof v10OnReform==='function')v10OnReform(v);if(Math.hypot(R.g.x-x,R.g.y-y)<12)floatTxt(x+.5,y-.6,'✨ Vein Reformed','#9fffd0',.9);}}else s.r[k]=now+5000;}
  return n;}
 /* ---------- bounded Dijkstra (binary heap, radius-capped, reusable buffers) for the 69k-tile world ---------- */
 const UDP={dist:null,prev:null,done:null,touched:[],heap:[]};
@@ -8942,7 +8944,7 @@ function udK(f){const n=(R&&R.udFam&&R.udFam[f])||0;return n?[0,.6,.8,1,1.1,1.2,
 {const _bo=breakOre;breakOre=function(o){if(!R||!R.ud||!o)return _bo(o);const v=o.ud&&UD.vmap[o.ud.v];const exc=o.exc;const x=o.x,y=o.y;_bo(o);if(!R)return;
  if(exc){S.ud.exc.push(o.id);UD.world.g[o.id]=T_FLOOR;udEdgeOpen(o.id);S.ud.stats.exc++;const al=UD.amap[exc];if(al&&!S.ud.disc['al_'+al.id]){S.ud.disc['al_'+al.id]={at:Date.now()};udRevealArea(al.x,al.y,al.rad+3);toast(`⛏ ขุดทะลุ! พบ${UD_ALC_N[al.type]||'ห้องลับ'}`,'gold');udTut('branch');}return;}
  if(!v)return;const s=udVSw(v);const k=o.ud.k;s.g[k]=(s.g[k]||0)+1;s.r[k]=Date.now()+udRespawnMs(v.tier,v,k,s.g[k]);if(s.ref)s.ref=0;S.ud.stats.mined++;udTut('mine');
- if(s.r.every(t=>t&&t>Date.now())){s.dep=1;S.ud.stats.depleted++;floatTxt(x+.5,y-.8,'🪨 Vein Depleted — Regrowth begins','#ffb060',.85);}
+ const depl=s.r.every(t=>t&&t>Date.now());const mut0=o.mut;if(depl){s.dep=1;S.ud.stats.depleted++;floatTxt(x+.5,y-.8,'🪨 Vein Depleted — Regrowth begins','#ffb060',.85);s.mut='';}if(typeof v10OnBreak==='function')try{v10OnBreak(o,v,k,depl,mut0);}catch(e){console.warn('v10OnBreak',e);}
  if(v.rich){S.ud.stats.rich++;if(bagFits(v.tier)){bagAdd(v.name,v.tier);floatTxt(x+.5,y-1.1,'💰 Rich Vein +1','#ffd84a',.9);}if(Math.random()<.12){const ck=udMatFor(v.tier);if(ck){cmAdd(ck,1,true);floatTxt(x+.5,y-1.5,`${CMAT[ck].i} ${CMAT[ck].n}`,CMAT[ck].col,.85);}}}
  if(v.kind==='unstable'&&udK('void')&&Math.random()<.25*udK('void')&&bagFits(v.tier)){bagAdd(v.name,v.tier);floatTxt(x+.5,y-1.1,'🌀 Resonance +1','#c066ff',.85);}
  if(udK('prism')&&UD_CRYSTAL.has(v.name))R.v5bonus=(R.v5bonus||0)+Math.round(TIERS[v.tier].price*.1*udK('prism'));
@@ -9027,7 +9029,7 @@ function udPropKind(r,k){const L=UDR[r].props;return L[(k-1)%L.length];}
    outposts · NPC quests · mining-disturbance ambushes · elite resource guardians · mini-bosses
    ===================================================================== */
 const UD_MON_CAP=12,UD_AMBUSH_CAP=2;
-const UD_SPAWN_CD={patrol:300,nest:1200,elite:900,lair:1800,ambush:0};
+const UD_SPAWN_CD={patrol:300,nest:1200,elite:900,lair:1800,ambush:0,rare:1200,chain:0,defend:0,cache:0};
 /* spawn index per chunk (built lazily) */
 function udSpawnIdx(){if(UD.spIdx)return UD.spIdx;UD.spIdx={};for(const s of UD.world.spawns)(UD.spIdx[UD.ck(s.x,s.y)]=UD.spIdx[UD.ck(s.x,s.y)]||[]).push(s);
  UD.dIdx={};for(const d of UD.world.disc)(UD.dIdx[UD.ck(d.x,d.y)]=UD.dIdx[UD.ck(d.x,d.y)]||[]).push(d);return UD.spIdx;}
@@ -9038,6 +9040,7 @@ function udSpawnChunkMons(c){if(!UD.world)return;udSpawnIdx();const now=Date.now
   if(s.k==='patrol'){const n=1+(udRand(s.id,'n')<.4?1:0);for(let k=0;k<n;k++)UD.mons.push(udMkMon(R_.mons[(k+(udRand(s.id)<.5?0:1))%2],tier,s.x+k*.8,s.y,{sid:s.id,kind:'patrol'}));}
   else if(s.k==='nest'){for(let k=0;k<3;k++)UD.mons.push(udMkMon(R_.mons[k%2],tier,s.x+(k-1)*.9,s.y+(k%2)*.6,{sid:s.id,kind:'nest',nest:true}));}
   else if(s.k==='elite'){UD.mons.push(udMkMon(R_.elite,tier,s.x,s.y,{sid:s.id,kind:'elite',vein:s.vein,guard:true}));}
+  else if(s.k==='rare'){UD.mons.push(udMkMon(s.rg,tier,s.x,s.y,{sid:s.id,kind:'rare',rare:true,guard:true}));}
   else if(s.k==='lair'){UD.mons.push(udMkMon(R_.elite,tier,s.x,s.y,{sid:s.id,kind:'lair',boss:true,bossDef:R_.boss,guard:true}));}}
  for(const d of(UD.dIdx[c]||[]))if(!UD.objs.includes(d))UD.objs.push(d);}
 UD.objs=[];
@@ -9456,6 +9459,529 @@ Object.assign(ACT,{udLoadout:()=>udLoadoutOpen(),udStanceSet:a=>{if(R&&R.ud&&R.u
  udLoadM:a=>{if(!R||!R.ud)return;loadPreset(+a);udRefreshMiningStats();toast(`⛏ Mining Loadout → P ${R.st.P}`,'ok');if(modalRefresh)modalRefresh();},
  udLoadC:a=>{ACT.gcpload(a);if(modalRefresh)modalRefresh();}});
 document.addEventListener('keydown',e=>{if(!R||!R.ud||R.ended||e.target.tagName==='INPUT')return;if((e.key==='l'||e.key==='L')&&$('#modal').classList.contains('hidden'))udLoadoutOpen();});
+
+/* =====================================================================
+   V7 ENDLESS GRINDING (1/4) — data · state · idempotent claims · world extension
+   (deep vein locations · rare guardians · excavation-project routes) · mutated vein core
+   Built on The Great Underdeep (V6.2). No stamina, no gacha, no stat inflation, no new currencies.
+   ===================================================================== */
+const V10_VER=70;
+/* ---------- mutated vein variants (one mining cycle each; rolled on reform with a pity guarantee) ---------- */
+const MUT={
+ resonant:{n:'Resonant Vein',i:'〰️',col:'#7fe6ff',d:'ทุบแตกแล้วปล่อยคลื่นพลัง 30% ไปยังโหนดอื่นในสายเดียวกัน (รัศมี 3) — แร่ที่ Power ไม่ถึงไม่เสียหาย · ได้วัตถุดิบรอง'},
+ bloom:{n:'Crystal Bloom',i:'🌸',col:'#ff9df0',d:'ทุบแตกแล้วแตกกิ่งคริสตัลชั่วคราว 1–2 ก้อนข้าง ๆ (สูงสุด 4 ต่อรอบ)'},
+ ancient:{n:'Ancient Vein',i:'⚙️',col:'#e8c070',d:'มีเศษ Relic เครื่องจักร (30% ต่อโหนด · การันตีเมื่อขุดหมดสาย)'},
+ volatile:{n:'Volatile Vein',i:'💥',col:'#ff6a3a',d:'แร่ ×2 ต่อโหนด แต่ระเบิดเป็นรูปกากบาทเมื่อแตก — ยืนทแยงมุมจะปลอดภัย'},
+ deepcore:{n:'Deepcore Vein',i:'🔻',col:'#ff3b6b',d:'พบเฉพาะในพื้นที่ Deep Vein · แร่ +2 ต่อโหนด · วัตถุดิบ Tier สูงขึ้น'},
+ echo:{n:'Echo Vein',i:'📡',col:'#9fffd0',d:'ทุบแตกแล้วสะท้อนเสียง เปิดแร่ซ่อน / รอยร้าว / สายแร่ในรัศมี 9 ช่องชั่วครู่'}};
+const MUT_ORDER=['resonant','bloom','ancient','volatile','echo','deepcore'];
+const MUT_BASE=.07,MUT_PITY=12,MUT_DEEP=.35;
+/* ---------- deep vein locations (physical places in the persistent world) ---------- */
+const DEEPLOC=[{n:'The Great Mineral Hall',k:'hall',d:'โถงแร่ขนาดมหึมาใต้ Stone Hollow'},{n:'Rootlock Labyrinth',k:'laby',d:'เขาวงกตแร่หายากใต้รากยักษ์'},{n:'Ancient Crystal Forest',k:'forest',d:'ป่าคริสตัลโบราณที่ยังเติบโต'},
+ {n:'The Magma Seam',k:'magma',d:'รอยแยกแมกมาที่แร่ร้อนไหลซึม'},{n:'Buried Mechanical Mine',k:'mech',d:'เหมืองจักรกลของอารยธรรมที่สาบสูญ'},{n:'The Void Fault',k:'fault',d:'รอยเลื่อนมิติที่แร่ว่างเปล่าก่อตัว'}];
+/* ---------- rare guardians (one per region, distinct arena patterns) ---------- */
+const RGUARD=[
+ {id:'rg0',n:'Foreman Mk-0',base:'cartgolem',col:'#d0a050',c2:'#5a3a10',eye:'#ffd84a',pat:['charge','mines','slam'],hp:5,fin:'industrial'},
+ {id:'rg1',n:'Thornroot Matriarch',base:'rootlurker',col:'#5fa060',c2:'#203a20',eye:'#d0ff6a',pat:['thorns','nova','summon'],hp:5,fin:'verdant'},
+ {id:'rg2',n:'Prism Colossus',base:'rubysentry',col:'#ffd0f0',c2:'#7a3a6a',eye:'#ffffff',pat:['barrage','beam','nova'],hp:5,fin:'crystal'},
+ {id:'rg3',n:'Crucible Wyrm',base:'furnacehound',col:'#ff7a2a',c2:'#3a0a04',eye:'#fff07a',pat:['charge','fire','mines'],hp:5,fin:'volcanic'},
+ {id:'rg4',n:'Archive Sentinel',base:'deepwarden',col:'#cfe8ff',c2:'#2a4a5a',eye:'#7fffd4',pat:['beam','barrage','slam'],hp:5,fin:'relic'},
+ {id:'rg5',n:'Horizon Eater',base:'abysswatcher',col:'#7a2ad0',c2:'#10031e',eye:'#ff9df0',pat:['nova','barrage','pull'],hp:5.5,fin:'void'}];
+/* ---------- relics: 3 per region · fragments from excavation / machines / chambers / elites / puzzles / rare veins ---------- */
+const RELIC=[];
+[[['Old Lift Lever','record','คันโยกลิฟต์รุ่นแรก — บันทึกการสร้าง Camp Lift'],['Foreman’s Pocketwatch','gadget:g_tapper','นาฬิกาพกที่ยังเดิน — Gadget: Seismic Tapper'],['Rail Spike Totem','deco','หมุดรางชุบทองแดง — ของประดับ Relic Hall']],
+ [['Rootbound Gear','deco','เฟืองที่รากไม้พันรอบ'],['Spore Lantern','gadget:g_lens','ตะเกียงสปอร์ — Gadget: Prism Lens'],['Drowned Survey Log','record','สมุดสำรวจที่จมน้ำ']],
+ [['Mirror Compass','gadget:g_compass','เข็มทิศกระจก — Gadget: Vein Compass'],['Gilded Ingot Stamp','recipe:bp_gilded','ตราประทับแท่งทอง — สูตร Gilded Finish'],['Hall of Mirrors Shard','deco','เศษกระจกที่สะท้อนอดีต']],
+ [['Crucible Heart','gadget:g_coil','หัวใจเตาหลอม — Gadget: Cryo Coil'],['Slag-Forged Mask','effect:trail_ember','หน้ากากตะกรัน — Footstep: Embers'],['Foundry Ledger','record','บัญชีโรงหลอมเล่มสุดท้าย']],
+ [['Archivist’s Lens','interact:vault','เลนส์บรรณารักษ์ — เปิดห้องนิรภัยโบราณ'],['Silent Assembly Core','gadget:g_echo','แกนโถงประกอบเงียบ — Gadget: Echo Chime'],['Pick of the First Miner','deco','อีเตอร์ของนักขุดคนแรก']],
+ [['Horizon Shard','effect:trail_void','เศษขอบฟ้า — Footstep: Void Motes'],['Null Stabilizer','gadget:g_stab','ตัวปรับเสถียร — Gadget: Stabilizer'],['Last Expedition Diary','record','บันทึกการสำรวจครั้งสุดท้าย']]
+].forEach((L,r)=>L.forEach(([n,rw,d],k)=>RELIC.push({id:'rl'+r+k,r,n,rw,d,need:4+k})));
+const RELIC_M={};RELIC.forEach(x=>RELIC_M[x.id]=x);
+/* ---------- gadgets: one equipped at a time · bounded sidegrades (each has a trade-off) ---------- */
+const GADGET={
+ g_tapper:{n:'Seismic Tapper',i:'🔨',d:'ผนังร้าวเสียหาย +40% · ดาเมจแร่ −5%'},
+ g_lens:{n:'Prism Lens',i:'🔍',d:'เปิดแร่ซ่อน/รอยร้าวไกลขึ้น +3 ช่อง · ความเร็วเดิน −4%'},
+ g_compass:{n:'Vein Compass',i:'🧭',d:'ลูกศรชี้สายแร่ Rich / กลายพันธุ์ที่ใกล้ที่สุด (40 ช่อง) · ระยะเก็บของ −0.5'},
+ g_coil:{n:'Cryo Coil',i:'❄️',d:'เดินบนหินร้อน/ไอน้ำไม่มึน · ความเร็วขุด −4%'},
+ g_echo:{n:'Echo Chime',i:'🔔',d:'ทุก 40 ก้อนที่ทุบแตก ปล่อย Echo เปิดพื้นที่รัศมี 9 · Capacity −2'},
+ g_stab:{n:'Stabilizer',i:'🛡',d:'ระเบิด Volatile ไม่ทำให้มึน · โบนัสแร่ Volatile ×2 → ×1.5'},
+ g_scanner:{n:'Seismic Scanner',i:'📶',d:'แผนที่แสดงสายแร่ Rich/กลายพันธุ์ในพื้นที่ที่สำรวจแล้ว · Recall ช้าลง 0.6 วิ'},
+ g_lamp:{n:'Prospector Lamp',i:'🔦',d:'มองเห็นในถ้ำ +1.5 · มอนสเตอร์สังเกตเห็นไกลขึ้น +1'}};
+/* ---------- blueprint collection (24) — options & conveniences, never gates for existing equipment ---------- */
+const BP=[
+ ['bp_industrial','finish:industrial','Industrial Finish','ลายโลหะอุตสาหกรรม (ภาพเท่านั้น)',4,0],['bp_gilded','finish:gilded','Gilded Finish','ชุบทองประกาย (ภาพเท่านั้น)',4,2],['bp_frost','finish:frost','Frostforged Finish','เคลือบน้ำแข็ง (ภาพเท่านั้น)',4,1],
+ ['bp_beam_gold','beam:gold','Gold Spark Beam','ประกายขุดสีทอง',3,2],['bp_beam_void','beam:void','Void Spark Beam','ประกายขุดสีม่วงว่างเปล่า',3,5],['bp_beam_frost','beam:frost','Frost Spark Beam','ประกายขุดน้ำแข็ง',3,1],
+ ['bp_trail_spark','trail:spark','Spark Footsteps','รอยเท้าประกายไฟ',3,0],['bp_trail_crystal','trail:crystal','Crystal Footsteps','รอยเท้าคริสตัล',3,2],['bp_trail_root','trail:root','Moss Footsteps','รอยเท้ามอส',3,1],
+ ['bp_scanner','gadget:g_scanner','Seismic Scanner','Gadget: แผนที่แสดงสายแร่ที่สำรวจแล้ว',5,1],['bp_lamp','gadget:g_lamp','Prospector Lamp','Gadget: มองเห็นในถ้ำไกลขึ้น',4,0],['bp_compass2','gadget:g_compass','Vein Compass (Schematic)','Gadget: เข็มทิศสายแร่ (อีกทางปลดล็อก)',4,3],
+ ['bp_compressor','util:compressor','Ore Compressor','ที่ Warehouse: อัดแร่ 10 → 3 Tier สูงขึ้น (แร่ Tier ต่ำยังมีค่า)',5,2],['bp_fieldforge','util:fieldforge','Field Forge','คราฟต์ชิ้นส่วนขุดได้ที่ Outpost ระดับ Operational ขึ้นไป',5,3],['bp_salvage','util:salvage','Salvage Rig','แยกชิ้นส่วนขุดซ้ำ → คืนแร่ 30%',5,4],
+ ['bp_pocketlift','conv:pocketlift','Pocket Lift','Recall เร็วขึ้น 2.2 → 1.4 วิ',4,4],['bp_drone','conv:drone','Survey Drone','เปิดหมอกรอบตัวกว้างขึ้น +1',4,3],['bp_locker','conv:locker','Expedition Locker','ฝากแร่จาก Outpost ทุกระดับ (ไม่ต้อง Shelter)',4,1],
+ ['bp_deco_drill','deco:drill','Display Drill Rig','ของประดับ Relic Hall / Research Station',3,4],['bp_deco_banner','deco:banner','Expedition Banner','ของประดับ',3,0],['bp_deco_orrery','deco:orrery','Void Orrery','ของประดับ',3,5],
+ ['bp_relicfinish','finish:relic','Ancient Relic Finish (Schematic)','ทางเลือกปลดล็อก Relic Finish',6,4],['bp_volcanic','finish:volcanic','Volcanic Forged Finish (Schematic)','ทางเลือกปลดล็อก Volcanic Finish',6,3],['bp_crystal','finish:crystal','Crystal Infusion (Schematic)','ทางเลือกปลดล็อก Crystal Finish',6,2]
+].map(([id,rw,n,d,need,r])=>({id,rw,n,d,need,r}));
+const BP_M={};BP.forEach(b=>BP_M[b.id]=b);
+/* ---------- cosmetics: finishes (golem tint/glow, both loadouts), trails, beams — zero stat effect ---------- */
+const FINISH={industrial:{n:'Industrial Finish',tint:'#7a8494',a:.34,glow:'#ffb060',p:'#cfd8dc'},relic:{n:'Ancient Relic Finish',tint:'#b8904a',a:.36,glow:'#e8c070',p:'#e8c070'},
+ crystal:{n:'Crystal Infusion',tint:'#ff8ad8',a:.3,glow:'#ff9df0',p:'#ff9df0'},volcanic:{n:'Volcanic Forged',tint:'#c2401a',a:.34,glow:'#ff6a1a',p:'#ff8a2a'},
+ void:{n:'Void Resonance',tint:'#6a2ad0',a:.36,glow:'#c066ff',p:'#c066ff'},gilded:{n:'Gilded Finish',tint:'#ffcc33',a:.32,glow:'#ffd84a',p:'#ffe14a'},
+ frost:{n:'Frostforged',tint:'#9fe8ff',a:.34,glow:'#bff0ff',p:'#e9fbff'},verdant:{n:'Verdant Moss',tint:'#4fa060',a:.32,glow:'#7dffb0',p:'#7dffb0'}};
+const TRAIL={spark:{n:'Spark',col:['#ffd84a','#ff9a3c']},crystal:{n:'Crystal',col:['#ff9df0','#b9f3ff']},root:{n:'Moss',col:['#7dffb0','#3a8a4a']},ember:{n:'Embers',col:['#ff6a1a','#ffd23f']},void:{n:'Void Motes',col:['#c066ff','#ff4fd8']},frost:{n:'Frost',col:['#e9fbff','#8fd3ff']}};
+const BEAM={gold:{n:'Gold Spark',col:'#ffd84a'},void:{n:'Void Spark',col:'#c066ff'},frost:{n:'Frost Spark',col:'#bff0ff'},deep:{n:'Deepcore Spark',col:'#ff3b6b'}};
+/* ---------- excavation projects (world changes permanently on completion) ---------- */
+const PROJ=[
+ {id:'pj_rail',r:0,n:'Buried Mining Railway',d:'ขุดรางเหมืองเก่าที่ถูกฝัง — ทางลัดข้ามโพรง Stone Hollow + โพรงแร่ใหม่ริมราง',ra:0,rb:0,ores:{Stone:120,Copper:80},cm:{rune_ore:4,shadow_shard:4},coins:600,boulders:3,svc:'ทางลัดราง + โพรงแร่ริมราง'},
+ {id:'pj_drill',r:1,n:'Ancient Drill Tunnel',d:'ฟื้นอุโมงค์สว่านโบราณ — ทางลัดจาก Ironroot ลงสู่ Gilded Crystal Vein',ra:1,rb:2,ores:{Iron:120,Silver:90,Copper:60},cm:{arcane_crystal:4,venom_sac:4},coins:1500,boulders:3,svc:'ทางลัดข้ามภูมิภาค'},
+ {id:'pj_supply',r:2,n:'Collapsed Supply Route',d:'เปิดเส้นทางเสบียงที่ถล่ม — ทางลัด Gilded → Obsidian Furnace + ตู้ฝากแร่ที่ทุก Outpost ในสองภูมิภาค',ra:2,rb:3,ores:{Gold:110,Ruby:90,Iron:60},cm:{refined_rune:3,swift_alloy:3},coins:3000,boulders:4,svc:'ทางลัด + Stash ฟรี'},
+ {id:'pj_shop',r:3,n:'Hidden Underground Workshop',d:'ขุดเปิดโรงงานใต้ดินที่ซ่อนอยู่ — ปลดล็อก Field Forge ที่ Outpost ทุกแห่ง + ของประดับ',ra:3,rb:3,ores:{Diamond:100,Obsidian:100,Gold:60},cm:{elemental_crystal:4,phantom_frag:4},coins:5000,boulders:4,svc:'Field Forge ทุก Outpost'},
+ {id:'pj_lift',r:4,n:'Abandoned Mineral Elevator',d:'ซ่อมลิฟต์แร่ร้าง — Waypoint ใหม่ “Deep Elevator” เชื่อม Ancient Deepworks กับ Void Abyss',ra:4,rb:5,ores:{Mythril:90,'Ancient Crystal':80,Diamond:60},cm:{rune_tablet:3,phantom_core:3},coins:8000,boulders:5,svc:'Waypoint: Deep Elevator'}];
+const PROJ_M={};PROJ.forEach(p=>PROJ_M[p.id]=p);
+/* ---------- outpost development ---------- */
+const OSTAGE=['Abandoned Site','Temporary Mining Shelter','Operational Mining Outpost','Advanced Research Station'];
+const OSTAGE_SVC=['ลิฟต์ · พัก · แผนที่ / Fast Travel','+ ฝากแร่ (Stash) · ซ่อมแซม','+ บอร์ด Contract · NPC ภารกิจ · Field Forge (ถ้ามี Blueprint)','+ วิจัย Relic · Bounty Board · เครื่องสแกนแผนที่ภูมิภาค'];
+function ostageCost(o,st){const R_=UDR[o.r];const t=R_.tier;const [a,b]=R_.ores;const low=t>1?UDR[o.r-1].ores[0]:'Stone';const m=[0,1,2.2,4][st];const cm=udMatFor(t);
+ const req={ores:{[a]:Math.round(30*m),[b]:Math.round(20*m)},coins:Math.round(150*t*m)};if(st>=2)req.ores[low]=(req.ores[low]||0)+Math.round(30*m);if(st>=2&&cm)req.cm={[cm]:st===2?2:4};return req;}
+/* ---------- codex ---------- */
+const CODEX_TOOLS={scanner:'Seismic Scanner (Gadget)',lamp:'Prospector Lamp (Gadget)',compass:'Vein Compass (Gadget)'};
+const TITLES={t_miner:'Hollow Digger',t_root:'Rootwalker',t_gild:'Gilded Prospector',t_forge:'Furnace Hand',t_deep:'Deepworks Archivist',t_void:'Voidwalker',t_mut:'Mutation Hunter',t_relic:'Relic Keeper',t_guard:'Guardian Slayer',t_proj:'Master Excavator',t_out:'Outpost Founder',t_bounty:'Bounty Legend',t_codex:'Geologist of the Underdeep'};
+function codexDefs(){if(codexDefs.c)return codexDefs.c;const L=[];UDR.forEach((R_,r)=>{const T_=['t_miner','t_root','t_gild','t_forge','t_deep','t_void'][r];
+ R_.ores.forEach((o,k)=>{L.push({id:`cx${r}_o${k}a`,r,cat:'ore',n:`${o} ×25`,k:'ore',ore:o,need:25,rw:'info',info:`${o}: Tier ${R_.tier} · Respawn ${UD_RESPAWN[R_.tier][0]/60}–${UD_RESPAWN[R_.tier][1]/60} นาที · พบมากใน${k?'กลุ่มก้อน (Cluster)':'สายตามผนัง (Seam)'}`});
+  L.push({id:`cx${r}_o${k}b`,r,cat:'ore',n:`${o} ×250`,k:'ore',ore:o,need:250,rw:k?'trail:'+['spark','root','crystal','ember','spark','void'][r]:'beam:'+['gold','frost','gold','deep','frost','void'][r]});
+  L.push({id:`cx${r}_o${k}c`,r,cat:'ore',n:`${o} ×1000`,k:'ore',ore:o,need:1000,rw:k?'title:'+T_:'xp'});});
+ ['seam','cluster','crystal','unstable'].forEach(f=>L.push({id:`cx${r}_f_${f}`,r,cat:'form',n:{seam:'Mineral Seam',cluster:'Ore Cluster',crystal:'Crystal Deposit',unstable:'Unstable Vein'}[f]+' ×10 โหนด',k:'form',f,need:10,rw:r===0&&f==='seam'?'tool:lamp':r===1&&f==='crystal'?'tool:scanner':'info',info:`${UDR[r].n}: ${f} พบตาม${f==='seam'?'ผนังถ้ำ':f==='cluster'?'กลางโถง':f==='crystal'?'มุมโถงที่มีแสงสะท้อน':'จุดที่มิติไม่เสถียร'}`}));
+ L.push({id:`cx${r}_rich`,r,cat:'rich',n:'ขุด Rich Vein หมดสาย ×3',k:'rich',need:3,rw:r===2?'tool:compass':'bpfrag'});
+ L.push({id:`cx${r}_mut`,r,cat:'mut',n:'พบสายแร่กลายพันธุ์ 3 แบบในภูมิภาคนี้',k:'mutreg',need:3,rw:'relicfrag'});
+ L.push({id:`cx${r}_lm`,r,cat:'lm',n:'ค้นพบ Landmark ทั้ง 2 แห่ง',k:'lm',need:2,rw:'info',info:`${UDR[r].landmarks.join(' · ')}`});
+ L.push({id:`cx${r}_exc`,r,cat:'exc',n:'เปิดห้องลับด้วยการขุด ×3',k:'alc',need:3,rw:'relicfrag'});
+ L.push({id:`cx${r}_deep`,r,cat:'deep',n:'ค้นพบ '+DEEPLOC[r].n,k:'deep',need:1,rw:'obj',info:DEEPLOC[r].d});});
+ MUT_ORDER.forEach(m=>L.push({id:'cxm_'+m,r:-1,cat:'mutg',n:'ค้นพบ '+MUT[m].n,k:'mut',m,need:1,rw:m==='echo'?'title:t_mut':'info',info:MUT[m].d}));
+ return codexDefs.c=L;}
+/* ---------- state ---------- */
+function v10Defaults(){return{ver:V10_VER,claims:{},codex:{ore:{},form:{},rich:{},mutReg:{},mutSeen:{},alc:{},deep:{},done:{}},tools:{},titles:{},title:'',
+ mp:[0,0,0,0,0,0],mutStats:{rolls:0,hits:0},board:{slots:[],seq:0,done:0,day:'',dayN:0,week:'',weekN:0,claimed:0},relic:{frag:{},done:{},dupe:0,pity:{}},gadget:'',gadgets:{},
+ bp:{own:{},frag:{},dupe:0,pity:0},guard:{kills:{},first:{},bpPity:{}},chain:{},proj:{},out:{},deep:{},cos:{own:{},m:{finish:'',trail:'',beam:''},c:{finish:''}},
+ bounty:{slots:[],seq:0,done:0},stats:{contracts:0,bounties:0,relics:0,mutMined:0,guard:0,proj:0,outUp:0,chains:0},reach:0,lastSurvey:{}};}
+function v10Migrate(){if(!S)return;if(!S.v10){try{const raw=localStorage.getItem(SAVE_KEY);if(raw&&!localStorage.getItem('buildAGolem_backup_pre_v7grind'))localStorage.setItem('buildAGolem_backup_pre_v7grind',raw);}catch(e){}S.v10=v10Defaults();
+  /* outposts already discovered start as Abandoned sites; the Camp Lift is already an operational outpost */
+  if(S.ud)for(const id in S.ud.wp)S.v10.out[id]=id==='o00'?2:0;S.v10.out.o00=2;}
+ const d=v10Defaults();for(const k in d)if(S.v10[k]===undefined)S.v10[k]=d[k];for(const k in d.codex)if(!S.v10.codex[k])S.v10.codex[k]={};for(const k in d.stats)if(S.v10.stats[k]===undefined)S.v10.stats[k]=0;
+ if(S.v10.out.o00==null||S.v10.out.o00<2)S.v10.out.o00=2;S.migrationVersion=Math.max(S.migrationVersion||0,V10_VER);}
+{const _m=v51Migrate;v51Migrate=function(){_m.apply(this,arguments);v10Migrate();};}
+/* idempotent one-time reward: each unique id pays exactly once (survives save / reload / re-entry) */
+function v10Once(id,fn){if(!S.v10)v10Migrate();if(S.v10.claims[id])return false;S.v10.claims[id]=Date.now();try{fn();}catch(e){console.warn('v10Once',id,e);}saveSoon();return true;}
+function v10Reach(){let r=S.v10?S.v10.reach:0;if(S.ud)for(const id in S.ud.wp){const o=UD.world&&UD.world.outposts.find(x=>x.id===id);if(o)r=Math.max(r,o.r);}return r;}
+/* ---------- world extension: deep locations · rare guardian sites · project routes (deterministic from the seed) ---------- */
+function v10WorldExt(w){if(w.v10)return;w.v10=true;const seed=w.seed;w.deep=[];
+ for(let r=0;r<UD_NR;r++){const C=w.chambers.filter(c=>c.r===r&&!c.small&&!c.outpost&&!c.landmark).sort((a,b)=>b.rx*b.ry-a.rx*a.ry);const c=C[udHash(seed,'deep',r)%Math.min(2,C.length)]||C[0];if(!c)continue;
+  const loc={id:'dl'+r,r,x:Math.round(c.x),y:Math.round(c.y),rx:c.rx,ry:c.ry,ch:c.id,n:DEEPLOC[r].n};w.deep.push(loc);c.deep=loc.id;
+  for(const v of w.veins){if(v.r!==r||v.alcove)continue;const n=v.nodes[0];if(((n.x-c.x)/(c.rx+2))**2+((n.y-c.y)/(c.ry+2))**2<=1)v.deep=loc.id;}
+  /* the rare guardian holds the deep location; spot on open floor near the centre */
+  let best=null,bd=1e9;for(let dy=-4;dy<=4;dy++)for(let dx=-6;dx<=6;dx++){const x=loc.x+dx,y=loc.y+dy;const i=y*UD_W+x;if(w.g[i]!==T_FLOOR||w.used[i]||w.zone[i])continue;const d=Math.abs(dx)+Math.abs(dy);if(d<bd){bd=d;best={x,y};}}
+  if(best)w.spawns.push({id:'rg'+r,r,x:best.x,y:best.y,k:'rare',rg:RGUARD[r].id});}
+ w.proj={};for(const p of PROJ)w.proj[p.id]=v10ProjRoute(w,p);
+ if(S&&S.v10)for(const id in S.v10.proj)if(S.v10.proj[id].done)v10ProjApply(w,id);}
+/* route = least-rock path between two chambers that never touches alcoves, outposts or the map edge */
+function v10ProjRoute(w,p){let best=null;for(let k=0;k<8;k++){const r=v10ProjRoute1(w,p,k);if(r&&(!best||r.carve.length>best.carve.length))best=r;if(best&&best.carve.length>=10)break;}return best;}
+function v10ProjRoute1(w,p,try_){const pick=(r,salt,far)=>{const C=w.chambers.filter(c=>c.r===r&&!c.small&&!c.outpost);if(!C.length)return null;return C[udHash(w.seed,p.id,salt)%C.length];};
+ let A=pick(p.ra,'a'+(try_||'')),B;if(p.ra===p.rb){const C=w.chambers.filter(c=>c.r===p.ra&&!c.small&&!c.outpost&&c!==A).sort((a,b)=>Math.hypot(b.x-A.x,b.y-A.y)-Math.hypot(a.x-A.x,a.y-A.y));B=C[0];}
+ else{const C=w.chambers.filter(c=>c.r===p.rb&&!c.small&&!c.outpost).sort((a,b)=>Math.hypot(a.x-A.x,a.y-A.y)-Math.hypot(b.x-A.x,b.y-A.y));B=C[0];}
+ if(!A||!B)return null;const N=UD_W*UD_H;const dist=new Float64Array(N).fill(Infinity),prev=new Int32Array(N).fill(-1);const s=Math.round(A.y)*UD_W+Math.round(A.x),goal=Math.round(B.y)*UD_W+Math.round(B.x);dist[s]=0;
+ const H_=[[0,s]];const push=(d,v)=>{H_.push([d,v]);let i=H_.length-1;while(i>0){const q=(i-1)>>1;if(H_[q][0]<=H_[i][0])break;[H_[q],H_[i]]=[H_[i],H_[q]];i=q;}};
+ const pop=()=>{const t=H_[0];const l=H_.pop();if(H_.length){H_[0]=l;let i=0;for(;;){const a=i*2+1,b=a+1;let m=i;if(a<H_.length&&H_[a][0]<H_[m][0])m=a;if(b<H_.length&&H_[b][0]<H_[m][0])m=b;if(m===i)break;[H_[m],H_[i]]=[H_[i],H_[m]];i=m;}}return t;};
+ const bad=i=>{const x=i%UD_W,y=(i/UD_W)|0;if(x<3||y<3||x>=UD_W-3||y>=UD_H-3)return true;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const j=(y+dy)*UD_W+x+dx;if(w.zone[j]===2||w.zone[j]===3||w.g[j]===T_SECRET)return true;}return false;};
+ while(H_.length){const[d,u]=pop();if(u===goal)break;if(d>dist[u])continue;const ux=u%UD_W,uy=(u/UD_W)|0;for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){const v=(uy+dy)*UD_W+ux+dx;if(bad(v))continue;const c=w.g[v]===T_WALL?1:.85;const nd=d+c;if(nd<dist[v]){dist[v]=nd;prev[v]=u;push(nd,v);}}}
+ if(prev[goal]<0){let n=0;for(let i=0;i<N;i++)if(dist[i]<Infinity)n++;v10ProjRoute.dbg={n,goal,s,gb:bad(goal)};return null;}const path=[];let c=goal;while(c!==-1&&c!==s){path.push(c);c=prev[c];}path.reverse();const carve=path.filter(i=>w.g[i]===T_WALL&&!w.used[i]);
+ const site=path.find(i=>w.g[i]===T_FLOOR&&!w.used[i]&&w.zone[i]===0)||s;return{a:{x:Math.round(A.x),y:Math.round(A.y)},b:{x:Math.round(B.x),y:Math.round(B.y)},carve,site:{x:site%UD_W,y:(site/UD_W)|0},len:path.length};}
+function v10ProjApply(w,id){const rt=w.proj&&w.proj[id];if(!rt||w['pj_'+id])return;w['pj_'+id]=1;for(const i of rt.carve){if(w.g[i]===T_WALL)w.g[i]=T_FLOOR;w.deco[i]=0;}
+ /* rails / lamps along the new route: the world visibly changes */for(let k=0;k<rt.carve.length;k+=3){const i=rt.carve[k];w.pjDeco=w.pjDeco||{};w.pjDeco[i]=id;}UD.edge=null;}
+/* hook the Underdeep world cache */
+{const _w=udWorld;udWorld=function(){const fresh=!(UD.world&&UD.world.seed===S.ud.seed);const w=_w();if(!w.v10){v10WorldExt(w);UD.spIdx=null;UD.edge=null;}return w;};}
+{const _e=udEdges;udEdges=function(){const key=Object.keys(S.v10&&S.v10.proj||{}).filter(k=>S.v10.proj[k].done).length;if(UD.edgeP!==key){UD.edge=null;UD.edgeP=key;}if(!UD.edge)UD.edgeN=-1;return _e();};}
+/* ---------- mutation core ---------- */
+function v10VeinMut(v){const s=S.ud.veins[v.id];if(s&&s.mut!==undefined)return s.mut||null;/* initial state (cycle 0) is deterministic */
+ const h=udRand(S.ud.seed,v.id,'m0');if(v.deep&&h<MUT_DEEP)return 'deepcore';if(h<.05){const L=MUT_ORDER.filter(m=>m!=='deepcore');return L[udHash(S.ud.seed,v.id,'mt')%L.length];}return null;}
+function v10RollMut(v){const s=udVSw(v);const r=v.r;S.v10.mutStats.rolls++;let m=null;
+ if(v.deep&&Math.random()<MUT_DEEP)m='deepcore';else{const p=MUT_BASE+(S.v10.mp[r]>=MUT_PITY?1:0);if(Math.random()<p){const L=MUT_ORDER.filter(x=>x!=='deepcore');m=L[Math.floor(Math.random()*L.length)];}}
+ if(m){S.v10.mp[r]=0;S.v10.mutStats.hits++;}else S.v10.mp[r]++;s.mut=m||'';return m;}
+function v10OnReform(v){const m=v10RollMut(v);if(m&&R&&R.ud){for(const o of R.ores)if(o.ud&&o.ud.v===v.id)o.mut=m;const n=v.nodes[0];if(Math.hypot(n.x-R.g.x,n.y-R.g.y)<16)floatTxt(n.x+.5,n.y-1.2,`${MUT[m].i} ${MUT[m].n}!`,MUT[m].col,1);}}
+/* rare guardian monster entries (drawn with their base silhouette, recoloured and larger) */
+RGUARD.forEach(g=>{UDM[g.id]=Object.assign({},UDM[g.base],{n:g.n,col:g.col,c2:g.c2,eye:g.eye,sz:UDM[g.base].sz*1.35,elite:1,rare:1});});
+
+/* =====================================================================
+   V7 ENDLESS GRINDING (2/4) — gameplay: mutated vein behaviour · Mineral Codex · relics · blueprints ·
+   gadgets · rare guardians · secret cave chains · excavation projects · deep locations · contract board · bounties
+   Every reward path is idempotent (unique claim ids / slot replacement in the same tick) and saved immediately.
+   ===================================================================== */
+function v10T(r){return UDR[clamp(r|0,0,5)].tier;}
+function v10Gad(id){return S.v10&&S.v10.gadget===id;}
+function v10Toast(m,t){toast(m,t||'gold');}
+/* ---------- event funnel ---------- */
+const V10L=[];function v10On(fn){V10L.push(fn);}
+function v10Ev(k,d){if(!S||!S.v10)return;for(const fn of V10L){try{fn(k,d||{});}catch(e){console.warn('v10Ev',k,e);}}}
+/* ---------- mutated vein behaviour ---------- */
+function v10OnBreak(o,v,k,depl,mut){const r=v.r;const x=o.x,y=o.y;const C=S.v10.codex;C.ore[o.name]=(C.ore[o.name]||0)+1;const fk=r+'_'+v.kind;C.form[fk]=(C.form[fk]||0)+1;
+ if(depl&&v.rich){C.rich[r]=(C.rich[r]||0)+1;v10Ev('richDone',{v});}
+ v10Ev('mine',{o,v,r,mut});
+ if(R&&R.ud&&v10Gad('g_echo')){R.v10echo=(R.v10echo||0)+1;if(R.v10echo>=40){R.v10echo=0;v10Echo(x,y,9,'🔔 Echo Chime');}}
+ if(!mut)return;S.v10.stats.mutMined++;if(!C.mutSeen[mut]){C.mutSeen[mut]=1;v10Toast(`${MUT[mut].i} ค้นพบ ${MUT[mut].n}! — บันทึกใน Mineral Codex`);}
+ const mr=C.mutReg[r]||(C.mutReg[r]={});mr[mut]=1;const t=v.tier;
+ if(mut==='resonant'){const L=R.ores.filter(q=>q!==o&&q.ud&&q.ud.v===v.id&&Math.hypot(q.x-x,q.y-y)<=3);for(const q of L)damageOre(q,R.st.rawP*.3,'chain');R.efx.push({type:'ring',x:x+.5,y:y+.5,r:3,t:0,dur:.6,col:MUT.resonant.col});if(Math.random()<.25){const ck=udMatFor(t);if(ck)cmAdd(ck,1,true);}}
+ else if(mut==='bloom'){const s=udVSw(v);s.bloomN=s.bloomN||0;let n=0;for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1]]){if(s.bloomN>=4||n>=1+(Math.random()<.5?1:0))break;const xx=x+dx,yy=y+dy;const i=yy*W+xx;if(R.map.g[i]!==T_FLOOR||R.oreAt[i]||UD.world.zone[i]===3||gTile()===i)continue;
+   const hp=Math.round(TIERS[t].hp*.6);const q={id:i,x:xx,y:yy,tier:t,hp,maxHp:hp,name:v.name,hidden:false,seed:Math.random(),hitT:0,bloomV:v.id,mut:'bloom'};R.ores.push(q);R.oreAt[i]=q;n++;s.bloomN++;R.efx.push({type:'ring',x:xx+.5,y:yy+.5,r:.8,t:0,dur:.5,col:MUT.bloom.col});}if(n)floatTxt(x+.5,y-.8,'🌸 Crystal Bloom!',MUT.bloom.col,.85);}
+ else if(mut==='ancient'){if(Math.random()<.3||depl)v10RelicFrag(r,'vein');}
+ else if(mut==='volatile'){const extra=v10Gad('g_stab')?(Math.random()<.5?1:0):1;for(let q=0;q<extra;q++)if(bagFits(t))bagAdd(v.name,t);(R.v10fx=R.v10fx||[]).push({k:'cross',x:x+.5,y:y+.5,t:.7,dur:.7});sfx('fire',1);}
+ else if(mut==='deepcore'){for(let q=0;q<2;q++)if(bagFits(t))bagAdd(v.name,t);if(Math.random()<.4){const ck=udMatFor(Math.min(6,t+1));if(ck)cmAdd(ck,1,true);}floatTxt(x+.5,y-1,'🔻 Deepcore +2',MUT.deepcore.col,.9);}
+ else if(mut==='echo')v10Echo(x,y,9,'📡 Echo');
+ if(depl&&(mut==='ancient'||mut==='deepcore')&&Math.random()<.15)v10BpFrag(null,r,1,'vein');
+ if(depl)v10Ev('mutDone',{v,mut});}
+function v10Echo(x,y,rad,label){if(!R)return;udRevealArea(x+.5,y+.5,rad);let n=0;for(const q of R.ores){if(Math.hypot(q.x-x,q.y-y)>rad)continue;if(q.hidden){q.hidden=false;n++;}if(q.exc&&!q.revealed){q.revealed=true;n++;}}R.efx.push({type:'ring',x:x+.5,y:y+.5,r:rad,t:0,dur:.9,col:MUT.echo.col});floatTxt(x+.5,y-1.2,`${label}${n?' +'+n:''}`,MUT.echo.col,.9);R.v10echoT=8;}
+/* volatile cross blasts resolve here (telegraphed 0.7 s; stand diagonal to be safe) */
+{const _st=udStep;udStep=function(dt,mv){_st(dt,mv);if(!R||!R.ud||R.ended)return;R.v10echoT=Math.max(0,(R.v10echoT||0)-dt);const L=R.v10fx;if(L&&L.length){for(let i=L.length-1;i>=0;i--){const f=L[i];f.t-=dt;if(f.t>0)continue;L.splice(i,1);
+  const dx=Math.abs(R.g.x-f.x),dy=Math.abs(R.g.y-f.y);for(let k=0;k<12;k++)part(f.x,f.y,k%2?'#ff6a3a':'#ffd23f',5,4);R.shake=Math.max(R.shake,.25);if(((dx<.55&&dy<2.6)||(dy<.55&&dx<2.6))&&!v10Gad('g_stab'))udStun(1,'💥 Volatile!');}}
+ v10Tick(dt);};}
+/* bloom / project / cache objects in the world: power rule + no auto targeting */
+{const _cm=canMine;canMine=function(o){if(o&&(o.proj||o.cache))return R.st.P>=TIERS[o.tier].req;return _cm(o);};}
+{const _ct=chooseTarget;chooseTarget=function(){if(!R||!R.ud)return _ct();const all=R.ores;R.ores=all.filter(o=>!o.proj&&!o.cache);try{return _ct();}finally{if(R)R.ores=all;}};}
+{const _d=damageOre;damageOre=function(o,amt,src){if(R&&R.ud&&o){if(v10Gad('g_tapper'))amt*=o.exc||o.proj?1.4:.95;if(v10Gad('g_coil')&&!o.exc)amt*=.96;}return _d(o,amt,src);};}
+{const _bo=breakOre;breakOre=function(o){if(R&&R.ud&&o&&o.proj){const i=o.id;R.ores.splice(R.ores.indexOf(o),1);R.oreAt[i]=null;for(let k=0;k<22;k++)part(o.x+.5,o.y+.5,k%2?'#8d755a':'#c9a24a',5,4);sfx('break',4);R.shake=.3;if(R.g.tgt&&R.g.tgt.o===o){R.g.tgt=null;R.g.state='idle';}v10ProjBoulder(o.proj);return;}
+ const wasAl=o&&o.exc;const al=wasAl&&UD.amap[o.exc];const before=al&&S.ud.disc['al_'+al.id];_bo(o);if(al&&!before&&S.ud.disc['al_'+al.id])v10Ev('alc',{al});};}
+/* ---------- Mineral Codex ---------- */
+function v10CxProg(e){const C=S.v10.codex;switch(e.k){case'ore':return C.ore[e.ore]||0;case'form':return C.form[e.r+'_'+e.f]||0;case'rich':return C.rich[e.r]||0;case'mutreg':return Object.keys(C.mutReg[e.r]||{}).length;
+ case'lm':return UD.world?UD.world.landmarks.filter(l=>l.r===e.r&&S.ud.lm[l.id]).length:Object.keys(S.ud.lm).filter(id=>id[1]==String(e.r)).length;case'alc':return C.alc[e.r]||0;case'deep':return C.deep['dl'+e.r]?1:0;case'mut':return C.mutSeen[e.m]?1:0;}return 0;}
+function v10CodexCheck(){if(!S.v10)return;let n=0;for(const e of codexDefs()){if(S.v10.codex.done[e.id])continue;if(v10CxProg(e)<e.need)continue;S.v10.codex.done[e.id]=Date.now();n++;v10Once('cx:'+e.id,()=>v10CxReward(e));}
+ if(n&&Object.keys(S.v10.codex.done).length>=codexDefs().length)v10Once('cx:all',()=>{S.v10.titles.t_codex=1;v10Toast('📚 Mineral Codex ครบ 100%! — Title: Geologist of the Underdeep');});return n;}
+function v10CxReward(e){const rw=e.rw;let t='';if(rw==='info')t='ข้อมูลธรณีวิทยาใหม่';else if(rw.startsWith('trail:')||rw.startsWith('beam:')){S.v10.cos.own[rw]=1;t='เอฟเฟกต์: '+(rw[0]==='t'?TRAIL[rw.slice(6)].n+' Footsteps':BEAM[rw.slice(5)].n);}
+ else if(rw.startsWith('title:')){S.v10.titles[rw.slice(6)]=1;t='Title: '+TITLES[rw.slice(6)];}else if(rw.startsWith('tool:')){const g={lamp:'g_lamp',scanner:'g_scanner',compass:'g_compass'}[rw.slice(5)];S.v10.gadgets[g]=1;t='Gadget: '+GADGET[g].n;}
+ else if(rw==='bpfrag'){v10BpFrag(null,e.r,1,'codex');t='Blueprint Fragment';}else if(rw==='relicfrag'){v10RelicFrag(e.r,'codex');t='Relic Fragment';}else if(rw==='xp'){S.data=(S.data||0)+10;S.coins+=500*v10T(e.r);t='📘+10 · 🪙'+fmt(500*v10T(e.r));}else if(rw==='obj'){t='Rare Guardian ปรากฏบนแผนที่';}
+ v10Toast(`📚 Codex: ${e.n}${e.r>=0?' ('+UDR[e.r].n+')':''} — ${t}`);}
+v10On(()=>{});
+/* ---------- relics ---------- */
+function v10RelicFrag(r,src){const L=RELIC.filter(x=>x.r===r);const cur=L.find(x=>!S.v10.relic.done[x.id]);S.v10.stats.relicFrags=(S.v10.stats.relicFrags||0)+1;v10Ev('relicFrag',{r,src});
+ if(!cur){S.v10.relic.dupe++;S.data=(S.data||0)+2;S.coins+=80*v10T(r);if(R)floatTxt(R.g.x,R.g.y-1.8,'🔬 Relic Research +📘2','#e8c070',.85);return null;}
+ const f=S.v10.relic.frag;f[cur.id]=(f[cur.id]||0)+1;if(R)floatTxt(R.g.x,R.g.y-1.8,`🧩 ${cur.n} ${Math.min(f[cur.id],cur.need)}/${cur.need}`,'#e8c070',.9);
+ if(f[cur.id]>=cur.need){S.v10.relic.done[cur.id]=Date.now();v10Once('rl:'+cur.id,()=>v10RelicReward(cur));}saveSoon();return cur;}
+function v10RelicReward(x){const[k,a]=x.rw.split(':');S.v10.stats.relics++;let t='';if(k==='gadget'){S.v10.gadgets[a]=1;t='Gadget: '+GADGET[a].n;}else if(k==='deco'){S.v10.cos.own['deco:'+x.id]=1;t='ของประดับ Relic Hall';}
+ else if(k==='record'){t='บันทึกประวัติศาสตร์';}else if(k==='recipe'){v10BpGrant(a);t='Blueprint: '+BP_M[a].n;}else if(k==='effect'){S.v10.cos.own[a.replace('_',':')]=1;t='เอฟเฟกต์: '+TRAIL[a.split('_')[1]].n;}else if(k==='interact'){S.v10.vaultKey=1;t='ปลดล็อกการเปิดห้องนิรภัยโบราณ';}
+ v10Toast(`🏺 ประกอบ Relic สำเร็จ: ${x.n} — ${t}`);sfx('upgrade');v10Ev('relicDone',{x});
+ if(RELIC.every(q=>S.v10.relic.done[q.id]))v10Once('rl:all',()=>{S.v10.titles.t_relic=1;S.v10.cos.own['finish:relic']=1;v10Toast('🏺 ครบ 18 Relic! — Title: Relic Keeper · Ancient Relic Finish');});}
+/* ---------- blueprints (fragments; duplicates convert to bounded research value) ---------- */
+function v10BpFrag(id,r,n,src){n=n||1;for(let q=0;q<n;q++){let b=id&&BP_M[id];if(b&&S.v10.bp.own[b.id])b=null;
+  if(!b){const open=BP.filter(x=>!S.v10.bp.own[x.id]);const pref=open.filter(x=>r==null||x.r===r);const L=pref.length?pref:open;b=L.sort((a,c)=>(S.v10.bp.frag[c.id]||0)/c.need-(S.v10.bp.frag[a.id]||0)/a.need||a.id.localeCompare(c.id))[0];}
+  if(!b){S.v10.bp.dupe++;S.coins+=150*v10T(r||0);S.data=(S.data||0)+1;continue;}
+  S.v10.bp.frag[b.id]=(S.v10.bp.frag[b.id]||0)+1;if(R)floatTxt(R.g.x,R.g.y-2.1,`📐 ${b.n} ${Math.min(S.v10.bp.frag[b.id],b.need)}/${b.need}`,'#7fe6ff',.85);if(S.v10.bp.frag[b.id]>=b.need)v10BpGrant(b.id);}saveSoon();}
+function v10BpGrant(id){const b=BP_M[id];if(!b||S.v10.bp.own[id])return;S.v10.bp.own[id]=Date.now();v10Once('bp:'+id,()=>{const[k,a]=b.rw.split(':');if(k==='finish'||k==='beam'||k==='trail'||k==='deco')S.v10.cos.own[b.rw]=1;else if(k==='gadget')S.v10.gadgets[a]=1;
+  v10Toast(`📐 Blueprint ปลดล็อก: ${b.n} — ${b.d}`);sfx('upgrade');});}
+function v10Has(util){return BP.some(b=>b.rw===util&&S.v10.bp.own[b.id]);}
+/* utilities unlocked by blueprints */
+{const _rc=udRecall;udRecall=function(){_rc();if(R&&R.udRecall>0){if(v10Has('conv:pocketlift'))R.udRecall=1.4;if(v10Gad('g_scanner'))R.udRecall+=.6;}};}
+{const _v=udVisR;udVisR=function(){let r=_v();if(R&&R.ud){if(v10Has('conv:drone'))r+=1;if(v10Gad('g_lamp'))r+=1.5;}return r;};}
+{const _h=hidDet;hidDet=function(){return _h()+(R&&R.ud&&v10Gad('g_lens')?3:0);};}
+{const _p=pickupR;pickupR=function(){return _p()-(R&&R.ud&&v10Gad('g_compass')?.5:0);};}
+{const _t=tileF;tileF=function(i){return _t(i)*(R&&R.ud&&v10Gad('g_lens')?.96:1);};}
+{const _s=udStun;udStun=function(s,txt){if(v10Gad('g_coil')&&txt&&/🔥|♨/.test(txt))return;return _s(s,txt);};}
+{const _f=bagFits;bagFits=function(t){if(R&&R.ud&&v10Gad('g_echo')&&t&&R.bag.w+TIERS[t].w>R.st.C-2)return false;return _f(t);};}
+function v10Compress(name){const t=ORE_INFO[name]?Object.keys(TIERS).find(k=>TIERS[k]&&TIERS[k].ores&&TIERS[k].ores.some(o=>o[0]===name)):null;const T_=+t;if(!v10Has('util:compressor')||!T_||T_>=6)return false;if((S.oreStorage[name]||0)<10){toast('ต้องมีแร่ 10 ก้อน','err');return false;}
+ S.oreStorage[name]-=10;const out=TIERS[T_+1].ores[0][0];S.oreStorage[out]=(S.oreStorage[out]||0)+3;save();toast(`🗜 อัด ${name}×10 → ${out}×3`,'ok');sfx('upgrade');return true;}
+function v10Salvage(uid){if(!v10Has('util:salvage'))return false;const i=invGet(uid);if(!i||SLOTS.some(sl=>S.equip[sl]===uid))return false;const pid=i.pid;const dup=S.inv.filter(x=>x.pid===pid).length;if(dup<2){toast('แยกได้เฉพาะชิ้นที่มีซ้ำ','err');return false;}
+ const rec=partRecipe(pid,'std',1);S.inv=S.inv.filter(x=>x.uid!==uid);const got={};for(const n in(rec.ores||{})){const k=Math.floor(rec.ores[n]*.3);if(k>0){S.oreStorage[n]=(S.oreStorage[n]||0)+k;got[n]=k;}}save();toast(`♻ Salvage: ${Object.entries(got).map(([n,k])=>n+'×'+k).join(' ')||'—'}`,'ok');return true;}
+/* ---------- rare guardians in the arena ---------- */
+{const _am=udArenaMon;udArenaMon=function(m,k,n){const a=_am(m,k,n);if(!m.rare)return a;const G=RGUARD.find(g=>g.id===m.type);a.hp=a.mhp=Math.round(UDM_HP[m.tier]*G.hp);a.dmg=UDM_DMG[m.tier]*1.3;a.def=UDM_DEF[m.tier]*1.4;a.stgMax=160+m.tier*25;a.r=1.15;a.rare=G;a.pi=0;a.cd=1.4;a.step=v10RareStep;a.x=AW/2;a.y=AH*.3;return a;};}
+function v10RareStep(a,dt){const p=CB.p;a.ph+=dt*4;if(p.dead||CB.ended||a.frozen>0||a.stunT>0||a.stagT>0)return;const d=dist(a,p);a.faceA=angTo(a,p);if(a.busy>0){a.busy-=dt;if(a.charge){const c=a.charge;c.t-=dt;if(c.t<=0){a.x+=Math.cos(c.a)*c.v*dt;a.y+=Math.sin(c.a)*c.v*dt;a.x=clamp(a.x,1,AW-1);a.y=clamp(a.y,1,AH-.8);if(c.t<-c.dur)a.charge=null;}}return;}
+ const enr=a.hp<a.mhp*.5?1.25:1;if(d>2.6){a.x+=Math.cos(a.faceA)*1.4*enr*dt;a.y+=Math.sin(a.faceA)*1.4*enr*dt;a.walk=1;}else a.walk=0;a.cd-=dt*enr;if(a.cd>0)return;
+ const G=a.rare;const pat=G.pat[a.pi++%G.pat.length];const dm=a.dmg;const el=['phys','phys','shock','fire','phys','void'][Math.min(5,a.tier-1)];
+ if(pat==='charge'){const len=Math.min(9,d+2);addTele(a,{kind:'rect',x:a.x,y:a.y,ang:a.faceA,len,w:2,dur:.95,dmg:dm*1.4,el,o:{kb:1.8,from:a}});a.charge={a:a.faceA,v:11,t:.95,dur:len/11};a.busy=1+len/11;a.cd=2.2;}
+ else if(pat==='mines'){for(let k=0;k<4;k++){const ang=Math.random()*6.28,r=1+Math.random()*3;addTele(a,{kind:'circle',x:clamp(p.x+Math.cos(ang)*r,1,AW-1),y:clamp(p.y+Math.sin(ang)*r,1,AH-1),r:1.2,dur:1.3+k*.15,dmg:dm*.9,el});}a.busy=.8;a.cd=2.6;}
+ else if(pat==='slam'){addTele(a,{kind:'circle',x:a.x,y:a.y,r:2.6,dur:1.1,dmg:dm*1.5,el:'phys',o:{kb:2.4,from:a}});a.busy=1.2;a.cd=2.4;}
+ else if(pat==='nova'){addTele(a,{kind:'ring',x:a.x,y:a.y,r:1.4,r2:3.4,dur:1.1,dmg:dm,el});addTele(a,{kind:'ring',x:a.x,y:a.y,r:3.8,r2:5.6,dur:1.6,dmg:dm,el});a.busy=.9;a.cd=2.5;}
+ else if(pat==='barrage'){for(let k=0;k<10;k++){const aa=k/10*6.28+a.ph;CB.timers.push({t:.3+(k%2)*.25,fn:()=>{if(a.dead||!CB)return;CB.projs.push({x:a.x,y:a.y,vx:Math.cos(aa)*5.5,vy:Math.sin(aa)*5.5,r:.4,dmg:dm*.55,el,life:3});}});}a.busy=.8;a.cd=2.6;}
+ else if(pat==='beam'){addTele(a,{kind:'rect',x:a.x,y:a.y,ang:a.faceA,len:12,w:1.3,dur:1,dmg:dm*1.3,el,track:.4});a.busy=1.1;a.cd=2.3;}
+ else if(pat==='fire'){addTele(a,{kind:'cone',x:a.x,y:a.y,ang:a.faceA,half:.9,len:4.2,dur:.9,dmg:dm*1.2,el:'fire',o:{burn:2}});a.busy=1;a.cd=2.2;}
+ else if(pat==='thorns'){for(let k=0;k<6;k++){const ang=a.faceA+(k-2.5)*.35;addTele(a,{kind:'rect',x:a.x,y:a.y,ang,len:7,w:.7,dur:1.1+k*.06,dmg:dm*.8,el:'phys'});}a.busy=1.1;a.cd=2.6;}
+ else if(pat==='summon'){const M=a.M;for(let k=0;k<2;k++){const s=udArenaMon(udMkMon(UDR[udRegionAt(a.src.hy)].mons[k],a.tier,0,0,{kind:'ambush'}),k,2);s.x=clamp(a.x+(k?2:-2),1,AW-1);s.y=a.y+1;s.hp=s.mhp=Math.round(s.hp*.5);CB.adds.push(s);}floatTxtC(a.x,a.y-2,'SUMMON!','#d0ff6a',1.2);a.busy=.8;a.cd=3.2;}
+ else if(pat==='pull'){CB.pull={a:angTo(p,a),v:2.6};CB.pullB=a;CB.timers.push({t:1.6,fn:()=>{if(CB)CB.pull=null;}});addTele(a,{kind:'circle',x:a.x,y:a.y,r:2.2,dur:1.6,dmg:dm*1.6,el:'void'});a.busy=1.7;a.cd=2.6;}}
+{const _rw=udReward;udReward=function(E){const got=_rw(E);for(const m of E.mons){const r=udRegionAt(m.hy);
+  if(m.rare){const G=RGUARD.find(g=>g.id===m.type);S.v10.guard.kills[G.id]=(S.v10.guard.kills[G.id]||0)+1;S.v10.stats.guard++;v10RelicFrag(r,'guardian');v10RelicFrag(r,'guardian');
+   const pity=S.v10.guard.bpPity;pity[G.id]=(pity[G.id]||0)+1;if(Math.random()<.5||pity[G.id]>=3){pity[G.id]=0;v10BpFrag(null,r,1,'guardian');}
+   for(let k=0;k<3;k++){const ck=udMatFor(Math.min(6,m.tier+(k===2?1:0)));if(ck){cmAdd(ck,1,true);got.cm[ck]=(got.cm[ck]||0)+1;}}
+   v10Once('rgfirst:'+G.id,()=>{S.v10.guard.first[G.id]=Date.now();S.v10.cos.own['finish:'+G.fin]=1;S.coins+=1500*m.tier;got.coins+=1500*m.tier;v10Toast(`👑 ล้ม ${G.n} ครั้งแรก! — Finish: ${FINISH[G.fin].n}`);});
+   if(Object.keys(S.v10.guard.first).length>=6)v10Once('rg:all',()=>{S.v10.titles.t_guard=1;v10Toast('👑 ล้ม Rare Guardian ครบ 6 ภูมิภาค — Title: Guardian Slayer');});}
+  else if(m.elite||m.boss){const pk='el'+r;const P=S.v10.relic.pity;P[pk]=(P[pk]||0)+1;if(Math.random()<.25||P[pk]>=4){P[pk]=0;v10RelicFrag(r,'elite');}const bp=S.v10.guard.bpPity;bp.elite=(bp.elite||0)+1;if(Math.random()<.1||bp.elite>=6){bp.elite=0;v10BpFrag(null,r,1,'elite');}}
+  v10Ev('kill',{m,r});}
+ return got;};}
+/* ---------- discoveries / puzzles / landmarks / tiles feed the systems ---------- */
+{const _d=udDiscover;udDiscover=function(d){_d(d);const r=d.r;if(d.k==='chest'&&Math.random()<.4)v10RelicFrag(r,'chamber');if(d.k==='workshop'){v10RelicFrag(r,'chamber');v10BpFrag(null,r,1,'workshop');}if(d.k==='supply'&&Math.random()<.25)v10RelicFrag(r,'chamber');v10Ev('disc',{d});};}
+{const _m=udMachineUse;udMachineUse=function(){const d=R&&R.udNear&&R.udNear.d;_m();if(d&&d.k==='machine')v10Once('mach:'+d.id,()=>{v10RelicFrag(d.r,'machine');v10Ev('machine',{d});});};}
+{const _r=udRelay;udRelay=function(d,j){const was=S.ud.disc[d.id]&&S.ud.disc[d.id].open;_r(d,j);if(!was&&S.ud.disc[d.id]&&S.ud.disc[d.id].open){v10RelicFrag(d.r,'puzzle');v10RelicFrag(d.r,'puzzle');v10Ev('puzzle',{d});}};}
+{const _l=udLandmarks;udLandmarks=function(){const n0=Object.keys(S.ud.lm).length,w0=Object.keys(S.ud.wp).length;_l();if(Object.keys(S.ud.lm).length>n0)v10Ev('lm',{});if(Object.keys(S.ud.wp).length>w0)v10Ev('wp',{});};}
+{const _rv=udRevealArea;udRevealArea=function(cx,cy,r){const n=_rv(cx,cy,r);if(n&&S.v10){const rg=udRegionAt(cy);const L=S.v10.lastSurvey;L[rg]=(L[rg]||0)+n;v10Ev('tiles',{r:rg,n});}return n;};}
+{const _rc=udRegionCheck;udRegionCheck=function(f){_rc(f);if(R&&R.ud&&S.v10)S.v10.reach=Math.max(S.v10.reach,R.udRegion);};}
+v10On((k,d)=>{if(k==='alc'){const r=d.al.r;S.v10.codex.alc[r]=(S.v10.codex.alc[r]||0)+1;v10RelicFrag(r,'excavation');}});
+v10On(()=>v10CodexCheck());
+/* ---------- deep locations ---------- */
+function v10DeepAt(){if(!R||!UD.world||!UD.world.deep)return null;for(const L of UD.world.deep){if(((R.g.x-L.x)/(L.rx+1))**2+((R.g.y-L.y)/(L.ry+1))**2<=1)return L;}return null;}
+function v10Tick(dt){R.v10T=(R.v10T||0)-dt;if(R.v10T>0)return;R.v10T=.5;const L=v10DeepAt();R.v10Deep=L;
+ if(L){const st=S.v10.deep[L.id]||(S.v10.deep[L.id]={visits:0,at:0});if(!st.at){st.at=Date.now();S.v10.codex.deep[L.id]=1;v10Once('dl:'+L.id,()=>{v10RelicFrag(L.r,'deep');S.data=(S.data||0)+3;v10Toast(`🔻 ค้นพบ ${L.n}! — สายแร่ลึก (Deepcore) และ Rare Guardian อาศัยอยู่ที่นี่`);});v10CodexCheck();}
+  if(R.v10LastDeep!==L.id){st.visits++;R.v10LastDeep=L.id;v10Ev('deepVisit',{L});}}else R.v10LastDeep=null;
+ const o=udOutpostAt();if(o&&Math.hypot(o.x-R.g.x,o.y-R.g.y)<6){if(S.v10.out[o.id]==null&&S.ud.wp[o.id])S.v10.out[o.id]=0;(R.v10route=R.v10route||new Set()).add(o.id);if(R.v10route.size>=4)v10Ev('route',{n:R.v10route.size});}
+ v10ChainTick();v10ProjTick();v10CacheTick();}
+/* ---------- excavation projects ---------- */
+function v10ProjState(id){return S.v10.proj[id]||(S.v10.proj[id]={contrib:{},boulders:0,survey:0,done:0});}
+function v10ProjNeed(p){const L=[];for(const n in p.ores)L.push(['o:'+n,n,p.ores[n],ORE_INFO[n]?ORE_INFO[n].c1:'#ccc']);for(const k in p.cm)L.push(['c:'+k,CMAT[k].n,p.cm[k],CMAT[k].col]);L.push(['coins','Coins',p.coins,'#ffd84a']);return L;}
+function v10ProjUnlocked(p){return v10Reach()>=p.r;}
+function v10ProjContribute(id){const p=PROJ_M[id];const st=v10ProjState(id);if(st.done||!v10ProjUnlocked(p))return 0;let moved=0;
+ for(const[key,name,need]of v10ProjNeed(p)){const have=st.contrib[key]||0;const want=need-have;if(want<=0)continue;let can=0;
+  if(key.startsWith('o:')){can=Math.min(want,S.oreStorage[name]||0);if(can>0)S.oreStorage[name]-=can;}else if(key.startsWith('c:')){const k=key.slice(2);can=Math.min(want,cmHave(k));if(can>0)S.v7.cm[k]-=can;}else{can=Math.min(want,Math.floor(S.coins));if(can>0)S.coins-=can;}
+  if(can>0){st.contrib[key]=have+can;moved+=can;}}
+ save();if(moved)toast(`🏗 มอบวัสดุให้ ${p.n} (${moved})`,'ok');else toast('ไม่มีวัสดุที่ต้องการในคลัง','err');v10ProjCheck(id);return moved;}
+function v10ProjMatsDone(p,st){return v10ProjNeed(p).every(([key,,need])=>(st.contrib[key]||0)>=need);}
+function v10ProjCheck(id){const p=PROJ_M[id];const st=v10ProjState(id);if(st.done)return;if(v10ProjMatsDone(p,st)&&st.boulders>=p.boulders&&st.survey){st.done=Date.now();v10Once('pj:'+id,()=>{S.v10.stats.proj++;if(UD.world){v10ProjApply(UD.world,id);if(R&&R.ud){R.bgChunks={};R.map.edge=udEdges();}}
+  if(id==='pj_lift')S.ud.wp.pj_lift=Date.now();S.data=(S.data||0)+5;v10BpFrag(null,p.r,2,'project');v10Toast(`🏗 โปรเจกต์สำเร็จ: ${p.n}! — ${p.svc}`);sfx('victory');
+  if(PROJ.every(q=>S.v10.proj[q.id]&&S.v10.proj[q.id].done))v10Once('pj:all',()=>{S.v10.titles.t_proj=1;v10Toast('🏗 ครบทุกโปรเจกต์ — Title: Master Excavator');});});save();}}
+function v10ProjBoulder(id){const st=v10ProjState(id);st.boulders=Math.min(PROJ_M[id].boulders,st.boulders+1);floatTxt(R.g.x,R.g.y-1.6,`🪨 ${PROJ_M[id].n} ${st.boulders}/${PROJ_M[id].boulders}`,'#c9a24a',.9);v10ProjCheck(id);saveSoon();}
+function v10ProjTick(){const w=UD.world;if(!w||!w.proj)return;for(const p of PROJ){const st=S.v10.proj[p.id];if(!st||st.done)continue;const rt=w.proj[p.id];if(!rt)continue;
+  if(!st.survey&&Math.hypot(R.g.x-rt.b.x,R.g.y-rt.b.y)<5){st.survey=1;v10Toast(`🧭 สำรวจปลายทาง ${p.n} แล้ว`);v10ProjCheck(p.id);}
+  /* cracked boulders at the site (only while the project is active and the player is near) */
+  const near=Math.hypot(R.g.x-rt.site.x,R.g.y-rt.site.y)<18;const have=R.ores.filter(o=>o.proj===p.id).length;const left=p.boulders-st.boulders;
+  if(near&&have<left){const t=UDR[p.r].tier;for(let k=0;k<40&&R.ores.filter(o=>o.proj===p.id).length<left;k++){const a=udRand(p.id,k)*6.28,rr=2+udRand(p.id,k,'r')*3;const x=Math.round(rt.site.x+Math.cos(a)*rr),y=Math.round(rt.site.y+Math.sin(a)*rr);const i=y*W+x;
+    if(R.map.g[i]!==T_FLOOR||R.oreAt[i]||w.zone[i]||gTile()===i)continue;let fl=0;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const j=(y+dy)*W+x+dx;if(R.map.g[j]===T_FLOOR&&!R.oreAt[j])fl++;}if(fl<7)continue;
+    const hp=Math.round(TIERS[t].hp*2.2);const o={id:i,x,y,tier:t,hp,maxHp:hp,name:'Cracked Boulder',secret:true,revealed:true,proj:p.id,hidden:false,seed:udRand(i),hitT:0};R.ores.push(o);R.oreAt[i]=o;}}}}
+/* ---------- secret cave chains (one unique 6-stage chain per region) ---------- */
+const CH_STAGES=['ค้นหาแผนที่เหมืองที่ชำรุด','ตรวจสอบเครื่องหมายโบราณ','หากำแพงที่ถูกซ่อน','เปิดห้องจักรกลลับ','ปราบผู้พิทักษ์ห้อง','รับสมบัติสุดท้าย'];
+function v10ChainDef(r){const w=UD.world;if(!w)return null;w.chains=w.chains||{};if(w.chains[r]!==undefined)return w.chains[r];const lm=w.landmarks.filter(l=>l.r===r)[0];const A=w.alcoves.filter(a=>a.r===r&&a.type!=='shortcut'&&a.type!=='nest');
+ const al=A[udHash(w.seed,'chain',r)%Math.max(1,A.length)];return w.chains[r]=lm&&al?{id:'ch'+r,r,lm,al,n:['The Foreman’s Lost Map','Song of the Roots','The Mirror Ledger','Crucible Secret','The Silent Archive','Beyond the Horizon'][r]}:null;}
+function v10ChainState(r){return S.v10.chain['ch'+r]||(S.v10.chain['ch'+r]={stage:0,mine:0,done:0});}
+v10On((k,d)=>{if(!UD.world)return;for(let r=0;r<UD_NR;r++){const C=v10ChainDef(r);if(!C)continue;const st=v10ChainState(r);if(st.done)continue;
+ if(st.stage===0&&((k==='disc'&&d.d.r===r&&['chest','record','supply'].includes(d.d.k))||(k==='mine'&&d.r===r&&++st.mine>=40))){st.stage=1;v10Toast(`🗺 พบแผนที่ชำรุด: “${C.n}” — ไปตรวจสอบ ${C.lm.n}`);}
+ if(st.stage===4&&k==='kill'&&d.m.chain===C.id){st.stage=5;v10Toast('⚔ ผู้พิทักษ์ห้องล้มแล้ว — เปิดหีบสมบัติในห้อง');}}});
+function v10ChainTick(){for(let r=0;r<UD_NR;r++){const C=v10ChainDef(r);if(!C)continue;const st=v10ChainState(r);if(st.done||!st.stage)continue;const g=R.g;
+  if(st.stage===1&&Math.hypot(g.x-C.lm.x,g.y-C.lm.y)<5){st.stage=2;v10Toast(`🔎 เครื่องหมายโบราณชี้ไปยังผนังที่ถูกซ่อน — ดูเครื่องหมาย ✦ บนแผนที่`);for(const i of C.al.exc){const o=R.oreAt[i];if(o)o.revealed=true;}}
+  if(st.stage===2&&S.ud.disc['al_'+C.al.id])st.stage=3;
+  if(st.stage===3&&Math.hypot(g.x-C.al.x,g.y-C.al.y)<C.al.rad+1.5){st.stage=4;const R_=UDR[r];if(!UD.mons.some(m=>m.chain===C.id)){const m=udMkMon(R_.elite,R_.tier,C.al.x-.5,C.al.y,{kind:'chain',chain:C.id,alert:6,state:'chase'});UD.mons.push(m);}v10Toast('⚠ ผู้พิทักษ์ห้องลับตื่นขึ้น!','err');}
+  if(st.stage===4&&!UD.mons.some(m=>m.chain===C.id)&&Math.hypot(g.x-C.al.x,g.y-C.al.y)<C.al.rad+1.5&&!UD.held){const R_=UDR[r];UD.mons.push(udMkMon(R_.elite,R_.tier,C.al.x-.5,C.al.y,{kind:'chain',chain:C.id,alert:6,state:'chase'}));}
+  if(st.stage===5&&Math.hypot(g.x-C.al.x,g.y-C.al.y)<1.6)v10ChainFinish(r);}}
+function v10ChainFinish(r){const C=v10ChainDef(r);const st=v10ChainState(r);if(st.done)return;st.done=Date.now();v10Once('ch:'+C.id,()=>{S.v10.stats.chains++;const t=v10T(r);S.coins+=800*t;v10RelicFrag(r,'chain');v10RelicFrag(r,'chain');v10BpFrag(null,r,2,'chain');S.data=(S.data||0)+4;
+ v10Toast(`💎 “${C.n}” สำเร็จ! +🪙${fmt(800*t)} · Relic ×2 · Blueprint ×2 · 📘+4`);sfx('victory');if(Object.values(S.v10.chain).filter(x=>x.done).length>=6)v10Once('ch:all',()=>{S.v10.cos.own['trail:frost']=1;v10Toast('🗺 ไขความลับครบ 6 ภูมิภาค — Footsteps: Frost');});});save();}
+/* ---------- outpost development ---------- */
+function v10OStage(id){if(!S.v10)return 0;const s=S.v10.out[id];return s==null?0:s;}
+function v10OUpgrade(id){const o=UD.world.outposts.find(x=>x.id===id);const st=v10OStage(id);if(!o||st>=3||!S.ud.wp[id])return false;const req=ostageCost(o,st+1);if(!haveMat(req)){toast('วัสดุไม่พอ (ใช้แร่จาก Ore Storage)','err');sfx('err');return false;}
+ payMat(req);S.v10.out[id]=st+1;S.v10.stats.outUp++;v10Once(`os:${id}:${st+1}`,()=>{S.data=(S.data||0)+st+1;});if(Object.values(S.v10.out).filter(x=>x>=3).length>=3)v10Once('os:t',()=>{S.v10.titles.t_out=1;v10Toast('🏕 Research Station 3 แห่ง — Title: Outpost Founder');});
+ save();v10Toast(`🏕 ${o.n} → ${OSTAGE[st+1]} · ${OSTAGE_SVC[st+1]}`);sfx('upgrade');v10Ev('outUp',{o,st:st+1});return true;}
+function v10StashOK(o){return v10OStage(o.id)>=1||v10Has('conv:locker')||((o.r===2||o.r===3)&&S.v10.proj.pj_supply&&S.v10.proj.pj_supply.done);}
+/* ---------- contract board (repeatable; refreshes on completion; never locked behind a timer) ---------- */
+const CB_CATS=['mining','mining','combat','combat','explore','craft'];
+function v10Day(){const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
+function v10PickRegion(mine){const reach=v10Reach();const P=curStats().P;let L=[];for(let r=0;r<=reach;r++){if(mine&&TIERS[UDR[r].tier].req>P)continue;L.push(r);}if(!L.length)L=[0];const top=L.slice(-2);return top[Math.floor(Math.random()*top.length)];}
+function v10GenContract(cat){const B=S.v10.board;const id='k'+(++B.seq);let c={id,cat,have:0};const pick=a=>a[Math.floor(Math.random()*a.length)];
+ if(cat==='mining'){const r=v10PickRegion(true);const t=UDR[r].tier;const k=pick(['deliver','extract','form','rich']);c.r=r;c.k=k;
+  if(k==='deliver'){c.ore=pick(UDR[r].ores);c.need=12+t*4;c.txt=`ส่งมอบ ${c.ore} ${c.need} ก้อน (จาก Ore Storage)`;}else if(k==='extract'){c.need=20+t*3;c.txt=`ขุดแร่ใน ${UDR[r].n} ${c.need} ก้อน`;}
+  else if(k==='form'){c.f=pick(['seam','cluster']);c.need=10+t*2;c.txt=`ขุด${c.f==='seam'?' Mineral Seam':' Ore Cluster'} ใน ${UDR[r].n} ${c.need} โหนด`;}else{c.need=1;c.txt=`ขุด Rich Vein ใน ${UDR[r].n} จนหมดสาย`;}c.size=1+t*.15;}
+ else if(cat==='combat'){const r=v10PickRegion(false);const t=UDR[r].tier;c.r=r;const k=pick(['kill','kill','nest','named','defend']);c.k=k;
+  if(k==='kill'){c.need=4+Math.floor(t/2);c.txt=`ปราบมอนสเตอร์ใน ${UDR[r].n} ${c.need} ตัว`;}else if(k==='nest'){c.need=3;c.txt=`กวาดล้างรังมอนสเตอร์ใน ${UDR[r].n} (3 ตัว)`;}else if(k==='named'){c.need=1;c.txt=`ล้ม Elite / ผู้พิทักษ์ใน ${UDR[r].n} 1 ตัว`;}
+  else{const os=UD.world.outposts.filter(o=>o.r===r&&S.ud.wp[o.id]);const o=os.length?pick(os):UD.world.outposts.find(o=>o.r===r);c.o=o.id;c.need=2;c.txt=`ป้องกัน ${o.n}: ไปที่ Outpost แล้วต้านมอนสเตอร์ 2 ระลอก`;}c.size=1.2+t*.15;}
+ else if(cat==='explore'){const r=v10PickRegion(false);c.r=r;const unl=UD.world.landmarks.filter(l=>l.r<=v10Reach()&&!S.ud.lm[l.id]);const sealed=UD.world.alcoves.filter(a=>a.r===r&&!S.ud.disc['al_'+a.id]);
+  const opts=['survey','fragments','cache'];if(unl.length)opts.push('landmark');if(sealed.length)opts.push('chamber');const k=pick(opts);c.k=k;
+  if(k==='survey'){c.need=300;c.txt=`สำรวจพื้นที่ใหม่ใน ${UDR[r].n} 300 ช่อง (Fog)`;}else if(k==='fragments'){c.need=2;c.txt='กู้เศษชิ้นส่วนเครื่องจักรโบราณ (Relic Fragment) 2 ชิ้น';}else if(k==='landmark'){const l=pick(unl);c.lm=l.id;c.r=l.r;c.need=1;c.txt=`ค้นหาจุดสังเกต: ${l.n}`;}
+  else if(k==='chamber'){c.need=1;c.txt=`ขุดเปิดห้องลับใน ${UDR[r].n} 1 ห้อง`;}else{const spot=v10CacheSpot(r);c.x=spot.x;c.y=spot.y;c.need=1;c.txt=`ตามรอย Lost Cache ใน ${UDR[r].n} (ดู ✦ บนแผนที่) — มีผู้คุ้มกัน`;}c.size=1.2+UDR[r].tier*.12;}
+ else{const k=pick(['part','armor','refine','deliver_cm']);c.k=k;c.r=Math.min(v10Reach(),5);if(k==='part'){c.need=2;c.txt='คราฟต์ชิ้นส่วนขุด 2 ชิ้น (Forge)';}else if(k==='armor'){c.cls=pick(['warrior','mage','assassin']);c.need=1;c.txt=`คราฟต์อุปกรณ์สาย ${CLASS_INFO[c.cls].n} 1 ชิ้น`;}
+  else if(k==='refine'){c.need=3;c.txt='แปรรูปวัตถุดิบที่ Refinery 3 ครั้ง';}else{const t=clamp(v10Reach()+1,1,6);const ck=udMatFor(Math.min(t,4));c.ck=ck;c.need=2;c.txt=`ส่งมอบ ${CMAT[ck].n} 2 ชิ้นให้ช่าง NPC`;}c.size=1.3;}
+ const t=v10T(c.r||0);c.rw={coins:Math.round(70*t*c.size*(1+Math.random()*.2)),cm:Math.random()<.6?1:0,data:1,relic:cat==='explore'?1:0};return c;}
+function v10BoardFill(){const B=S.v10.board;const day=v10Day();if(B.day!==day){B.day=day;B.dayN=0;}const wk=weekKey?weekKey():'';if(B.week!==wk){B.week=wk;B.weekN=0;}
+ for(let i=0;i<CB_CATS.length;i++)if(!B.slots[i]||B.slots[i].claimed)B.slots[i]=v10GenContract(CB_CATS[i]);}
+function v10BoardClaim(i){const B=S.v10.board;const c=B.slots[i];if(!c||c.claimed||c.have<c.need)return false;if(c.k==='deliver'){if((S.oreStorage[c.ore]||0)<c.need){toast('แร่ใน Ore Storage ไม่พอ','err');return false;}S.oreStorage[c.ore]-=c.need;}
+ if(c.k==='deliver_cm'){if(cmHave(c.ck)<c.need){toast('วัตถุดิบไม่พอ','err');return false;}S.v7.cm[c.ck]-=c.need;}
+ c.claimed=1;B.done++;B.dayN++;B.weekN++;S.v10.stats.contracts++;const bonus=B.dayN<=3?1.5:1;const coins=Math.round(c.rw.coins*bonus);S.coins+=coins;S.data=(S.data||0)+c.rw.data;let extra='';
+ if(c.rw.cm){const ck=udMatFor(v10T(c.r||0));if(ck){cmAdd(ck,1,true);extra+=` · ${CMAT[ck].i}`;}}if(c.rw.relic){v10RelicFrag(c.r||0,'contract');extra+=' · 🧩';}if(B.done%3===0){v10BpFrag(null,c.r,1,'contract');extra+=' · 📐';}if(B.weekN===10){v10BpFrag(null,null,1,'weekly');extra+=' · 📐 Weekly';}
+ B.slots[i]=v10GenContract(c.cat);save();v10Toast(`📋 Contract สำเร็จ +🪙${fmt(coins)}${bonus>1?' (Daily ×1.5)':''} · 📘+${c.rw.data}${extra}`);sfx('coin');v10Ev('contract',{c});return true;}
+/* progress: counted only from events after the contract was created */
+v10On((k,d)=>{const B=S.v10.board;for(const L of[B.slots,S.v10.bounty.slots])for(const c of L){if(!c||c.claimed||c.have>=c.need)continue;const before=c.have;
+ if(k==='mine'){if((c.k==='extract'&&d.r===c.r)||(c.k==='form'&&d.r===c.r&&d.v.kind===c.f))c.have++;if(c.k==='gather'&&d.r===c.r)c.have++;if(c.k==='mutv'&&d.mut){c.seen=c.seen||{};if(!c.seen[d.mut]){c.seen[d.mut]=1;c.have++;}}}
+ if(k==='richDone'&&c.k==='rich'&&d.v.r===c.r)c.have++;
+ if(k==='kill'){if(c.k==='kill'&&d.r===c.r)c.have++;if(c.k==='nest'&&d.r===c.r&&d.m.kind==='nest')c.have++;if(c.k==='named'&&d.r===c.r&&(d.m.elite||d.m.boss))c.have++;if(c.k==='rguard'&&d.m.rare&&udRegionAt(d.m.hy)===c.r)c.have++;if(c.k==='cache'&&d.m.cache===c.id)c.cg=(c.cg||0)+1;}
+ if(k==='tiles'&&c.k==='survey'&&d.r===c.r)c.have=Math.min(c.need,c.have+d.n);if(k==='relicFrag'&&(c.k==='fragments'||c.k==='relicb'))c.have++;if(k==='lm'&&c.k==='landmark'&&S.ud.lm[c.lm])c.have=1;
+ if(k==='alc'&&(c.k==='chamber'&&d.al.r===c.r||c.k==='chainb'))c.have++;if(k==='craft'){if(c.k==='part'&&d.kind==='part')c.have+=d.n;if(c.k==='armor'&&d.kind==='armor'&&d.cls===c.cls)c.have+=d.n;if(c.k==='craftb'&&d.tier>=4)c.have+=d.n;}
+ if(k==='refine'&&(c.k==='refine'||c.k==='refineb'))c.have+=d.n;if(k==='route'&&c.k==='route')c.have=Math.max(c.have,d.n);if(k==='cacheOpen'&&c.id===d.id)c.have=1;
+ if(c.k==='deliver')c.have=Math.min(c.need,S.oreStorage[c.ore]||0);if(c.k==='deliver_cm')c.have=Math.min(c.need,cmHave(c.ck));
+ c.have=Math.min(c.need,c.have);if(c.have>=c.need&&before<c.need)v10Toast(`📋 ${c.b?'Bounty':'Contract'} พร้อมรับรางวัล: ${c.txt}`);}});
+/* crafting events */
+{const _c=craftPart;craftPart=function(pid,mode,qty){const out=_c(pid,mode,qty);if(out&&out.length)v10Ev('craft',{kind:'part',n:out.length,tier:PART[pid].ri||1});return out;};}
+{const _c=craftArmor;craftArmor=function(aid,mode,qty){const out=_c(aid,mode,qty);if(out&&out.length)v10Ev('craft',{kind:'armor',n:out.length,cls:ARMOR[aid].cls||'warrior',tier:ARMOR[aid].tier||ARMOR[aid].ri||1});return out;};}
+{const _r=v7Refine;v7Refine=function(i,q){const ok=_r(i,q);if(ok)v10Ev('refine',{n:q||1});return ok;};}
+/* defend + lost-cache objectives spawn real monsters / a real cache object */
+function v10CacheSpot(r){const w=UD.world;const C=w.chambers.filter(c=>c.r===r&&!c.outpost&&!c.small);for(let k=0;k<60;k++){const c=C[Math.floor(Math.random()*C.length)];const x=Math.round(c.x+(Math.random()-.5)*c.rx),y=Math.round(c.y+(Math.random()-.5)*c.ry);const i=y*UD_W+x;if(w.g[i]===T_FLOOR&&!w.used[i]&&!w.zone[i])return{x,y};}const c=C[0];return{x:Math.round(c.x),y:Math.round(c.y)};}
+function v10CacheTick(){const B=S.v10.board;const L=B.slots.concat(S.v10.bounty.slots);for(const c of L){if(!c||c.claimed)continue;
+ if(c.k==='cache'&&c.have<1&&Math.hypot(R.g.x-c.x-.5,R.g.y-c.y-.5)<9){const alive=UD.mons.filter(m=>m.cache===c.id).length;const need=2-(c.cg||0);if(alive<need&&!UD.held){const R_=UDR[c.r];for(let q=alive;q<need;q++)UD.mons.push(udMkMon(R_.mons[q%2],R_.tier,c.x+(q?-1.5:1.5),c.y,{kind:'cache',cache:c.id}));}
+  if((c.cg||0)>=2&&Math.hypot(R.g.x-c.x-.5,R.g.y-c.y-.5)<1.6){c.have=1;v10Ev('cacheOpen',{id:c.id});const t=v10T(c.r);S.coins+=200*t;const ck=udMatFor(t);if(ck)cmAdd(ck,2,true);v10Toast(`📦 เปิด Lost Cache! +🪙${fmt(200*t)}`);save();}}
+ if(c.k==='defend'&&c.have<c.need){const o=UD.world.outposts.find(x=>x.id===c.o);if(o&&Math.hypot(R.g.x-o.x,R.g.y-o.y)<8&&!UD.held&&!UD.mons.some(m=>m.defend===c.id)){const R_=UDR[o.r];for(let k=0;k<2;k++){for(let q=0;q<20;q++){const a=Math.random()*6.28,rr=7+Math.random()*3;const x=o.x+Math.cos(a)*rr,y=o.y+1+Math.sin(a)*rr;if(udMonFree(x,y)){UD.mons.push(udMkMon(R_.mons[k],R_.tier,x,y,{kind:'defend',defend:c.id,alert:8,state:'chase'}));break;}}}floatTxt(R.g.x,R.g.y-1.8,`⚠ ระลอกที่ ${c.have+1}/${c.need}`,'#ff5a5a',1);}}}}
+/* a defend contract counts a wave when every monster of that wave is down */
+v10On((k,d)=>{if(k!=='kill'||!d.m.defend)return;});
+{const _cr=udCombatReturn;udCombatReturn=function(){const E=UD.enc;const win=CB&&CB.res&&CB.res.win;_cr();if(!win||!E)return;const ids=new Set(E.mons.filter(m=>m.defend).map(m=>m.defend));for(const id of ids){if(!UD.mons.some(m=>m.defend===id)){const c=S.v10.board.slots.find(x=>x&&x.id===id);if(c&&c.have<c.need){c.have++;v10Toast(`🛡 ต้านระลอกได้ ${c.have}/${c.need}`);}}}};}
+/* kills are forwarded (udReward already emits v10Ev('kill')) — wave kills counted above, not twice */
+/* ---------- endgame bounty board ---------- */
+function v10BountyOpen(){return UD.world&&UDR.every((r,k)=>UD.world.outposts.some(o=>o.r===k&&S.ud.wp[o.id]));}
+function v10GenBounty(){const V=S.v10.bounty;const id='b'+(++V.seq);const r=2+Math.floor(Math.random()*4);const pick=a=>a[Math.floor(Math.random()*a.length)];const k=pick(['rguard','gather','craftb','mutv','route','relicb','chainb','refineb']);const c={id,b:1,k,r,have:0};
+ if(k==='rguard'){c.need=1;c.txt=`ล้ม Rare Guardian ${RGUARD[r].n} (${DEEPLOC[r].n})`;}else if(k==='gather'){c.need=150;c.txt=`ขุดแร่ใน ${UDR[r].n} 150 ก้อน`;}else if(k==='craftb'){c.need=3;c.txt='คราฟต์อุปกรณ์ Tier 4+ 3 ชิ้น';}else if(k==='mutv'){c.need=3;c.txt='ขุดสายแร่กลายพันธุ์ 3 แบบที่ต่างกัน';}
+ else if(k==='route'){c.need=4;c.txt='เดินทางผ่าน Outpost 4 แห่งในการสำรวจครั้งเดียว (ไม่กลับค่าย)';}else if(k==='relicb'){c.need=6;c.txt='กู้ Relic Fragment 6 ชิ้น';}else if(k==='chainb'){c.need=2;c.txt='ขุดเปิดห้องลับ 2 ห้อง (ทุกภูมิภาค)';}else{c.need=12;c.txt='แปรรูปวัตถุดิบ 12 ครั้ง';}
+ c.rw={coins:900*UDR[r].tier,bp:2};return c;}
+function v10BountyFill(){const V=S.v10.bounty;for(let i=0;i<3;i++)if(!V.slots[i]||V.slots[i].claimed)V.slots[i]=v10GenBounty();}
+function v10BountyClaim(i){const V=S.v10.bounty;const c=V.slots[i];if(!c||c.claimed||c.have<c.need)return false;c.claimed=1;V.done++;S.v10.stats.bounties++;S.coins+=c.rw.coins;v10BpFrag(null,null,c.rw.bp,'bounty');for(let k=0;k<2;k++){const ck=udMatFor(5+k);if(ck)cmAdd(ck,1,true);}
+ if(V.done===5)v10Once('bt:5',()=>{S.v10.cos.own['finish:frost']=1;v10Toast('🏆 Bounty ×5 — Frostforged Finish');});if(V.done===25)v10Once('bt:25',()=>{S.v10.titles.t_bounty=1;S.v10.cos.own['beam:deep']=1;v10Toast('🏆 Bounty ×25 — Title: Bounty Legend · Deepcore Spark');});
+ V.slots[i]=v10GenBounty();save();v10Toast(`🏆 Bounty สำเร็จ +🪙${fmt(c.rw.coins)} · Blueprint ×2`);sfx('victory');return true;}
+/* session route resets when leaving the mine */
+{const _l=udLeave;udLeave=function(h){if(R)R.v10route=null;return _l(h);};}
+
+/* =====================================================================
+   V7 ENDLESS GRINDING (3/4) — rendering: mutated veins · volatile telegraphs · project routes & boulders ·
+   deep locations · chain / cache markers · outpost stages · vein compass · cosmetics (finish / trail / beam)
+   ===================================================================== */
+{const _bg=drawBG51;drawBG51=function(c,T,x0,y0,x1,y1){_bg(c,T,x0,y0,x1,y1);if(!R||!R.ud||!S.v10)return;const t=GT;const w=UD.world;
+ /* deep location ground tint + embers */for(const L of(w.deep||[])){if(L.x+L.rx<x0||L.x-L.rx>x1||L.y+L.ry<y0||L.y-L.ry>y1)continue;const P=UDR[L.r].pal;c.save();c.globalAlpha=.12+.04*Math.sin(t*1.5);c.fillStyle=P.vein;ell(c,L.x*T,L.y*T,(L.rx+.5)*T,(L.ry+.5)*T);c.fill();c.restore();
+  if(S.v10.deep[L.id]){c.font=`800 ${Math.max(11,T*.3)}px Kanit,sans-serif`;c.textAlign='center';c.lineWidth=3;c.strokeStyle='rgba(0,0,0,.8)';c.strokeText('🔻 '+L.n,L.x*T,(L.y-L.ry-.6)*T);c.fillStyle='#ff9ab0';c.fillText('🔻 '+L.n,L.x*T,(L.y-L.ry-.6)*T);}}
+ /* completed project routes: rails + lamps */if(w.pjDeco){for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++){const i=y*UD_W+x;if(!w.pjDeco[i]||!UD.fog[i])continue;const X=x*T,Y=y*T;c.strokeStyle='rgba(150,130,100,.8)';c.lineWidth=2;c.beginPath();c.moveTo(X,Y+T*.35);c.lineTo(X+T,Y+T*.35);c.moveTo(X,Y+T*.65);c.lineTo(X+T,Y+T*.65);c.stroke();
+   if((x+y)%2===0)glow(c,X+T/2,Y+T/2,T*.9,'#ffcf8a',.14);}}
+ /* active project sites */if(w.proj)for(const p of PROJ){const st=S.v10.proj[p.id];const rt=w.proj[p.id];if(!rt||st&&st.done||!v10ProjUnlocked(p))continue;const X=(rt.site.x+.5)*T,Y=(rt.site.y+.5)*T;if(X<(x0-2)*T||X>(x1+2)*T||Y<(y0-2)*T||Y>(y1+2)*T)continue;
+  c.strokeStyle=`rgba(255,200,80,${.5+.3*Math.sin(t*3)})`;c.setLineDash([6,5]);c.lineWidth=2;circ(c,X,Y,T*1.6);c.stroke();c.setLineDash([]);c.font=`800 ${Math.max(10,T*.26)}px Kanit,sans-serif`;c.textAlign='center';c.fillStyle='#ffd27a';c.fillText('🏗 '+p.n,X,Y-T*1.8);}
+ /* mutated ore auras */for(const o of R.ores){if(!o.mut||o.x<x0-1||o.x>x1||o.y<y0-1||o.y>y1||!oreVisible(o))continue;const M=MUT[o.mut];const X=(o.x+.5)*T,Y=(o.y+.5)*T;glow(c,X,Y,T*1.05,M.col,.22+.1*Math.sin(t*4+o.seed*9));
+  c.strokeStyle=rgba(M.col,.7);c.lineWidth=1.6;c.beginPath();c.arc(X,Y,T*.58,t*2,t*2+Math.PI*1.2);c.stroke();}
+ /* volatile cross telegraphs */for(const f of(R.v10fx||[])){const k=1-f.t/f.dur;c.fillStyle=`rgba(255,90,40,${.18+.25*Math.abs(Math.sin(t*14))})`;c.fillRect((f.x-.45)*T,(f.y-2.5)*T,.9*T,5*T);c.fillRect((f.x-2.5)*T,(f.y-.45)*T,5*T,.9*T);c.strokeStyle='rgba(255,140,60,.9)';c.lineWidth=2;c.strokeRect((f.x-.45)*T,(f.y-2.5)*T,.9*T,5*T*(1-k*.1));}
+ /* chain + cache markers */for(let r=0;r<UD_NR;r++){const C=v10ChainDef(r);if(!C)continue;const st=S.v10.chain[C.id];if(!st||st.done||!st.stage)continue;let m=null;if(st.stage===1)m={x:C.lm.x,y:C.lm.y,tx:'🔎'};else if(st.stage===2)m={x:C.al.exc[0]%UD_W,y:(C.al.exc[0]/UD_W)|0,tx:'✦'};else m={x:C.al.x,y:C.al.y,tx:st.stage===5?'💎':'⚔'};
+  if(m&&m.x>=x0-2&&m.x<=x1+2&&m.y>=y0-2&&m.y<=y1+2){const X=(m.x+.5)*T,Y=(m.y+.5)*T;glow(c,X,Y,T,'#ffe14a',.3+.15*Math.sin(t*4));c.font=`900 ${T*.5}px Kanit,sans-serif`;c.textAlign='center';c.fillStyle='#ffe14a';c.fillText(m.tx,X,Y-T*.7+Math.sin(t*3)*3);}}
+ for(const cc of S.v10.board.slots.concat(S.v10.bounty.slots)){if(!cc||cc.claimed||cc.k!=='cache'||cc.have)continue;if(cc.x<x0-2||cc.x>x1+2||cc.y<y0-2||cc.y>y1+2)continue;const X=(cc.x+.5)*T,Y=(cc.y+.5)*T;rr(c,X-T*.3,Y-T*.2,T*.6,T*.42,4);fs(c,'#8a6a3a',1.6);glow(c,X,Y,T*.8,'#ffd84a',.3);c.fillStyle='#ffe14a';c.font=`900 ${T*.4}px Kanit`;c.textAlign='center';c.fillText('✦',X,Y-T*.5);}};}
+/* cracked boulders (project objects) */
+{const _de=drawEnt;drawEnt=function(c,e,T,t){if(e.k==='o'&&e.o&&e.o.proj){const o=e.o;const X=(o.x+.5)*T,Y=(o.y+.5)*T;const k=1-o.hp/o.maxHp;c.save();c.translate(X,Y+(o.hitT>0?Math.sin(t*80)*1.5:0));c.fillStyle='rgba(0,0,0,.35)';ell(c,0,T*.32,T*.42,T*.12);c.fill();
+  poly(c,[-T*.42,T*.3,-T*.36,-T*.12,-T*.1,-T*.38,T*.26,-T*.3,T*.44,T*.05,T*.34,T*.3]);fs(c,lg(c,-T*.38,T*.3,'#9a8a74','#5a4a3a'),2);c.strokeStyle='rgba(255,200,80,.85)';c.lineWidth=1.6+k*2;c.beginPath();c.moveTo(-T*.2,-T*.25);c.lineTo(0,0);c.lineTo(-T*.1,T*.2);c.moveTo(0,0);c.lineTo(T*.22,-T*.08);c.stroke();c.restore();hpBar(c,o,X,Y-T*.6,T);return;}
+ if(e.k==='g'&&R&&R.ud&&S.v10){const f=FINISH[S.v10.cos.m.finish];if(f){if(!NOGLOW)glow(c,R.g.x*T,R.g.y*T-T*.4,T*1.1,f.glow,.16);v10Tint(c,R.g.x*T,R.g.y*T-T*.55,T*3.6,T*3.6,DV.dpr||1,oc=>_de(oc,e,T,t),f);v10CompassDraw(c,T,t);return;}const r=_de(c,e,T,t);v10CompassDraw(c,T,t);return r;}
+ return _de(c,e,T,t);};}
+function v10CompassDraw(c,T,t){if(!v10Gad('g_compass')||!R)return;const now=performance.now();if(!R.v10cp||now-R.v10cpT>700){R.v10cpT=now;let best=null,bd=40;for(const o of R.ores){if(!o.ud||!oreVisible(o)&&!o.mut)continue;const v=UD.vmap[o.ud.v];if(!(v.rich||o.mut)||!canMine(o))continue;const d=Math.hypot(o.x-R.g.x,o.y-R.g.y);if(d<bd&&d>2.5){bd=d;best=o;}}R.v10cp=best;}
+ const o=R.v10cp;if(!o||!R.ores.includes(o))return;const gx=R.g.x*T,gy=R.g.y*T-T*.4;const a=Math.atan2((o.y+.5)*T-gy,(o.x+.5)*T-gx);c.save();c.translate(gx+Math.cos(a)*T*1.25,gy+Math.sin(a)*T*1.25);c.rotate(a);poly(c,[T*.3,0,-T*.14,-T*.18,-T*.05,0,-T*.14,T*.18]);fs(c,o.mut?MUT[o.mut].col:'#ffd84a',1.4);c.restore();}
+/* arena: combat finish */
+{const _dp=drawPlayerC;drawPlayerC=function(c,x,y,s,dt,alpha){const f=S&&S.v10&&FINISH[S.v10.cos.c.finish];if(!f||!CB||CB.sim)return _dp(c,x,y,s,dt,alpha);const T=AV.T;v10Tint(c,x,y-T*1.6,T*5,T*5.2,AV.dpr||1,oc=>_dp(oc,x,y,s,dt,alpha),f);};}
+/* finish tint: draw the unit into a small offscreen buffer, colour it with source-atop, blit back (cheap, keeps the silhouette) */
+const V10TC={};function v10Tint(c,cx,cy,w,h,dpr,fn,f){const W_=Math.ceil(w*dpr),H_=Math.ceil(h*dpr);let o=V10TC.cv;if(!o||o.width<W_||o.height<H_){o=V10TC.cv=document.createElement('canvas');o.width=Math.max(W_,o?o.width:0);o.height=Math.max(H_,o?o.height:0);V10TC.c=o.getContext('2d');}
+ const oc=V10TC.c;oc.setTransform(1,0,0,1,0,0);oc.globalCompositeOperation='source-over';oc.clearRect(0,0,W_+2,H_+2);const m=c.getTransform();
+ /* reproduce the scale of the main context but anchor the box at the origin */oc.setTransform(m.a,m.b,m.c,m.d,0,0);oc.translate(-(cx-w/2),-(cy-h/2));try{fn(oc);}catch(e){}
+ oc.setTransform(1,0,0,1,0,0);oc.globalCompositeOperation='source-atop';oc.fillStyle=rgba(f.tint,f.a);oc.fillRect(0,0,W_,H_);oc.globalCompositeOperation='source-over';
+ c.save();c.setTransform(1,0,0,1,0,0);const p=m.transformPoint(new DOMPoint(cx-w/2,cy-h/2));c.drawImage(o,0,0,W_,H_,p.x,p.y,W_,H_);c.restore();}
+/* footstep trails + mining beam sparks */
+{const _fs=footstep;footstep=function(g){_fs(g);if(!R||!S.v10)return;const tr=TRAIL[S.v10.cos.m.trail];if(tr){for(let k=0;k<3;k++)part(g.x+(Math.random()-.5)*.3,g.y+.35,tr.col[k%2],1.2,2.6);}};}
+{const _mf=mineFx;mineFx=function(o){_mf(o);if(!R||!S.v10)return;const b=BEAM[S.v10.cos.m.beam];if(b){for(let k=0;k<4;k++)part(o.x+.5,o.y+.4,b.col,3.2,2.8);}const f=FINISH[S.v10.cos.m.finish];if(f&&Math.random()<.3)part(R.g.x,R.g.y-.6,f.p,1.5,2);};}
+/* outposts change visibly with their stage */
+{const _od=udOutpostDraw;udOutpostDraw=function(c,o,T,t){_od(c,o,T,t);if(!S.v10||!S.ud.wp[o.id])return;const st=v10OStage(o.id);const X=(o.x+.5)*T,Y=(o.y-.5)*T;const s=T/40;c.save();c.translate(X,Y);c.scale(s,s);const P=UDR[o.r].pal;
+ if(st===0){for(let k=0;k<3;k++){ell(c,-30+k*26,16,9,5);fs(c,'#5a4a3a',1.2);}line(c,-36,-6,-26,14,2,'#3a2a18');}
+ if(st>=1){poly(c,[-58,14,-46,-8,-34,14]);fs(c,'#8a6a3a',1.6);poly(c,[38,14,50,-8,62,14]);fs(c,'#6a5a3a',1.6);}
+ if(st>=2){rr(c,-20,-56,4,40,1);fs(c,'#3a2a18',1);poly(c,[-16,-56,8,-50,-16,-44]);fs(c,P.acc,1.2);rr(c,-62,-2,16,14,2);fs(c,'#5a6a70',1.2);rr(c,46,-2,16,14,2);fs(c,'#5a6a70',1.2);}
+ if(st>=3){line(c,0,-38,0,-74,2.4,'#9aa3b2');circ(c,0,-76,5);fs(c,'#7fe6ff',1.2);glow(c,0,-76,26,'#7fe6ff',.25+.15*Math.sin(t*4));c.save();c.translate(0,-62);c.rotate(t);ell(c,0,0,12,4);c.strokeStyle='rgba(127,230,255,.7)';c.lineWidth=1.5;c.stroke();c.restore();
+  const decos=Object.keys(S.v10.cos.own).filter(k=>k.startsWith('deco:')).length;for(let k=0;k<Math.min(4,decos);k++){rr(c,-74+k*10,10,7,6,1);fs(c,'#e8c070',1);}}
+ c.restore();c.font=`700 ${Math.max(9,T*.2)}px Kanit,sans-serif`;c.textAlign='center';c.fillStyle='rgba(230,240,255,.85)';c.fillText(OSTAGE[st],X,Y-T*1.05);};}
+/* world map overlay: scanner veins, deep locations, project routes, chain markers */
+{const _mi=udMapImage;udMapImage=function(){const cv=_mi();if(!S.v10)return cv;const c=cv.getContext('2d');const w=UD.world;
+ if(v10Gad('g_scanner'))for(const v of w.veins){const n=v.nodes[0];if(!UD.fog[n.y*UD_W+n.x])continue;const m=v10VeinMut(v);if(!v.rich&&!m)continue;c.fillStyle=m?MUT[m].col:'#ffd84a';c.fillRect(n.x-1,n.y-1,3,3);}
+ for(const L of(w.deep||[]))if(S.v10.deep[L.id]){c.strokeStyle='#ff3b6b';c.lineWidth=1;c.strokeRect(L.x-L.rx,L.y-L.ry,L.rx*2,L.ry*2);}
+ if(w.pjDeco){c.fillStyle='#ffcf8a';for(const i in w.pjDeco){c.fillRect(i%UD_W,(i/UD_W)|0,1,1);}}
+ for(let r=0;r<UD_NR;r++){const C=v10ChainDef(r);const st=C&&S.v10.chain[C.id];if(!st||st.done||!st.stage)continue;const p=st.stage===1?C.lm:st.stage===2?{x:C.al.exc[0]%UD_W,y:(C.al.exc[0]/UD_W)|0}:C.al;c.fillStyle='#ffe14a';c.fillRect(p.x-2,p.y-2,5,5);}
+ for(const cc of S.v10.board.slots.concat(S.v10.bounty.slots))if(cc&&!cc.claimed&&cc.k==='cache'&&!cc.have){c.fillStyle='#ffe14a';c.fillRect(cc.x-2,cc.y-2,5,5);}
+ return cv;};}
+
+/* =====================================================================
+   V7 ENDLESS GRINDING (4/4) — UI: Underdeep Journal (Codex · Contracts · Bounties · Relics · Blueprints · Projects ·
+   Collection) · outpost development menu · camp entry points · developer test panel (simulations)
+   ===================================================================== */
+{const s=document.createElement('style');s.textContent=`
+.v10tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}.v10tabs button{font:700 12px Kanit;border-radius:9px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:#dfe8f5;padding:6px 10px;cursor:pointer}.v10tabs button.on{background:linear-gradient(#caa23a,#8a6a1a);color:#1a1206}
+.v10g{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}.v10c{border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:8px 10px;background:rgba(255,255,255,.03);font-size:12px}.v10c.done{border-color:rgba(127,255,212,.45);background:rgba(127,255,212,.06)}
+.v10c b{color:#ffe9a8}.v10bar{height:6px;border-radius:4px;background:rgba(255,255,255,.08);margin:5px 0;overflow:hidden}.v10bar i{display:block;height:100%;background:linear-gradient(90deg,#3fe0ff,#7fffd4)}
+.v10c .btn{margin-top:6px}.v10h{font:800 13px Kanit;margin:12px 0 6px;color:#cfe}.v10sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:middle;margin-right:4px}
+.v10dev td,.v10dev th{padding:3px 6px;font-size:12px;text-align:right}.v10dev td:first-child,.v10dev th:first-child{text-align:left}
+`;document.head.appendChild(s);}
+const V10UI={tab:'codex',cx:0};
+function v10Bar(a,b){return `<div class="v10bar"><i style="width:${clamp(a/b*100,0,100)}%"></i></div>`;}
+function v10Journal(tab){v10Migrate();if(UD.world==null)udWorld();if(tab)V10UI.tab=tab;v10BoardFill();if(v10BountyOpen())v10BountyFill();const render=()=>{const T_=V10UI.tab;
+ const tabs=[['codex','📚 Codex'],['board','📋 Contracts'],['bounty','🏆 Bounties'],['relic','🏺 Relics'],['bp','📐 Blueprints'],['proj','🏗 Projects'],['chain','🗺 Cave Chains'],['cos','🎨 Collection'],['gad','🔧 Gadgets']];
+ let h=(S.settings&&S.settings.debug?'<button class="btn sm" data-act="v10dev">🧪 Dev Panel</button> ':'')+`<div class="v10tabs">${tabs.map(([k,n])=>`<button class="${T_===k?'on':''}" data-act="v10tab" data-arg="${k}">${n}</button>`).join('')}</div>`;h+=(V10V[T_]||V10V.codex)();$('#mbody').innerHTML=h;};
+ openModal('📖 UNDERDEEP JOURNAL — เป้าหมายระยะยาว','',render);$('#mbox').classList.add('wide');render();}
+const V10V={
+ codex(){const L=codexDefs();const done=Object.keys(S.v10.codex.done).length;const r=V10UI.cx;let h=`<div class="hint">Mineral Codex <b>${done}/${L.length}</b> — ความคืบหน้ามาจากการขุดและการสำรวจจริงเท่านั้น · รางวัล: ข้อมูลธรณีวิทยา · Gadget · Title · เอฟเฟกต์ขุด · ไม่มีค่าพลังถาวรแบบไม่จำกัด</div>${v10Bar(done,L.length)}
+  <div class="v10tabs">${UDR.map((R_,k)=>`<button class="${r===k?'on':''}" data-act="v10cx" data-arg="${k}">${R_.n}</button>`).join('')}<button class="${r===-1?'on':''}" data-act="v10cx" data-arg="-1">🧬 Mutations</button></div><div class="v10g">`;
+  for(const e of L.filter(e=>e.r===r)){const p=Math.min(e.need,v10CxProg(e));const d=!!S.v10.codex.done[e.id];h+=`<div class="v10c ${d?'done':''}"><b>${d?'✅':'⬜'} ${esc(e.n)}</b>${v10Bar(p,e.need)}<span class="hint">${fmt(p)}/${fmt(e.need)} · รางวัล: ${v10RwTxt(e.rw)}</span>${d&&e.info?`<div style="margin-top:4px;color:#cfe">ℹ ${esc(e.info)}</div>`:''}</div>`;}
+  return h+'</div>';},
+ board(){v10BoardFill();const B=S.v10.board;let h=`<div class="hint">บอร์ดงานแบบทำซ้ำได้ไม่จำกัด — ทำเสร็จแล้วรับรางวัล งานใหม่มาแทนทันที · 3 งานแรกของวันได้เหรียญ ×1.5 (โบนัสเสริม ไม่บังคับ) · ทุก 3 งาน = Blueprint Fragment · สำเร็จแล้ว <b>${B.done}</b></div><div class="v10g">`;
+  B.slots.forEach((c,i)=>{const ok=c.have>=c.need;h+=`<div class="v10c ${ok?'done':''}"><span class="hint">${{mining:'⛏ Mining',combat:'⚔ Combat',explore:'🧭 Exploration',craft:'⚒ Crafting'}[c.cat]}</span><br><b>${esc(c.txt)}</b>${v10Bar(c.have,c.need)}<span class="hint">${fmt(c.have)}/${fmt(c.need)} · 🪙${fmt(c.rw.coins)} · 📘${c.rw.data}${c.rw.cm?' · วัตถุดิบ':''}${c.rw.relic?' · 🧩':''}</span><br><button class="btn sm ${ok?'gold':''}" ${ok?'':'disabled'} data-act="v10claim" data-arg="${i}">${c.k==='deliver'||c.k==='deliver_cm'?'ส่งมอบ':'รับรางวัล'}</button></div>`;});return h+'</div>';},
+ bounty(){if(!v10BountyOpen())return `<div class="hint">🔒 Endgame Bounty Board เปิดเมื่อปลดล็อก Waypoint ครบทั้ง 6 ภูมิภาค (เกมนี้ยังไม่มีระบบ Core Level — ใช้ความคืบหน้าในโลกใต้ดินแทน)</div><div class="hint">ตอนนี้: ${UDR.map((r,k)=>UD.world.outposts.some(o=>o.r===k&&S.ud.wp[o.id])?'✅':'⬜').join(' ')}</div>`;
+  v10BountyFill();const V=S.v10.bounty;let h=`<div class="hint">ภารกิจ Endgame ทำซ้ำได้ — รางวัลเน้นทางเลือกใหม่ (Blueprint), คอสเมติก และวัตถุดิบ ไม่เพิ่มค่าพลังแบบไม่จำกัด · สำเร็จแล้ว <b>${V.done}</b> (×5: Frostforged Finish · ×25: Title)</div><div class="v10g">`;
+  V.slots.forEach((c,i)=>{const ok=c.have>=c.need;h+=`<div class="v10c ${ok?'done':''}"><b>🏆 ${esc(c.txt)}</b>${v10Bar(c.have,c.need)}<span class="hint">${fmt(c.have)}/${fmt(c.need)} · 🪙${fmt(c.rw.coins)} · 📐×${c.rw.bp} · วัตถุดิบ T5–6</span><br><button class="btn sm ${ok?'gold':''}" ${ok?'':'disabled'} data-act="v10bclaim" data-arg="${i}">รับรางวัล</button></div>`;});return h+'</div>';},
+ relic(){const n=Object.keys(S.v10.relic.done).length;let h=`<div class="hint">Relic ${n}/${RELIC.length} · เศษ Relic มาจาก: ขุดเปิดห้องลับ · เครื่องจักรโบราณ · ห้องลับ/หีบ · Elite · ปริศนา Guardian · สายแร่ Ancient · Deep Location · Rare Guardian · ครบชุดแล้วเศษที่เกินจะกลายเป็น Relic Research (📘 + 🪙) · รวบรวมแล้ว ${S.v10.relic.dupe} ชิ้น</div><div class="v10g">`;
+  for(const x of RELIC){const f=Math.min(x.need,S.v10.relic.frag[x.id]||0);const d=!!S.v10.relic.done[x.id];h+=`<div class="v10c ${d?'done':''}"><span class="hint">${UDR[x.r].n}</span><br><b>${d?'🏺':'🧩'} ${esc(x.n)}</b>${v10Bar(f,x.need)}<span class="hint">${f}/${x.need} · ${esc(x.d)}</span>${d&&x.rw==='record'?`<div style="color:#e8c070;margin-top:4px">📜 ${esc(UD_LORE[(x.r*2+1)%UD_LORE.length])}</div>`:''}</div>`;}return h+'</div>';},
+ bp(){const n=Object.keys(S.v10.bp.own).length;let h=`<div class="hint">Blueprint ${n}/${BP.length} — ปลดล็อกทางเลือกเพิ่ม (หน้าตา · Gadget · ยูทิลิตี · ความสะดวก · ของประดับ) <b>ไม่เคยล็อกการคราฟต์อุปกรณ์เดิม</b> · เศษซ้ำ → 🪙 + 📘 (จำกัด) · ได้แล้ว ${S.v10.bp.dupe} ชิ้น</div><div class="v10g">`;
+  for(const b of BP){const f=Math.min(b.need,S.v10.bp.frag[b.id]||0);const d=!!S.v10.bp.own[b.id];h+=`<div class="v10c ${d?'done':''}"><b>${d?'✅':'📐'} ${esc(b.n)}</b>${v10Bar(d?b.need:f,b.need)}<span class="hint">${d?b.need:f}/${b.need} · ${esc(b.d)}</span>${d&&b.rw==='util:compressor'?'<br><button class="btn sm" data-act="v10comp">🗜 Ore Compressor</button>':''}</div>`;}return h+'</div>';},
+ proj(){let h=`<div class="hint">โปรเจกต์ขุดขนาดใหญ่ — มอบแร่/วัตถุดิบจาก Ore Storage ได้ทีละส่วน + ต้องทำในโลกจริง: สำรวจปลายทาง และทุบหินร้าวที่ไซต์ (🏗 บนแผนที่) · สำเร็จแล้วโลกเปลี่ยนถาวร</div><div class="v10g">`;
+  for(const p of PROJ){const st=S.v10.proj[p.id]||{contrib:{},boulders:0,survey:0};const un=v10ProjUnlocked(p);const N=v10ProjNeed(p);
+   h+=`<div class="v10c ${st.done?'done':''}"><span class="hint">${UDR[p.r].n}</span><br><b>${st.done?'✅':'🏗'} ${esc(p.n)}</b><div class="hint">${esc(p.d)}</div>${N.map(([k,n,need,col])=>`<div style="font-size:11px"><i class="v10sw" style="background:${col}"></i>${esc(n)} ${fmt(Math.min(need,st.contrib[k]||0))}/${fmt(need)}</div>`).join('')}
+   <div style="font-size:11px">🪨 หินร้าวที่ไซต์ ${st.boulders||0}/${p.boulders} · 🧭 สำรวจปลายทาง ${st.survey?'✅':'⬜'}</div>${st.done?`<div style="color:#7fffd4">✔ ${esc(p.svc)}</div>`:un?`<button class="btn sm gold" data-act="v10contrib" data-arg="${p.id}">มอบวัสดุจากคลัง</button>`:`<div class="hint">🔒 ไปถึง ${UDR[p.r].n} ก่อน</div>`}</div>`;}return h+'</div>';},
+ chain(){let h=`<div class="hint">ล่าสมบัติหลายขั้น 6 สาย (ภูมิภาคละ 1) · ขั้น: ${CH_STAGES.join(' → ')} · เส้นทางหลักเดินได้เสมอแม้ยังไม่ไขปริศนา</div><div class="v10g">`;
+  for(let r=0;r<UD_NR;r++){const C=v10ChainDef(r);if(!C)continue;const st=S.v10.chain[C.id]||{stage:0};h+=`<div class="v10c ${st.done?'done':''}"><span class="hint">${UDR[r].n}</span><br><b>${st.done?'💎':'🗺'} ${esc(C.n)}</b>${v10Bar(st.done?6:st.stage,6)}<span class="hint">${st.done?'สำเร็จแล้ว':'ขั้นที่ '+(st.stage+1)+': '+CH_STAGES[st.stage]+(st.stage===1?` (${esc(C.lm.n)})`:'')}</span></div>`;}return h+'</div>';},
+ cos(){const own=S.v10.cos.own;const eq=S.v10.cos;const titles=Object.keys(S.v10.titles);let h=`<div class="hint">คอสเมติกไม่มีผลกับค่าพลังใด ๆ · ปลดล็อกจาก Codex, Relic, Guardian, Blueprint, Bounty และ Cave Chain · ไม่มีกาชา</div>`;
+  h+=`<div class="v10h">🎨 Finish (ทั้งชุดขุดและชุดต่อสู้)</div><div class="v10g">${Object.entries(FINISH).map(([k,f])=>{const o=own['finish:'+k];return `<div class="v10c ${o?'done':''}"><i class="v10sw" style="background:${f.glow}"></i><b>${f.n}</b><br>${o?`<button class="btn sm ${eq.m.finish===k?'gold':''}" data-act="v10eq" data-arg="m|finish|${k}">⛏ ชุดขุด</button> <button class="btn sm ${eq.c.finish===k?'gold':''}" data-act="v10eq" data-arg="c|finish|${k}">⚔ ชุดต่อสู้</button>`:'<span class="hint">🔒 ยังไม่ปลดล็อก</span>'}</div>`;}).join('')}</div>`;
+  h+=`<div class="v10h">👣 Footsteps · ⛏ Mining Beam</div><div class="v10g">${Object.entries(TRAIL).map(([k,x])=>{const o=own['trail:'+k];return `<div class="v10c ${o?'done':''}"><b>👣 ${x.n}</b><br>${o?`<button class="btn sm ${eq.m.trail===k?'gold':''}" data-act="v10eq" data-arg="m|trail|${k}">ใช้</button>`:'<span class="hint">🔒</span>'}</div>`;}).join('')}${Object.entries(BEAM).map(([k,x])=>{const o=own['beam:'+k];return `<div class="v10c ${o?'done':''}"><b>⛏ ${x.n}</b><br>${o?`<button class="btn sm ${eq.m.beam===k?'gold':''}" data-act="v10eq" data-arg="m|beam|${k}">ใช้</button>`:'<span class="hint">🔒</span>'}</div>`;}).join('')}</div>`;
+  h+=`<div class="v10h">🏷 Titles</div><div class="v10g">${Object.entries(TITLES).map(([k,n])=>`<div class="v10c ${S.v10.titles[k]?'done':''}"><b>${n}</b><br>${S.v10.titles[k]?`<button class="btn sm ${S.v10.title===k?'gold':''}" data-act="v10title" data-arg="${k}">ใช้ Title</button>`:'<span class="hint">🔒</span>'}</div>`).join('')}</div>`;
+  const decos=Object.keys(own).filter(k=>k.startsWith('deco:'));h+=`<div class="v10h">🏛 Relic Hall (${decos.length})</div><div class="hint">${decos.map(k=>{const id=k.slice(5);return RELIC_M[id]?RELIC_M[id].n:BP.find(b=>b.rw===k)?BP.find(b=>b.rw===k).n:id;}).join(' · ')||'ยังว่าง'} — จัดแสดงที่ Research Station ทุกแห่ง</div>`;
+  h+=`<div class="hint" style="margin-top:8px">ตรวจสอบ: CP ${calcCombat(S.combatEquip).cp} · Mining P ${curStats().P} (คอสเมติกไม่เปลี่ยนตัวเลขเหล่านี้)</div>`;return h;},
+ gad(){const own=Object.keys(S.v10.gadgets);let h=`<div class="hint">Gadget ใส่ได้ครั้งละ 1 ชิ้น — เป็น sidegrade ทุกชิ้นมีข้อเสียเล็กน้อย · ปลดล็อกจาก Relic, Codex และ Blueprint</div><div class="v10g">`;
+  for(const[k,g]of Object.entries(GADGET)){const o=S.v10.gadgets[k];h+=`<div class="v10c ${S.v10.gadget===k?'done':''}"><b>${g.i} ${g.n}</b><div class="hint">${esc(g.d)}</div>${o?`<button class="btn sm ${S.v10.gadget===k?'gold':''}" data-act="v10gad" data-arg="${k}">${S.v10.gadget===k?'ถอด':'ใส่'}</button>`:'<span class="hint">🔒 ยังไม่ปลดล็อก</span>'}</div>`;}return h+'</div>';}};
+function v10RwTxt(rw){if(rw==='info')return'ข้อมูลธรณีวิทยา';if(rw==='bpfrag')return'Blueprint Fragment';if(rw==='relicfrag')return'Relic Fragment';if(rw==='xp')return'📘+10 · เหรียญ';if(rw==='obj')return'เป้าหมายใหม่';const[k,a]=rw.split(':');
+ return k==='trail'?'👣 '+TRAIL[a].n:k==='beam'?'⛏ '+BEAM[a].n:k==='title'?'🏷 '+TITLES[a]:k==='tool'?'🔧 '+CODEX_TOOLS[a]:rw;}
+Object.assign(ACT,{v10tab:a=>{V10UI.tab=a;modalRefresh&&modalRefresh();},v10cx:a=>{V10UI.cx=+a;modalRefresh&&modalRefresh();},v10claim:a=>{v10BoardClaim(+a);modalRefresh&&modalRefresh();},v10bclaim:a=>{v10BountyClaim(+a);modalRefresh&&modalRefresh();},
+ v10contrib:a=>{v10ProjContribute(a);modalRefresh&&modalRefresh();},v10eq:a=>{const[w,k,v]=a.split('|');const cur=S.v10.cos[w][k];S.v10.cos[w][k]=cur===v?'':v;save();modalRefresh&&modalRefresh();},v10title:a=>{S.v10.title=S.v10.title===a?'':a;save();modalRefresh&&modalRefresh();},
+ v10gad:a=>{S.v10.gadget=S.v10.gadget===a?'':a;save();if(R&&R.ud)udHudBuild();toast(S.v10.gadget?`🔧 ${GADGET[a].n}`:'ถอด Gadget','ok');modalRefresh&&modalRefresh();},v10comp:()=>v10CompressOpen(),v10cmp:a=>{v10Compress(a);modalRefresh&&modalRefresh();},
+ v10journal:a=>v10Journal(a),v10oup:a=>{v10OUpgrade(a);modalRefresh&&modalRefresh();},v10dev:()=>v10DevPanel(),v10devRun:()=>{V10UI.sim=v10Simulate();modalRefresh&&modalRefresh();}});
+function v10CompressOpen(){const render=()=>{const L=[];for(let t=1;t<6;t++)for(const o of TIERS[t].ores){const n=o[0];L.push(`<button class="btn sm" ${(S.oreStorage[n]||0)>=10?'':'disabled'} data-act="v10cmp" data-arg="${n}">${n} ×10 → ${TIERS[t+1].ores[0][0]} ×3 <small>(มี ${S.oreStorage[n]||0})</small></button>`);}
+ $('#mbody').innerHTML=`<div class="hint">อัดแร่ Tier ต่ำให้มีค่าในงานระดับสูง (Blueprint: Ore Compressor)</div><div class="udwps">${L.join('')}</div>`;};openModal('🗜 ORE COMPRESSOR','',render);render();}
+/* ---------- outpost menu with development stages ---------- */
+udOutpostMenu=function(){if(!R||!R.ud||!R.udNear||R.udNear.k!=='outpost')return;const o=R.udNear.o;const render=()=>{const st=v10OStage(o.id);const bagN=Object.values(R.bag.items).reduce((a,b)=>a+b.count,0);const next=st<3?ostageCost(o,st+1):null;const q=udQuest(o);
+ const stash=v10StashOK(o);const forge=st>=2&&(v10Has('util:fieldforge')||(S.v10.proj.pj_shop&&S.v10.proj.pj_shop.done));
+ let h=`<div class="hint">${esc(UDR[o.r].n)} · <b>${OSTAGE[st]}</b> · เขตปลอดภัย</div><div class="udop" style="margin-top:8px">
+ <button class="btn" data-act="udRest">🛏 พักผ่อน<small>หายมึนงง · ขุดเร็ว +10% 3 นาที</small></button>
+ <button class="btn" ${stash?'':'disabled'} data-act="udStash">🏦 ฝากแร่เข้าคลัง<small>${stash?bagN+' ก้อนในกระเป๋า':'🔒 ต้อง Shelter ขึ้นไป'}</small></button>
+ <button class="btn" data-act="udMap">🗺 แผนที่ / Fast Travel<small>${Object.keys(S.ud.wp).length} Waypoint</small></button>
+ <button class="btn" data-act="udLoadout">🎒 Loadout<small>สลับชุดขุด/ต่อสู้</small></button>
+ <button class="btn" ${st>=2?'':'disabled'} data-act="v10journal" data-arg="board">📋 Contract Board<small>${st>=2?'งานทำซ้ำได้':'🔒 ต้อง Operational'}</small></button>
+ <button class="btn" ${st>=3?'':'disabled'} data-act="v10journal" data-arg="bounty">🏆 Bounty / Relic Research<small>${st>=3?'Endgame':'🔒 ต้อง Research Station'}</small></button>
+ ${forge?'<button class="btn" data-act="st6" data-arg="openForge">⚒ Field Forge<small>คราฟต์ชิ้นส่วนที่นี่</small></button>':''}
+ <button class="btn gold" data-act="udCamp">🏕 ขึ้นลิฟต์กลับค่าย<small>ทันที · แร่ 100%</small></button></div>`;
+ h+=`<div class="v10h">🏗 พัฒนา Outpost (${st}/3)</div>`+(next?`<div class="v10c"><b>${OSTAGE[st+1]}</b> — ${OSTAGE_SVC[st+1]}<div style="margin:6px 0">${matRows(next).map(r=>`<span style="margin-right:8px;color:${r.have>=r.need?'#7fffd4':'#ff8a8a'}">${r.i} ${esc(r.n)} ${fmt(r.have)}/${fmt(r.need)}</span>`).join('')}</div><button class="btn sm gold" ${haveMat(next)?'':'disabled'} data-act="v10oup" data-arg="${o.id}">อัปเกรด (ใช้วัสดุจากคลัง)</button></div>`:'<div class="hint">✅ ระดับสูงสุดแล้ว</div>');
+ if(st>=2)h+=`<div class="v10h">📋 ภารกิจจากนักสำรวจ</div><div class="v5note"><span class="ic">📋</span><span class="tx"><b>${udQuestText(q)}</b> <span class="hint">${Math.min(q.have,q.need)}/${q.need} · 🪙${fmt(q.rw.coins)}</span></span>${q.claimed?'<span class="hint">รับแล้ว</span>':`<button class="btn sm ${q.have>=q.need?'gold':''}" ${q.have>=q.need?'':'disabled'} data-act="udQuestClaim" data-arg="${o.id}">รับรางวัล</button>`}</div>`;
+ $('#mbody').innerHTML=h;};openModal(`🏕 ${o.n.toUpperCase()}`,'',render);render();};
+{const _s=udStash;udStash=function(){const o=R&&udOutpostAt();if(o&&!v10StashOK(o)){toast('🔒 ต้องพัฒนา Outpost เป็น Shelter ก่อน (หรือ Blueprint: Expedition Locker)','err');return;}return _s();};}
+/* HUD: journal button in the mine + session progress chip */
+{const _hb=udHudBuild;udHudBuild=function(){_hb();const row=$('#udBar .row');if(row&&!$('#v10J')){const b=document.createElement('button');b.id='v10J';b.dataset.act='v10journal';b.textContent='📖 Journal';row.appendChild(b);}
+ const g=S.v10&&S.v10.gadget;if(g){const p=$('#udPerks');if(p)p.insertAdjacentHTML('afterbegin',`<span title="${esc(GADGET[g].d)}" style="border-color:#7fe6ff">${GADGET[g].i}<b> ${GADGET[g].n}</b></span>`);}};}
+{const _uh=updateHud;updateHud=function(){_uh();if(!R||!R.ud||!S.v10)return;if((R.v10H=(R.v10H||0)-1/60)>0)return;R.v10H=.5;const el=$('#udInfo');if(!el)return;const tg=R.g.tgt;
+ if(tg&&tg.kind==='ore'&&tg.o.mut){const M=MUT[tg.o.mut];el.innerHTML+=` · <b style="color:${M.col}">${M.i} ${M.n}</b> — ${esc(M.d)}`;}else if(R.v10Deep)el.innerHTML+=` · 🔻 <b>${esc(R.v10Deep.n)}</b>`;};}
+document.addEventListener('keydown',e=>{if(!R||!R.ud||R.ended||e.target.tagName==='INPUT')return;if((e.key==='j'||e.key==='J')&&$('#modal').classList.contains('hidden'))v10Journal();});
+/* ---------- camp entry points ---------- */
+{const q=ST6.quest;const o=q.opts;q.opts=()=>[['v10board','📋','Underdeep Contracts',`สำเร็จ ${S.v10?S.v10.board.done:0}`,'hot'],['v10bounty','🏆','Endgame Bounties','',''],...o()];}
+{const l=ST6.lab;const o=l.opts;l.opts=()=>[['v10codex','📚','Mineral Codex',S.v10?Object.keys(S.v10.codex.done).length+'/'+codexDefs().length:'','hot'],['v10relic','🏺','Relics & Blueprints','',''],['v10cos','🎨','Collection / Titles','',''],...o()];}
+{const w=ST6.ware;const o=w.opts;w.opts=()=>[...o(),['v10proj','🏗','Excavation Projects','มอบวัสดุ',''],...(S.v10&&v10Has('util:compressor')?[['v10comp','🗜','Ore Compressor','','']]:[])];}
+{const g=ST6.garage;if(g&&g.opts){const o=g.opts;g.opts=()=>[...o(),['v10gad','🔧','Gadgets','',''],['v10cos','🎨','Finishes','','']];}}
+Object.assign(ST6FN,{v10board:()=>{closeModal();v10Journal('board');},v10bounty:()=>{closeModal();v10Journal('bounty');},v10codex:()=>{closeModal();v10Journal('codex');},v10relic:()=>{closeModal();v10Journal('relic');},v10cos:()=>{closeModal();v10Journal('cos');},v10proj:()=>{closeModal();v10Journal('proj');},v10comp:()=>{closeModal();v10CompressOpen();},v10gad:()=>{closeModal();v10Journal('gad');}});
+{const _pa=paneAdv;paneAdv=function(){const h=_pa();return h.replace('<div class="v5sec"><h3>⚔ Combat','<div class="v5sec"><h3>📖 Long-term Goals</h3><div class="v5big"><button class="hot" data-act="v10journal" data-arg="board"><span class="e">📋</span>Contracts<small>ทำซ้ำได้ไม่จำกัด</small></button><button data-act="v10journal" data-arg="codex"><span class="e">📚</span>Mineral Codex</button><button data-act="v10journal" data-arg="relic"><span class="e">🏺</span>Relics</button><button data-act="v10journal" data-arg="proj"><span class="e">🏗</span>Projects</button><button data-act="v10journal" data-arg="bounty"><span class="e">🏆</span>Bounties</button></div></div><div class="v5sec"><h3>⚔ Combat');};}
+/* ---------- developer test panel: simulations from the real tables (labelled as simulated) ---------- */
+function v10Simulate(){const out={};const N=20000;
+ /* mutation frequency per reform with pity (Monte Carlo over the real constants) */let hits=0,gaps=[],g=0;for(let i=0;i<N;i++){const p=MUT_BASE+(g>=MUT_PITY?1:0);if(Math.random()<p){hits++;gaps.push(g);g=0;}else g++;}out.mutRate=hits/N;out.mutGapMax=Math.max(...gaps);
+ /* vein reforms per hour of active play: assume the measured auto-mining rate (ores/min) and average vein size */const vs=UD.world?UD.world.veins.reduce((a,v)=>a+v.nodes.length,0)/UD.world.veins.length:6;out.veinSize=vs;
+ const opm=V10UI.opm||8;out.opm=opm;out.reformsPerHour=opm*60/vs;out.mutPerHour=out.reformsPerHour*out.mutRate;
+ /* relic completion: fragments needed vs. expected fragment sources per hour (exploring play) */const need=RELIC.reduce((a,x)=>a+x.need,0);const fph={excavation:1.2,chamber:.6,machine:.15,elite:3*.32,puzzle:.15,vein:out.mutPerHour/5*1.6,contract:.8};out.relicNeed=need;out.relicFph=Object.values(fph).reduce((a,b)=>a+b,0);out.relicHours=need/out.relicFph;
+ /* blueprints */const bpNeed=BP.reduce((a,b)=>a+b.need,0);const bph=.33*3+.15+.5;out.bpNeed=bpNeed;out.bpHours=bpNeed/bph;
+ /* contract rewards per hour (average generated contract × assumed 4 contracts/hour) */let coins=0;const save_=JSON.stringify(S.v10.board);for(let i=0;i<300;i++){const c=v10GenContract(CB_CATS[i%6]);coins+=c.rw.coins;}S.v10.board=JSON.parse(save_);out.contractCoins=coins/300;out.contractCph=out.contractCoins*4;
+ /* project + outpost material totals vs. ore income */let ores=0;for(const p of PROJ)for(const n in p.ores)ores+=p.ores[n];out.projOres=ores;let oo=0;if(UD.world)for(const o of UD.world.outposts)for(let s=1;s<=3;s++){const r_=ostageCost(o,s);for(const n in r_.ores)oo+=r_.ores[n];}out.outOres=oo;out.oreHours=(ores+oo)/(opm*60);
+ return out;}
+function v10DevPanel(){const render=()=>{const s=V10UI.sim;const row=(a,b,n)=>`<tr><td>${a}</td><td>${b}</td><td class="hint">${n||''}</td></tr>`;
+ $('#mbody').innerHTML=`<div class="hint">🧪 Developer Test Panel — ตัวเลขด้านล่าง <b>เป็นการจำลอง</b> จากตารางค่าจริงในเกม (ไม่ใช่การวัดจากผู้เล่นจริง) · อัตราขุดตั้งต้นจากการวัดของบอท Auto Mining</div>
+ <div class="row2" style="margin:8px 0"><label class="hint">อัตราขุด (ก้อน/นาที): <input id="v10opm" type="number" value="${V10UI.opm||8}" style="width:60px" onchange="V10UI.opm=+this.value"></label><button class="btn sm gold" data-act="v10devRun">▶ รันจำลอง</button></div>
+ ${s?`<table class="t v10dev"><tr><th>รายการ</th><th>ค่า</th><th>หมายเหตุ</th></tr>${row('โอกาสกลายพันธุ์ต่อการ Reform',(s.mutRate*100).toFixed(1)+'%','ฐาน 7% + การันตีทุก '+MUT_PITY+' ครั้ง')}${row('ช่วงห่างสูงสุดระหว่างกลายพันธุ์',s.mutGapMax+' Reform','Pity ทำงาน')}
+ ${row('สายแร่เฉลี่ย',s.veinSize.toFixed(1)+' โหนด')}${row('Reform / ชั่วโมง',s.reformsPerHour.toFixed(1),'ที่ '+s.opm+' ก้อน/นาที')}${row('สายแร่กลายพันธุ์ / ชั่วโมง',s.mutPerHour.toFixed(2))}
+ ${row('เศษ Relic ที่ต้องใช้ทั้งหมด',s.relicNeed)}${row('เศษ Relic / ชั่วโมง (สำรวจ)',s.relicFph.toFixed(2))}${row('เวลาเก็บ Relic ครบ (ประมาณ)',s.relicHours.toFixed(0)+' ชม.','จำลอง')}
+ ${row('เศษ Blueprint ทั้งหมด',s.bpNeed)}${row('เวลาเก็บ Blueprint ครบ (ประมาณ)',s.bpHours.toFixed(0)+' ชม.','จำลอง')}${row('เหรียญเฉลี่ยต่อ Contract',fmt(s.contractCoins))}${row('เหรียญ/ชม. จาก Contract (4 งาน/ชม.)',fmt(s.contractCph))}
+ ${row('แร่ที่โปรเจกต์ทั้งหมดใช้',fmt(s.projOres))}${row('แร่ที่พัฒนา Outpost ครบใช้',fmt(s.outOres))}${row('ชั่วโมงขุดเพื่อจ่ายทั้งหมด',s.oreHours.toFixed(0)+' ชม.','ไม่รวมคราฟต์')}</table>`:''}
+ <div class="hint" style="margin-top:8px">สถิติจริงของเซฟนี้: Contract ${S.v10.stats.contracts} · Bounty ${S.v10.stats.bounties} · Relic ${S.v10.stats.relics}/18 · แร่กลายพันธุ์ที่ขุด ${S.v10.stats.mutMined} · Reform ${S.v10.mutStats.rolls} / กลายพันธุ์ ${S.v10.mutStats.hits} · Guardian ${S.v10.stats.guard}</div>`;};
+ openModal('🧪 DEV — Grind Simulation','',render);$('#mbox').classList.add('wide');render();}
+window.v10DevPanel=v10DevPanel;
 
 
 /* ========================= LOOP ========================= */
