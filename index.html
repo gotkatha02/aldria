@@ -6912,7 +6912,7 @@ function stepPlayer(dt){const K=CAMP.keys;let ix=0,iy=0;if(!campBlocked()&&!CP.a
  if(moving||CP.anim)CAMP.lastAct=CAMP.t;}
 function playAnim(kind,dur,done){CP.anim={kind,dur,done};CP.animT=0;playerStop();}
 /* ---------- camera ---------- */
-function camUpdate(dt,snap){const C=CAMP.cam;const p=S2(CP.x,CP.y,.9);let tx=p[0],ty=p[1];if(CAMP.asm){const q=S2(23.5,17.35,1);tx=q[0];ty=q[1];}
+function camUpdate6(dt,snap){const C=CAMP.cam;const p=S2(CP.x,CP.y,.9);let tx=p[0],ty=p[1];if(CAMP.asm){const q=S2(23.5,17.35,1);tx=q[0];ty=q[1];}
  C.z+=(C.zt-C.z)*Math.min(1,dt*8);const vw=CAMP.vw/C.z,vh=CAMP.vh/C.z;const dzx=vw*.08,dzy=vh*.08;
  if(snap){C.x=tx;C.y=ty;}else{const ex=tx-C.x,ey=ty-C.y;const k=Math.min(1,dt*5);if(Math.abs(ex)>dzx)C.x+=(ex-Math.sign(ex)*dzx)*k;if(Math.abs(ey)>dzy)C.y+=(ey-Math.sign(ey)*dzy)*k;}
  /* world bounds: keep the view centre inside the island (tile space) */let wx2=(C.x/32+C.y/16)/2,wy2=(C.y/16-C.x/32)/2;const mx=Math.min(26,vw/64*.55),my=Math.min(20,vh/32*.55);wx2=clamp(wx2,3+mx*.4,CW-3-mx*.4);wy2=clamp(wy2,3+my*.4,CHH-3-my*.4);const b=S2(wx2,wy2);C.x=b[0];C.y=b[1];
@@ -6982,7 +6982,7 @@ function campLights(info){const L=[];if(info.dark<=.01)return L;const C=CAMP.cam
 function campFrame(dt){if(!CAMP.on)return;const cv=$('#ccv');if(!cv)return;if(!CAMP.vw)campResize();if(W6.built!==campLevel())campRebuild();
  if(CAMP.lastQ!==effQ()){CAMP.lastQ=effQ();campResize();}CAMP.t+=dt;const info=dayInfo(S.camp.tod);CAMP.info=info;if(!S.camp.dayLock){S.camp.tod=(S.camp.tod+dt/(18*60))%1;}
  if(!campBlocked()||CAMP.asm||CAMP.ret){stepPlayer(dt);}if(CAMP.asm)stepAssembly(dt);else{const cv0=CAMP.combatView;CAMP.combatView=Math.hypot(CP.x-49,CP.y-26.9)<5.2;if(cv0!==CAMP.combatView&&CAMP.combatView){const p=S2(CP.x,CP.y,1);p6burst(p[0],p[1],['#ff6a7a','#ffd84a'],10,'tw');sfx('equip');}}if(CAMP.ret)stepReturn(dt);
- stepNPCs(dt,info);stepPet(dt,info);stepSanct(dt);campEventsTick(dt);camUpdate(dt,CAMP.firstFrame);CAMP.firstFrame=false;
+ stepNPCs(dt,info);stepPet(dt,info);stepSanct(dt);campEventsTick(dt);camUpdate6(dt,CAMP.firstFrame);CAMP.firstFrame=false;
  const c=cv.getContext('2d');const dpr=CAMP.dpr,C=CAMP.cam,vw=CAMP.vw,vh=CAMP.vh;const t=CAMP.t;const q=effQ();
  c.setTransform(1,0,0,1,0,0);
  c.setTransform(dpr*C.z,0,0,dpr*C.z,Math.round((vw/2-C.x*C.z)*dpr),Math.round((vh/2-C.y*C.z)*dpr));c.lineJoin='round';
@@ -8674,6 +8674,788 @@ Object.assign(ACT,{
 /* version label */
 {const _cb=campBoot;campBoot=function(){const r=_cb.apply(this,arguments);const lg_=document.querySelector('.logo small');if(lg_)lg_.textContent='V6.1 · THREE COMBAT PATHS';document.title='Build a Golem — V6.1 Three Combat Paths';return r;};}
 window.__V7={CFAM,CMAT,V7_RCP,GSKR,ALL_FAMS,v7Refine,v7OreDrops,v7Recipe,calcCombat:(eq)=>calcCombat(eq),version:'6.1'};
+
+/* =====================================================================
+   V6.2 THE GREAT UNDERDEEP (1/5) — world data + deterministic world generator
+   One persistent 160×432-tile underground world · 6 vertically stacked, physically connected regions ·
+   chambers + looping tunnels + region descents · hidden alcoves behind excavation walls · living vein anchors ·
+   outposts / waypoints · discoveries · landmarks · monster nests / guardians / lairs.
+   The procedural world is regenerated identically from S.ud.seed every load; only compact changes are saved.
+   ===================================================================== */
+const UD_W=160,UD_RH=72,UD_NR=6,UD_H=UD_RH*UD_NR,UD_CH=32;
+const UDR=[
+ {id:'hollow',n:'Stone Hollow',th:'โพรงหินชั้นต้น · รางเกวียน คานค้ำ เครื่องจักรเก่า',tier:1,ores:['Stone','Copper'],
+  pal:{bg:'#0d0b0a',fl:['#4a4036','#433a31'],fd:'#2c251f',face:'#5a4d40',top:'#7a6a58',acc:'#ffb060',light:'#ffcf8a',dark:.62,vein:'#ffb060'},props:['beam','cart','lamp','crate','pick','rails'],
+  mons:['crawler','scraprat'],elite:'cartgolem',boss:{def:'sentinel',hp:.32,n:'Hollow Sentinel'},haz:{rock:1},landmarks:['The Old Lift','Collapsed Shaft No.3']},
+ {id:'ironroot',n:'Ironroot Caverns',th:'รากยักษ์ อุโมงค์ชื้น เห็ดเรืองแสง',tier:2,ores:['Iron','Silver'],
+  pal:{bg:'#070d0c',fl:['#2f3d36','#2a3731'],fd:'#1a2420',face:'#3a4a40',top:'#55705f',acc:'#7dffb0',light:'#9fffd0',dark:.66,vein:'#c9d2dc'},props:['root','fungus','puddle','fungus','vine'],
+  mons:['rootlurker','sporebat'],elite:'ironbeetle',boss:{def:'sentinel',hp:.55,n:'Rootbound Sentinel'},haz:{rock:1,cold:1},landmarks:['Root Cathedral','The Dripping Vault']},
+ {id:'gilded',n:'Gilded Crystal Vein',th:'ห้องคริสตัล ผนังสะท้อนแสง สายแร่หนาแน่น',tier:3,ores:['Gold','Ruby'],
+  pal:{bg:'#0e0710',fl:['#3a2a3e','#342538'],fd:'#22172a',face:'#4a3450',top:'#6e4f76',acc:'#ffd84a',light:'#ffe9a8',dark:.6,vein:'#ffd84a'},props:['crystal','crystal','goldseam','mirror'],
+  mons:['crystalmimic','gildwasp'],elite:'rubysentry',boss:{def:'warlord',hp:.32,n:'Gilded Warlord'},haz:{rock:1,discharge:1},landmarks:['Hall of Mirrors','The Ruby Throat']},
+ {id:'furnace',n:'Obsidian Furnace',th:'รอยแยกลาวา ไอน้ำ ซากโรงหลอม',tier:4,ores:['Diamond','Obsidian'],
+  pal:{bg:'#120604',fl:['#3a2622','#33211d'],fd:'#1f1210',face:'#4a2c24',top:'#6a3a2c',acc:'#ff6a1a',light:'#ffa060',dark:.58,vein:'#a6f6ff'},props:['vent','furnace','slag','vent','chain'],
+  mons:['magmaslug','steamimp'],elite:'furnacehound',boss:{def:'warlord',hp:.55,n:'Furnace Warlord'},haz:{rock:1,lava:1,steam:1},landmarks:['The Great Crucible','Steam Gallery']},
+ {id:'deepworks',n:'Ancient Deepworks',th:'อารยธรรมนักขุดที่หายไป โถงเครื่องจักรโบราณ',tier:5,ores:['Mythril','Ancient Crystal'],
+  pal:{bg:'#05090e',fl:['#2c3a44','#27343d'],fd:'#18222a',face:'#34444f',top:'#4f6a78',acc:'#66ffd1',light:'#a8ffe8',dark:.64,vein:'#66ffd1'},props:['pillar','gear','console','pillar','pipe'],
+  mons:['sentrydrone','gearspider'],elite:'deepwarden',boss:{def:'tyrant',hp:.38,n:'Deepworks Overseer'},haz:{rock:1,collapse:1},landmarks:['The Silent Assembly','Archive of Picks']},
+ {id:'abyss',n:'Void Abyss',th:'ความผิดปกติของมิติ คริสตัลลอยฟ้า โซนไม่เสถียร',tier:6,ores:['Celestial Ore','Void Crystal'],
+  pal:{bg:'#05020a',fl:['#241a33','#20172d'],fd:'#120c1c',face:'#2c2040',top:'#45325f',acc:'#c066ff',light:'#e0b3ff',dark:.7,vein:'#c066ff'},props:['float','rift','float','obelisk'],
+  mons:['voidwisp','riftstalker'],elite:'abysswatcher',boss:{def:'tyrant',hp:.6,n:'Abyss Tyrant'},haz:{rock:1,discharge:1,cold:1},landmarks:['The Shattered Sky','Event Horizon Pit']}];
+/* Respawn windows (seconds) per ore tier — configurable balancing table (Part 10) */
+const UD_RESPAWN={1:[120,180],2:[180,240],3:[240,360],4:[360,480],5:[480,720],6:[600,900]};
+const UD_CONDUCT=new Set(['Copper','Iron','Silver','Gold','Mythril','Celestial Ore']);
+const UD_CRYSTAL=new Set(['Ruby','Diamond','Ancient Crystal','Void Crystal','Celestial Ore']);
+const UD_HARD=new Set(['Stone','Obsidian','Diamond','Ancient Crystal']);
+/* monster catalog (world + arena) — ai: melee / ranged / charger / caster */
+const UDM={
+ crawler:{n:'Rock Crawler',ai:'melee',col:'#8d7a62',c2:'#4a3d30',eye:'#ffb060',sp:1.5,sz:.8,shape:'crawler'},
+ scraprat:{n:'Scrap Rat',ai:'charger',col:'#9aa3b2',c2:'#4a505c',eye:'#ff6a3a',sp:2.2,sz:.65,shape:'rat'},
+ cartgolem:{n:'Runaway Cart Golem',ai:'charger',col:'#b88a4a',c2:'#5a4020',eye:'#ffd84a',sp:1.7,sz:1.1,shape:'cart',elite:1},
+ rootlurker:{n:'Root Lurker',ai:'caster',col:'#4f7a52',c2:'#24402a',eye:'#9fffd0',sp:1.2,sz:.9,shape:'root'},
+ sporebat:{n:'Spore Bat',ai:'ranged',col:'#7a6a9a',c2:'#3a2f50',eye:'#d0ff6a',sp:2.1,sz:.6,shape:'bat'},
+ ironbeetle:{n:'Iron Stag Beetle',ai:'charger',col:'#9fb0c3',c2:'#3c4656',eye:'#7dffb0',sp:1.6,sz:1.15,shape:'beetle',elite:1},
+ crystalmimic:{n:'Crystal Mimic',ai:'melee',col:'#ff7aa8',c2:'#7a2a50',eye:'#ffffff',sp:1.4,sz:.85,shape:'mimic'},
+ gildwasp:{n:'Gilded Wasp Drone',ai:'ranged',col:'#ffd84a',c2:'#8a6a12',eye:'#ff4766',sp:2.3,sz:.6,shape:'wasp'},
+ rubysentry:{n:'Ruby Sentry',ai:'caster',col:'#ff4766',c2:'#7a1228',eye:'#ffe9a8',sp:1.2,sz:1.2,shape:'sentry',elite:1},
+ magmaslug:{n:'Magma Slug',ai:'caster',col:'#ff6a1a',c2:'#5a1a08',eye:'#ffe14a',sp:1.0,sz:.95,shape:'slug'},
+ steamimp:{n:'Steam Imp',ai:'ranged',col:'#c9d2dc',c2:'#5a3a30',eye:'#ff6a1a',sp:2.2,sz:.65,shape:'imp'},
+ furnacehound:{n:'Furnace Hound',ai:'charger',col:'#3a2622',c2:'#120806',eye:'#ffb020',sp:2.0,sz:1.15,shape:'hound',elite:1},
+ sentrydrone:{n:'Ancient Sentry Drone',ai:'ranged',col:'#a8ffe8',c2:'#2a5a50',eye:'#66ffd1',sp:2.0,sz:.7,shape:'drone'},
+ gearspider:{n:'Gearwork Spider',ai:'melee',col:'#c9a24a',c2:'#4a3a12',eye:'#66ffd1',sp:1.9,sz:.9,shape:'spider'},
+ deepwarden:{n:'Deep Warden',ai:'caster',col:'#efe6cf',c2:'#6a5a3a',eye:'#7fffd4',sp:1.3,sz:1.25,shape:'warden',elite:1},
+ voidwisp:{n:'Void Wisp',ai:'ranged',col:'#c066ff',c2:'#3a1080',eye:'#ffffff',sp:2.4,sz:.6,shape:'wisp'},
+ riftstalker:{n:'Rift Stalker',ai:'charger',col:'#2c2040',c2:'#0a0612',eye:'#ff4fd8',sp:2.3,sz:.95,shape:'stalker'},
+ abysswatcher:{n:'Abyss Watcher',ai:'caster',col:'#4b1580',c2:'#12051e',eye:'#ff9df0',sp:1.3,sz:1.25,shape:'watcher',elite:1}};
+const UDM_HP=[0,800,1300,2000,2900,4000,5400],UDM_DMG=[0,40,52,64,78,92,108],UDM_DEF=[0,8,14,22,30,40,52];
+/* ---------- small deterministic helpers ---------- */
+function udHash(...a){let h=2166136261>>>0;for(const v of a){const s=String(v);for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}h^=0x9e3779b9;h=Math.imul(h,2246822519)>>>0;}return h>>>0;}
+function udRand(...a){return udHash(...a)/4294967296;}
+function udRegionAt(y){return clamp(Math.floor(y/UD_RH),0,UD_NR-1);}
+/* =====================================================================
+   GENERATOR
+   ===================================================================== */
+function udGenWorld(seed){const t0=performance.now();const Wd=UD_W,Hd=UD_H,N=Wd*Hd;const g=new Uint8Array(N).fill(T_WALL),deco=new Uint8Array(N),zone=new Uint8Array(N),cmap=new Uint8Array(N);/* zone: 0 normal, 2 alcove (hidden), 3 outpost safe */
+ const I=(x,y)=>y*Wd+x;const inB=(x,y)=>x>=1&&y>=1&&x<Wd-1&&y<Hd-1;const rng=mulberry32(seed>>>0);const ri=(a,b)=>a+Math.floor(rng()*(b-a+1));
+ const carveDisk=(cx,cy,rx,ry,jag,keep)=>{for(let y=Math.floor(cy-ry-2);y<=cy+ry+2;y++)for(let x=Math.floor(cx-rx-2);x<=cx+rx+2;x++){if(!inB(x,y))continue;const a=Math.atan2(y-cy,x-cx);const k=1+jag*(Math.sin(a*3+cx)*.5+Math.sin(a*5+cy*1.7)*.35);const d=((x-cx)/(rx*k))**2+((y-cy)/(ry*k))**2;if(d<=1){const i=I(x,y);if(keep&&zone[i]===2)continue;g[i]=T_FLOOR;}}};
+ const tunnel=(a,b,w,keep)=>{let x=a.x,y=a.y;const ph=rng()*6,amp=1.2+rng()*2.4;let guard=0;const L=Math.hypot(b.x-a.x,b.y-a.y);while((Math.abs(x-b.x)>1||Math.abs(y-b.y)>1)&&guard++<2000){const dx=b.x-x,dy=b.y-y;const d=Math.hypot(dx,dy)||1;const s=guard/Math.max(8,L);
+   const wob=Math.sin(s*Math.PI*2*1.3+ph)*amp;const nx=-dy/d,ny=dx/d;x+=dx/d*.9+nx*wob*.12;y+=dy/d*.9+ny*wob*.12;const r=w+(Math.sin(guard*.21+ph)>.7?.8:0);carveDisk(x,y,r,r,0,keep);}};
+ const chambers=[];const regionData=[];
+ for(let r=0;r<UD_NR;r++){const y0=r*UD_RH,R_=UDR[r];const rr=mulberry32((seed+r*7919)>>>0);const cols=4,rows=3;const ch=[];
+  for(let cy=0;cy<rows;cy++)for(let cx=0;cx<cols;cx++){const x=Math.round((cx+.5)*Wd/cols+(rr()-.5)*18),y=Math.round(y0+(cy+.5)*UD_RH/rows+(rr()-.5)*8);const big=rr()<.3;
+   ch.push({id:chambers.length+ch.length,r,x:clamp(x,12,Wd-13),y:clamp(y,y0+9,y0+UD_RH-10),rx:big?11+rr()*4:7+rr()*3.5,ry:big?7+rr()*3:5+rr()*2,big});}
+  if(r===0){ch[1].x=Math.round(Wd/2);ch[1].y=y0+10;ch[1].rx=9;ch[1].ry=6;ch[1].entry=1;}
+  for(let k=0;k<3;k++)ch.push({id:chambers.length+ch.length,r,x:Math.round(14+rr()*(Wd-28)),y:Math.round(y0+10+rr()*(UD_RH-20)),rx:3.5+rr()*2,ry:3+rr()*1.5,small:1});
+  for(const c of ch){carveDisk(c.x,c.y,c.rx,c.ry,.18);chambers.push(c);for(let y=Math.floor(c.y-c.ry-1);y<=c.y+c.ry+1;y++)for(let x=Math.floor(c.x-c.rx-1);x<=c.x+c.rx+1;x++)if(inB(x,y)&&((x-c.x)/(c.rx*1.12))**2+((y-c.y)/(c.ry*1.12))**2<=1)cmap[I(x,y)]=1;}
+  /* MST + loops */const L=ch.slice();const inT=new Set([L[0].id]);const edges=[];
+  while(inT.size<L.length){let best=null,bd=1e9;for(const a of L){if(!inT.has(a.id))continue;for(const b of L){if(inT.has(b.id))continue;const d=Math.hypot(a.x-b.x,(a.y-b.y)*1.4);if(d<bd){bd=d;best=[a,b];}}}inT.add(best[1].id);edges.push(best);}
+  for(let k=0;k<4;k++){const a=L[Math.floor(rr()*L.length)],b=L[Math.floor(rr()*L.length)];if(a!==b&&Math.hypot(a.x-b.x,a.y-b.y)<70)edges.push([a,b]);}
+  for(const[a,b]of edges)tunnel(a,b,1+(rr()<.35?1:0));
+  regionData.push({r,ch});}
+ /* region descents: 2–3 physical connections between every pair of stacked regions */
+ for(let r=0;r<UD_NR-1;r++){const up=regionData[r].ch.filter(c=>!c.small).sort((a,b)=>b.y-a.y).slice(0,4),dn=regionData[r+1].ch.filter(c=>!c.small).sort((a,b)=>a.y-b.y).slice(0,4);
+  const n=2+(r%2);for(let k=0;k<n;k++){const a=up[k%up.length],b=dn.slice().sort((p,q)=>Math.abs(p.x-a.x)-Math.abs(q.x-a.x))[k%2];tunnel(a,b,1.3);}}
+ const ent={x:Math.round(Wd/2),y:4};carveDisk(ent.x,ent.y+3,3,3,0);tunnel({x:ent.x,y:ent.y+1},{x:chambers[1].x,y:chambers[1].y},1.4);
+ /* ---------- hazards & terrain per region ---------- */
+ for(const c of chambers){const R_=UDR[c.r];const rr=mulberry32(udHash(seed,'haz',c.id));if(c.entry||c.small)continue;
+  const walkPatch=(tile,n,len)=>{for(let k=0;k<n;k++){let x=Math.round(c.x+(rr()-.5)*c.rx),y=Math.round(c.y+(rr()-.5)*c.ry);for(let s=0;s<len;s++){const i=I(x,y);if(g[i]===T_FLOOR&&Math.hypot(x-c.x,y-c.y)<c.rx*.8)g[i]=tile;x+=[1,-1,0,0][Math.floor(rr()*4)];y+=[0,0,1,-1][Math.floor(rr()*4)];}}};
+  if(R_.haz.lava&&rr()<.75)walkPatch(T_LAVA,2,9);if(R_.haz.cold&&rr()<.5)walkPatch(T_SLOW,2,10);if(c.r===1&&rr()<.4)walkPatch(T_SLOW,1,8);if((c.r===0||c.r===4)&&rr()<.6)walkPatch(T_RUBBLE,1,4);}
+ /* ---------- connectivity: every non-alcove floor reachable from the entrance (rubble/lava/slow count as walkable) ---------- */
+ const reach=()=>{const seen=new Uint8Array(N);const q=new Int32Array(N);let h=0,t=0;const s=I(ent.x,ent.y+2);seen[s]=1;q[t++]=s;while(h<t){const i=q[h++];const x=i%Wd,y=(i/Wd)|0;
+   for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){const j=I(x+dx,y+dy);if(seen[j])continue;const v=g[j];if(v===T_WALL||v===T_SECRET)continue;seen[j]=1;q[t++]=j;}}return seen;};
+ for(let pass=0;pass<3;pass++){const seen=reach();for(const c of chambers){const i=I(Math.round(c.x),Math.round(c.y));if(g[i]!==T_FLOOR||seen[i])continue;
+   let best=null,bd=1e9;for(const o of chambers){const j=I(Math.round(o.x),Math.round(o.y));if(!seen[j])continue;const d=Math.hypot(o.x-c.x,o.y-c.y);if(d<bd){bd=d;best=o;}}if(best)tunnel(c,best,1.2);}}
+ {const seen=reach();for(let i=0;i<N;i++)if(!seen[i]&&g[i]!==T_WALL&&g[i]!==T_SECRET)g[i]=T_WALL;}
+ /* ---------- hidden alcoves behind excavation walls ---------- */
+ const alcoves=[];const exc=[];const ALC=['pocket','treasure','workshop','machine','nest','shortcut','pocket','supply'];
+ const areaWall=(cx,cy,r)=>{for(let y=cy-r-1;y<=cy+r+1;y++)for(let x=cx-r-1;x<=cx+r+1;x++){if(!inB(x,y))return false;if(g[I(x,y)]!==T_WALL)return false;}return true;};
+ for(const c of chambers){if(c.small||c.entry)continue;const rr=mulberry32(udHash(seed,'alc',c.id));const want=rr()<.62?1:0;for(let k=0;k<want;k++){
+   for(let tries=0;tries<14;tries++){const a=rr()*Math.PI*2;const dist=Math.max(c.rx,c.ry)+5+rr()*3;const ax=Math.round(c.x+Math.cos(a)*dist),ay=Math.round(c.y+Math.sin(a)*dist*.8);const rad=2+Math.floor(rr()*2);
+    if(!areaWall(ax,ay,rad+1))continue;
+    /* passage from chamber to alcove — must leave the chamber once and then run through solid rock only (no bypass) */
+    let px=c.x,py=c.y;const steps=[];for(let s=0;s<80;s++){const dx=ax-px,dy=ay-py;const d=Math.hypot(dx,dy);if(d<rad)break;px+=dx/d*.7;py+=dy/d*.7;const i=I(Math.round(px),Math.round(py));if(!steps.length||steps[steps.length-1]!==i)steps.push(i);}
+    const fi=steps.findIndex(i=>g[i]===T_WALL);if(fi<0)continue;const rest=steps.slice(fi);if(rest.length<2||rest.some(i=>g[i]!==T_WALL))continue;
+    let type=ALC[Math.floor(rr()*ALC.length)];if(c.r===0&&alcoves.filter(x=>x.r===0).length===0)type='pocket';
+    for(let y=ay-rad;y<=ay+rad;y++)for(let x=ax-rad;x<=ax+rad;x++){if(Math.hypot(x-ax,y-ay)<=rad+.3){g[I(x,y)]=T_FLOOR;zone[I(x,y)]=2;}}
+    for(const i of rest){g[i]=T_FLOOR;zone[i]=2;}const ex=rest.slice(0,2);const al={id:'a'+alcoves.length,r:c.r,x:ax,y:ay,rad,type,from:c.id,exc:ex};for(const i of ex){g[i]=T_SECRET;exc.push({i,al:al.id,r:c.r});}alcoves.push(al);break;}}}
+ /* shortcut alcoves: also break through to a second chamber */
+ for(const al of alcoves){if(al.type!=='shortcut')continue;const c2=chambers.filter(c=>c.r===al.r&&c.id!==al.from&&!c.small).sort((p,q)=>Math.hypot(p.x-al.x,p.y-al.y)-Math.hypot(q.x-al.x,q.y-al.y))[0];if(!c2)continue;
+  let px=al.x,py=al.y;const path=[];for(let s=0;s<220;s++){const dx=c2.x-px,dy=c2.y-py;const d=Math.hypot(dx,dy);if(d<Math.min(c2.rx,c2.ry))break;px+=dx/d*.7;py+=dy/d*.7;const xx=Math.round(px),yy=Math.round(py);if(!inB(xx,yy))break;const i=I(xx,yy);
+   if(g[i]===T_FLOOR&&zone[i]!==2)break;/* reached open cave */if(g[i]===T_WALL){g[i]=T_FLOOR;zone[i]=2;path.push(i);}}
+  if(path.length>=2){/* far end is sealed too → the shortcut opens only by excavation from either side */for(const i of path.slice(-2)){g[i]=T_SECRET;exc.push({i,al:al.id,r:al.r});al.exc.push(i);}al.to=c2.id;}else{al.type='pocket';}}
+ /* ---------- outposts (safe zones + waypoints) ---------- */
+ const outposts=[];for(let r=0;r<UD_NR;r++){const L=regionData[r].ch.filter(c=>!c.small);const pick=r===0?[L.find(c=>c.entry)]:[L.sort((a,b)=>Math.abs(a.y-(r*UD_RH+UD_RH*.35))-Math.abs(b.y-(r*UD_RH+UD_RH*.35)))[0]];
+  if(r>=3){const far=regionData[r].ch.filter(c=>!c.small&&c!==pick[0]).sort((a,b)=>b.y-a.y)[0];if(far)pick.push(far);}
+  pick.forEach((c,k)=>{const o={id:'o'+r+k,r,x:Math.round(c.x),y:Math.round(c.y),n:r===0&&k===0?'Camp Lift':`${UDR[r].n.split(' ')[0]} Outpost ${k?'II':'I'}`,ch:c.id};c.outpost=o.id;outposts.push(o);
+   for(let y=o.y-4;y<=o.y+4;y++)for(let x=o.x-5;x<=o.x+5;x++)if(inB(x,y)&&g[I(x,y)]!==T_WALL&&g[I(x,y)]!==T_SECRET){if(g[I(x,y)]!==T_FLOOR)g[I(x,y)]=T_FLOOR;zone[I(x,y)]=3;}});}
+ /* ---------- landmarks ---------- */
+ const landmarks=[];for(let r=0;r<UD_NR;r++){const L=regionData[r].ch.filter(c=>c.big&&!c.outpost).concat(regionData[r].ch.filter(c=>!c.small&&!c.outpost)).filter((c,i,a)=>a.indexOf(c)===i);UDR[r].landmarks.forEach((n,k)=>{const c=L[k];if(c){landmarks.push({id:'l'+r+k,r,x:Math.round(c.x),y:Math.round(c.y),n,ch:c.id});c.landmark=n;}});}
+ /* ---------- living ore vein anchors ---------- */
+ const seamOK=(x,y)=>{if(!inB(x,y))return false;const i=I(x,y);if(g[i]!==T_FLOOR||zone[i]===3||!cmap[i])return false;if(Math.hypot(x-ent.x,y-ent.y)<5)return false;let wall=0,floor=0;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dy)continue;const v=g[I(x+dx,y+dy)];if(v===T_WALL||v===T_SECRET)wall++;else floor++;}if(!(wall>=1&&floor>=6))return false;let f5=0;for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){const v=g[I(x+dx,y+dy)];if(v!==T_WALL&&v!==T_SECRET)f5++;}return f5>=13;};
+ const nodeOK=(x,y)=>{if(!inB(x,y))return false;const i=I(x,y);if(g[i]!==T_FLOOR||zone[i]===3||!cmap[i])return false;if(Math.hypot(x-ent.x,y-ent.y)<5)return false;let f5=0;for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){const v=g[I(x+dx,y+dy)];if(v!==T_WALL&&v!==T_SECRET)f5++;}return f5>=15;};
+ const used=new Uint8Array(N);const veins=[];
+ const mkVein=(r,cx,cy,size,opt)=>{const R_=UDR[r];const rr=mulberry32(udHash(seed,'v',veins.length));let tier=opt.tier||R_.tier;if(!opt.tier&&r>0&&rr()<.22)tier=R_.tier-1;const name=TIERS[tier].ores[Math.floor(rr()*2)][0];
+  const nodes=[];const open=[[cx,cy]];const seen=new Set();while(open.length&&nodes.length<size){const k=Math.floor(rr()*Math.min(open.length,3));const[x,y]=open.splice(open.length-1-k,1)[0];const key=x+','+y;if(seen.has(key))continue;seen.add(key);
+   const i=I(x,y);if(!used[i]&&(opt.alcove?(g[i]===T_FLOOR&&zone[i]===2):(nodes.length?nodeOK(x,y):seamOK(x,y)))){used[i]=1;nodes.push({x,y});}for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]])if(Math.abs(x+dx-cx)<6&&Math.abs(y+dy-cy)<5)open.push([x+dx,y+dy]);}
+  if(nodes.length<2){for(const n of nodes)used[I(n.x,n.y)]=0;return null;}
+  for(const n of nodes){n.alts=[];for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){if(!dx&&!dy)continue;const x=n.x+dx,y=n.y+dy;if(!inB(x,y))continue;const i=I(x,y);if(!used[i]&&(opt.alcove?g[i]===T_FLOOR:nodeOK(x,y)))n.alts.push([x,y]);}n.alts=n.alts.slice(0,4);}
+  const kind=r===5&&rr()<.4?'unstable':UD_CRYSTAL.has(name)&&rr()<.5?'crystal':nodes.length>=7?'seam':'cluster';
+  const v={id:'v'+veins.length,r,tier,name,nodes,kind,rich:!!opt.rich||rr()<.08,alcove:opt.alcove||null};veins.push(v);return v;};
+ for(let r=0;r<UD_NR;r++){const y0=r*UD_RH;const rr=mulberry32(udHash(seed,'vr',r));const want=44;let made=0,tries=0;
+  while(made<want&&tries++<15000){const x=1+Math.floor(rr()*(Wd-2)),y=y0+1+Math.floor(rr()*(UD_RH-2));if(!seamOK(x,y))continue;const big=rr();const size=big<.08?12+Math.floor(rr()*4):big<.35?7+Math.floor(rr()*4):3+Math.floor(rr()*4);if(mkVein(r,x,y,size,{}))made++;}}
+ for(const al of alcoves){if(al.type==='pocket'||al.type==='nest'){mkVein(al.r,al.x,al.y,6+Math.floor(udRand(seed,al.id)*4),{alcove:al.id,rich:true,tier:Math.min(6,UDR[al.r].tier+(al.type==='pocket'&&al.r<5&&udRand(seed,al.id,'up')<.35?1:0))});}}
+ /* tutorial guarantee: two small T1 veins close to the Camp Lift */
+ {const c=chambers[1];let made=0;for(let k=0;k<40&&made<2;k++){const a=k*.9,d=c.rx-1;const x=Math.round(c.x+Math.cos(a)*d),y=Math.round(c.y+Math.sin(a)*c.ry*.9);if(seamOK(x,y)&&!used[I(x,y)]&&Math.hypot(x-c.x,y-c.y)>4){if(mkVein(0,x,y,4,{tier:1}))made++;}}}
+ /* ---------- connectivity safety with ore nodes as obstacles: drop nodes that cut off floor ---------- */
+ for(let pass=0;pass<400;pass++){const seen=new Uint8Array(N);const q=new Int32Array(N);let h=0,t=0;const s=I(ent.x,ent.y+2);seen[s]=1;q[t++]=s;
+  const wk=v=>v===T_FLOOR||v===T_SLOW||v===T_LAVA||v===T_RUBBLE;
+  while(h<t){const i=q[h++];const x=i%Wd,y=(i/Wd)|0;for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){const j=I(x+dx,y+dy);if(seen[j]||used[j])continue;if(!wk(g[j]))continue;seen[j]=1;q[t++]=j;}}
+  /* small enclosed pockets behind ore become solid rock; large cut-off areas free their blocking nodes */
+  const comp=new Int32Array(N).fill(-1);const big=new Uint8Array(N);let fixed=0;
+  for(let i=0;i<N;i++){if(seen[i]||used[i]||!wk(g[i])||zone[i]===2||comp[i]>=0)continue;const L=[i];comp[i]=i;for(let k=0;k<L.length;k++){const x=L[k]%Wd,y=(L[k]/Wd)|0;for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){const j=I(x+dx,y+dy);if(comp[j]>=0||seen[j]||used[j]||!wk(g[j])||zone[j]===2)continue;comp[j]=i;L.push(j);}}
+   if(L.length<9){for(const j of L){g[j]=T_WALL;}fixed++;}else for(const j of L)big[j]=i+1;}
+  /* open one "door" per cut-off component: the node touching both the component and the reachable cave */
+  const doneC=new Set();for(const v of veins){if(v.alcove)continue;for(let k=v.nodes.length-1;k>=0;k--){const n=v.nodes[k];let cid=0,touch=false;for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){const j=I(n.x+dx,n.y+dy);if(big[j])cid=big[j];if(seen[j])touch=true;}
+    if(cid&&touch&&!doneC.has(cid)){doneC.add(cid);used[I(n.x,n.y)]=0;v.nodes.splice(k,1);fixed++;}}}
+  if(!doneC.size){/* component walled by nodes that do not touch reachable tiles directly: free any adjacent node */for(const v of veins){if(v.alcove)continue;for(let k=v.nodes.length-1;k>=0;k--){const n=v.nodes[k];if([[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>big[I(n.x+dx,n.y+dy)])){used[I(n.x,n.y)]=0;v.nodes.splice(k,1);fixed++;break;}}}}
+  if(!fixed)break;}
+ for(let k=veins.length-1;k>=0;k--)if(veins[k].nodes.length<3){for(const n of veins[k].nodes)used[I(n.x,n.y)]=0;veins.splice(k,1);}/* a vein is always a formation of ≥3 nodes */veins.forEach((v,k)=>v.id='v'+k);
+ /* ---------- discoveries, nests, guardians, lairs ---------- */
+ const disc=[];const spawns=[];
+ for(const al of alcoves){if(al.type==='treasure'||al.type==='supply')disc.push({id:'d'+disc.length,r:al.r,x:al.x,y:al.y,k:al.type==='treasure'?'chest':'supply',al:al.id});
+  if(al.type==='workshop')disc.push({id:'d'+disc.length,r:al.r,x:al.x,y:al.y,k:'workshop',al:al.id});if(al.type==='machine')disc.push({id:'d'+disc.length,r:al.r,x:al.x,y:al.y,k:'machine',al:al.id});
+  if(al.type==='nest')spawns.push({id:'n'+spawns.length,r:al.r,x:al.x,y:al.y,k:'nest',al:al.id});}
+ for(let r=0;r<UD_NR;r++){const L=regionData[r].ch.filter(c=>!c.small&&!c.outpost&&!c.entry);const rr=mulberry32(udHash(seed,'dsc',r));
+  const fl=(c,rad)=>{for(let k=0;k<30;k++){const x=Math.round(c.x+(rr()-.5)*c.rx*rad),y=Math.round(c.y+(rr()-.5)*c.ry*rad);const i=I(x,y);if(inB(x,y)&&g[i]===T_FLOOR&&!used[i]&&zone[i]===0)return{x,y};}return null;};
+  const kinds=['record','machine','guardian','record'];kinds.forEach((k,j)=>{const c=L[(j*3+1)%L.length];const p=c&&fl(c,1.2);if(p){const d={id:'d'+disc.length,r,x:p.x,y:p.y,k};if(k==='guardian'){d.relays=[];for(let q=0;q<3;q++){const pp=fl(c,1.6);if(pp)d.relays.push(pp);}}disc.push(d);}});
+  for(const v of veins.filter(v=>v.r===r&&v.rich&&!v.alcove).slice(0,3)){const n=v.nodes[0];const p=fl({x:n.x,y:n.y,rx:4,ry:4},1);if(p)spawns.push({id:'e'+spawns.length,r,x:p.x,y:p.y,k:'elite',vein:v.id});}
+  for(let k=0;k<2;k++){const c=L[(k*5+2)%L.length];const p=c&&fl(c,1);if(p)spawns.push({id:'n'+spawns.length,r,x:p.x,y:p.y,k:'nest'});}
+  const far=L.slice().sort((a,b)=>Math.hypot(b.x-80,b.y-r*UD_RH)-Math.hypot(a.x-80,a.y-r*UD_RH))[0];if(far){const p=fl(far,.6);if(p)spawns.push({id:'b'+r,r,x:p.x,y:p.y,k:'lair'});}
+  for(const c of L){const p=fl(c,1);if(p)spawns.push({id:'p'+spawns.length,r,x:p.x,y:p.y,k:'patrol'});}}
+ /* decorative layer: prop kind index per tile (render-only) */
+ for(let i=0;i<N;i++){if(g[i]!==T_FLOOR||used[i]||zone[i]===3)continue;const x=i%Wd,y=(i/Wd)|0;const h=udRand(seed,'deco',i);let wallN=0;for(const[dx,dy]of[[1,0],[-1,0],[0,-1],[0,1]])if(g[I(x+dx,y+dy)]===T_WALL)wallN++;if(h<(wallN?.06:.018))deco[i]=1+Math.floor(udRand(seed,'dk',i)*8);}
+ return{seed,w:Wd,h:Hd,g,deco,zone,ent,chambers,veins,exc,alcoves,outposts,landmarks,disc,spawns,used,ms:Math.round(performance.now()-t0)};}
+
+/* =====================================================================
+   V6.2 THE GREAT UNDERDEEP (2/5) — runtime
+   Reuses the real mining engine (R): Mining Power rule, ore HP, mining speed, capacity, auto-mining, arm skills,
+   pets, bag, extraction claim. Adds: world session, 32×32 chunk streaming, bounded pathfinding,
+   living vein lifecycle (Rich → Depleted → Regrowth → Reformed), family mining mechanisms,
+   excavation, fog of war, hazards, interactions, persistence, session mastery.
+   ===================================================================== */
+const UD_VER=62,UD_SEED=61021;
+const UD={world:null,fog:null,chunks:new Set(),nodeIdx:null,excIdx:null,objIdx:null,mons:[],held:null,last:0,checkT:0,saveT:0,fogDirty:false};
+function udDefaults(){return{ver:UD_VER,seed:UD_SEED,pos:null,lastWp:'o00',wp:{o00:1},fog:'',veins:{},exc:[],disc:{},spawns:{},lm:{},lore:[],bag:null,sess:null,q:{},
+ tut:{on:false,done:false,steps:{}},stats:{mined:0,depleted:0,reformed:0,exc:0,kills:0,elites:0,bosses:0,disc:0,dist:0,rich:0,sessions:0},stance:'mine'};}
+/* ---------- migration (idempotent, backup first) ---------- */
+function udMigrate(){if(!S)return;if(!S.ud){try{const raw=localStorage.getItem(SAVE_KEY);if(raw&&!localStorage.getItem('buildAGolem_backup_pre_v62'))localStorage.setItem('buildAGolem_backup_pre_v62',raw);}catch(e){}
+  S.ud=udDefaults();
+  /* a suspended legacy expedition: its earned ores become a normal pending extraction once (no duplication) */
+  if(S.suspended&&!S.ud.legacyDone){try{const sp=S.suspended;const items={};const add=src=>{for(const k in(src||{})){const c=src[k]&&src[k].count!=null?src[k].count:src[k];if(c>0&&ORE_INFO[k])items[k]=(items[k]||0)+c;}};add(sp.bag&&sp.bag.items);add(sp.exp&&sp.exp.items);
+    const L=sp.loot||{};if(L.coins>0){S.coins+=Math.round(L.coins);}if(L.bpf>0&&S.armorBlueprints)S.armorBlueprints.frag+=L.bpf;
+    if(Object.keys(items).length)createPending('legacy',items,1,{title:'Legacy Expedition (V6.1)',d:sp.did,mined:sp.mined||0,time:Math.round(sp.elapsed||0)});S.ud.legacyNote={at:Date.now(),items,coins:L.coins||0,bpf:L.bpf||0};}catch(e){console.warn('legacy suspend',e);}S.suspended=null;}
+  S.ud.legacyDone=true;}
+ const d=udDefaults();for(const k in d)if(S.ud[k]===undefined)S.ud[k]=d[k];for(const k in d.stats)if(S.ud.stats[k]===undefined)S.ud.stats[k]=0;
+ S.migrationVersion=Math.max(S.migrationVersion||0,UD_VER);}
+{const _m=v51Migrate;v51Migrate=function(){_m.apply(this,arguments);udMigrate();};}
+/* ---------- world cache + index ---------- */
+function udWorld(){if(UD.world&&UD.world.seed===S.ud.seed)return UD.world;const w=udGenWorld(S.ud.seed);UD.world=w;
+ for(const i of S.ud.exc)if(w.g[i]===T_SECRET)w.g[i]=T_FLOOR;
+ const ck=(x,y)=>(Math.floor(y/UD_CH)*Math.ceil(UD_W/UD_CH)+Math.floor(x/UD_CH));UD.ck=ck;UD.cw=Math.ceil(UD_W/UD_CH);UD.chN=Math.ceil(UD_H/UD_CH);
+ UD.nodeIdx={};for(const v of w.veins)v.nodes.forEach((n,k)=>{const all=[[n.x,n.y],...n.alts];const seen=new Set();for(const[x,y]of all){const c=ck(x,y);if(seen.has(c))continue;seen.add(c);(UD.nodeIdx[c]=UD.nodeIdx[c]||[]).push([v,k]);}});
+ UD.excIdx={};for(const e of w.exc)(UD.excIdx[ck(e.i%UD_W,(e.i/UD_W)|0)]=UD.excIdx[ck(e.i%UD_W,(e.i/UD_W)|0)]||[]).push(e);
+ UD.vmap={};for(const v of w.veins)UD.vmap[v.id]=v;UD.amap={};for(const a of w.alcoves)UD.amap[a.id]=a;
+ UD.fog=new Uint8Array(UD_W*UD_H);if(S.ud.fog){try{const b=atob(S.ud.fog);for(let i=0;i<b.length&&i*8<UD.fog.length;i++){const v=b.charCodeAt(i);for(let k=0;k<8;k++)if(v&(1<<k))UD.fog[i*8+k]=1;}}catch(e){}}
+ return w;}
+function udFogSave(){if(!UD.fog)return;let s='';const n=Math.ceil(UD.fog.length/8);const parts=[];for(let i=0;i<n;i++){let v=0;for(let k=0;k<8;k++)if(UD.fog[i*8+k])v|=1<<k;parts.push(String.fromCharCode(v));if(parts.length>=4096){s+=parts.join('');parts.length=0;}}s+=parts.join('');S.ud.fog=btoa(s);UD.fogDirty=false;}
+/* rock that does not touch open cave is drawn as deep solid rock (readable cave silhouettes) */
+function udEdges(){if(UD.edge&&UD.edgeSeed===UD.world.seed&&UD.edgeN===S.ud.exc.length)return UD.edge;const g=UD.world.g;const e=new Uint8Array(UD_W*UD_H);for(let y=0;y<UD_H;y++)for(let x=0;x<UD_W;x++){const i=y*UD_W+x;const t=g[i];if(t!==T_WALL&&t!==T_SECRET){e[i]=1;continue;}
+ for(let dy=-1;dy<=1&&!e[i];dy++)for(let dx=-1;dx<=1;dx++){const xx=x+dx,yy=y+dy;if(xx<0||yy<0||xx>=UD_W||yy>=UD_H)continue;const tt=g[yy*UD_W+xx];if(tt!==T_WALL&&tt!==T_SECRET){e[i]=1;break;}}}UD.edge=e;UD.edgeSeed=UD.world.seed;UD.edgeN=S.ud.exc.length;return e;}
+function udEdgeOpen(i){const e=UD.edge;if(!e)return;const x=i%UD_W,y=(i/UD_W)|0;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const xx=x+dx,yy=y+dy;if(xx>=0&&yy>=0&&xx<UD_W&&yy<UD_H)e[yy*UD_W+xx]=1;}UD.edgeN=S.ud.exc.length;if(R)R.bgChunks={};}
+/* ---------- living veins ---------- */
+function udVS(v){return S.ud.veins[v.id]||null;}
+function udVSw(v){let s=S.ud.veins[v.id];if(!s){s=S.ud.veins[v.id]={r:new Array(v.nodes.length).fill(0),g:new Array(v.nodes.length).fill(0)};}return s;}
+function udNodePos(v,k){const s=udVS(v);const gc=s?s.g[k]||0:0;const n=v.nodes[k];if(!gc||!n.alts.length)return[n.x,n.y];const h=udRand(S.ud.seed,v.id,k,gc);return h<.28?n.alts[Math.floor(h/.28*n.alts.length)%n.alts.length]:[n.x,n.y];}
+function udNodeReady(v,k,now){const s=udVS(v);return !s||!s.r[k]||s.r[k]<=now;}
+function udRespawnMs(tier,v,k,gc){const R_=UD_RESPAWN[tier]||[180,240];const h=udRand(S.ud.seed,v.id,k,gc,'rs');return Math.round((R_[0]+(R_[1]-R_[0])*h)*1000);}
+function udVeinStage(v,now){now=now||Date.now();const s=udVS(v);if(!s)return 'rich';let down=0,grow=0;for(let k=0;k<v.nodes.length;k++){if(s.r[k]&&s.r[k]>now){down++;}}if(!down)return s.ref?'reformed':'rich';if(down===v.nodes.length)return 'depleted';return s.dep?'regrowth':'rich';}
+function udMkOre(v,k,x,y){const w=UD.world;const i=y*UD_W+x;const T_=TIERS[v.tier];const near=(()=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(w.g[(y+dy)*UD_W+x+dx]===T_LAVA)return true;return false;})();
+ const hp=Math.round(T_.hp*(v.rich?1.15:1));const o={id:i,x,y,tier:v.tier,hp,maxHp:hp,name:v.name,hidden:v.kind==='crystal'&&udRand(S.ud.seed,v.id,k,'hid')<.25,hot:near,seed:udRand(S.ud.seed,v.id,k),hitT:0,ud:{v:v.id,k},rich:v.rich,unstable:v.kind==='unstable'};return o;}
+function udPlaceOre(o){if(R.oreAt[o.id])return false;const t=R.map.g[o.id];if(t!==T_FLOOR&&t!==T_SLOW)return false;if(gTile()===o.id)return false;R.ores.push(o);R.oreAt[o.id]=o;return true;}
+function udLoadChunk(c){const now=Date.now();const w=UD.world;
+ for(const[v,k]of(UD.nodeIdx[c]||[])){if(!udNodeReady(v,k,now))continue;const[x,y]=udNodePos(v,k);if(UD.ck(x,y)!==c)continue;if(R.ores.some(o=>o.ud&&o.ud.v===v.id&&o.ud.k===k))continue;udPlaceOre(udMkOre(v,k,x,y));}
+ for(const e of(UD.excIdx[c]||[])){if(w.g[e.i]!==T_SECRET||R.oreAt[e.i])continue;const tier=UDR[e.r].tier;const hp=Math.round(240*Math.pow(tier,1.25));const o={id:e.i,x:e.i%UD_W,y:(e.i/UD_W)|0,tier,hp,maxHp:hp,name:'ผนังร้าว',secret:true,revealed:false,exc:e.al,hidden:false,seed:udRand(e.i),hitT:0};R.ores.push(o);R.oreAt[e.i]=o;}
+ UD.chunks.add(c);udSpawnChunkMons(c);}
+function udUnloadChunk(c){for(let k=R.ores.length-1;k>=0;k--){const o=R.ores[k];if(UD.ck(o.x,o.y)!==c)continue;if(R.g.tgt&&R.g.tgt.o===o){R.g.tgt=null;R.g.state='idle';}R.oreAt[o.id]=null;R.ores.splice(k,1);}
+ UD.mons=UD.mons.filter(m=>m.state==='chase'||UD.ck(Math.floor(m.x),Math.floor(m.y))!==c);UD.chunks.delete(c);}
+function udStream(force){const gx=Math.floor(R.g.x),gy=Math.floor(R.g.y);const cx=Math.floor(gx/UD_CH),cy=Math.floor(gy/UD_CH);const want=new Set();
+ for(let y=cy-2;y<=cy+2;y++)for(let x=cx-2;x<=cx+2;x++){if(x<0||y<0||x>=UD.cw||y>=UD.chN)continue;if(Math.abs(x-cx)+Math.abs(y-cy)>3)continue;want.add(y*UD.cw+x);}
+ for(const c of want)if(!UD.chunks.has(c))udLoadChunk(c);for(const c of[...UD.chunks])if(!want.has(c)){const x=c%UD.cw,y=Math.floor(c/UD.cw);if(Math.abs(x-cx)>3||Math.abs(y-cy)>3)udUnloadChunk(c);}}
+/* regrowth tick for loaded chunks — nodes come back at their anchor or a nearby valid position */
+function udRegrow(){const now=Date.now();let n=0;for(const c of UD.chunks)for(const[v,k]of(UD.nodeIdx[c]||[])){const s=udVS(v);if(!s||!s.r[k]||s.r[k]>now)continue;const[x,y]=udNodePos(v,k);if(UD.ck(x,y)!==c)continue;
+  if(Math.hypot(R.g.x-(x+.5),R.g.y-(y+.5))<1.2){s.r[k]=now+4000;continue;}const o=udMkOre(v,k,x,y);if(udPlaceOre(o)){s.r[k]=0;n++;R.efx.push({type:'ring',x:x+.5,y:y+.5,r:.9,t:0,dur:.6,col:UDR[v.r].pal.vein});
+   if(s.dep&&s.r.every(t=>!t||t<=now)){s.dep=0;s.ref=1;S.ud.stats.reformed++;if(Math.hypot(R.g.x-x,R.g.y-y)<12)floatTxt(x+.5,y-.6,'✨ Vein Reformed','#9fffd0',.9);}}else s.r[k]=now+5000;}
+ return n;}
+/* ---------- bounded Dijkstra (binary heap, radius-capped, reusable buffers) for the 69k-tile world ---------- */
+const UDP={dist:null,prev:null,done:null,touched:[],heap:[]};
+{const _dj=dijkstra;dijkstra=function(src){if(!R||!R.ud)return _dj(src);const N=W*H;if(!UDP.dist||UDP.dist.length!==N){UDP.dist=new Float32Array(N).fill(Infinity);UDP.prev=new Int32Array(N).fill(-1);UDP.done=new Uint8Array(N);}
+ const dist=UDP.dist,prev=UDP.prev,done=UDP.done;for(const i of UDP.touched){dist[i]=Infinity;prev[i]=-1;done[i]=0;}UDP.touched=[src];dist[src]=0;const H_=[[0,src]];const MAXC=46;
+ const push=(d,v)=>{H_.push([d,v]);let i=H_.length-1;while(i>0){const p=(i-1)>>1;if(H_[p][0]<=H_[i][0])break;[H_[p],H_[i]]=[H_[i],H_[p]];i=p;}};
+ const pop=()=>{const top=H_[0];const last=H_.pop();if(H_.length){H_[0]=last;let i=0;for(;;){const l=i*2+1,r=l+1;let m=i;if(l<H_.length&&H_[l][0]<H_[m][0])m=l;if(r<H_.length&&H_[r][0]<H_[m][0])m=r;if(m===i)break;[H_[m],H_[i]]=[H_[i],H_[m]];i=m;}}return top;};
+ while(H_.length){const[du,u]=pop();if(done[u])continue;done[u]=1;if(du>MAXC)break;const ux=u%W,uy=(u/W)|0;
+  for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dy)continue;const vx=ux+dx,vy=uy+dy;if(vx<0||vy<0||vx>=W||vy>=H)continue;const v=vy*W+vx;if(done[v]||!walkable(v))continue;
+   if(dx&&dy&&(!walkable(uy*W+vx)||!walkable(vy*W+ux)))continue;const t=R.map.g[v];let cost=(dx&&dy?1.414:1)/tileF(v);if(t===T_LAVA)cost+=.8;if(t===T_RUBBLE)cost+=1.2;const nd=du+cost;
+   if(nd<dist[v]){if(dist[v]===Infinity)UDP.touched.push(v);dist[v]=nd;prev[v]=u;push(nd,v);}}}
+ return{dist,prev};};}
+{const _pt=pathTo;pathTo=function(D,goal){if(!R||!R.ud)return _pt(D,goal);const p=[];let c=goal;let g=0;while(c!==-1&&D.prev[c]!==-1&&g++<4000){p.push(c);c=D.prev[c];}return p.reverse();};}
+/* ---------- golem family mining mechanisms (bounded; never bypass Mining Power) ---------- */
+const UD_PERK={
+ scrap:{n:'Reliable Rig',i:'🔧',d:'เริ่มขุดเป้าถัดไปเร็วขึ้น · มึนงงจากอันตรายสั้นลง · แร่ Tier 1–2 +10%'},
+ stoneguard:{n:'Stable Drilling',i:'🪨',d:'ยืนขุดนิ่ง 3 วิ ดาเมจ +8% · หินถล่มทำให้มึนงงน้อยลงมากและไม่กระเด็น'},
+ coppergear:{n:'Sustained Extraction',i:'⚙️',d:'ตีโหนดในสายแร่เดียวกันต่อเนื่อง +5%/ฮิต (สูงสุด 6)'},
+ zephyr:{n:'Glide Reposition',i:'🌪',d:'Move +15% · เป้าไกลเกิน 4 ช่อง: ร่อนเร็ว ×2.4 (คูลดาวน์ 8 วิ)'},
+ drilltech:{n:'Continuous Drill',i:'🔩',d:'สายแร่หนาแน่น (≥6 โหนด) +18% · ทุบโหนดในสายเดียวกันต่อเนื่อง ลด HP โหนดถัดไป 10% (สูงสุด 3)'},
+ titanstone:{n:'Heavy Excavation',i:'🗿',d:'ขุดผนังร้าว ×1.8 · แร่แข็ง (Stone/Obsidian/Diamond/Ancient) +15%'},
+ magnetite:{n:'Magnetic Collection',i:'🧲',d:'ดึงเศษแร่ที่กระเด็นเข้ากระเป๋าอัตโนมัติ · ระยะเก็บ +2.5 · มีโอกาสได้เศษเพิ่ม'},
+ prism:{n:'Crystal Sense',i:'💎',d:'เปิดแร่ซ่อนระยะ 10 · มองเห็น Rich Vein ไกล 14 ช่อง · แร่คริสตัลมูลค่า +10%'},
+ frostbound:{n:'Cold Operation',i:'❄️',d:'ไม่ช้าลงบนพื้นน้ำแข็ง · ไม่โดนโทษขุดช้าในโซนหนาว'},
+ magma:{n:'Heat Control',i:'🔥',d:'เดินบนหินร้อนไม่ร้อนเกิน · ไอน้ำพุ่งไม่ทำให้มึนงง · ใน Obsidian Furnace +10%'},
+ thunder:{n:'Conductive Burst',i:'⚡',d:'ทุก 6 ฮิตบนแร่นำไฟฟ้า ปล่อยกระแสไปโหนดอื่นในสายเดียวกัน (สูงสุด 3) — โหนดที่ Power ไม่พอไม่เสียหาย'},
+ void:{n:'Unstable Resonance',i:'🌀',d:'มองเห็น/ขุดสายแร่ไม่เสถียรได้ตลอด · ได้แร่เพิ่ม +25% จากสายแร่ไม่เสถียร'}};
+function udFam(){const out={};if(!R||!R.st||!R.st.look)return out;for(const sl of SLOTS){const p=R.st.look[sl];if(p&&PART[p]){const f=PART[p].fam;out[f]=(out[f]||0)+1;}}return out;}
+function udK(f){const n=(R&&R.udFam&&R.udFam[f])||0;return n?[0,.6,.8,1,1.1,1.2,1.3][n]:0;}
+{const _d=damageOre;damageOre=function(o,amt,src){if(!R||!R.ud||!o)return _d(o,amt,src);if(!R.ores.includes(o))return _d(o,amt,src);
+ if(o.unstable&&!udUnstableVisible(o)&&!udK('void'))return 0;let m=1;const v=o.ud&&UD.vmap[o.ud.v];
+ if(o.exc){m*=1+.8*udK('titanstone');return _d(o,amt*m,src);}
+ if(udK('scrap')&&o.tier<=2)m*=1+.1*udK('scrap');if(udK('stoneguard')&&R.udStill>=3)m*=1+.08*udK('stoneguard');
+ if(udK('coppergear')&&v){if(R.udCg&&R.udCg.v===v.id)R.udCg.n=Math.min(6,R.udCg.n+1);else R.udCg={v:v.id,n:0};m*=1+.05*R.udCg.n*udK('coppergear');}
+ if(udK('drilltech')&&v&&v.nodes.length>=6)m*=1+.18*udK('drilltech');if(udK('titanstone')&&UD_HARD.has(o.name))m*=1+.15*udK('titanstone');
+ if(udK('magma')&&R.udRegion===3)m*=1+.1*udK('magma');if(UDR[R.udRegion].haz.cold&&!udK('frostbound'))m*=.85;
+ const d=_d(o,amt*m,src);
+ if(d>0&&udK('thunder')&&v&&UD_CONDUCT.has(o.name)&&src!=='chain'){R.udTh=(R.udTh||0)+1;if(R.udTh>=6){R.udTh=0;const L=R.ores.filter(x=>x!==o&&x.ud&&x.ud.v===v.id&&Math.hypot(x.x-o.x,x.y-o.y)<=4).slice(0,3);for(const x of L){const dd=damageOre(x,R.st.rawP*.6*udK('thunder'),'chain');R.efx.push({type:'bolt',x0:o.x+.5,y0:o.y+.5,x1:x.x+.5,y1:x.y+.5,t:0,dur:.3,col:'#9ef0ff'});}if(L.length)floatTxt(o.x+.5,o.y-.6,'⚡ Conductive Burst','#9ef0ff',.85);}}
+ return d;};}
+{const _s=settleTime;settleTime=function(){let s=_s();if(R&&R.ud&&udK('scrap'))s*=1-.5*udK('scrap');return s;};}
+{const _tf=tileF;tileF=function(i){if(R&&R.ud){const t=R.map.g[i];if(t===T_SLOW&&udK('frostbound'))return 1;if(t===T_LAVA&&udK('magma'))return 1;let f=_tf(i);if(udK('zephyr'))f*=1+.15*udK('zephyr');return f;}return _tf(i);};}
+{const _p=pickupR;pickupR=function(){let r=_p();if(R&&R.ud&&udK('magnetite'))r+=2.5*udK('magnetite');return r;};}
+{const _st=setTarget;setTarget=function(tgt,manual){const ok=_st(tgt,manual);if(ok&&R&&R.ud&&udK('zephyr')&&R.g.path.length>4&&(R.udGlide||0)<=0){R.boost=.8;R.udGlide=8;floatTxt(R.g.x,R.g.y-1.3,'🌪 Glide','#9ffff5',.75);}return ok;};}
+/* ore breaking → vein lifecycle, rich rewards, fragments, excavation */
+{const _bo=breakOre;breakOre=function(o){if(!R||!R.ud||!o)return _bo(o);const v=o.ud&&UD.vmap[o.ud.v];const exc=o.exc;const x=o.x,y=o.y;_bo(o);if(!R)return;
+ if(exc){S.ud.exc.push(o.id);UD.world.g[o.id]=T_FLOOR;udEdgeOpen(o.id);S.ud.stats.exc++;const al=UD.amap[exc];if(al&&!S.ud.disc['al_'+al.id]){S.ud.disc['al_'+al.id]={at:Date.now()};udRevealArea(al.x,al.y,al.rad+3);toast(`⛏ ขุดทะลุ! พบ${UD_ALC_N[al.type]||'ห้องลับ'}`,'gold');udTut('branch');}return;}
+ if(!v)return;const s=udVSw(v);const k=o.ud.k;s.g[k]=(s.g[k]||0)+1;s.r[k]=Date.now()+udRespawnMs(v.tier,v,k,s.g[k]);if(s.ref)s.ref=0;S.ud.stats.mined++;udTut('mine');
+ if(s.r.every(t=>t&&t>Date.now())){s.dep=1;S.ud.stats.depleted++;floatTxt(x+.5,y-.8,'🪨 Vein Depleted — Regrowth begins','#ffb060',.85);}
+ if(v.rich){S.ud.stats.rich++;if(bagFits(v.tier)){bagAdd(v.name,v.tier);floatTxt(x+.5,y-1.1,'💰 Rich Vein +1','#ffd84a',.9);}if(Math.random()<.12){const ck=udMatFor(v.tier);if(ck){cmAdd(ck,1,true);floatTxt(x+.5,y-1.5,`${CMAT[ck].i} ${CMAT[ck].n}`,CMAT[ck].col,.85);}}}
+ if(v.kind==='unstable'&&udK('void')&&Math.random()<.25*udK('void')&&bagFits(v.tier)){bagAdd(v.name,v.tier);floatTxt(x+.5,y-1.1,'🌀 Resonance +1','#c066ff',.85);}
+ if(udK('prism')&&UD_CRYSTAL.has(v.name))R.v5bonus=(R.v5bonus||0)+Math.round(TIERS[v.tier].price*.1*udK('prism'));
+ /* scattered fragments: a chance for an extra drop beside the node — Magnetite pulls them in automatically */
+ const fc=.22+(udK('magnetite')?.1*udK('magnetite'):0);if(Math.random()<fc){const a=Math.random()*Math.PI*2;R.drops.push({x:x+.5+Math.cos(a)*1.3,y:y+.5+Math.sin(a)*1.1,tier:v.tier,name:v.name,t:0,fly:!!udK('magnetite'),vy:-2,frag:1});}};}
+const UD_ALC_N={pocket:'โพรงแร่หนาแน่น',treasure:'ห้องสมบัติใต้ดิน',workshop:'โรงงานโกเลมที่สาบสูญ',machine:'เครื่องจักรโบราณ',nest:'รังมอนสเตอร์',shortcut:'ทางลัดที่ถูกปิด',supply:'ห้องเสบียงที่ถูกฝัง'};
+function udMatFor(tier){const P_=[[],['rune_ore','shadow_shard'],['arcane_crystal','venom_sac'],['refined_rune','swift_alloy'],['elemental_crystal','phantom_frag'],['rune_tablet','phantom_core'],['void_core','abyss_core']][tier]||[];return P_[Math.floor(Math.random()*P_.length)]||null;}
+function udUnstableVisible(o){const ph=(Date.now()/1000+o.seed*10)%10;return ph<6.5;}
+{const _ov=oreVisible;oreVisible=function(o){if(!R||!R.ud)return _ov(o);if(!_ov(o))return false;if(!UD.fog[o.id])return false;if(o.unstable&&!udUnstableVisible(o)&&!udK('void'))return false;return true;};}
+{const _cm=canMine;canMine=function(o){if(R&&R.ud&&o&&o.exc)return R.st.P>=TIERS[o.tier].req;return _cm(o);};}
+/* auto-mining never chooses excavation walls (discovery is deliberate) */
+{const _ct=chooseTarget;chooseTarget=function(){if(!R||!R.ud)return _ct();if(R.udStance==='combat'){R.g.idleWait=.6;return false;}const all=R.ores;R.ores=all.filter(o=>!o.exc);try{return _ct();}finally{if(R)R.ores=all;}};}
+/* ---------- fog of war ---------- */
+function udRevealArea(cx,cy,r){let n=0;for(let y=Math.floor(cy-r);y<=cy+r;y++)for(let x=Math.floor(cx-r);x<=cx+r;x++){if(x<0||y<0||x>=UD_W||y>=UD_H)continue;if(Math.hypot(x-cx,y-cy)>r)continue;const i=y*UD_W+x;if(!UD.fog[i]){UD.fog[i]=1;n++;}}if(n){UD.fogDirty=true;}return n;}
+function udVisR(){let v=6;if(R.fx.has('scrap_head'))v+=1.5;if(udK('prism'))v+=1;return v;}
+/* ---------- session: enter / leave ---------- */
+function udRegionDef(r){const R_=UDR[r];return{id:'ud_'+R_.id,name:R_.n,hz:{},tiers:[R_.tier],wts:[1],th1:{floor:R_.pal.fl[0]}};}
+function udThemes(){for(const R_ of UDR){const p=R_.pal;THEMES['ud_'+R_.id]={bg:p.bg,fl:p.fl,fd:p.fd,face:p.face,top:p.top,acc:p.acc,light:p.light,dark:p.dark,name:R_.n};}}
+function udEnter(wpId){if(R||CB){toast('จบกิจกรรมปัจจุบันก่อน','err');return false;}udMigrate();closeModal();try{const c=typeof tutCur==='function'&&tutCur();if(c&&['mine','vein','mine3'].includes(c.id))wpId='o00';}catch(e){}const w=udWorld();udThemes();const st=calcStats(S.equip);
+ let sp=null;if(wpId){const o=w.outposts.find(x=>x.id===wpId);if(o&&S.ud.wp[o.id])sp={x:o.x+.5,y:o.y+1.5};}if(!sp&&S.ud.pos)sp=S.ud.pos;if(!sp){const o=w.outposts[0];sp={x:o.x+.5,y:o.y+1.5};}
+ setDims(UD_W,UD_H);const N=UD_W*UD_H;const m={g:w.g,deco:null,big:false,w:UD_W,h:UD_H,ent:{x:w.outposts[0].x,y:w.outposts[0].y},ores:[],oreAt:new Array(N).fill(null),seed:w.seed,props:[],room:null};
+ const r0=udRegionAt(sp.y);initRun('ud',udRegionDef(r0),m,st,{seed:w.seed,time:0,valMul:1});R.ud=true;R.timed=false;R.time=0;R.map.big=true;R.map.edge=udEdges();R.fog=UD.fog;R.inter=[];R.amb=[];R.udRegion=r0;R.thKey='ud_'+UDR[r0].id;R.udFam=udFam();R.udStance='mine';R.udStill=0;R.udGlide=0;R.udInv=2;R.mode=R.mode||'value';
+ R.g.x=sp.x;R.g.y=sp.y;const ti=gTile();if(!walkable(ti)){const o=w.outposts[0];R.g.x=o.x+.5;R.g.y=o.y+1.5;}
+ if(S.ud.bag&&S.ud.bag.items){R.bag=S.ud.bag;}if(S.ud.sess){R.mined=S.ud.sess.mined||0;if(R.mx&&S.ud.sess.mx)Object.assign(R.mx,S.ud.sess.mx);}
+ UD.chunks=new Set();UD.mons=[];UD.cache&&UD.cache.clear();UD.held=null;udStream(true);udRevealArea(R.g.x,R.g.y,udVisR());
+ enterView('⛏ THE GREAT UNDERDEEP');R.udSince=Date.now();S.ud.stats.sessions++;udHudBuild();udTut('enter');sfx('equip');
+ toast(`⛏ เข้าสู่ ${UDR[r0].n} — ไม่มีเวลาจำกัด · กลับค่ายได้ทุกเมื่อ`,'ok');return true;}
+function udSnapshot(){if(!R||!R.ud)return;S.ud.pos={x:R.g.x,y:R.g.y};S.ud.bag=JSON.parse(JSON.stringify(R.bag));S.ud.sess={mined:R.mined,mx:R.mx?JSON.parse(JSON.stringify(R.mx)):null};if(UD.fogDirty)udFogSave();}
+/* mining mastery / pet / activity for a whole session (same formula as legacy big maps, capped) */
+function udSessionEnd(){if(!R||R.v5done)return null;R.v5done=true;const mined=R.mined||0;const out={mast:{},pet:0,shards:0};const look=R.st.look;
+ const base=mined>=3?Math.min(1500,22+2.6*mined):0;
+ if(base>0&&R.mx){const act={head:R.mx.hid*6+mined*.5,core:mined,arm:(R.mx.hits[0]+R.mx.hits[1])*.25,legs:R.mx.walk*.4,back:R.mx.haul};const done=new Set();
+  for(const sl of SLOTS){const pid=look[sl];if(!pid)continue;const key='m:'+pid;if(done.has(key))continue;done.add(key);const ty=PART[pid].type;const a=act[ty]||0,ref=Math.max(1,mined);const f=clamp(.85+.3*Math.min(1,a/(ref*(ty==='arm'?2:ty==='legs'?2.5:ty==='head'?1.2:1))),.85,1.15);
+   const n=Math.round(base*f);out.mast[key]={n,up:addMastExp(key,n)};}}
+ if(mined>0){let t13=0,t46=0;for(const k in R.bag.items){const it=R.bag.items[k];if(it.tier<=3)t13+=it.count;else t46+=it.count;}addAM('crystal',t13*2);addAM('metal',t46*3);addAM('collect',Math.round(mined*1.2));addAM('deep',Math.round(S.ud.stats.dist/40));}
+ if(R.pet){const p=petGet(R.pet.uid);if(p){const n=Math.round((12+mined*1.4)*(mined>=3?1:.2));petExpGain(p,n);out.pet=n;if(mined>=3){p.bondPts+=2;while(p.bond<5&&p.bondPts>=BOND_NEED[p.bond])p.bond++;}}}
+ dEvent('mine',mined);if(mined>=3){dEvent('extract',1);out.shards=petShardEvent('extract',1,{d:'underdeep'});}LAST_V5=out;return out;}
+function udLeave(how){if(!R||!R.ud||R.ended)return;udSnapshot();const out=udSessionEnd();R.ended=true;const items=R.bag.items;const has=Object.keys(items).some(k=>items[k].count>0);
+ const value=bagValue();const pend=has?createPending('dungeon',items,exValMul(items,value),{d:'underdeep',title:'The Great Underdeep',mined:R.mined,time:Math.round((Date.now()-(R.udSince||Date.now()))/1000)}):null;
+ S.ud.bag=null;S.ud.sess=null;S.stats.runs++;if(has)S.stats.extracts++;ctEvent('runEnd',{extracted:true,success:R.mined>=5,fill:R.bag.w/R.st.C});recordRun(0,value);udTut('return');
+ save();sfx('coin');toast(how==='outpost'?'🏕 ขึ้นลิฟต์กลับ Golem Camp':'🏠 เรียกกลับ Golem Camp — แร่ทั้งหมดปลอดภัย','ok');
+ setTimeout(()=>{exitDungeon();if(pend)openClaim(pend.id);},350);}
+function udRecall(){if(!R||!R.ud||R.ended)return;if(R.udRecall>0)return;if(udInSafe()){udLeave('outpost');return;}R.udRecall=2.2;R.g.path=[];R.g.tgt=null;R.g.state='idle';floatTxt(R.g.x,R.g.y-1.4,'🏠 Recall…','#7fe6ff',.9);sfx('equip');}
+/* outpost stash: deposit straight into Ore Storage without leaving */
+function udStash(){if(!R||!R.ud)return;let n=0;for(const k in R.bag.items){const it=R.bag.items[k];if(it.count>0){S.oreStorage[k]=(S.oreStorage[k]||0)+it.count;n+=it.count;}}R.bag={items:{},w:0,res:0,val:0};R.v5bonus=0;S.ud.bag=null;udTut('deposit');save();toast(n?`🏦 ฝากแร่ ${n} ก้อนเข้า Ore Storage`:'กระเป๋าว่าง','ok');sfx('coin');}
+function udInSafe(){if(!R)return false;return UD.world.zone[gTile()]===3;}
+function udFastTravel(id){const o=UD.world.outposts.find(x=>x.id===id);if(!o||!S.ud.wp[id])return;if(R&&R.ud){R.g.x=o.x+.5;R.g.y=o.y+1.5;R.g.path=[];R.g.tgt=null;R.g.state='idle';udStream(true);udRevealArea(R.g.x,R.g.y,udVisR());R.udInv=2;closeModal();floatTxt(R.g.x,R.g.y-1.4,'🚡 '+o.n,'#7fe6ff',1);sfx('equip');udRegionCheck(true);}else udEnter(id);}
+/* ---------- per-frame step ---------- */
+{const _rt=runTick;runTick=function(dt){if(!R||!R.ud)return _rt(dt);if(R.ended||R.paused)return;const gx=R.g.x,gy=R.g.y;_rt(dt);if(!R||R.ended)return;udStep(dt,Math.hypot(R.g.x-gx,R.g.y-gy));};}
+function udStep(dt,moved){R.udGlide=Math.max(0,(R.udGlide||0)-dt);R.udInv=Math.max(0,(R.udInv||0)-dt);if(moved>.001){R.udStill=0;S.ud.stats.dist+=moved;R.mx&&(R.mx.walk=(R.mx.walk||0)+moved);}else R.udStill+=dt;
+ const t=gTile();if(t!==R.udLastT){R.udLastT=t;if(udRevealArea(R.g.x,R.g.y,udVisR()))udLandmarks();udStream(false);udRegionCheck(false);}
+ UD.checkT-=dt;if(UD.checkT<=0){UD.checkT=1;udRegrow();udPerkReveal();}
+ if(R.udRecall>0){R.udRecall-=dt;if(R.udRecall<=0){R.udRecall=0;udLeave('recall');return;}}
+ udHazards(dt);if(!R||R.ended)return;udMonStep(dt);if(!R||R.ended||!R.ud)return;udInterCheck();
+ UD.saveT-=dt;if(UD.saveT<=0){UD.saveT=12;udSnapshot();saveSoon();}}
+function udRegionCheck(force){const r=udRegionAt(R.g.y);if(r===R.udRegion&&!force)return;const prev=R.udRegion;R.udRegion=r;R.d=udRegionDef(r);R.thKey='ud_'+UDR[r].id;R.bgKey=null;if(r!==prev){toast(`🗺 ${UDR[r].n} — ${UDR[r].th}`,'gold');sceneAudio&&setTimeout(sceneAudio,30);}}
+function udLandmarks(){const w=UD.world;for(const l of w.landmarks){if(S.ud.lm[l.id])continue;if(Math.hypot(l.x-R.g.x,l.y-R.g.y)<7){S.ud.lm[l.id]=Date.now();S.data=(S.data||0)+1;toast(`📍 ค้นพบ: ${l.n}`,'gold');udTut('branch');}}
+ for(const o of w.outposts){if(S.ud.wp[o.id])continue;if(Math.hypot(o.x-R.g.x,o.y-R.g.y)<6){S.ud.wp[o.id]=Date.now();toast(`🚡 ปลดล็อก Waypoint: ${o.n}`,'gold');sfx('upgrade');}}}
+function udPerkReveal(){if(udK('prism')){for(const o of R.ores){if(o.hidden&&Math.hypot(o.x-R.g.x,o.y-R.g.y)<10){o.hidden=false;R.efx.push({type:'ring',x:o.x+.5,y:o.y+.5,r:.9,t:0,dur:.5,col:'#ff9df0'});}}}}
+/* ---------- hazards (readable telegraphs, short stuns, nothing destroyed) ---------- */
+function udStunMul(){let m=stunMul();if(udK('scrap'))m*=1-.4*udK('scrap');if(udK('stoneguard'))m*=1-.5*udK('stoneguard');return m;}
+function udHazards(dt){const g=R.g;const safe=udInSafe();const reg=UDR[R.udRegion];const H_=R.udHaz=R.udHaz||{rock:16,steam:6,dis:20,col:35,heat:0,warn:[]};
+ /* hidden ore reveal (proximity / prism head / void head) */const rev=R.fx.has('prism_head')||R.fx.has('void_head');for(const o of R.ores){if(o.hidden&&(rev||Math.hypot(o.x+.5-g.x,o.y+.5-g.y)<1.6+hidDet()))revealHidden(o);}
+ for(let k=H_.warn.length-1;k>=0;k--){const w=H_.warn[k];w.t-=dt;if(w.t<=0){H_.warn.splice(k,1);udHazResolve(w);}}
+ if(safe||R.udRecall>0)return;
+ H_.rock-=dt;if(H_.rock<=0){H_.rock=18+Math.random()*14;const wd=1.7+.15*rl('C3')+(udK('stoneguard')?.4:0);H_.warn.push({k:'rock',x:g.x,y:g.y,r:1.2,t:wd,dur:wd});sfx('rock',1);}
+ if(reg.haz.steam){H_.steam-=dt;if(H_.steam<=0){H_.steam=5+Math.random()*3;const v=udNearDeco(['vent'],7);if(v)H_.warn.push({k:'steam',x:v.x+.5,y:v.y+.5,r:1.4,t:1,dur:1});}}
+ if(reg.haz.discharge){H_.dis-=dt;if(H_.dis<=0){H_.dis=16+Math.random()*10;H_.warn.push({k:'dis',x:g.x+(Math.random()-.5)*2,y:g.y+(Math.random()-.5)*2,r:1.7,t:1.3,dur:1.3});}}
+ if(reg.haz.collapse){H_.col-=dt;if(H_.col<=0){H_.col=34+Math.random()*16;const a=Math.random()*Math.PI*2;const cx=Math.floor(g.x+Math.cos(a)*3),cy=Math.floor(g.y+Math.sin(a)*3);H_.warn.push({k:'col',x:cx+.5,y:cy+.5,r:1.6,t:1.6,dur:1.6});}}
+ if(R.map.g[gTile()]===T_LAVA&&!udK('magma')){H_.heat+=dt*(R.fx.has('frostbound_core')?.5:1);if(Math.random()<dt*8)part(g.x,g.y+.3,'#ff6a1a',2,2.5);if(H_.heat>=3){H_.heat=0;udStun(.9,'🔥 ร้อนเกินไป!');}}else H_.heat=Math.max(0,H_.heat-dt);}
+function udStun(s,txt){const g=R.g;if(R.udInv>0)return;s*=udStunMul();if(s<.15){floatTxt(g.x,g.y-1.2,'🛡 ทนทาน','#8fd3ff',.75);return;}g.stun=Math.max(g.stun,s);g.state='stun';g.path=[];floatTxt(g.x,g.y-1.5,txt||'💫 มึนงง','#ffb347');}
+function udHazResolve(w){const g=R.g;const hit=Math.hypot(g.x-w.x,g.y-w.y)<=w.r;R.shake=Math.max(R.shake,w.k==='col'?.45:.25);
+ if(w.k==='rock'){sfx('rock');for(let k=0;k<20;k++)part(w.x,w.y,k%2?'#8d755a':'#5b4a3a',5,4);if(hit){if(R.fort){R.fort=false;toast('🏰 Fortress ป้องกันหินถล่ม!','ok');}else if(R.shield){R.shield=false;toast('🛡 Shieldstone ป้องกันหินถล่ม!','ok');}else udStun(1.4,'💫 หินถล่ม!');}}
+ else if(w.k==='steam'){for(let k=0;k<16;k++)part(w.x,w.y-.4,'rgba(230,230,240,.8)',4,5);sfx('fire',1);if(hit&&!udK('magma'))udStun(.8,'♨ ไอน้ำร้อน!');}
+ else if(w.k==='dis'){R.efx.push({type:'burst',x:w.x,y:w.y,r:1.4,t:0,dur:.4,col:UDR[R.udRegion].pal.acc});sfx('zap',2);if(hit)udStun(.6,'⚡ คริสตัลปลดประจุ!');}
+ else if(w.k==='col'){sfx('rock');for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const x=Math.floor(w.x)+dx,y=Math.floor(w.y)+dy;const i=y*W+x;if(R.map.g[i]===T_FLOOR&&!R.oreAt[i]&&UD.world.zone[i]!==3&&Math.random()<.7)tempTile(x,y,T_RUBBLE,24);}for(let k=0;k<26;k++)part(w.x,w.y,'#7a6a58',5,4);if(hit)udStun(1,'🪨 ถ้ำถล่มเฉพาะจุด!');}}
+function udNearDeco(kinds,r){const g=R.g;let best=null,bd=r;const x0=Math.floor(g.x),y0=Math.floor(g.y);for(let y=y0-r;y<=y0+r;y++)for(let x=x0-r;x<=x0+r;x++){if(x<0||y<0||x>=W||y>=H)continue;const k=UD.world.deco[y*W+x];if(!k)continue;const p=udPropKind(R.udRegion,k);if(!kinds.includes(p))continue;const d=Math.hypot(x-g.x,y-g.y);if(d<bd){bd=d;best={x,y};}}return best;}
+function udPropKind(r,k){const L=UDR[r].props;return L[(k-1)%L.length];}
+
+/* =====================================================================
+   V6.2 THE GREAT UNDERDEEP (3/5) — monsters · encounters on the real combat engine · discoveries ·
+   outposts · NPC quests · mining-disturbance ambushes · elite resource guardians · mini-bosses
+   ===================================================================== */
+const UD_MON_CAP=12,UD_AMBUSH_CAP=2;
+const UD_SPAWN_CD={patrol:300,nest:1200,elite:900,lair:1800,ambush:0};
+/* spawn index per chunk (built lazily) */
+function udSpawnIdx(){if(UD.spIdx)return UD.spIdx;UD.spIdx={};for(const s of UD.world.spawns)(UD.spIdx[UD.ck(s.x,s.y)]=UD.spIdx[UD.ck(s.x,s.y)]||[]).push(s);
+ UD.dIdx={};for(const d of UD.world.disc)(UD.dIdx[UD.ck(d.x,d.y)]=UD.dIdx[UD.ck(d.x,d.y)]||[]).push(d);return UD.spIdx;}
+function udSpawnAlive(s){const st=S.ud.spawns[s.id];return !st||!st.until||st.until<=Date.now();}
+function udMkMon(type,tier,x,y,o){const M=UDM[type];return Object.assign({ud:'mon',id:'m'+(UD.monSeq=(UD.monSeq||0)+1),type,tier,elite:!!M.elite,boss:false,x,y,hx:x,hy:y,state:'idle',t:Math.random()*2,face:1,ph:Math.random()*6,tx:x,ty:y,calm:0,alert:0,sp:M.sp},o||{});}
+function udSpawnChunkMons(c){if(!UD.world)return;udSpawnIdx();const now=Date.now();
+ for(const s of(UD.spIdx[c]||[])){if(!udSpawnAlive(s))continue;if(s.al&&!S.ud.disc['al_'+s.al])continue;if(UD.mons.some(m=>m.sid===s.id))continue;const R_=UDR[s.r];const tier=R_.tier;
+  if(s.k==='patrol'){const n=1+(udRand(s.id,'n')<.4?1:0);for(let k=0;k<n;k++)UD.mons.push(udMkMon(R_.mons[(k+(udRand(s.id)<.5?0:1))%2],tier,s.x+k*.8,s.y,{sid:s.id,kind:'patrol'}));}
+  else if(s.k==='nest'){for(let k=0;k<3;k++)UD.mons.push(udMkMon(R_.mons[k%2],tier,s.x+(k-1)*.9,s.y+(k%2)*.6,{sid:s.id,kind:'nest',nest:true}));}
+  else if(s.k==='elite'){UD.mons.push(udMkMon(R_.elite,tier,s.x,s.y,{sid:s.id,kind:'elite',vein:s.vein,guard:true}));}
+  else if(s.k==='lair'){UD.mons.push(udMkMon(R_.elite,tier,s.x,s.y,{sid:s.id,kind:'lair',boss:true,bossDef:R_.boss,guard:true}));}}
+ for(const d of(UD.dIdx[c]||[]))if(!UD.objs.includes(d))UD.objs.push(d);}
+UD.objs=[];
+{const _ul=udUnloadChunk;udUnloadChunk=function(c){_ul(c);UD.objs=UD.objs.filter(d=>UD.ck(d.x,d.y)!==c);};}
+/* ---------- walking on the tile grid ---------- */
+function udMonFree(x,y){const xi=Math.floor(x+.5),yi=Math.floor(y+.5);if(xi<0||yi<0||xi>=W||yi>=H)return false;const i=yi*W+xi;const t=R.map.g[i];if(!(t===T_FLOOR||t===T_SLOW||t===T_LAVA))return false;if(R.oreAt[i])return false;if(UD.world.zone[i]===3)return false;return true;}
+function udMonMove(m,tx,ty,sp,dt){const dx=tx-m.x,dy=ty-m.y,l=Math.hypot(dx,dy);if(l<.05)return true;const st=Math.min(l,sp*dt);const nx=m.x+dx/l*st,ny=m.y+dy/l*st;
+ if(udMonFree(nx,ny)){m.x=nx;m.y=ny;}else if(udMonFree(nx,m.y)){m.x=nx;}else if(udMonFree(m.x,ny)){m.y=ny;}else return false;if(Math.abs(dx)>.02)m.face=dx>0?1:-1;m.ph+=dt*sp*5;return l<.1;}
+/* ---------- per-frame monster AI on the mine map ---------- */
+function udMonStep(dt){if(!R||!UD.mons.length){R.inter=UD.objs.length?UD.objs.concat(UD.held?[]:[]):[];udOutpostMarks();return;}
+ const g=R.g;const gx=g.x-.5,gy=g.y-.5;const safe=udInSafe();const stance=R.udStance;
+ for(const m of UD.mons){if(m.state!=='chase'&&Math.abs(m.x-gx)+Math.abs(m.y-gy)>30)continue;/* dormant outside the activation radius */m.t-=dt;m.calm=Math.max(0,m.calm-dt);m.alert=Math.max(0,m.alert-dt);const d=Math.hypot(m.x-gx,m.y-gy);const home=Math.hypot(m.x-m.hx,m.y-m.hy);
+  const det=(m.boss?3.6:m.elite?4.6:4.2)+(m.alert>0?4:0)+(stance==='combat'?1:0);
+  if(m.state!=='chase'&&m.calm<=0&&!safe&&!UD.peace&&d<det&&udLOS(m.x,m.y,gx,gy)&&(!m.guard||d<det*.75||m.alert>0)){m.state='chase';m.t=0;floatTxt(m.x+.5,m.y-.6,'❗','#ff5a5a',1);}
+  if(m.state==='chase'){const leash=m.boss?7:m.guard?9:12;if(safe||home>leash||m.calm>0||d>14){m.state='return';}
+   else{udMonMove(m,gx,gy,m.sp*(m.elite?1:1.05),dt);if(d<.95&&R.g.stun<=0&&!R.ended&&R.udInv<=0&&!UD.peace){udEncounter(m);return;}}}
+  else if(m.state==='return'){if(udMonMove(m,m.hx,m.hy,m.sp*1.2,dt)||m.t<-6){m.state='idle';m.t=1+Math.random()*2;}}
+  else{/* idle → wander / patrol within a small radius of home */if(m.t<=0){if(m.kind==='patrol'||(!m.guard&&Math.random()<.5)){const a=Math.random()*Math.PI*2,r=m.kind==='patrol'?2+Math.random()*4:1+Math.random()*1.5;m.tx=m.hx+Math.cos(a)*r;m.ty=m.hy+Math.sin(a)*r;m.state='walk';}m.t=2+Math.random()*3;}}
+  if(m.state==='walk'){if(udMonMove(m,m.tx,m.ty,m.sp*.45,dt)||m.t<=0){m.state='idle';m.t=1.5+Math.random()*2.5;}}}
+ /* combat stance: walk to the nearest visible monster */
+ if(stance==='combat'&&R.auto&&g.state==='idle'&&g.stun<=0){let best=null,bd=8;for(const m of UD.mons){const dd=Math.hypot(m.x-gx,m.y-gy);if(dd<bd&&UD.fog[Math.floor(m.y+.5)*W+Math.floor(m.x+.5)]){bd=dd;best=m;}}if(best){const i=Math.floor(best.y+.5)*W+Math.floor(best.x+.5);if(setTarget({kind:'move',i},false))g.idleWait=.4;best.alert=3;}}
+ R.inter=UD.objs.concat(UD.mons);udOutpostMarks();}
+function udOutpostMarks(){if(!R.inter)R.inter=[];for(const o of UD.world.outposts){if(Math.abs(o.x-R.g.x)<30&&Math.abs(o.y-R.g.y)<30)R.inter.push(o.mk||(o.mk={ud:'outpost',x:o.x,y:o.y-1,o}));}}
+function udLOS(x0,y0,x1,y1){const n=Math.ceil(Math.hypot(x1-x0,y1-y0)*2);for(let k=1;k<n;k++){const x=Math.floor(x0+.5+(x1-x0)*k/n),y=Math.floor(y0+.5+(y1-y0)*k/n);const t=R.map.g[y*W+x];if(t===T_WALL||t===T_SECRET)return false;}return true;}
+/* mining disturbance: breaking ore can wake nearby creatures; mining a guarded rich vein angers its guardian */
+{const _bo=breakOre;breakOre=function(o){const ud=R&&R.ud&&o&&!o.secret&&o.ud;const v=ud&&UD.vmap[o.ud.v];_bo(o);if(!ud||!R||R.ended)return;
+ for(const m of UD.mons)if(m.guard&&m.vein===v.id&&Math.hypot(m.x-o.x,m.y-o.y)<10){m.alert=6;m.state='chase';floatTxt(m.x+.5,m.y-.8,'⚠ Guardian!','#ff5a5a',1);}
+ const amb=UD.mons.filter(m=>m.kind==='ambush').length;const p=(v.rich?.09:.045)*(R.udRegion>=3?1.2:1);
+ const near=UD.mons.filter(m=>Math.abs(m.x-o.x)+Math.abs(m.y-o.y)<14).length;if(near<UD_MON_CAP&&amb<UD_AMBUSH_CAP&&!udInSafe()&&Math.random()<p&&(S.ud.stats.mined>6)){const R_=UDR[v.r];for(let k=0;k<12;k++){const a=Math.random()*Math.PI*2,r=3+Math.random()*2.5;const x=o.x+Math.cos(a)*r,y=o.y+Math.sin(a)*r;if(udMonFree(x,y)&&udLOS(x,y,o.x,o.y)){const m=udMkMon(R_.mons[Math.random()<.5?0:1],R_.tier,x,y,{kind:'ambush',alert:5,state:'chase'});UD.mons.push(m);floatTxt(x+.5,y-.6,'🪨 สิ่งมีชีวิตตื่นจากเสียงขุด!','#ffb060',.85);R.shake=Math.max(R.shake,.15);for(let q=0;q<10;q++)part(x+.5,y+.5,'#8d755a',4,3);break;}}}};}
+/* ---------- encounter bridge → real combat engine (calcCombat · hitEnemy · skills · sets · classes) ---------- */
+const UD_ELR=[{shock:1.15},{fire:1.2},{shock:1.2,phys:.95},{fire:.7,ice:1.25},{shock:1.15,void:1.1},{void:.7,shock:1.15}];
+function udEncounter(lead,first){if(!R||!R.ud||CB||UD.held)return;const stance=R.udStance;const gx=R.g.x-.5,gy=R.g.y-.5;
+ const group=[lead,...UD.mons.filter(m=>m!==lead&&!m.boss&&(m.state==='chase'||m.nest&&lead.nest)&&Math.hypot(m.x-gx,m.y-gy)<4.5)].slice(0,lead.boss?2:lead.tier>=4?2:3);
+ udSnapshot();UD.enc={mons:group,lead,first:!!first,region:R.udRegion,at:Date.now(),pos:{x:R.g.x,y:R.g.y}};UD.held=R;R.g.path=[];R.g.tgt=null;R.g.state='idle';
+ const reg=UDR[R.udRegion];ATH.ud={f1:reg.pal.fl[0],f2:reg.pal.fl[1],edge:reg.pal.top,acc:reg.pal.acc,sky:[reg.pal.face,reg.pal.bg],name:reg.n};ABGK='';
+ R=null;$('#dungeon').classList.add('hidden');
+ try{startCombat('ud',null,{});}catch(e){console.error('ud encounter',e);}
+ if(!CB){R=UD.held;UD.held=null;UD.enc=null;$('#dungeon').classList.remove('hidden');return;}
+ CB.udEnc=UD.enc;CB.adds=[];CB.intro=.9;CB.limit=240;
+ if(lead.boss){const base=CBOSS[lead.bossDef.def];const def=Object.assign({},base,{hp:Math.round(base.hp*lead.bossDef.hp),name:lead.bossDef.n,lvl:Math.max(8,Math.round(base.lvl*(.55+.12*lead.tier)))});CB.boss=makeBoss(def);CB.boss.dmgM=[0,.55,.7,.75,.85,.9,1][lead.tier];CB.boss.udName=lead.bossDef.n;}
+ group.filter(m=>!m.boss).forEach((m,k)=>CB.adds.push(udArenaMon(m,k,group.length-(lead.boss?1:0))));
+ if(first||stance==='combat'){for(const a of CB.adds){a.hp=Math.round(a.hp*.85);}if(CB.boss)CB.boss.hp=Math.round(CB.boss.hp*.92);CB.udFirst=true;}
+ cbHudBuild&&cbHudBuild();udTut('monster');sfx('bosswarn');}
+function udArenaMon(m,k,n){const M=UDM[m.type];const t=m.tier;const el=m.elite?1:0;const hp=Math.round(UDM_HP[t]*(el?3.2:1)*(m.kind==='ambush'?.8:1));
+ const spread=n>1?(k-(n-1)/2)*3.2:0;
+ return{kind:'udm',type:m.type,src:m,tier:t,elite:!!el,x:clamp(AW/2+spread,2,AW-2),y:AH*.3+(k%2)*.8,r:.55+M.sz*.45,hp,mhp:hp,def:UDM_DEF[t]*(el?1.3:1),stg:0,stgMax:50+t*12+(el?60:0),stagT:0,faceA:Math.PI/2,tm:1,ts:1,dmgM:1,elr:UD_ELR[UDR.findIndex(r=>r.tier===t)]||{},sres:{},
+  cd:1+k*.6+Math.random()*.6,busy:0,ph:Math.random()*6,dmg:UDM_DMG[t]*(el?1.45:1),M,step:udArenaStep,onDie:udArenaDie};}
+function udArenaStep(a,dt){const p=CB.p;a.ph+=dt*4;if(p.dead||CB.ended)return;if(a.frozen>0||a.stunT>0||a.stagT>0)return;const M=a.M;const d=dist(a,p);a.faceA=angTo(a,p);const slow=a.chill?1-.08*a.chill:1;
+ if(a.busy>0){a.busy-=dt;if(a.charge){const c=a.charge;c.t-=dt;if(c.t<=0){a.x+=Math.cos(c.a)*c.v*dt;a.y+=Math.sin(c.a)*c.v*dt;a.x=clamp(a.x,.8,AW-.8);a.y=clamp(a.y,.9,AH-.6);if(c.t<-c.dur)a.charge=null;}}return;}
+ const want=M.ai==='ranged'?4.6:M.ai==='caster'?3.8:1.25+a.r;
+ if(d>want){const sp=M.sp*.95*slow;a.x+=Math.cos(a.faceA)*sp*dt;a.y+=Math.sin(a.faceA)*sp*dt;a.walk=1;}else if(M.ai==='ranged'&&d<2.4){const sp=M.sp*.6*slow;a.x-=Math.cos(a.faceA)*sp*dt;a.y-=Math.sin(a.faceA)*sp*dt;a.walk=1;}else a.walk=0;
+ a.x=clamp(a.x,.8,AW-.8);a.y=clamp(a.y,.9,AH-.6);
+ /* separation between monsters */for(const b of CB.adds){if(b===a||b.dead)continue;const dd=dist(a,b),mn=a.r+b.r;if(dd<mn&&dd>0){const an=angTo(b,a);a.x+=Math.cos(an)*(mn-dd)*.5;a.y+=Math.sin(an)*(mn-dd)*.5;}}
+ a.cd-=dt*slow;if(a.cd>0||d>want+2.2)return;const dm=a.dmg;const el=['phys','phys','shock','fire','phys','void'][Math.min(5,a.tier-1)];
+ if(M.ai==='melee'){addTele(a,{kind:'cone',x:a.x,y:a.y,ang:a.faceA,half:.75,len:1.7+a.r,dur:.75,dmg:dm,el:'phys'});a.busy=.8;a.cd=rnd2(1.9,2.6);}
+ else if(M.ai==='charger'){const an=a.faceA;const len=Math.min(7,d+1.5);addTele(a,{kind:'rect',x:a.x,y:a.y,ang:an,len,w:a.r*2+.3,dur:.9,dmg:dm*1.25,el:'phys',o:{kb:1.5,from:a}});a.busy=.9+len/9;a.charge={a:an,v:9,t:.9,dur:len/9};a.cd=rnd2(2.8,3.6);}
+ else if(M.ai==='ranged'){const n=a.elite?3:1;for(let k=0;k<n;k++){const aa=a.faceA+(k-(n-1)/2)*.28;CB.timers.push({t:.35+k*.05,fn:()=>{if(a.dead||!CB)return;CB.projs.push({x:a.x,y:a.y,vx:Math.cos(aa)*6.5,vy:Math.sin(aa)*6.5,r:.38,dmg:dm*.6,el,life:2.6,udCol:M.eye});}});}a.busy=.5;a.cd=rnd2(2.2,2.9);}
+ else{addTele(a,{kind:'circle',x:p.x,y:p.y,r:1.45,dur:1.15,dmg:dm*1.2,el,track:.6});if(a.elite)addTele(a,{kind:'ring',x:a.x,y:a.y,r:1.2,r2:2.8,dur:1.3,dmg:dm*.9,el});a.busy=.6;a.cd=rnd2(2.4,3.1);}}
+function udArenaDie(a){a.fade=.6;partC(a.x,a.y,a.M.col,14,5);partC(a.x,a.y,a.M.eye,8,4);floatTxtC(a.x,a.y-1.8,a.elite?'ELITE DOWN!':'DEFEATED','#ffd84a',1.1);sfx('break',a.elite?5:3);}
+/* victory when every monster in the encounter is down (bosses use the normal boss-defeat flow) */
+{const _st=cbStep;cbStep=function(dt){_st(dt);if(!CB||CB.type!=='ud'||CB.ended||CB.intro>0||CB.udWin)return;if(!CB.boss&&CB.adds.length&&CB.adds.every(a=>a.dead)||!CB.boss&&!CB.adds.length){CB.udWin=true;setPState('victory',1.2);CB.timers.push({t:1.1,fn:()=>endCombat(true,'clear')});}};}
+/* real combat progression for monster fights: Part Specialization (c:) + Discipline, scaled by encounter size */
+{const _ce=v5CombatEnd;v5CombatEnd=function(win){const ud=CB&&CB.type==='ud'&&!CB.sim&&!CB.v5done;const st=CB&&CB.st;const out=_ce(win);if(!ud||!out||!st)return out;const E=CB.udEnc;
+ let base=0;if(E){const w=E.mons.reduce((a,m)=>a+(m.boss?6:m.elite?2.5:1),0);base=win?Math.min(160,14*w+4*E.lead.tier):Math.min(20,4+CB.t/8);}
+ if(base>0){const seen=new Set();for(const sl of CSLOTS){const i=st.pieces[sl];if(!i||seen.has(i.aid))continue;seen.add(i.aid);const n=Math.round(base);out.mast['c:'+i.aid]={n,up:addMastExp('c:'+i.aid,n)};}
+  out.disc=out.disc||{};if(st.cls)for(const c in st.cls){if(!st.cls[c])continue;const n=Math.round(base*2.4*st.cls[c]/6);out.disc[c]={n,up:v7AddDisc(c,n)};}}
+ CB.udOut=out;return out;};}
+{const _ex=exitCombat;exitCombat=function(){if(CB&&CB.type==='ud'||UD.held&&!CB){udCombatReturn();return;}return _ex();};}
+{const _sr=showCombatResult;showCombatResult=function(r){if(r&&r.type==='ud')return;return _sr(r);};}
+function udCombatReturn(){const res=CB&&CB.res;const out=CB&&CB.udOut;const E=UD.enc;CB=null;$('#arena').classList.add('hidden');R=UD.held;UD.held=null;UD.enc=null;
+ if(!R){exitDungeon();return;}$('#dungeon').classList.remove('hidden');$('#workshop').classList.add('hidden');resizeDungeon();updateSkillButtons();updateHudButtons();setTimeout(sceneAudio,40);R.cam.init=false;
+ if(!E)return;const win=res&&res.win;
+ if(win){const got=udReward(E);udTut('monster');S.ud.stats.kills+=E.mons.length;for(const m of E.mons){UD.mons.splice(UD.mons.indexOf(m),1);if(m.sid){const sp=UD.world.spawns.find(s=>s.id===m.sid);const left=UD.mons.filter(x=>x.sid===m.sid).length;if(!left)S.ud.spawns[m.sid]={until:Date.now()+UD_SPAWN_CD[m.kind]*1000,kills:((S.ud.spawns[m.sid]||{}).kills||0)+1};}if(m.elite&&!m.boss)S.ud.stats.elites++;if(m.boss)S.ud.stats.bosses++;udQuestEv('kill',m);}
+  R.udInv=2.5;udCombatToast(got,out);}
+ else if(res&&res.why==='retreat'){for(const m of E.mons){m.state='return';m.calm=8;}udPushBack(E.lead);R.udInv=3;toast('🏃 ถอยออกจากการต่อสู้ — มอนสเตอร์กลับรัง','ok');}
+ else{for(const m of E.mons){m.state='return';m.calm=10;}const o=udNearestOutpost();R.g.x=o.x+.5;R.g.y=o.y+1.5;R.g.path=[];udStream(true);udRevealArea(R.g.x,R.g.y,udVisR());R.udInv=4;udRegionCheck(true);
+  toast(`🛠 โกเลมถูกลากกลับ ${o.n} — แร่ในกระเป๋าและอุปกรณ์ครบทุกชิ้น`,'gold');}
+ udSnapshot();save();}
+function udNearestOutpost(){const L=UD.world.outposts.filter(o=>S.ud.wp[o.id]);let best=L[0]||UD.world.outposts[0],bd=1e9;for(const o of L){const d=Math.hypot(o.x-R.g.x,(o.y-R.g.y)*1.3);if(d<bd){bd=d;best=o;}}return best;}
+function udPushBack(m){const g=R.g;const a=Math.atan2(g.y-.5-m.y,g.x-.5-m.x);for(let r=3;r>=1;r--){const x=Math.floor(g.x+Math.cos(a)*r),y=Math.floor(g.y+Math.sin(a)*r);if(stand(y*W+x)){g.x=x+.5;g.y=y+.5;return;}}}
+function udReward(E){const got={coins:0,ores:{},cm:{},data:0,bpf:0,stored:0};const add=(name,tier,n)=>{for(let k=0;k<n;k++){if(R&&bagFits(tier))bagAdd(name,tier);else{S.oreStorage[name]=(S.oreStorage[name]||0)+1;got.stored++;}got.ores[name]=(got.ores[name]||0)+1;}};
+ for(const m of E.mons){const R_=UDR[udRegionAt(m.hy)];const t=m.tier;const mult=m.boss?14:m.elite?4:m.kind==='ambush'?.8:1;got.coins+=Math.round(28*t*mult*(1+.15*(S.ud.stats.kills>50?1:0)));
+  add(R_.ores[Math.random()<.6?0:1],t,m.boss?4:m.elite?2:(Math.random()<.55?1:0));
+  const nc=m.boss?3:m.elite?1+(Math.random()<.4?1:0):(Math.random()<.22?1:0);for(let k=0;k<nc;k++){const ck=udMatFor(t);if(ck){cmAdd(ck,1,true);got.cm[ck]=(got.cm[ck]||0)+1;}}
+  if(m.elite||m.boss)got.data+=m.boss?3:1;if(m.boss){const first=!(S.ud.lairs||(S.ud.lairs={}))[m.sid];if(first){S.ud.lairs[m.sid]=Date.now();got.bpf+=2;got.coins+=600*t;}}}
+ S.coins+=got.coins;S.stats.earned+=got.coins;S.data=(S.data||0)+got.data;if(got.bpf&&S.armorBlueprints)S.armorBlueprints.frag+=got.bpf;return got;}
+function udCombatToast(g,out){const ores=Object.entries(g.ores).map(([n,c])=>`${n}×${c}`).join(' ');const cm=Object.entries(g.cm).map(([k,c])=>`${CMAT[k].i}${c}`).join(' ');
+ const ms=out&&out.mast?Object.values(out.mast).reduce((a,b)=>a+b.n,0):0;
+ toast(`⚔ ชนะ! +🪙${fmt(g.coins)}${ores?' · '+ores:''}${cm?' · '+cm:''}${g.data?' · 📘+'+g.data:''}${g.bpf?' · 📄+'+g.bpf:''}${ms?' · ⭐ Spec EXP +'+ms:''}${g.stored?' (กระเป๋าเต็ม → ส่งเข้าคลัง '+g.stored+')':''}`,'gold');}
+/* ---------- discoveries · outposts · quests ---------- */
+const UD_LORE=['บันทึกหัวหน้าคนงาน: "สายแร่ที่เราขุดหมดเมื่อวาน วันนี้งอกกลับมาครึ่งหนึ่ง… ภูเขานี้มีชีวิต"',
+ 'แผ่นจารึก: "ผู้ใดฟังเสียงหิน ผู้นั้นพบทางที่ซ่อนอยู่หลังผนังร้าว"','รายงานสำรวจ: "ใต้โรงหลอมคือเมืองของนักขุดโบราณ — พวกเขาสร้างโกเลมก่อนเรา"',
+ 'สมุดช่างเครื่อง: "แกนสายฟ้าส่งกระแสผ่านทองแดงและเงินได้ แต่ไม่ผ่านหิน"','บันทึกฉบับสุดท้าย: "ที่ก้นเหว ความว่างเปล่าเริ่มขุดเรากลับ"',
+ 'ป้ายเตือน: "ไอน้ำพุ่งทุกไม่กี่วินาที — ฟังเสียงฟู่ก่อนเดินผ่าน"','จดหมายถึงบ้าน: "เจอห้องเสบียงที่ถูกฝังไว้ มีชิ้นส่วนโกเลมรุ่นเก่าเต็มไปหมด"',
+ 'บันทึกนักธรณี: "คริสตัลในโถงกระจกสะท้อนแสงไปยังสายแร่ที่ซ่อนอยู่"','คำสาบานผู้พิทักษ์: "ประตูนี้เปิดแด่ผู้ปลุกรีเลย์ทั้งสามตามลำดับดวงดาว"',
+ 'เศษแผนที่: "ทางลัดเก่าถูกปิดหลังการถล่ม ปี 34 — ขุดตรงรอยร้าวสีชมพู"','บันทึกเตาหลอม: "Obsidian ร้อนจนตีไม่เข้า เว้นแต่จะคุมความร้อนได้"','ข้อความในหิน: "ทุกอย่างที่ถูกขุด จะกลับคืนสู่หิน"'];
+function udDiscState(d){return S.ud.disc[d.id]||null;}
+function udInterCheck(){const g=R.g;const gx=g.x-.5,gy=g.y-.5;R.udNear=null;
+ for(const d of UD.objs){const dd=Math.hypot(d.x-gx,d.y-gy);if(dd<1.35){const st=udDiscState(d);if(d.k==='guardian'){if(!st||!st.open)R.udNear={k:'disc',d};continue;}if(!st)udDiscover(d);else if(d.k==='machine'||d.k==='workshop')R.udNear={k:'disc',d};}
+  if(d.k==='guardian'&&d.relays)d.relays.forEach((p,j)=>{if(Math.hypot(p.x-gx,p.y-gy)<1)udRelay(d,j);});}
+ const z=UD.world.zone[gTile()];if(z===3){const o=udOutpostAt();if(o){R.udNear={k:'outpost',o};if(!S.ud.wp[o.id]){S.ud.wp[o.id]=Date.now();toast(`🚡 ปลดล็อก Waypoint: ${o.n}`,'gold');}if(!R.udInOut){R.udInOut=o.id;udTut('outpost');}}}else R.udInOut=null;}
+function udOutpostAt(){let best=null,bd=9;for(const o of UD.world.outposts){const d=Math.hypot(o.x-R.g.x,o.y-R.g.y);if(d<bd){bd=d;best=o;}}return best;}
+function udDiscover(d){const st=S.ud.disc[d.id]={at:Date.now()};S.ud.stats.disc++;const t=UDR[d.r].tier;let msg='';
+ if(d.k==='chest'){const c=180*t+Math.round(Math.random()*120*t);S.coins+=c;const ck=udMatFor(t);if(ck)cmAdd(ck,2,true);if(S.armorBlueprints)S.armorBlueprints.frag+=1;msg=`💰 หีบสมบัติใต้ดิน! +🪙${fmt(c)}${ck?` · ${CMAT[ck].i}${CMAT[ck].n}×2`:''} · 📄+1`;sfx('coin');}
+ else if(d.k==='supply'){const n=2+t;let put=0;for(let k=0;k<n;k++){const nm=UDR[d.r].ores[k%2];if(bagFits(t)){bagAdd(nm,t);put++;}else S.oreStorage[nm]=(S.oreStorage[nm]||0)+1;}S.data=(S.data||0)+1;msg=`📦 ห้องเสบียงที่ถูกฝัง! แร่ ${n} ก้อน${put<n?' (ส่วนเกินเข้าคลัง)':''} · 📘+1`;}
+ else if(d.k==='workshop'){const ck=udMatFor(Math.min(6,t+1));if(ck)cmAdd(ck,2,true);S.data=(S.data||0)+3;st.lore=udLoreAdd(d);msg=`🛠 โรงงานโกเลมที่สาบสูญ! 📘+3${ck?` · ${CMAT[ck].i}${CMAT[ck].n}×2`:''} · บันทึกใหม่ในสมุด`;}
+ else if(d.k==='machine'){msg='⚙ เครื่องจักรขุดเก่า — เข้าใกล้แล้วกดปุ่ม ⚙ เพื่อแปรรูปแร่ (3 → 1 Tier สูงขึ้น)';}
+ else if(d.k==='record'){S.data=(S.data||0)+2;st.lore=udLoreAdd(d);msg=`📜 บันทึกการขุดที่สาบสูญ · 📘+2 — "${UD_LORE[st.lore].slice(0,60)}…"`;}
+ toast(msg,'gold');udTut('branch');save();}
+function udLoreAdd(d){const k=udHash(d.id,'lore')%UD_LORE.length;if(!S.ud.lore.includes(k))S.ud.lore.push(k);return k;}
+/* guardian relay puzzle: three relays must be activated in the order engraved on the guardian (shown as ①②③ in the world) */
+function udRelayOrder(d){const o=[0,1,2];const h=udHash(d.id,'ord');for(let i=2;i>0;i--){const j=(h>>(i*3))%(i+1);[o[i],o[j]]=[o[j],o[i]];}return o;}
+function udRelay(d,j){const st=S.ud.disc[d.id]||(S.ud.disc[d.id]={at:Date.now(),seq:[]});if(st.open)return;st.seq=st.seq||[];if(st.seq.includes(j))return;const ord=udRelayOrder(d);
+ if(ord[st.seq.length]===j){st.seq.push(j);sfx('crystal');floatTxt(d.relays[j].x+.5,d.relays[j].y-.4,`◆ Relay ${st.seq.length}/3`,'#7fffd4',.9);if(st.seq.length===3){st.open=1;S.ud.stats.disc++;const t=UDR[d.r].tier;const c=400*t;S.coins+=c;const ck=udMatFor(Math.min(6,t+1));if(ck)cmAdd(ck,3,true);S.data=(S.data||0)+4;if(S.armorBlueprints)S.armorBlueprints.frag+=2;
+  toast(`🗿 ผู้พิทักษ์จักรกลเปิดคลัง! +🪙${fmt(c)}${ck?` · ${CMAT[ck].i}×3`:''} · 📘+4 · 📄+2`,'gold');sfx('upgrade');R.efx.push({type:'ring',x:d.x+.5,y:d.y+.5,r:2.5,t:0,dur:.9,col:'#7fffd4',fill:true});save();}}
+ else{st.seq=[];sfx('err');floatTxt(d.relays[j].x+.5,d.relays[j].y-.4,'✖ ลำดับผิด — รีเลย์รีเซ็ต','#ff5a5a',.9);}}
+/* ore machine: 3 ores of tier t from the bag → 1 ore of tier t+1 (region-appropriate) */
+function udMachineUse(){if(!R||!R.udNear||R.udNear.k!=='disc')return;const d=R.udNear.d;if(d.k==='workshop'){udOpenLore();return;}if(d.k==='guardian'){const ord=udRelayOrder(d);toast(`🗿 จารึกบนผู้พิทักษ์: ปลุกรีเลย์ตามลำดับ ${ord.map(i=>['①','②','③'][i]).join(' → ')}`,'gold');return;}
+ let best=null;for(const k in R.bag.items){const it=R.bag.items[k];if(it.count>=3&&it.tier<6&&(!best||it.tier<R.bag.items[best].tier))best=k;}
+ if(!best){toast('⚙ ต้องมีแร่ชนิดเดียวกัน 3 ก้อนในกระเป๋า (Tier 1–5)','err');return;}const it=R.bag.items[best];const t=it.tier;for(let k=0;k<3;k++){it.count--;R.bag.w=Math.max(0,R.bag.w-TIERS[t].w);R.bag.val=Math.max(0,R.bag.val-TIERS[t].price*R.valMul);}if(!it.count)delete R.bag.items[best];
+ const nt=t+1;const nm=UDR[nt-1].ores[0];bagAdd(nm,nt);sfx('upgrade');toast(`⚙ แปรรูป ${best}×3 → ${nm}×1`,'ok');R.efx.push({type:'spin',x:d.x+.5,y:d.y+.5,t:0,dur:.6,col:'#ffd84a'});}
+/* outpost NPC quests (simple exploration tasks, existing rewards) */
+function udQuest(o){let q=S.ud.q[o.id];if(!q||q.claimed&&Date.now()-q.claimed>10*60*1000){const t=UDR[o.r].tier;const h=udHash(o.id,(q&&q.n||0)+1);const kind=['mine','kill','mine','disc'][h%4];const ore=UDR[o.r].ores[h%2];
+  q=S.ud.q[o.id]={n:(q&&q.n||0)+1,k:kind,ore,r:o.r,need:kind==='mine'?8+t*2:kind==='kill'?3+Math.floor(t/2):1,have:0,claimed:0,rw:{coins:150*t+100,cm:t}};}return q;}
+function udQuestText(q){return q.k==='mine'?`ขุด ${q.ore} ${q.need} ก้อน`:q.k==='kill'?`ปราบมอนสเตอร์ใน ${UDR[q.r].n} ${q.need} ตัว`:`ค้นพบสิ่งใหม่ (หีบ/บันทึก/ห้องลับ) 1 แห่ง`;}
+function udQuestEv(k,x){for(const id in S.ud.q){const q=S.ud.q[id];if(q.claimed||q.have>=q.need)continue;if(q.k==='kill'&&k==='kill'&&udRegionAt(x.hy)===q.r)q.have++;if(q.k==='mine'&&k==='mine'&&x===q.ore)q.have++;if(q.k==='disc'&&k==='disc')q.have++;if(q.have>=q.need)toast(`📋 ภารกิจ Outpost สำเร็จ: ${udQuestText(q)} — กลับไปรับรางวัลที่ Outpost`,'gold');}}
+{const _bo=breakOre;breakOre=function(o){const nm=o&&!o.secret&&R&&R.ud?o.name:null;_bo(o);if(nm)udQuestEv('mine',nm);};}
+{const _dv=udDiscover;udDiscover=function(d){_dv(d);udQuestEv('disc');};}
+function udQuestClaim(id){const q=S.ud.q[id];if(!q||q.claimed||q.have<q.need)return;q.claimed=Date.now();S.coins+=q.rw.coins;const ck=udMatFor(q.rw.cm);if(ck)cmAdd(ck,2,true);S.data=(S.data||0)+1;save();toast(`📋 รับรางวัล +🪙${fmt(q.rw.coins)}${ck?` · ${CMAT[ck].i}×2`:''} · 📘+1`,'gold');sfx('coin');if(modalRefresh)modalRefresh();}
+/* hazards module from the legacy runs is replaced inside the Underdeep (no ore melting, no knock-back into walls) */
+{const _sh=stepHazards;stepHazards=function(dt){if(R&&R.ud)return;return _sh(dt);};}
+{const _fs=fogSeen;fogSeen=function(x,y){if(R&&R.ud)return UD.fog[Math.floor(y+.5)*W+Math.floor(x+.5)]>0;return _fs(x,y);};}
+{const _sa=sceneAudio;sceneAudio=function(){if(R&&R.ud){const k=['depths','quarry','quarry','rift','depths','void'][R.udRegion];if(k!==AMB_KIND||!AMB)ambient(k);return;}return _sa();};}
+
+/* =====================================================================
+   V6.2 THE GREAT UNDERDEEP (4/5) — rendering: per-region cached terrain chunks (LRU) · region props ·
+   living-vein visuals (rich aura, regrowth sprouts, unstable shimmer) · excavation damage states ·
+   hazard telegraphs · fog of war · monsters (mine map + arena) · discoveries · outposts · minimap
+   ===================================================================== */
+function udHex(h,a){const[r,g,b]=hexRgb(h);const t=a>0?255:0,p=Math.abs(a);const f=v=>Math.round(v+(t-v)*p).toString(16).padStart(2,'0');return'#'+f(r)+f(g)+f(b);}
+const UD_TH_X=[{amb:'dust',faceStyle:'brick',wall:['beam','torch']},{amb:'motes',faceStyle:'rock',wall:['crystal']},{amb:'motes',faceStyle:'rock',wall:['crystalBig']},{amb:'embers',faceStyle:'rock',wall:['magmaRock']},{amb:'dust',faceStyle:'ruin',wall:['runePillar']},{amb:'void',faceStyle:'void',wall:['pcrystal'],stars:1}];
+udThemes=function(){UDR.forEach((R_,r)=>{const p=R_.pal;const x=UD_TH_X[r];THEMES['ud_'+R_.id]={n:R_.n,bg:p.bg,fl:p.fl,fd:p.fd,top:p.top,top2:udHex(p.top,.14),face:p.face,face2:udHex(p.face,-.25),acc:p.acc,light:p.light,dark:p.dark,amb:x.amb,faceStyle:x.faceStyle,wall:x.wall,floor:['pebbles'],crack:p.acc,stars:x.stars};});};
+/* terrain chunks: each chunk is painted with the theme of the region it belongs to */
+{const _bb=buildBG;buildBG=function(T,bx0,by0,bx1,by1){if(!R||!R.ud)return _bb(T,bx0,by0,bx1,by1);const keep=R.thKey;const r=udRegionAt(by0);R.thKey='ud_'+UDR[r].id;let cv;try{cv=_bb(T,bx0,by0,bx1,by1);}finally{R.thKey=keep;}
+ try{const c=cv.getContext('2d');const dp=Math.min(2,DV.dpr||1);c.setTransform(dp,0,0,dp,-bx0*T*dp,-by0*T*dp);udPaintStatic(c,T,bx0,by0,bx1,by1);}catch(e){console.warn(e);}return cv;};}
+function udPaintStatic(c,T,x0,y0,x1,y1){const w=UD.world;for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++){const i=y*UD_W+x;const t=w.g[i];if(t===T_WALL||t===T_SECRET)continue;const r=udRegionAt(y);const P=UDR[r].pal;const X=x*T,Y=y*T;
+  if(w.zone[i]===3){c.fillStyle=rgba(P.acc,.08);c.fillRect(X,Y,T,T);if((x+y)%2===0){c.strokeStyle=rgba(P.acc,.18);c.lineWidth=1;c.strokeRect(X+3,Y+3,T-6,T-6);}}
+  /* region ground texture so higher regions are not recolors of Stone Hollow */
+  const h=udRand(i,'gt');if(r===1&&h<.18){c.strokeStyle='rgba(30,60,40,.55)';c.lineWidth=2;c.beginPath();c.moveTo(X,Y+T*h*4);c.quadraticCurveTo(X+T*.5,Y+T*.2,X+T,Y+T*.7);c.stroke();}
+  else if(r===2&&h<.1){c.fillStyle=rgba('#ffd84a',.22);poly(c,[X+T*.3,Y+T*.7,X+T*.4,Y+T*.35,X+T*.5,Y+T*.7]);c.fill();}
+  else if(r===3&&h<.14){c.strokeStyle=rgba('#ff6a1a',.35);c.lineWidth=1.5;c.beginPath();c.moveTo(X+T*.1,Y+T*.5);c.lineTo(X+T*.45,Y+T*.4);c.lineTo(X+T*.9,Y+T*.6);c.stroke();}
+  else if(r===4&&(x%4===0||y%4===0)&&h<.5){c.strokeStyle=rgba('#66ffd1',.07);c.lineWidth=1;c.strokeRect(X+1,Y+1,T-2,T-2);if(h<.04){c.fillStyle=rgba('#66ffd1',.25);c.font=`${T*.3}px serif`;c.textAlign='center';c.fillText('ᚱᛟᚦ'[Math.floor(h*75)%3],X+T/2,Y+T*.62);}}
+  else if(r===5&&h<.12){c.fillStyle=`rgba(255,255,255,${.15+h})`;c.fillRect(X+T*h*7%T,Y+T*(h*13%1),1.4,1.4);}
+  else if(r===0&&h<.05){c.strokeStyle='rgba(120,90,60,.5)';c.lineWidth=2;c.beginPath();c.moveTo(X,Y+T*.4);c.lineTo(X+T,Y+T*.4);c.moveTo(X,Y+T*.6);c.lineTo(X+T,Y+T*.6);c.stroke();}
+  const k=w.deco[i];if(k)udProp(c,udPropKind(r,k),X,Y,T,0,P,h,true);}}
+/* region props (static layer is cached in the chunk; animated details are drawn per frame in view only) */
+function udProp(c,k,X,Y,T,t,P,h,stat){const cx=X+T/2,cy=Y+T/2,s=T/40;c.save();c.translate(cx,cy);c.scale(s,s);
+ switch(k){
+ case'beam':if(stat){rr(c,-16,-4,32,8,2);fs(c,'#6a4a2a',1.5);line(c,-12,-4,-12,4,1.5,'#3a2a18');line(c,12,-4,12,4,1.5,'#3a2a18');}break;
+ case'cart':if(stat){rr(c,-13,-9,26,13,3);fs(c,lg(c,-9,4,'#7a5a3a','#4a3420'),1.6);circ(c,-8,6,4);fs(c,'#3a3a40',1.4);circ(c,8,6,4);fs(c,'#3a3a40',1.4);for(let q=0;q<3;q++){circ(c,-6+q*6,-11,3.4);fs(c,['#8d7a62','#c27a4a','#9aa3b2'][q],1);}}break;
+ case'lamp':if(stat){line(c,0,8,0,-12,2,'#3a2a18');rr(c,-4,-18,8,8,2);fs(c,'#ffcf8a',1.4);}else{glow(c,0,-14,26,'#ffb060',.18+.06*Math.sin(t*9+h*20));}break;
+ case'crate':if(stat){rr(c,-10,-10,20,18,2);fs(c,'#8a6a3a',1.5);line(c,-10,-10,10,8,1.4,'#5a4020');line(c,10,-10,-10,8,1.4,'#5a4020');}break;
+ case'pick':if(stat){line(c,-10,8,8,-10,3,'#7a5a3a');poly(c,[2,-14,14,-6,12,-4,4,-10]);fs(c,'#9aa3b2',1.2);}break;
+ case'rails':if(stat){line(c,-20,-5,20,-5,2,'#8a7a6a');line(c,-20,5,20,5,2,'#8a7a6a');for(let q=-15;q<=15;q+=10)line(c,q,-7,q,7,3,'#5a3a20');}break;
+ case'root':if(stat){c.strokeStyle='#3a2a1a';c.lineWidth=4;c.lineCap='round';c.beginPath();c.moveTo(-18,10);c.quadraticCurveTo(-4,-4,6,6);c.quadraticCurveTo(12,12,18,-2);c.stroke();c.strokeStyle='#5a4428';c.lineWidth=1.5;c.stroke();}break;
+ case'fungus':if(stat){for(let q=0;q<3;q++){const x=-8+q*8,hh=6+q*3%7;line(c,x,8,x,8-hh,2.4,'#d8d0c0');ell(c,x,8-hh,5,3);fs(c,'#3fd0a0',1);}}else{glow(c,0,0,22,'#7dffb0',.14+.08*Math.sin(t*2+h*30));}break;
+ case'puddle':if(stat){ell(c,0,4,14,6);c.fillStyle='rgba(120,200,190,.35)';c.fill();}else{c.strokeStyle=`rgba(200,255,240,${.25+.2*Math.sin(t*3+h*9)})`;c.lineWidth=1;ell(c,0,4,6+4*((t+h*3)%1),3+2*((t+h*3)%1));c.stroke();}break;
+ case'vine':if(stat){c.strokeStyle='#2f6a3a';c.lineWidth=2;c.beginPath();c.moveTo(-12,-16);c.bezierCurveTo(-4,-4,-14,4,-2,14);c.stroke();for(let q=0;q<3;q++){ell(c,-8+q*3,-8+q*8,3,2);c.fillStyle='#4fa05a';c.fill();}}break;
+ case'crystal':if(stat){for(let q=0;q<3;q++){const x=-8+q*8,hh=10+((q*7+h*20)%8);poly(c,[x-4,8,x,8-hh,x+4,8]);fs(c,q%2?'#ff7aa8':'#ffd84a',1.2);}}else{glow(c,0,0,20,'#ffd84a',.12+.08*Math.sin(t*3+h*10));}break;
+ case'goldseam':if(stat){c.strokeStyle='#ffd84a';c.lineWidth=2.4;c.beginPath();c.moveTo(-16,6);c.lineTo(-6,-2);c.lineTo(2,4);c.lineTo(16,-6);c.stroke();}break;
+ case'mirror':if(stat){poly(c,[-10,10,-6,-14,6,-14,10,10]);fs(c,lg(c,-14,10,'#fff6d0','#b08aa0'),1.4);}else{const a=(Math.sin(t*1.5+h*8)+1)/2;c.fillStyle=`rgba(255,255,255,${.15+.3*a})`;poly(c,[-4,-10,0,-12,-6,6,-9,6]);c.fill();}break;
+ case'vent':if(stat){ell(c,0,4,10,5);fs(c,'#2a1a14',1.6);ell(c,0,3,5,2.4);c.fillStyle='#ff6a1a';c.fill();}else{const a=(t*.8+h*5)%1;c.fillStyle=`rgba(230,230,240,${.35*(1-a)})`;circ(c,Math.sin(t*3+h)*3,-a*28,4+a*9);c.fill();}break;
+ case'furnace':if(stat){rr(c,-12,-14,24,24,4);fs(c,'#3a2622',1.8);rr(c,-6,-4,12,9,3);fs(c,'#ff6a1a',1);line(c,-6,-18,-6,-14,4,'#2a1a14');}else{glow(c,0,0,26,'#ff6a1a',.2+.08*Math.sin(t*7+h*30));}break;
+ case'slag':if(stat){for(let q=0;q<3;q++){ell(c,-8+q*7,4-q%2*3,6,4);fs(c,q===1?'#5a2a1a':'#2a1a14',1.2);}}break;
+ case'chain':if(stat){for(let q=0;q<5;q++){ell(c,0,-16+q*7,3,4);c.strokeStyle='#6a6a70';c.lineWidth=1.6;c.stroke();}}break;
+ case'pillar':if(stat){rr(c,-7,-22,14,30,2);fs(c,lg(c,-22,8,'#6a8a96','#2c3a44'),1.6);rr(c,-10,-24,20,5,1);fs(c,'#8aa8b4',1.2);c.fillStyle='rgba(102,255,209,.5)';c.fillRect(-1,-16,2,18);}break;
+ case'gear':if(stat){c.save();for(let q=0;q<8;q++){c.rotate(Math.PI/4);rr(c,-2.5,-13,5,6,1);fs(c,'#8a7a4a',1);}c.restore();circ(c,0,0,9);fs(c,'#a8904a',1.4);circ(c,0,0,3);fs(c,'#2a2a2a',1);}break;
+ case'console':if(stat){rr(c,-12,-10,24,16,3);fs(c,'#34444f',1.6);}else{for(let q=0;q<3;q++){c.fillStyle=`rgba(102,255,209,${.3+.5*((Math.sin(t*4+q*2+h*9)+1)/2)})`;c.fillRect(-8+q*6,-6,4,3);}}break;
+ case'pipe':if(stat){rr(c,-20,-4,40,8,4);fs(c,'#5a6a70',1.4);rr(c,-4,-6,8,12,2);fs(c,'#7a8a90',1.2);}break;
+ case'float':if(!stat){const b=Math.sin(t*1.6+h*12)*4;c.translate(0,-10+b);poly(c,[-6,0,0,-10,6,0,0,6]);fs(c,'#c066ff',1.2);glow(c,0,0,16,'#e0b3ff',.25);}else{ell(c,0,6,7,2.4);c.fillStyle='rgba(0,0,0,.35)';c.fill();}break;
+ case'rift':if(!stat){c.rotate(t*.8+h*6);c.strokeStyle=`rgba(255,79,216,${.4+.2*Math.sin(t*3)})`;c.lineWidth=2;c.beginPath();for(let q=0;q<3;q++){c.ellipse(0,0,10-q*3,4-q,q,0,Math.PI*2);}c.stroke();}break;
+ case'obelisk':if(stat){poly(c,[-6,8,-4,-24,4,-24,6,8]);fs(c,'#2c2040',1.6);}else{c.fillStyle=`rgba(255,157,240,${.4+.4*Math.sin(t*2+h*7)})`;c.fillRect(-1,-18,2,16);}break;}
+ c.restore();}
+const UD_ANIM=new Set(['lamp','fungus','puddle','crystal','mirror','vent','furnace','console','float','rift','obelisk']);
+/* per-frame overlay above terrain, below entities */
+{const _bg=drawBG51;drawBG51=function(c,T,x0,y0,x1,y1){_bg(c,T,x0,y0,x1,y1);if(!R||!R.ud)return;udEvictChunks(x0,y0,x1,y1);const t=GT;const w=UD.world;
+ const anim=GF().part>0;for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++){const i=y*UD_W+x;const k=w.deco[i];if(!k||!UD.fog[i])continue;const r=udRegionAt(y);const kind=udPropKind(r,k);if(anim&&UD_ANIM.has(kind))udProp(c,kind,x*T,y*T,T,t,UDR[r].pal,udRand(i,'gt'),false);}
+ /* living veins: rich aura, regrowth sprouts with progress */
+ const now=Date.now();for(const cc of UD.chunks)for(const[v,k]of(UD.nodeIdx[cc]||[])){const s=udVS(v);const n=v.nodes[k];if(n.x<x0||n.x>=x1||n.y<y0||n.y>=y1||!UD.fog[n.y*UD_W+n.x])continue;
+  if(s&&s.r[k]>now){const[px,py]=udNodePos(v,k);if(UD.ck(px,py)!==cc)continue;const tot=udRespawnMs(v.tier,v,k,s.g[k]||1);const p=clamp(1-(s.r[k]-now)/tot,0,1);const X=(px+.5)*T,Y=(py+.5)*T;const col=UDR[v.r].pal.vein;
+   c.fillStyle='rgba(0,0,0,.25)';ell(c,X,Y+T*.2,T*.3,T*.1);c.fill();for(let q=0;q<3;q++){const hh=T*(.08+.22*p)*(q===1?1.3:1);poly(c,[X+(q-1)*T*.12-T*.05,Y+T*.2,X+(q-1)*T*.12,Y+T*.2-hh,X+(q-1)*T*.12+T*.05,Y+T*.2]);c.fillStyle=rgba(col,.35+.4*p);c.fill();}
+   c.strokeStyle=rgba(col,.5);c.lineWidth=2;c.beginPath();c.arc(X,Y-T*.25,T*.12,-Math.PI/2,-Math.PI/2+p*Math.PI*2);c.stroke();}}
+ for(const o of R.ores){if(!o.ud||o.x<x0||o.x>=x1||o.y<y0||o.y>=y1||!oreVisible(o))continue;const v=UD.vmap[o.ud.v];if(v.rich){glow(c,(o.x+.5)*T,(o.y+.5)*T,T*.95,'#ffd84a',.16+.06*Math.sin(t*3+o.seed*9));}
+  if(o.unstable){c.strokeStyle=`rgba(192,102,255,${.3+.3*Math.sin(t*6+o.seed*20)})`;c.lineWidth=2;c.setLineDash([3,4]);c.lineDashOffset=-t*20;circ(c,(o.x+.5)*T,(o.y+.5)*T,T*.5);c.stroke();c.setLineDash([]);}}
+ /* guardian relays + landmarks */
+ for(const d of UD.objs){if(d.k!=='guardian'||!d.relays)continue;const st=S.ud.disc[d.id];const ord=udRelayOrder(d);d.relays.forEach((p,j)=>{if(!UD.fog[p.y*UD_W+p.x])return;const on=st&&(st.open||st.seq&&st.seq.includes(j));const X=(p.x+.5)*T,Y=(p.y+.5)*T;ell(c,X,Y,T*.36,T*.2);fs(c,on?'#7fffd4':'#34444f',1.6);
+  c.fillStyle=on?'#0a2a24':'#a8ffe8';c.font=`800 ${T*.3}px Kanit,sans-serif`;c.textAlign='center';c.fillText(['①','②','③'][ord.indexOf(j)],X,Y+T*.1);if(on)glow(c,X,Y,T*.6,'#7fffd4',.35);});}
+ for(const l of w.landmarks){if(l.x<x0-3||l.x>x1+3||l.y<y0-3||l.y>y1+3||!UD.fog[l.y*UD_W+l.x])continue;udLandmarkArt(c,l,T,t);}
+ /* hazard telegraphs */
+ const H_=R.udHaz;if(H_)for(const wv of H_.warn){const k=1-wv.t/wv.dur;const X=wv.x*T,Y=wv.y*T;const col=wv.k==='steam'?'#e6e6f0':wv.k==='dis'?UDR[R.udRegion].pal.acc:wv.k==='col'?'#ffb060':'#ff3c3c';
+  c.fillStyle=rgba(col,.14+.2*Math.abs(Math.sin(t*12)));circ(c,X,Y,wv.r*T);c.fill();c.strokeStyle=rgba(col,.9);c.lineWidth=2;circ(c,X,Y,wv.r*T*(1-k*.35));c.stroke();
+  if(wv.k==='rock'||wv.k==='col')for(let n=0;n<3;n++){c.fillStyle=TH().face;circ(c,X+(n-1)*T*.4,Y-T*3*(1-k)-n*T*.3,T*.16);c.fill();c.strokeStyle=OL;c.lineWidth=1;c.stroke();}
+  else if(wv.k==='steam'){c.fillStyle=`rgba(240,240,250,${.2+.3*k})`;circ(c,X,Y-T*.5*k,T*.3*k);c.fill();}else{bolt(c,X-T*.6,Y-T*.6,X+T*.5,Y+T*.4,rgba(col,.7),1.5,5,T*.1);}}
+ const ht=H_&&H_.heat;if(ht>0&&!udK('magma')){c.strokeStyle=`rgba(255,106,26,${.3+.2*Math.sin(t*10)})`;c.lineWidth=3;circ(c,R.g.x*T,R.g.y*T,T*(.5+ht*.15));c.stroke();}};}
+function udEvictChunks(x0,y0,x1,y1){const C=R.bgChunks;if(!C)return;const keys=Object.keys(C);if(keys.length<70)return;const cx=(x0+x1)/2/CHUNK,cy=(y0+y1)/2/CHUNK;keys.sort((a,b)=>{const[ax,ay]=a.split(',').map(Number),[bx,by]=b.split(',').map(Number);return Math.hypot(bx-cx,by-cy)-Math.hypot(ax-cx,ay-cy);});for(let k=0;k<keys.length-48;k++)delete C[keys[k]];}
+function udLandmarkArt(c,l,T,t){const X=(l.x+.5)*T,Y=(l.y+.5)*T;const P=UDR[l.r].pal;c.save();c.translate(X,Y);const s=T/40;c.scale(s,s);c.fillStyle='rgba(0,0,0,.35)';ell(c,0,10,26,8);c.fill();
+ if(l.r===0){rr(c,-18,-40,6,50,1);fs(c,'#6a4a2a',1.6);rr(c,12,-40,6,50,1);fs(c,'#6a4a2a',1.6);rr(c,-22,-44,44,6,1);fs(c,'#8a6a3a',1.6);line(c,0,-38,0,-6,1.5,'#9aa3b2');rr(c,-8,-8,16,12,2);fs(c,'#7a6a58',1.4);}
+ else if(l.r===1){c.strokeStyle='#3a2a1a';c.lineWidth=7;c.lineCap='round';c.beginPath();c.moveTo(-20,10);c.quadraticCurveTo(-26,-30,0,-44);c.quadraticCurveTo(26,-30,20,10);c.stroke();glow(c,0,-20,30,'#7dffb0',.2+.08*Math.sin(t*2));}
+ else if(l.r===2){for(let q=0;q<5;q++){const x=-20+q*10,hh=24+(q%2)*16;poly(c,[x-5,10,x,10-hh,x+5,10]);fs(c,q%2?'#ff7aa8':'#ffe9a8',1.4);}glow(c,0,-14,34,'#ffd84a',.22+.1*Math.sin(t*2.4));}
+ else if(l.r===3){ell(c,0,0,24,12);fs(c,'#2a1a14',2);ell(c,0,-2,18,8);c.fillStyle=`rgb(${230+20*Math.sin(t*3)|0},110,30)`;c.fill();glow(c,0,-6,36,'#ff6a1a',.3);}
+ else if(l.r===4){rr(c,-14,-36,28,46,4);fs(c,lg(c,-36,10,'#6a8a96','#2c3a44'),2);circ(c,0,-16,8);fs(c,'#66ffd1',1.4);glow(c,0,-16,24,'#66ffd1',.25+.1*Math.sin(t*3));}
+ else{c.rotate(Math.sin(t*.6)*.05);for(let q=0;q<3;q++){const a=t*.5+q*2.1;c.save();c.translate(Math.cos(a)*16,-24+Math.sin(a)*6);poly(c,[-5,0,0,-12,5,0,0,6]);fs(c,'#c066ff',1.2);c.restore();}ell(c,0,0,18,6);c.strokeStyle='#ff4fd8';c.lineWidth=2;c.stroke();glow(c,0,-14,30,'#c066ff',.25);}
+ c.restore();if(S.ud.lm[l.id]){c.font=`700 ${Math.max(10,T*.24)}px Kanit,sans-serif`;c.textAlign='center';c.lineWidth=3;c.strokeStyle='rgba(0,0,0,.75)';c.strokeText('📍 '+l.n,X,Y-T*1.4);c.fillStyle=P.light;c.fillText('📍 '+l.n,X,Y-T*1.4);}}
+/* fog of war in the Underdeep (same look as expeditions; persistent) */
+{const _df=drawFog51;drawFog51=function(c,T,x0,y0,x1,y1){if(!R||!R.ud)return _df(c,T,x0,y0,x1,y1);const v51=R.v51;R.v51=true;try{_df(c,T,x0,y0,x1,y1);}finally{R.v51=v51;}};}
+/* excavation walls: visible damage states (crack network grows as the wall loses HP) */
+{const _hb=hpBar;hpBar=function(c,o,x,y,T){_hb(c,o,x,y,T);if(!R||!R.ud||!o||!o.exc)return;const k=1-clamp(o.hp/o.maxHp,0,1);if(k<=0)return;const wh=R.ws?R.ws.wh:T*.42;const X=o.x*T,Y=o.y*T-wh;
+ c.strokeStyle=`rgba(20,10,10,${.55+.3*k})`;c.lineWidth=1.5+k*2;c.beginPath();const n=1+Math.floor(k*4);for(let q=0;q<n;q++){const a=udRand(o.id,q);c.moveTo(X+T*.5,Y+T*.5);c.lineTo(X+T*(.5+Math.cos(a*6.28)*.25),Y+T*(.5+Math.sin(a*6.28)*.25));c.lineTo(X+T*(.5+Math.cos(a*6.28+.4)*.48),Y+T*(.5+Math.sin(a*6.28+.4)*.48));}c.stroke();
+ if(k>.6){c.fillStyle=`rgba(255,157,240,${.2+.2*Math.sin(GT*8)})`;rr(c,X+T*.3,Y+T*.3,T*.4,T*.4,4);c.fill();}};}
+/* ---------- monsters: one shared drawer for the mine map and the arena ---------- */
+function udDrawMon(c,M,t,o){const col=M.col,c2=M.c2,eye=M.eye;const w=o.walk?Math.sin(o.ph||t*8):0;const hit=o.hit>0;c.save();if(hit)c.translate(Math.sin(t*70)*1.5,0);
+ const E=(x,y,r)=>{circ(c,x,y,r);c.fillStyle=eye;c.fill();glow(c,x,y,r*3.5,eye,.45);};
+ switch(M.shape){
+ case'crawler':for(let q=0;q<3;q++){line(c,-8+q*8,-2,-12+q*8+w*2,8,2.5,c2);}ell(c,0,-6,16,9);fs(c,lg(c,-15,3,col,c2));for(let q=0;q<3;q++){poly(c,[-10+q*8,-12,-6+q*8,-19,-2+q*8,-12]);fs(c,udHex(col,.15),1.2);}E(11,-7,2.2);break;
+ case'rat':line(c,-14,-4,-24,-8+w*3,2,c2);ell(c,0,-5,12,7);fs(c,col);ell(c,10,-7,6,5);fs(c,udHex(col,.1));circ(c,8,-12,3);fs(c,c2,1);line(c,-5,1,-6+w*2,6,2,c2);line(c,5,1,6-w*2,6,2,c2);rr(c,-6,-14,8,4,1);fs(c,'#c27a4a',1);E(13,-8,1.6);break;
+ case'cart':rr(c,-18,-20,36,18,3);fs(c,lg(c,-20,-2,col,c2),2);for(let q=0;q<3;q++){circ(c,-10+q*10,-23,4);fs(c,['#8d7a62','#c27a4a','#9aa3b2'][q],1);}circ(c,-11,2,6);fs(c,'#2a2a30',1.8);circ(c,11,2,6);fs(c,'#2a2a30',1.8);c.save();c.translate(-11,2);c.rotate(t*6*(o.walk?1:0));line(c,-5,0,5,0,1.5,'#9aa3b2');c.restore();rr(c,6,-30,14,10,3);fs(c,udHex(col,.15),1.6);E(16,-25,2.4);break;
+ case'root':for(let q=0;q<4;q++){c.strokeStyle=c2;c.lineWidth=3;c.beginPath();c.moveTo(-6+q*4,0);c.quadraticCurveTo(-14+q*8,6,-10+q*7+w*2,10);c.stroke();}ell(c,0,-12,11,14);fs(c,lg(c,-26,2,col,c2));for(let q=0;q<3;q++){line(c,-4+q*4,-24,-8+q*6,-34-q*2,2,'#2f6a3a');}E(-3,-14,2);E(4,-14,2);break;
+ case'bat':{const f=Math.sin(t*16)*8;poly(c,[0,-14,-22,-22+f,-16,-10,-26,-8+f*.5,-6,-6]);fs(c,c2,1.4);poly(c,[0,-14,22,-22+f,16,-10,26,-8+f*.5,6,-6]);fs(c,c2,1.4);ell(c,0,-11,7,8);fs(c,col);E(-3,-12,1.5);E(3,-12,1.5);glow(c,0,-4,12,'#d0ff6a',.25);}break;
+ case'beetle':for(let q=0;q<3;q++){line(c,-10+q*9,-2,-14+q*9+w*2,8,2.5,c2);}ell(c,0,-9,17,11);fs(c,lg(c,-20,2,udHex(col,.2),c2),2);line(c,0,-20,0,2,1.5,c2);c.strokeStyle=c2;c.lineWidth=3.5;c.beginPath();c.moveTo(14,-12);c.quadraticCurveTo(26,-20,24,-30);c.moveTo(14,-8);c.quadraticCurveTo(28,-10,28,-20);c.stroke();E(15,-11,2);break;
+ case'mimic':{const op=(Math.sin(t*3)+1)*.5;rr(c,-14,-8,28,12,3);fs(c,lg(c,-8,4,'#7a4a3a','#3a2018'),2);c.save();c.translate(-14,-8);c.rotate(-.15-op*.35);for(let q=0;q<3;q++){poly(c,[4+q*9,0,8+q*9,-14-(q%2)*5,12+q*9,0]);fs(c,col,1.2);}c.restore();for(let q=0;q<4;q++){poly(c,[-10+q*6,-8,-7+q*6,-3,-4+q*6,-8]);c.fillStyle='#fff';c.fill();}E(0,-4,2);}break;
+ case'wasp':{const f=Math.sin(t*30)*4;ell(c,-6,-22+f*.3,8,4);c.fillStyle='rgba(255,255,255,.4)';c.fill();ell(c,6,-22-f*.3,8,4);c.fill();ell(c,-6,-12,9,6);fs(c,'#2a2010',1.4);for(let q=0;q<2;q++){c.fillStyle=col;c.fillRect(-12+q*6,-16,3,8);}ell(c,6,-14,7,6);fs(c,col);poly(c,[-15,-12,-22,-10,-15,-9]);fs(c,'#9aa3b2',1);E(10,-15,1.6);}break;
+ case'sentry':rr(c,-12,-34,24,34,6);fs(c,lg(c,-34,0,udHex(col,.15),c2),2);poly(c,[-12,-34,0,-46,12,-34]);fs(c,col,1.6);circ(c,0,-20,7);fs(c,'#ffe9a8',1.6);E(0,-20,3);for(let q=0;q<2;q++){poly(c,[-20+q*40,-26,-14+q*28,-14,-20+q*40,-4]);fs(c,udHex(col,-.2),1.4);}glow(c,0,-20,26,col,.25+.1*Math.sin(t*3));break;
+ case'slug':{const b=Math.sin(t*3)*1.5;ell(c,0,-6+b*.3,18,9);fs(c,lg(c,-15,3,'#ffb060',c2),2);for(let q=0;q<4;q++){c.fillStyle=`rgba(255,${200-q*30},60,.8)`;circ(c,-10+q*6,-10,2);c.fill();}line(c,12,-12,16,-22,2,c2);line(c,15,-11,20,-19,2,c2);E(16,-23,1.6);E(20,-20,1.6);glow(c,0,-6,26,'#ff6a1a',.25);}break;
+ case'imp':ell(c,0,-14,8,10);fs(c,lg(c,-24,-4,col,'#8a8a9a'));poly(c,[-6,-22,-10,-32,-2,-23]);fs(c,c2,1);poly(c,[6,-22,10,-32,2,-23]);fs(c,c2,1);line(c,-4,-4,-6+w*2,4,2,c2);line(c,4,-4,6-w*2,4,2,c2);c.fillStyle=`rgba(240,240,250,${.4+.2*Math.sin(t*5)})`;circ(c,-12,-28-((t*20)%10),4);c.fill();E(-3,-15,1.6);E(3,-15,1.6);break;
+ case'hound':line(c,-12,-4,-14+w*3,8,3,'#1a0e0a');line(c,-6,-4,-4-w*3,8,3,'#1a0e0a');line(c,8,-4,6+w*3,8,3,'#1a0e0a');line(c,14,-4,16-w*3,8,3,'#1a0e0a');ell(c,0,-10,18,9);fs(c,lg(c,-19,0,col,c2),2);for(let q=0;q<4;q++){c.strokeStyle=`rgba(255,${140+q*20},40,.8)`;c.lineWidth=1.5;c.beginPath();c.moveTo(-12+q*7,-14);c.lineTo(-10+q*7,-6);c.stroke();}ell(c,18,-16,8,6);fs(c,col,1.8);poly(c,[14,-21,16,-28,20,-21]);fs(c,c2,1);E(21,-17,2);glow(c,0,-10,30,'#ff6a1a',.2);break;
+ case'drone':{const b=Math.sin(t*4)*3;c.translate(0,-18+b);rr(c,-12,-6,24,12,5);fs(c,lg(c,-6,6,udHex(col,.1),c2),1.8);line(c,-18,-9,18,-9,2,'#cfd8dc');ell(c,-16,-10,6,1.6);c.fillStyle='rgba(255,255,255,.5)';c.fill();ell(c,16,-10,6,1.6);c.fill();E(0,0,3);c.translate(0,18-b);c.fillStyle='rgba(0,0,0,.3)';ell(c,0,2,10,3);c.fill();}break;
+ case'spider':for(let q=0;q<4;q++){const a=(q-1.5)*.5;c.strokeStyle=c2;c.lineWidth=2.4;c.beginPath();c.moveTo(0,-8);c.lineTo(Math.cos(a+Math.PI)*16,-14+Math.sin(t*10+q)*2*(o.walk?1:0));c.lineTo(Math.cos(a+Math.PI)*22,6);c.moveTo(0,-8);c.lineTo(Math.cos(a)*16,-14-Math.sin(t*10+q)*2*(o.walk?1:0));c.lineTo(Math.cos(a)*22,6);c.stroke();}circ(c,0,-10,9);fs(c,lg(c,-19,-1,udHex(col,.15),c2),2);c.save();c.translate(0,-10);c.rotate(t*2);for(let q=0;q<6;q++){c.rotate(Math.PI/3);rr(c,-1.5,-10,3,3,1);fs(c,col,.8);}c.restore();E(4,-12,1.8);break;
+ case'warden':rr(c,-14,-40,28,40,8);fs(c,lg(c,-40,0,col,c2),2.2);rr(c,-10,-50,20,14,6);fs(c,udHex(col,-.1),1.8);E(-4,-44,2);E(4,-44,2);line(c,-16,-30,-26,-10,5,c2);line(c,16,-30,26,-10,5,c2);circ(c,0,-22,6);fs(c,'#7fffd4',1.4);glow(c,0,-22,24,'#7fffd4',.25+.12*Math.sin(t*2));break;
+ case'wisp':{c.translate(0,-16+Math.sin(t*3)*3);for(let q=0;q<5;q++){const a=t*2+q*1.26;c.fillStyle=rgba(col,.35);circ(c,Math.cos(a)*9,Math.sin(a)*5+6,4);c.fill();}circ(c,0,0,8);c.fillStyle=col;c.fill();glow(c,0,0,26,col,.5);E(0,0,2.6);}break;
+ case'stalker':{const k=.6+.4*Math.sin(t*5);c.globalAlpha=.85;line(c,-8,-6,-12+w*3,8,3,c2);line(c,8,-6,12-w*3,8,3,c2);poly(c,[-16,-8,0,-30,16,-8,0,-2]);fs(c,lg(c,-30,-2,col,c2),2);line(c,10,-16,26,-22,2,'#ff4fd8');line(c,-10,-16,-26,-22,2,'#ff4fd8');E(-3,-18,2*k);E(3,-18,2*k);c.globalAlpha=1;}break;
+ case'watcher':{c.translate(0,-22+Math.sin(t*1.5)*3);circ(c,0,0,15);fs(c,lg(c,-15,15,udHex(col,.2),c2),2.2);circ(c,0,0,8);c.fillStyle='#fff0fb';c.fill();circ(c,Math.cos(t)*3,Math.sin(t*1.3)*2,4);c.fillStyle='#2a0a3a';c.fill();for(let q=0;q<6;q++){const a=q*1.05+t*.4;line(c,Math.cos(a)*15,Math.sin(a)*15,Math.cos(a)*24,Math.sin(a)*24,2.5,c2);}glow(c,0,0,34,eye,.3);}break;
+ default:ell(c,0,-8,14,10);fs(c,col);E(6,-10,2);}
+ c.restore();}
+function udMonDraw(c,m,T,t){const M=UDM[m.type];const X=(m.x+.5)*T,Y=(m.y+.5)*T;const sc=T/40*(m.boss?1.9:m.elite?1.3:.95)*M.sz*1.1;c.save();c.translate(X,Y+T*.3);c.fillStyle='rgba(0,0,0,.35)';ell(c,0,0,T*.36*(m.boss?1.6:1),T*.12);c.fill();
+ if(m.boss||m.elite)glow(c,0,-T*.4,T*(m.boss?1.6:1),m.boss?'#ff3b3b':UDR[udRegionAt(m.hy)].pal.acc,.18+.06*Math.sin(t*3));c.scale(sc*(m.face<0?-1:1),sc);udDrawMon(c,M,t+m.ph,{walk:m.state==='chase'||m.state==='walk'||m.state==='return',ph:m.ph});c.restore();
+ if(m.state==='chase'){c.fillStyle='#ff5a5a';c.font=`900 ${T*.34}px Kanit,sans-serif`;c.textAlign='center';c.fillText('!',X,Y-T*(m.boss?1.6:.9));}
+ if(m.boss||m.elite){c.font=`800 ${Math.max(9,T*.22)}px Kanit,sans-serif`;c.textAlign='center';c.lineWidth=3;c.strokeStyle='rgba(0,0,0,.75)';const nm=m.boss?'👑 '+m.bossDef.n:'★ '+M.n;c.strokeText(nm,X,Y-T*(m.boss?2:1.15));c.fillStyle=m.boss?'#ff8a8a':'#ffd84a';c.fillText(nm,X,Y-T*(m.boss?2:1.15));}}
+{const _dc=drawClone;drawClone=function(c,e,x,y,s){if(e.kind!=='udm')return _dc(c,e,x,y,s);if(e.dead&&!(e.fade>0))return;const t=GT;c.save();c.translate(x,y);if(e.dead){e.fade-=1/60;c.globalAlpha=Math.max(0,e.fade/.6);}
+ c.fillStyle='rgba(0,0,0,.35)';ell(c,0,0,30*s*2*e.r,9*s*2*e.r);c.fill();if(e.elite)glow(c,0,-40*s*2,70*s*2,e.M.eye,.2);const k=s*2*(.9+e.r*.9);c.scale(k*(Math.cos(e.faceA)<0?-1:1),k);
+ if(e.frozen>0){c.globalAlpha*=.85;}udDrawMon(c,e.M,t+e.ph,{walk:e.walk,ph:e.ph*2,hit:e.hitT});if(e.stagT>0){c.fillStyle='#ffd84a';c.font='900 12px Kanit';c.textAlign='center';c.fillText('✦✦',0,-38);}c.restore();
+ if(!e.dead&&(e.elite)){c.font=`800 ${Math.max(10,AV.T*.28)}px Kanit,sans-serif`;c.textAlign='center';c.fillStyle='#ffd84a';c.fillText('★ '+e.M.n,x,y-AV.T*2.5);}};}
+/* entity hook for objects in R.inter */
+{const _de=drawEnt;drawEnt=function(c,e,T,t){if(e.k==='i'&&e.it&&e.it.ud==='mon'){udMonDraw(c,e.it,T,t);return;}if(e.k==='i'&&e.it&&e.it.ud==='outpost'){udOutpostDraw(c,e.it.o,T,t);return;}if(e.k==='i'&&e.it&&e.it.k&&R&&R.ud){udDiscDraw(c,e.it,T,t);return;}return _de(c,e,T,t);};}
+function udOutpostDraw(c,o,T,t){const X=(o.x+.5)*T,Y=(o.y-.5)*T;const P=UDR[o.r].pal;const on=!!S.ud.wp[o.id];c.save();c.translate(X,Y);const s=T/40;c.scale(s,s);
+ c.fillStyle='rgba(0,0,0,.35)';ell(c,0,14,34,9);c.fill();rr(c,-26,-20,52,34,4);fs(c,lg(c,-20,14,'#6a5a48','#3a3024'),2);poly(c,[-32,-18,0,-38,32,-18]);fs(c,'#8a3a2a',2);rr(c,-8,-6,16,20,3);fs(c,'#2a2018',1.4);
+ line(c,30,14,30,-34,2.4,'#3a2a18');rr(c,24,-46,12,12,3);fs(c,on?P.acc:'#5a5a60',1.4);if(on)glow(c,30,-40,30,P.acc,.35+.1*Math.sin(t*3));
+ c.restore();c.font=`800 ${Math.max(10,T*.26)}px Kanit,sans-serif`;c.textAlign='center';c.lineWidth=3;c.strokeStyle='rgba(0,0,0,.8)';const n=(on?'🚡 ':'')+o.n;c.strokeText(n,X,Y-T*1.4);c.fillStyle=on?'#ffe9a8':'#cfd8dc';c.fillText(n,X,Y-T*1.4);}
+function udDiscDraw(c,d,T,t){const X=(d.x+.5)*T,Y=(d.y+.5)*T;const st=S.ud.disc[d.id];const done=d.k==='guardian'?st&&st.open:!!st;c.save();c.translate(X,Y);const s=T/40;c.scale(s,s);c.fillStyle='rgba(0,0,0,.35)';ell(c,0,12,22,6);c.fill();
+ if(d.k==='chest'){rr(c,-14,-10,28,20,3);fs(c,lg(c,-10,10,done?'#5a4a3a':'#b8863a','#5a3a1a'),2);rr(c,-14,-14,28,7,3);fs(c,done?'#4a3a2a':'#d8a64a',1.6);if(!done){rr(c,-3,-6,6,7,1);fs(c,'#ffe14a',1.2);glow(c,0,-4,26,'#ffd84a',.3+.1*Math.sin(t*4));}}
+ else if(d.k==='supply'){for(let q=0;q<3;q++){rr(c,-16+q*10,-8-(q%2)*8,12,14,2);fs(c,done?'#4a3a2a':'#8a6a3a',1.4);}}
+ else if(d.k==='workshop'){rr(c,-18,-16,36,26,3);fs(c,'#4a4a52',2);c.save();c.translate(-6,-4);c.rotate(done?0:t*.6);for(let q=0;q<6;q++){c.rotate(Math.PI/3);rr(c,-2,-10,4,5,1);fs(c,'#a8904a',1);}circ(c,0,0,6);fs(c,'#a8904a',1.2);c.restore();rr(c,6,-12,8,14,2);fs(c,'#7a8a90',1.2);if(!done)glow(c,0,-4,30,'#7fe6ff',.25);}
+ else if(d.k==='machine'){rr(c,-16,-22,32,30,4);fs(c,lg(c,-22,8,'#7a6a58','#3a3024'),2);circ(c,0,-8,8);fs(c,'#2a2a2a',1.4);c.save();c.translate(0,-8);c.rotate(t*1.5);line(c,-7,0,7,0,2,'#ffd84a');line(c,0,-7,0,7,2,'#ffd84a');c.restore();rr(c,-20,4,40,6,2);fs(c,'#5a4a3a',1.2);}
+ else if(d.k==='record'){poly(c,[-12,8,-10,-12,10,-12,12,8]);fs(c,done?'#5a5048':'#cfc0a0',1.6);for(let q=0;q<3;q++)line(c,-7,-6+q*5,7,-6+q*5,1.2,'#6a5a48');if(!done)glow(c,0,-2,22,'#ffe9a8',.3+.1*Math.sin(t*3));}
+ else if(d.k==='guardian'){rr(c,-14,-40,28,40,8);fs(c,lg(c,-40,0,done?'#8aa8b4':'#5a6a70','#2c3a44'),2.2);rr(c,-10,-50,20,14,6);fs(c,'#4f6a78',1.8);circ(c,0,-44,3);c.fillStyle=done?'#7fffd4':'#3a4a50';c.fill();line(c,-16,-30,-22,-6,5,'#3a4a50');line(c,16,-30,22,-6,5,'#3a4a50');if(done)glow(c,0,-30,36,'#7fffd4',.3);}
+ c.restore();if(R.udNear&&R.udNear.d===d){c.font=`800 ${Math.max(10,T*.25)}px Kanit,sans-serif`;c.textAlign='center';c.fillStyle='#ffe9a8';c.fillText(d.k==='machine'?'⚙ แปรรูปแร่ (E)':d.k==='guardian'?'🗿 อ่านจารึก (E)':'📜 อ่าน (E)',X,Y-T*1.3);}}
+/* ---------- world map ---------- */
+const UD_MAPCOL=UDR.map(r=>hexRgb(r.pal.top));
+function udMapImage(scale){const w=UD.world;const cv=document.createElement('canvas');cv.width=UD_W;cv.height=UD_H;const c=cv.getContext('2d');const im=c.createImageData(UD_W,UD_H);const d=im.data;const exc=new Set(S.ud.exc);
+ for(let i=0;i<UD_W*UD_H;i++){const o=i*4;d[o+3]=255;if(!UD.fog[i]){d[o]=6;d[o+1]=7;d[o+2]=12;continue;}const t=w.g[i];const r=udRegionAt((i/UD_W)|0);const rc=UD_MAPCOL[r];
+  if(t===T_WALL||t===T_SECRET){d[o]=rc[0]*.25;d[o+1]=rc[1]*.25;d[o+2]=rc[2]*.25;continue;}let col=[rc[0]*.75+30,rc[1]*.75+30,rc[2]*.75+30];if(t===T_LAVA)col=[230,100,30];if(w.zone[i]===3)col=[120,220,160];if(exc.has(i))col=[255,157,240];d[o]=col[0];d[o+1]=col[1];d[o+2]=col[2];}
+ c.putImageData(im,0,0);return cv;}
+function udMinimap(){const cv=$('#mm');if(!cv||!R||!R.ud)return;const c=cv.getContext('2d');const now=performance.now();if(!UD.mmImg||now-(UD.mmT||0)>2500){UD.mmImg=udMapImage();UD.mmT=now;}
+ const vw=64,vh=vw*cv.height/cv.width;const x0=clamp(R.g.x-vw/2,0,UD_W-vw),y0=clamp(R.g.y-vh/2,0,UD_H-vh);c.imageSmoothingEnabled=false;c.fillStyle='#05070d';c.fillRect(0,0,cv.width,cv.height);c.drawImage(UD.mmImg,x0,y0,vw,vh,0,0,cv.width,cv.height);const k=cv.width/vw;
+ for(const o of UD.world.outposts){if(!UD.fog[o.y*UD_W+o.x])continue;const x=(o.x-x0)*k,y=(o.y-y0)*k;if(x<0||y<0||x>cv.width||y>cv.height)continue;c.fillStyle=S.ud.wp[o.id]?'#7fffd4':'#9aa3b2';c.fillRect(x-3,y-3,6,6);}
+ for(const m of UD.mons){const x=(m.x+.5-x0)*k,y=(m.y+.5-y0)*k;if(!UD.fog[Math.floor(m.y+.5)*UD_W+Math.floor(m.x+.5)])continue;c.fillStyle=m.boss?'#ff3b3b':m.elite?'#ffb020':'#ff7a7a';c.beginPath();c.arc(x,y,m.boss?3.5:2.2,0,7);c.fill();}
+ c.fillStyle='#fff';c.beginPath();c.arc((R.g.x-x0)*k,(R.g.y-y0)*k,3.2,0,7);c.fill();c.strokeStyle='#3fe0ff';c.lineWidth=1.5;c.stroke();}
+function udOpenMap(fromCamp){udMigrate();udWorld();UD.mmImg=udMapImage();const at=R&&R.ud?udOutpostAt():null;const canTravel=fromCamp||(R&&R.ud&&udInSafe());
+ const wps=UD.world.outposts.filter(o=>S.ud.wp[o.id]);const disc=Object.keys(S.ud.disc).length;
+ const render=()=>{const pct=(()=>{let n=0;for(let i=0;i<UD.fog.length;i+=7)n+=UD.fog[i];return Math.round(n/(UD.fog.length/7)*100);})();
+  $('#mbody').innerHTML=`<div class="udmap"><canvas id="udMapCv" width="${UD_W*3}" height="${UD_H*3}"></canvas><div class="udmapside"><div class="hint">สำรวจแล้ว <b>${pct}%</b> · Waypoint <b>${wps.length}/${UD.world.outposts.length}</b> · ค้นพบ <b>${disc}</b> · ทางลับที่เปิด <b>${S.ud.exc.length}</b></div>
+  ${UDR.map((r,k)=>`<div class="udreg"><i style="background:${r.pal.top}"></i><b>${r.n}</b> <span class="hint">T${r.tier} · ${r.ores.join(' / ')}</span></div>`).join('')}
+  <h4>🚡 Waypoints ${canTravel?'':'<span class="hint">(Fast Travel ใช้ได้ที่ Outpost หรือจาก Golem Camp)</span>'}</h4><div class="udwps">${wps.map(o=>`<button class="btn sm ${canTravel?'gold':''}" ${canTravel?'':'disabled'} data-act="${fromCamp?'udEnterAt':'udTravel'}" data-arg="${o.id}">${o.n}<small>${UDR[o.r].n}</small></button>`).join('')}</div>
+  <h4>📍 Landmarks</h4><div class="hint">${UD.world.landmarks.filter(l=>S.ud.lm[l.id]).map(l=>l.n).join(' · ')||'ยังไม่พบ'}</div></div></div>`;
+  const cv=$('#udMapCv');const c=cv.getContext('2d');c.imageSmoothingEnabled=false;c.drawImage(UD.mmImg,0,0,cv.width,cv.height);const k=3;
+  for(let r=1;r<UD_NR;r++){c.strokeStyle='rgba(255,255,255,.08)';c.beginPath();c.moveTo(0,r*UD_RH*k);c.lineTo(cv.width,r*UD_RH*k);c.stroke();}
+  c.font='bold 13px Kanit,sans-serif';UDR.forEach((r,j)=>{c.fillStyle=rgba(r.pal.light,.55);c.fillText(r.n,6,j*UD_RH*k+16);});
+  for(const o of UD.world.outposts){if(!UD.fog[o.y*UD_W+o.x])continue;const on=S.ud.wp[o.id];c.fillStyle=on?'#7fffd4':'#9aa3b2';c.fillRect(o.x*k-5,o.y*k-5,10,10);c.strokeStyle='#000';c.strokeRect(o.x*k-5,o.y*k-5,10,10);if(on){c.fillStyle='#e8fff8';c.fillText(o.n,o.x*k+8,o.y*k+4);}}
+  for(const l of UD.world.landmarks)if(S.ud.lm[l.id]){c.fillStyle='#ffd84a';c.fillText('📍',l.x*k-7,l.y*k+5);}
+  for(const d of UD.world.disc){const st=S.ud.disc[d.id];if(!st)continue;c.fillStyle=d.k==='chest'?'#ffd84a':'#cfd8dc';c.beginPath();c.arc(d.x*k,d.y*k,3,0,7);c.fill();}
+  const pos=R&&R.ud?{x:R.g.x,y:R.g.y}:S.ud.pos;if(pos){c.fillStyle='#fff';c.beginPath();c.arc(pos.x*k,pos.y*k,6,0,7);c.fill();c.strokeStyle='#3fe0ff';c.lineWidth=2.5;c.stroke();}
+  const sc=$('.udmap');if(sc&&pos)sc.scrollTop=Math.max(0,pos.y*k-180);};
+ openModal('🗺 THE GREAT UNDERDEEP — World Map','',render);$('#mbox').classList.add('wide');render();}
+
+/* =====================================================================
+   V6.2 THE GREAT UNDERDEEP (5/5) — HUD · stance (mining ⇄ combat loadout) · recall · outposts UI ·
+   camp Mine Entrance → Underdeep · legacy selection screens retired (internals kept) · tutorial (real actions)
+   ===================================================================== */
+{const s=document.createElement('style');s.textContent=`
+#udBar{position:absolute;left:8px;z-index:6;display:flex;flex-direction:column;gap:6px;pointer-events:none;max-width:calc(100% - 230px)}
+#udBar .row{display:flex;gap:6px;flex-wrap:wrap;pointer-events:auto}
+#udBar button{font:700 12px Kanit,sans-serif;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(10,14,24,.82);color:#e8eef8;padding:6px 10px;cursor:pointer;backdrop-filter:blur(4px)}
+#udBar button.on{background:linear-gradient(#c23a3a,#7a1a1a);border-color:#ff8a8a}#udBar button.mine{background:linear-gradient(#2a6a8a,#163a50);border-color:#7fe6ff}
+#udBar button.gold{background:linear-gradient(#caa23a,#8a6a1a);color:#1a1206;border-color:#ffe14a}
+#udBar .chip{pointer-events:auto;font:600 11px Kanit,sans-serif;background:rgba(10,14,24,.72);border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:3px 8px;color:#cfd8e8;max-width:min(520px,92vw)}
+#udBar .chip b{color:#ffe9a8}#udBar .perks{display:flex;gap:4px;flex-wrap:wrap;pointer-events:auto}#udBar .perks span{font:600 11px Kanit;background:rgba(40,30,10,.75);border:1px solid rgba(255,216,74,.35);border-radius:8px;padding:2px 6px;color:#ffe9a8;cursor:help}
+#udRec{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);z-index:7;font:800 18px Kanit;color:#7fe6ff;text-shadow:0 2px 6px #000;pointer-events:none}
+.udmap{display:grid;grid-template-columns:auto minmax(220px,1fr);gap:12px;max-height:72vh;overflow:auto}.udmap canvas{width:${UD_W*2}px;height:auto;image-rendering:pixelated;border-radius:8px;background:#05070d}
+.udmapside h4{margin:10px 0 4px}.udreg{font-size:12px;margin:3px 0}.udreg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:middle}
+.udwps{display:flex;flex-wrap:wrap;gap:6px}.udwps .btn small{display:block;font-size:10px;opacity:.75}
+.udop{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}.udop button{text-align:left;padding:10px}.udop button small{display:block;opacity:.75;font-size:11px}
+@media (max-width:760px){.udmap{grid-template-columns:1fr}.udmap canvas{width:100%}#udBar{max-width:calc(100% - 150px)}#udBar button{padding:5px 8px;font-size:11px}#udBar .perks span b,#udBar .perks span i{display:none}#udBar .chip{font-size:10px}}
+`;document.head.appendChild(s);}
+function udHudBuild(){let b=$('#udBar');if(!b){b=document.createElement('div');b.id='udBar';$('#dungeon').appendChild(b);const r=document.createElement('div');r.id='udRec';$('#dungeon').appendChild(r);}
+ b.innerHTML=`<div class="row"><button id="udStance" data-act="udStance" title="สลับโหมด (C)">⛏ Mining</button><button data-act="udMap" title="แผนที่ (M)">🗺 Map</button><button data-act="udLoadout" title="สลับชุดขุด / ชุดต่อสู้ (L)">🎒 Loadout</button><button id="udOutBtn" class="gold" data-act="udOutpost" style="display:none">🏕 Outpost (E)</button><button id="udUseBtn" data-act="udUse" style="display:none">⚙ ใช้งาน (E)</button></div>
+ <div class="chip" id="udInfo"></div><div class="perks" id="udPerks"></div>`;b.style.display='';udPerkChips();udHudPos();}
+function udHudPos(){const b=$('#udBar');const t=$('#hudTop');if(b&&t)b.style.top=(t.offsetHeight+12)+'px';}
+function udPerkChips(){const el=$('#udPerks');if(!el||!R)return;const F=R.udFam||{};el.innerHTML=Object.keys(F).filter(f=>UD_PERK[f]).map(f=>`<span title="${esc(UD_PERK[f].n+' — '+UD_PERK[f].d)}" data-act="udPerkInfo" data-arg="${f}">${UD_PERK[f].i}<b> ${UD_PERK[f].n}</b>${F[f]>1?'<i> ×'+F[f]+'</i>':''}</span>`).join('');}
+{const _ex=exitDungeon;exitDungeon=function(){const b=$('#udBar');if(b)b.style.display='none';const r=$('#udRec');if(r)r.textContent='';return _ex();};}
+{const _uh=updateHud;updateHud=function(){_uh();if(!R||!R.ud)return;const reg=UDR[R.udRegion];const te=$('#hTimer');te.textContent=`🗺 ${reg.n} · T${reg.tier}`;te.classList.remove('low');te.title='Region';$('#hName').textContent='⛏ THE GREAT UNDERDEEP';
+ R.udHT=(R.udHT||0)-1/60;if(R.udHT>0)return;R.udHT=.25;const mmw=$('#mmw');if(mmw){mmw.style.display='';const t=$('#hudTop');if(t)mmw.style.top=(t.offsetHeight+30)+'px';}$('#hClear').style.display='none';
+ udMinimap();udHudPos();const st=$('#udStance');if(st){st.textContent=R.udStance==='combat'?'⚔ Combat':'⛏ Mining';st.className=R.udStance==='combat'?'on':'mine';}
+ const near=R.udNear;$('#udOutBtn').style.display=near&&near.k==='outpost'?'':'none';const ub=$('#udUseBtn');ub.style.display=near&&near.k==='disc'?'':'none';if(near&&near.k==='disc')ub.textContent=near.d.k==='machine'?'⚙ แปรรูปแร่ (E)':near.d.k==='guardian'?'🗿 จารึก (E)':'📜 บันทึก (E)';
+ let info='';const tg=R.g.tgt;if(tg&&tg.kind==='ore'&&tg.o.ud){const v=UD.vmap[tg.o.ud.v];const stg=udVeinStage(v);const left=R.ores.filter(o=>o.ud&&o.ud.v===v.id).length;info=`${v.rich?'💰 <b>Rich Vein</b>':v.kind==='unstable'?'🌀 <b>Unstable Vein</b>':v.kind==='crystal'?'💎 <b>Crystal Deposit</b>':v.kind==='seam'?'⛏ <b>Mineral Seam</b>':'⛏ <b>Ore Cluster</b>'} · ${v.name} · ${left}/${v.nodes.length} โหนด · ${{rich:'Rich',depleted:'Depleted',regrowth:'Regrowth',reformed:'Reformed'}[stg]}`;}
+ else if(tg&&tg.kind==='ore'&&tg.o.exc)info='🧱 <b>ผนังร้าว</b> — ขุดทะลุเพื่อเปิดทางที่ซ่อนอยู่';else if(near&&near.k==='outpost')info=`🏕 <b>${near.o.n}</b> — เขตปลอดภัย · พัก · ฝากแร่ · Fast Travel · ภารกิจ`;
+ else info=`${R.udStance==='combat'?'⚔ โหมดต่อสู้: เดินชนมอนสเตอร์เพื่อเข้าต่อสู้ (โจมตีก่อน −15% HP ศัตรู) · Auto Mining หยุด':'⛏ โหมดขุด: Auto Mining ทำงาน · มอนสเตอร์อาจซุ่มโจมตี'}`;
+ if(R.udRecall>0)info=`🏠 กำลังเรียกกลับค่าย… ${R.udRecall.toFixed(1)}s (เดิน/แตะเพื่อยกเลิก)`;$('#udInfo').innerHTML=info;$('#hObj').style.display='none';
+ $('#udRec').textContent=R.udRecall>0?`🏠 Recall ${R.udRecall.toFixed(1)}s`:'';};}
+{const _ub=updateHudButtons;updateHudButtons=function(){_ub();if(!R||!R.ud)return;const sm=window.innerWidth<520;const be=$('#bExtract');be.textContent=sm?'🏠 Camp':'🏠 Return to Camp';be.classList.remove('going');};}
+/* recall cancel when the player gives a new order */
+{const _dc=dungeonClick;dungeonClick=function(ev){if(R&&R.ud&&!R.ended){if(R.udRecall>0){R.udRecall=0;toast('ยกเลิกการเรียกกลับ');}
+  const rect=$('#dcv').getBoundingClientRect();const wx=(ev.clientX-rect.left-R.cam.x)/DV.T,wy=(ev.clientY-rect.top-R.cam.y)/DV.T;
+  const m=UD.mons.find(q=>Math.hypot(q.x+.5-wx,q.y+.2-wy)<.9&&fogSeen(q.x,q.y));if(m){const i=Math.floor(m.y+.5)*W+Math.floor(m.x+.5);if(Math.hypot(m.x+.5-R.g.x,m.y+.5-R.g.y)<1.6){udEncounter(m,true);return;}if(setTarget({kind:'move',i},true)){m.alert=4;sfx('click');}return;}
+  const d=UD.objs.find(q=>Math.hypot(q.x+.5-wx,q.y+.5-wy)<.9&&fogSeen(q.x,q.y));if(d){const i=d.y*W+d.x;if(Math.hypot(d.x+.5-R.g.x,d.y+.5-R.g.y)<1.6){R.udNear={k:'disc',d};udMachineUse();return;}setTarget({kind:'move',i},true);sfx('click');return;}}
+ return _dc(ev);};}
+/* a moving golem that walks into a monster in combat stance strikes first */
+{const _ms=udMonStep;udMonStep=function(dt){if(R&&R.udStance==='combat'){const gx=R.g.x-.5,gy=R.g.y-.5;for(const m of UD.mons){if(Math.hypot(m.x-gx,m.y-gy)<1.05&&R.udInv<=0&&R.g.stun<=0&&!UD.peace){udEncounter(m,true);return;}}}return _ms(dt);};}
+function udStanceToggle(){if(!R||!R.ud)return;R.udStance=R.udStance==='combat'?'mine':'combat';S.ud.stance=R.udStance;R.g.path=[];R.g.tgt=null;R.g.state='idle';R.g.idleWait=.2;const cs=calcCombat(S.combatEquip);
+ toast(R.udStance==='combat'?`⚔ Combat Loadout · CP ${cs.cp} — เดินเข้าหามอนสเตอร์เพื่อโจมตีก่อน`:`⛏ Mining Loadout · P ${R.st.P} — Auto Mining กลับมาทำงาน`,'ok');sfx('equip');udHudBuild();}
+/* outpost services */
+function udOutpostMenu(){if(!R||!R.ud||!R.udNear||R.udNear.k!=='outpost')return;const o=R.udNear.o;const render=()=>{const q=udQuest(o);const bagN=Object.values(R.bag.items).reduce((a,b)=>a+b.count,0);
+ $('#mbody').innerHTML=`<div class="hint">${esc(UDR[o.r].n)} · เขตปลอดภัย — มอนสเตอร์และอันตรายเข้ามาไม่ได้</div><div class="udop" style="margin-top:8px">
+ <button class="btn" data-act="udRest">🛏 พักผ่อน<small>หายมึนงง · ความเร็วขุด +10% 3 นาที</small></button>
+ <button class="btn" data-act="udStash">🏦 ฝากแร่เข้าคลัง<small>${bagN} ก้อนในกระเป๋า → Ore Storage</small></button>
+ <button class="btn" data-act="udMap">🗺 แผนที่ / Fast Travel<small>${Object.keys(S.ud.wp).length} Waypoint</small></button>
+ <button class="btn gold" data-act="udCamp">🏕 ขึ้นลิฟต์กลับค่าย<small>ทันที · แร่ 100%</small></button></div>
+ <h4 style="margin:12px 0 4px">📋 ภารกิจจากนักสำรวจ</h4><div class="v5note"><span class="ic">📋</span><span class="tx"><b>${udQuestText(q)}</b> <span class="hint">${Math.min(q.have,q.need)}/${q.need} · รางวัล 🪙${fmt(q.rw.coins)} + วัตถุดิบ T${q.rw.cm}</span></span>${q.claimed?'<span class="hint">รับแล้ว — งานใหม่ใน 10 นาที</span>':`<button class="btn sm ${q.have>=q.need?'gold':''}" ${q.have>=q.need?'':'disabled'} data-act="udQuestClaim" data-arg="${o.id}">รับรางวัล</button>`}</div>`;};
+ openModal(`🏕 ${o.n.toUpperCase()}`,'',render);render();}
+function udRest(){if(!R||!R.ud)return;R.g.stun=0;R.over=180;R.overAmt=10;if(R.udHaz)R.udHaz.heat=0;closeModal();toast('🛏 พักแล้ว — ความเร็วขุด +10% (3 นาที)','ok');sfx('upgrade');}
+Object.assign(ACT,{udEnter:()=>{closeModal();udEnter();},udEnterAt:a=>{closeModal();udEnter(a);},udTravel:a=>udFastTravel(a),udMap:()=>udOpenMap(!R),udStance:()=>udStanceToggle(),udOutpost:()=>udOutpostMenu(),udUse:()=>udMachineUse(),
+ udRest:()=>udRest(),udStash:()=>{udStash();if(modalRefresh)modalRefresh();},udCamp:()=>{closeModal();udLeave('outpost');},udQuestClaim:a=>udQuestClaim(a),udHub:()=>udHubOpen()});
+{const _x=ACT.extract;ACT.extract=(...a)=>{if(R&&R.ud){udRecall();return;}return _x(...a);};}
+{const _m=ACT.openMap51;ACT.openMap51=(...a)=>{if(R&&R.ud){udOpenMap(false);return;}return _m&&_m(...a);};}
+{const _p=ACT.pause51;ACT.pause51=(...a)=>{if(R&&R.ud){udOpenMap(false);return;}return _p&&_p(...a);};}
+document.addEventListener('keydown',e=>{if(!R||!R.ud||R.ended||e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;const k=e.key.toLowerCase();const mo=!$('#modal').classList.contains('hidden');
+ if(k==='m'&&!mo)udOpenMap(false);else if(k==='c'&&!mo)udStanceToggle();else if(k==='h'&&!mo)udRecall();else if(k==='e'&&!mo){if(R.udNear&&R.udNear.k==='outpost')udOutpostMenu();else if(R.udNear)udMachineUse();}});
+/* ---------- camp: the Mine Entrance leads into the Underdeep ---------- */
+function udHubLine(){const pos=S.ud&&S.ud.pos;const r=pos?UDR[udRegionAt(pos.y)].n:'Stone Hollow';return `P <b>${curStats().P}</b> · Tier ${curStats().maxTier} · Pet: ${petLine('mine')} · โลกใต้ดินเดียว 6 ภูมิภาค · <b>ไม่มีเวลาจำกัด</b> · ตำแหน่งล่าสุด: <b>${r}</b>`;}
+ST6.mine.line=()=>udHubLine();
+ST6.mine.opts=()=>[['udEnter','⛏','ENTER THE GREAT UNDERDEEP',S.ud&&S.ud.pos?'กลับไปจุดล่าสุด':'เริ่มที่ Camp Lift','hot'],['udMap','🗺','Waypoints / World Map',`${S.ud?Object.keys(S.ud.wp).length:1} Waypoint`,''],['openBoss','👹','Mining Boss','3 บอส','']];
+Object.assign(ST6FN,{udEnter:()=>{closeModal();udEnter();},udMap:()=>udOpenMap(true)});
+{const _ci=campInteractStation;campInteractStation=function(id){if(id!=='mine')return _ci(id);sfx('click');playAnim('interact',.45,()=>{if(typeof tutEvent==='function')tutEvent('st_mine');udEnter();});};}
+function udHubOpen(){openStation('mine');}
+/* legacy selection screens are retired from the UI; the internal run functions stay available (UD_LEGACY) */
+const UD_LEGACY={openDungeons,openDeep,openEndless,quickRun};
+openDungeons=function(){udHubOpen();};openDeep=function(){udHubOpen();};openEndless=function(){udHubOpen();};quickRun=function(){closeModal();udEnter();};
+if(ACT.quickRun)ACT.quickRun=()=>{closeModal();udEnter();};
+{const _pa=paneAdv;paneAdv=function(){let h=_pa();const i=h.indexOf('<div class="v5sec">',1);const rest=i>0?h.slice(i):'';const st=curStats();
+ return `<div class="v5sec"><h3>⛏ The Great Underdeep <span class="hint">P ${st.P} · Tier ${st.maxTier} · Pet: ${petLine('mine')}</span></h3><div class="v5big"><button class="hot" data-act="udEnter"><span class="e">⛏</span>ENTER THE GREAT UNDERDEEP<small>${S.ud&&S.ud.pos?UDR[udRegionAt(S.ud.pos.y)].n:'Stone Hollow'} · ไม่มีเวลาจำกัด</small></button><button data-act="udMap"><span class="e">🗺</span>World Map<small>Waypoints · Fast Travel</small></button><button data-act="openBoss"><span class="e">👹</span>Mining Boss<small>3 บอส</small></button></div></div>`+rest;};}
+{const _hn=homeNotes;homeNotes=function(){const N=_hn().filter(n=>n.act!=='resume51');if(S.ud&&S.ud.legacyNote&&!S.ud.legacyNote.seen)N.unshift({hot:1,ic:'📦',tx:'การสำรวจแบบเก่าที่พักไว้ถูกแปลงเป็นรางวัลรอรับที่ Warehouse แล้ว (ไม่ซ้ำ ไม่หาย)',act:'udLegacySeen',btn:'รับทราบ'});return N;};}
+ACT.udLegacySeen=()=>{S.ud.legacyNote.seen=1;save();renderWorkshop();};
+/* camp mine badge / quest hint */
+{const _sb=typeof stBadge6==='function'?stBadge6:null;if(_sb){stBadge6=function(id){if(id==='mine')return '';return _sb(id);};}}
+/* ---------- tutorial: 10 real gameplay lessons inside the camp flow ---------- */
+function udTut(k){if(!S||!S.ud)return;const T=S.ud.tut.steps;if(k==='mine')T.mineN=(T.mineN||0)+1;else T[k]=1;if(k==='enter'&&T.ret)T.resume=1;if(k==='return')T.ret=1;try{if(typeof tutCheck==='function')tutCheck();}catch(e){}}
+TUT.splice(0,TUT.length,
+ {id:'walk',short:'เดินไปรอบ ๆ ค่าย',where:'camp',t:'สวัสดี! ฉันชื่อ <b>GEARLY</b> 🤖 — นี่คือโกเลมของคุณใน <b>Golem Camp</b> · ลอง<b>เดิน</b>: ⌨ <b>WASD</b> · 🖱 <b>คลิกพื้น</b> · 📱 <b>จอยซ้าย</b>',sel:()=>null},
+ {id:'garage',short:'ไปที่ Golem Garage',st:'garage',where:'camp',t:'ไปที่ <b>🧍 Golem Garage</b> ตามลูกศรสีทอง แล้วกด <b>E</b> (หรือแตะอาคาร)',sel:()=>null},
+ {id:'gpart',short:'① ติดตั้งอุปกรณ์ขุดเริ่มต้น',where:'garage',t:'① <b>อุปกรณ์ขุดเริ่มต้น</b>: ชิ้นส่วน 6 ช่องกำหนด <b>Mining Power</b> และ <b>Capacity</b> · <b>แตะช่องชิ้นส่วน</b>ดู แล้วกด <b>✕ ปิด Garage</b>',sel:()=>GA.open?(S.v51.tut.saw?'[data-act="closeGarage"]':'[data-act="gslot"]'):null},
+ {id:'mine',short:'② เข้าสู่ The Great Underdeep',st:'mine',where:'camp',t:'② ไปที่ <b>⛏ Mine Entrance</b> แล้วกด <b>E</b> — เดินเข้า <b>The Great Underdeep</b> โลกใต้ดินเดียวที่ต่อเนื่องกัน 6 ภูมิภาค',sel:()=>$('[data-act="st6"][data-arg="udEnter"]')?'[data-act="st6"][data-arg="udEnter"]':null},
+ {id:'vein',short:'③ หาสายแร่',where:'run',t:'③ แร่ที่นี่เกิดเป็น<b>สายแร่มีชีวิต</b> (Seam / Cluster) — เดินเข้าใกล้สายแร่ใกล้ <b>Camp Lift</b> (แตะพื้นหรือแร่)',sel:()=>null},
+ {id:'mine3',short:'④ ขุดแร่ 3 ก้อน',where:'run',t:'④ แตะแร่เพื่อขุด หรือปล่อย <b>🤖 Auto</b> · ขุดหมดสายแล้วสายแร่จะ <b>Regrowth</b> กลับมาเอง — ขุดให้ได้ <b>3 ก้อน</b>',sel:()=>'#hudTop .bagw'},
+ {id:'branch',short:'⑤ ค้นพบทางแยกถ้ำ',where:'run',t:'⑤ สำรวจออกไป! เปิด <b>หมอก (Fog of War)</b> หาทางแยก จุดสังเกต หรือ <b>ผนังร้าวสีชมพู</b> ที่ขุดทะลุไปทางลับได้',sel:()=>null},
+ {id:'monster',short:'⑥ เผชิญมอนสเตอร์',where:'run',t:'⑥ มีสิ่งมีชีวิตใกล้ ๆ! กด <b>⚔ Combat</b> (หรือ C) แล้วเดินเข้าหา — การต่อสู้ใช้ <b>Combat Loadout</b> จริง (Warrior / Mage / Assassin)',sel:()=>R&&R.ud&&R.udStance!=='combat'?'#udStance':null},
+ {id:'exit',short:'⑦ กลับ Golem Camp',where:'run',t:'⑦ กด <b>🏠 Return to Camp</b> (Recall 2 วิ จากทุกจุด หรือทันทีที่ Outpost) — แร่ 100% · ตำแหน่งถูกบันทึก',sel:()=>'#bExtract'},
+ {id:'claim',short:'⑧ ฝากทรัพยากร',where:'any',t:'⑧ เลือก <b>STORE</b> เก็บแร่เข้าคลัง (หรือ SELL / SPLIT)',sel:()=>'#mbody [data-act="claimAll"]'},
+ {id:'forge',short:'⑨ ไปที่ Blacksmith Forge',st:'forge',where:'camp',t:'⑨ ไปที่ <b>⚒ Blacksmith Forge</b> — GEARLY จะให้วัสดุเริ่มต้นไว้คราฟต์',sel:()=>null},
+ {id:'craft',short:'⑨ คราฟต์ชิ้นส่วนใหม่',where:'any',t:'⑨ เลือก <b>⚒ Assembly Forge</b> แล้ว <b>ASSEMBLE</b> ชิ้นใดก็ได้ — ใช้แร่จากคลังจริง',sel:()=>$('[data-act="fgCraft"]')?'[data-act="fgCraft"]':'[data-act="st6"][data-arg="openForge"]'},
+ {id:'resume',short:'⑩ กลับไปสำรวจต่อ',st:'mine',where:'camp',t:'⑩ กลับไปที่ <b>⛏ Mine Entrance</b> — คุณจะกลับไป<b>จุดเดิม</b>ที่ออกมา (หรือเลือก Waypoint จากแผนที่)',sel:()=>null},
+ {id:'free',short:'เล่นอิสระ!',where:'any',t:'ยอดเยี่ยม! โลกใต้ดินเป็นของคุณ — สายแร่งอกใหม่ตลอด · ขุดผนังร้าวหาทางลับ · Outpost ปลดล็อก Fast Travel · กด <b>🎓 จบ Tutorial</b>',sel:()=>'#gearly [data-act="tutFin"]'});
+Object.assign(TUT_DONE,{mine:()=>!!(R&&R.ud),vein:()=>!!(R&&R.ud&&R.ores.some(o=>!o.exc&&oreVisible(o)&&Math.hypot(o.x+.5-R.g.x,o.y+.5-R.g.y)<3.2)),
+ mine3:()=>(S.ud.tut.steps.mineN||0)>=3,branch:()=>!!S.ud.tut.steps.branch||!!(R&&R.ud&&(R.udRev||0)>=380),monster:()=>!!S.ud.tut.steps.monster,
+ exit:()=>!!S.ud.tut.steps.ret&&!R,claim:()=>!!S.ud.tut.steps.ret&&!S.pendingExtraction.length,resume:()=>!!S.ud.tut.steps.resume||!!(S.ud.tut.steps.ret&&R&&R.ud)});
+{const _ts=tutStart;tutStart=function(f){if(S&&S.ud)S.ud.tut.steps={};return _ts(f);};}
+{const _tp=tutPlace;tutPlace=function(){_tp();try{const c=tutCur();if(c&&c.where==='run'&&!R&&!CB){$('#gtx').innerHTML='กลับเข้า <b>⛏ The Great Underdeep</b> เพื่อทำต่อ — ไปที่ <b>Mine Entrance</b>';}}catch(e){}};}
+/* tutorial helper: a weak practice crawler appears near the golem for lesson ⑥ */
+{const _st=udStep;udStep=function(dt,moved){_st(dt,moved);if(!R||!R.ud)return;try{const c=tutCur&&tutCur();if(c&&c.id==='monster'&&!UD.held){R.udTutT=(R.udTutT||0)-dt;if(R.udTutT<=0){R.udTutT=4;const near=UD.mons.some(m=>Math.hypot(m.x-R.g.x,m.y-R.g.y)<10);if(!near){for(let k=0;k<20;k++){const a=Math.random()*6.28,r=4+Math.random()*2;const x=R.g.x-.5+Math.cos(a)*r,y=R.g.y-.5+Math.sin(a)*r;if(udMonFree(x,y)&&udLOS(x,y,R.g.x-.5,R.g.y-.5)){UD.mons.push(udMkMon('crawler',1,x,y,{kind:'ambush',tut:1}));break;}}}}}}catch(e){}};}
+{const _ar=udArenaMon;udArenaMon=function(m,k,n){const a=_ar(m,k,n);if(m.tut){a.hp=a.mhp=Math.round(a.hp*.45);a.dmg*=.5;}return a;};}
+/* explored-tile counter for lesson ⑤ */
+{const _rv=udRevealArea;udRevealArea=function(cx,cy,r){const n=_rv(cx,cy,r);if(R&&R.ud&&n)R.udRev=(R.udRev||0)+n;return n;};}
+/* proximity reveal of excavation cracks (+Prism / secret-sense research) */
+{const _st=udStep;udStep=function(dt,moved){_st(dt,moved);if(!R||!R.ud||R.ended)return;R.udCrT=(R.udCrT||0)-dt;if(R.udCrT>0)return;R.udCrT=.3;const rr=2.6+(udK('prism')?3:0)+secDet()*.5;
+ for(const o of R.ores){if(!o.exc||o.revealed)continue;if(Math.hypot(o.x+.5-R.g.x,o.y+.5-R.g.y)<=rr){o.revealed=true;floatTxt(o.x+.5,o.y,'🧱 รอยร้าว…','#ff9df0',.85);udTut('branch');}}};}
+
+/* neutral Underdeep wording for legacy run notices (no hint about Mining Power) */
+{const _n=notify;notify=function(key,msg,type,cd){if(R&&R.ud){if(key==='none'){msg='🧭 สำรวจต่อเพื่อหาสายแร่ใหม่ (แผนที่: M)';cd=25;}else if(key==='full'){msg='🎒 กระเป๋าเต็ม! กด 🏠 Return to Camp หรือฝากแร่ที่ Outpost';}else if(key==='rockw')return;}return _n(key,msg,type,cd);};}
+ACT.udPerkInfo=f=>{const P_=UD_PERK[f];if(P_)toast(`${P_.i} ${P_.n} (${(R&&R.udFam[f])||0} ชิ้น) — ${P_.d}`,'ok');};
+/* switch Mining / Combat loadout presets without leaving the mine */
+function udRefreshMiningStats(){if(!R||!R.ud)return;const st=calcStats(S.equip);R.st=st;R.fx=st.fx;R.syn=st.syn;R.skills=st.skills;R.shield=st.fx.has('stoneguard_back');R.fort=st.syn.has('fortress');R.snap=buildSnap(st);R.udFam=udFam();updateSkillButtons();udHudBuild();}
+function udLoadoutOpen(){if(!R||!R.ud)return;const render=()=>{const ms=R.st;const cs=calcCombat(S.combatEquip);const mp=(S.presets||[]).map((p,i)=>p&&p.equip?`<button class="btn sm" data-act="udLoadM" data-arg="${i}">⛏ ${esc(p.name||'Preset '+(i+1))}</button>`:'').join('');const cp=(S.combatPresets||[]).map((p,i)=>p&&p.equip?`<button class="btn sm" data-act="udLoadC" data-arg="${i}">⚔ ${esc(p.name||'Build '+(i+1))}</button>`:'').join('');
+ $('#mbody').innerHTML=`<div class="hint">โหมดตอนนี้: <b>${R.udStance==='combat'?'⚔ Combat':'⛏ Mining'}</b> · Mining Loadout P <b>${ms.P}</b> · Capacity ${ms.C} · Combat Loadout CP <b>${cs.cp}</b></div>
+ <div class="row2" style="margin:8px 0"><button class="btn ${R.udStance==='mine'?'gold':''}" data-act="udStanceSet" data-arg="mine">⛏ ใช้ Mining Loadout</button><button class="btn ${R.udStance==='combat'?'gold':''}" data-act="udStanceSet" data-arg="combat">⚔ ใช้ Combat Loadout</button></div>
+ <h4 style="margin:10px 0 4px">⛏ Mining Presets</h4><div class="udwps">${mp||'<span class="hint">ยังไม่มี preset — บันทึกได้ที่ Garage</span>'}</div>
+ <h4 style="margin:10px 0 4px">⚔ Combat Presets</h4><div class="udwps">${cp||'<span class="hint">ยังไม่มี preset — บันทึกได้ที่ Garage (Combat)</span>'}</div>
+ <div class="hint" style="margin-top:8px">การต่อสู้กับมอนสเตอร์ใช้ Combat Loadout จริงเสมอ (Warrior / Mage / Assassin / ผสม) · การขุดใช้ Mining Loadout</div>`;};openModal('🎒 LOADOUT — Mining ⇄ Combat','',render);render();}
+Object.assign(ACT,{udLoadout:()=>udLoadoutOpen(),udStanceSet:a=>{if(R&&R.ud&&R.udStance!==a)udStanceToggle();if(modalRefresh)modalRefresh();},
+ udLoadM:a=>{if(!R||!R.ud)return;loadPreset(+a);udRefreshMiningStats();toast(`⛏ Mining Loadout → P ${R.st.P}`,'ok');if(modalRefresh)modalRefresh();},
+ udLoadC:a=>{ACT.gcpload(a);if(modalRefresh)modalRefresh();}});
+document.addEventListener('keydown',e=>{if(!R||!R.ud||R.ended||e.target.tagName==='INPUT')return;if((e.key==='l'||e.key==='L')&&$('#modal').classList.contains('hidden'))udLoadoutOpen();});
 
 
 /* ========================= LOOP ========================= */
